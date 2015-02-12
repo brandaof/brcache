@@ -56,13 +56,14 @@ public class Cache implements Serializable{
                 0.01F,
                 0.01F);
         */
+        
         this.dataMap =
                 new TreeHugeMap<StringTreeKey, DataMap>(
                 "/mnt2/var/webcache/dataMap",
                 "data",
-                5000000,
+                1000000,
                 0.001F,
-                0.001F,
+                0.0001F,
                 300000,
                 0.001F,
                 0.001F);
@@ -74,6 +75,7 @@ public class Cache implements Serializable{
                 436906,
                 0.001F,
                 0.001F);
+        
         this.segmentSize = 6*1024;
     }
 
@@ -95,7 +97,7 @@ public class Cache implements Serializable{
             return null;
     }
     
-    public void put(String key, long maxAliveTime, InputStream inputData) throws IOException{
+    public synchronized void put(String key, long maxAliveTime, InputStream inputData) throws IOException{
         int[] segments = this.putData(inputData);
         this.putSegments(key, maxAliveTime, segments);
     }
@@ -148,11 +150,8 @@ public class Cache implements Serializable{
                 byte[] tmp = new byte[length];
                 System.arraycopy(buffer, 0, tmp, 0, length);
 
-                int segment;
-                synchronized(this.dataList){
-                    this.dataList.add(tmp);
-                    segment = this.dataList.size() - 1;
-                }
+                this.dataList.add(tmp);
+                int segment = this.dataList.size() - 1;
 
                 if(segment % 10000 == 0){
                     System.out.println(segment);
