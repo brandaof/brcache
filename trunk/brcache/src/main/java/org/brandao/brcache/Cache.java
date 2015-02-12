@@ -60,10 +60,10 @@ public class Cache implements Serializable{
                 new TreeHugeMap<StringTreeKey, DataMap>(
                 "/mnt2/var/webcache/dataMap",
                 "data",
-                1000000,
+                5000000,
                 0.001F,
                 0.001F,
-                1000000,
+                300000,
                 0.001F,
                 0.001F);
 
@@ -71,10 +71,9 @@ public class Cache implements Serializable{
                 new HugeArrayList<byte[]>(
                 "/mnt2/var/webcache/dataList",
                 "data",
-                284444,
+                436906,
                 0.001F,
                 0.001F);
-        
         this.segmentSize = 6*1024;
     }
 
