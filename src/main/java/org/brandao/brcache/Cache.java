@@ -62,10 +62,10 @@ public class Cache implements Serializable{
                 "/mnt2/var/webcache/dataMap",
                 "data",
                 100000,
-                0.001F,
+                0.0001F,
                 0.0001F,
                 300000,
-                0.001F,
+                0.0001F,
                 0.0001F);
 
         this.dataList =
@@ -73,7 +73,7 @@ public class Cache implements Serializable{
                 "/mnt2/var/webcache/dataList",
                 "data",
                 200000,
-                0.001F,
+                0.0001F,
                 0.0001F);
         
         this.segmentSize = 6*1024;
