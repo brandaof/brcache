@@ -61,20 +61,20 @@ public class Cache implements Serializable{
                 new TreeHugeMap<StringTreeKey, DataMap>(
                 "/mnt2/var/webcache/dataMap",
                 "data",
-                1000000,
+                100000,
                 0.001F,
                 0.0001F,
                 300000,
                 0.001F,
-                0.001F);
+                0.0001F);
 
         this.dataList =
                 new HugeArrayList<byte[]>(
                 "/mnt2/var/webcache/dataList",
                 "data",
-                436906,
+                200000,
                 0.001F,
-                0.001F);
+                0.0001F);
         
         this.segmentSize = 6*1024;
     }
@@ -105,12 +105,8 @@ public class Cache implements Serializable{
     public InputStream get(String key){
         DataMap map = this.dataMap.get(new StringTreeKey(key));
         
-        if(map != null){
-            if(!key.equals(map.getId()))
-                throw new IllegalStateException("invalid key: \"" + key + "\" <> \"" + map.getId() + "\"" );
-            else
-                return new CacheInputStream(map, this.dataList);
-        }
+        if(map != null)
+            return new CacheInputStream(map, this.dataList);
         else
             return null;
     }
@@ -133,7 +129,6 @@ public class Cache implements Serializable{
         DataMap map = new DataMap();
         map.setMaxLiveTime(maxAliveTime);
         map.setSegments(segmens);
-        map.setId(key);
         this.dataMap.put(new StringTreeKey(key), map);
     }
     
