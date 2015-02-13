@@ -18,8 +18,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  *
@@ -61,20 +59,22 @@ public class Cache implements Serializable{
                 new TreeHugeMap<StringTreeKey, DataMap>(
                 "/mnt2/var/webcache/dataMap",
                 "data",
-                100000,
-                0.0001F,
-                0.0001F,
-                300000,
-                0.0001F,
-                0.0001F);
+                600000, //Quantidade de nós na memória
+                0.01F,  //Fator de limpeza de segmentos
+                0.0005F,//Fator de agrupamentos dos nós
+                300000, //Quantidade de itens em memória
+                0.003F ,//Fator de limpeza de segmentos
+                0.0001F //Fator de agrupamentos dos itens
+                );
 
         this.dataList =
                 new HugeArrayList<byte[]>(
                 "/mnt2/var/webcache/dataList",
                 "data",
-                200000,
-                0.0001F,
-                0.0001F);
+                200000,//Quantidade de itens em memória
+                0.003F,//Fator de limpeza de segmentos
+                0.0001F//Fator de agrupamentos dos itens
+                );
         
         this.segmentSize = 6*1024;
     }
