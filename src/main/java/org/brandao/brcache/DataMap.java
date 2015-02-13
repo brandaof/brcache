@@ -14,8 +14,6 @@ import java.io.Serializable;
  */
 public class DataMap implements Serializable{
     
-    private String id;
-    
     private long maxLiveTime;
     
     private int[] segments;
@@ -36,18 +34,4 @@ public class DataMap implements Serializable{
         this.segments = segments;
     }
 
-    /**
-     * @return the id
-     */
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * @param id the id to set
-     */
-    public void setId(String id) {
-        this.id = id;
-    }
-    
 }
