@@ -18,6 +18,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  *
@@ -30,6 +32,8 @@ public class Cache implements Serializable{
     private final HugeArrayList<byte[]> dataList;
     
     private final int segmentSize;
+    
+    private final BlockingQueue<Integer> freeSegments;
     
     private int maxdataOnMemory;
     
@@ -60,8 +64,8 @@ public class Cache implements Serializable{
                 "/mnt2/var/webcache/dataMap",
                 "data",
                 600000, //Quantidade de nós na memória
-                0.0005F,//Fator de limpeza de segmentos
-                0.0005F,//Fator de agrupamentos dos nós
+                0.0001F,//Fator de limpeza de segmentos
+                0.00005F,//Fator de agrupamentos dos nós
                 300000, //Quantidade de itens em memória
                 0.0001F,//Fator de limpeza de segmentos
                 0.0001F //Fator de agrupamentos dos itens
@@ -73,10 +77,11 @@ public class Cache implements Serializable{
                 "data",
                 200000, //Quantidade de itens em memória
                 0.0001F,//Fator de limpeza de segmentos
-                0.0001F //Fator de agrupamentos dos itens
+                0.00005F //Fator de agrupamentos dos itens
                 );
         
         this.segmentSize = 6*1024;
+        this.freeSegments = new LinkedBlockingQueue<Integer>();
     }
 
     public void putObject(String key, long maxAliveTime, Object inputData) throws IOException{
@@ -111,18 +116,29 @@ public class Cache implements Serializable{
             return null;
     }
     
-    public synchronized void remove(String key){
+    public synchronized boolean remove(String key){
         DataMap data = this.dataMap.get(new StringTreeKey(key));
+        
         if(data != null){
             
             this.dataMap.remove(new StringTreeKey(key));
             
             int[] segments = data.getSegments();
-            for(int segment: segments){
-                this.dataList.remove(segment);
-            }
             
+            for(int segment: segments){
+                this.dataList.set(segment, null);
+                try{
+                    this.freeSegments.put(segment);
+                }
+                catch(Throwable e){
+                    throw new RuntimeException(e);
+                }
+            }
+            return true;
         }
+        else
+            return false;
+        
     }
     
     private void putSegments(String key, long maxAliveTime, int[] segmens){
@@ -145,8 +161,14 @@ public class Cache implements Serializable{
                 byte[] tmp = new byte[length];
                 System.arraycopy(buffer, 0, tmp, 0, length);
 
-                this.dataList.add(tmp);
-                int segment = this.dataList.size() - 1;
+                Integer segment = this.freeSegments.poll();
+                
+                if(segment == null){
+                    this.dataList.add(tmp);
+                    segment = this.dataList.size() - 1;
+                }
+                else
+                    this.dataList.set(segment, tmp);
 
                 if(segment % 10000 == 0){
                     System.out.println(segment);

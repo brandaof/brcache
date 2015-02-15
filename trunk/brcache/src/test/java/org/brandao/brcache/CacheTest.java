@@ -46,19 +46,37 @@ public class CacheTest extends TestCase{
         
         for(int i=0;i<200;i++){
             Thread th = null;
-            if(!(i % 4 == 0)){
+            if(i % 50 == 0){
                 th = new Thread(){
                     public void run(){
                         int rv = index++;
                         while(rv<1000000){
                             String expected = "INDEX-" + String.valueOf(rv);
                             try{
-                                cache.putObject(expected, 0, expected + text);
+                                cache.putObject(expected, 0, expected);
                             }
                             catch(Exception e){
                                 e.printStackTrace();
                             }
                             rv = index++;
+                        }
+                    }
+                };
+            }
+            else
+            if(i % 99 == 0){
+                th = new Thread(){
+                    public void run(){
+                        Random r = new Random();
+                        while(true){
+                            int rv = r.nextInt(900000);
+                            String expected = "INDEX-" + String.valueOf(rv);
+                            try{
+                                cache.remove(expected);
+                            }
+                            catch(Throwable e){
+                                e.printStackTrace();
+                            }
                         }
                     }
                 };
@@ -74,7 +92,7 @@ public class CacheTest extends TestCase{
                                 String val = (String) cache.getObject(expected);
                                 if(val != null){
                                     //System.out.println(val);
-                                    Assert.assertEquals(expected + text, val);
+                                    Assert.assertEquals(expected, val);
                                 }
                             }
                             catch(Throwable e){
@@ -85,6 +103,7 @@ public class CacheTest extends TestCase{
                 };
                 
             }
+            
             th.start();
         }
         
