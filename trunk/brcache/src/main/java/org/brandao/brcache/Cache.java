@@ -117,11 +117,12 @@ public class Cache implements Serializable{
     }
     
     public synchronized boolean remove(String key){
+        
         DataMap data = this.dataMap.get(new StringTreeKey(key));
         
         if(data != null){
             
-            this.dataMap.remove(new StringTreeKey(key));
+            this.dataMap.put(new StringTreeKey(key), null);
             
             int[] segments = data.getSegments();
             
