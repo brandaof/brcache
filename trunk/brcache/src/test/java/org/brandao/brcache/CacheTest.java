@@ -40,20 +40,41 @@ public class CacheTest extends TestCase{
          
     private static int index = 0;
     
+    private static int count = 0;
+    
     public void test() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
         final Cache cache = new Cache();
+
+        Thread read =
+            new Thread(){
+                public void run(){
+                    while(true){
+                        try{
+                            System.out.println("write: " + cache.getWritePerSec() + "/sec read: " + cache.getReadPerSec() + "/sec");
+                            //System.out.println("\"" + count++ +   "\",\"" + cache.getWritePerSec() + "\",\"" + cache.getReadPerSec() + "\"");
+                            Thread.sleep(1200);
+                        }
+                        catch(Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            };
         
-        for(int i=0;i<200;i++){
+        read.start();
+        
+        for(int i=0;i<100;i++){
             Thread th = null;
-            if(i % 50 == 0){
+            if(i % 10 == 0){
                 th = new Thread(){
                     public void run(){
                         int rv = index++;
                         while(rv<1000000){
                             String expected = "INDEX-" + String.valueOf(rv);
+                            //System.out.println(rv);
                             try{
-                                cache.putObject(expected, 0, expected);
+                                cache.putObject(expected, 0, expected + text);
                             }
                             catch(Exception e){
                                 e.printStackTrace();
@@ -64,7 +85,7 @@ public class CacheTest extends TestCase{
                 };
             }
             else
-            if(i % 99 == 0){
+            /*if(i % 99 == 0){
                 th = new Thread(){
                     public void run(){
                         Random r = new Random();
@@ -81,7 +102,7 @@ public class CacheTest extends TestCase{
                     }
                 };
             }
-            else{
+            else*/{
                 th = new Thread(){
                     public void run(){
                         Random r = new Random();
@@ -92,7 +113,7 @@ public class CacheTest extends TestCase{
                                 String val = (String) cache.getObject(expected);
                                 if(val != null){
                                     //System.out.println(val);
-                                    Assert.assertEquals(expected, val);
+                                    Assert.assertEquals(expected + text, val);
                                 }
                             }
                             catch(Throwable e){
