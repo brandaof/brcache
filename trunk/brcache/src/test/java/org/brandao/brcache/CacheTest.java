@@ -139,4 +139,72 @@ public class CacheTest extends TestCase{
         Thread.sleep(999999999);
         
     }    
+    
+    public void test2() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
+        
+        final Cache cache = new Cache();
+
+        Thread read =
+            new Thread(){
+                public void run(){
+                    long lastRead = 0;
+                    long lastWrite = 0;
+                    long read = 0;
+                    long write = 0;
+                    while(true){
+                        try{
+                            System.out.println("write: " + (write-lastWrite) + "/sec read: " + (read-lastRead) + "/sec");
+                            lastRead = cache.getCountRead();
+                            lastWrite = cache.getCountWrite();
+                            Thread.sleep(1000);
+                            read = cache.getCountRead();
+                            write = cache.getCountWrite();
+                        }
+                        catch(Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            };
+        
+        read.start();
+        
+        for(int i=0;i<100000;i++){
+            try{
+                String expected = "INDEX-" + String.valueOf(i);
+                cache.putObject(expected, 0, expected + text);
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+        
+        for(int i=0;i<10;i++){
+            Thread th = null;
+            th = new Thread(){
+                public void run(){
+                    Random r = new Random();
+                    while(true){
+                        int rv = r.nextInt(900000);
+                        String expected = "INDEX-" + String.valueOf(rv);
+                        try{
+                            String val = (String) cache.getObject(expected);
+                            if(val != null){
+                                //System.out.println(val);
+                                Assert.assertEquals(expected + text, val);
+                            }
+                        }
+                        catch(Throwable e){
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            };
+            th.start();
+        }
+        
+        Thread.sleep(999999999);
+        
+    }    
+    
 }

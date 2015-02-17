@@ -64,16 +64,16 @@ public class Cache implements Serializable{
         */
 
         double keyItens         = 10000;//600000.0;
-        double keySegments      = 100.0/keyItens;
-        double clearKeySegments = ((keyItens/keySegments)*0.2)/(keySegments*keyItens);
+        double keySegments      = 5.0/keyItens;
+        double clearKeySegments = ((keyItens/keySegments)*0.6)/(keySegments*keyItens);
 
         double nodeItens         = 10000;//300000.0;
-        double nodeSegments      = 100.0/nodeItens;
-        double clearNodeSegments = ((nodeItens/nodeSegments)*0.2)/(nodeSegments*nodeItens);
+        double nodeSegments      = 5.0/nodeItens;
+        double clearNodeSegments = ((nodeItens/nodeSegments)*0.6)/(nodeSegments*nodeItens);
 
         double dataItens         = 4000;//200000.0;
-        double dataSegments      = 400.0/dataItens;
-        double clearDataSegments = ((dataItens/dataSegments)*0.2)/(dataSegments*dataItens);
+        double dataSegments      = 2.0/dataItens;
+        double clearDataSegments = ((dataItens/dataSegments)*0.6)/(dataSegments*dataItens);
         
         this.dataMap =
                 new TreeHugeMap<StringTreeKey, DataMap>(
