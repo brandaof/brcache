@@ -72,7 +72,7 @@ public class CacheTest extends TestCase{
         
         read.start();
         
-        for(int i=0;i<100;i++){
+        for(int i=0;i<1000;i++){
             Thread th = null;
             if(i % 2 == 0){
                 th = new Thread(){
