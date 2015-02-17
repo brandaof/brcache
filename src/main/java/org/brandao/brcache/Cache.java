@@ -63,15 +63,15 @@ public class Cache implements Serializable{
                 0.01F);
         */
 
-        double keyItens         = 1000;//600000.0;
+        double keyItens         = 10000;//600000.0;
         double keySegments      = 5.0/keyItens;
         double clearKeySegments = ((keyItens/keySegments)*0.6)/(keySegments*keyItens);
 
-        double nodeItens         = 1000;//300000.0;
+        double nodeItens         = 10000;//300000.0;
         double nodeSegments      = 5.0/nodeItens;
         double clearNodeSegments = ((nodeItens/nodeSegments)*0.6)/(nodeSegments*nodeItens);
 
-        double dataItens         = 4000;//200000.0;
+        double dataItens         = 6000;//200000.0;
         double dataSegments      = 1.0/dataItens;
         double clearDataSegments = ((dataItens/dataSegments)*0.6)/(dataSegments*dataItens);
         

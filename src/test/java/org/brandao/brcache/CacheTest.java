@@ -115,7 +115,7 @@ public class CacheTest extends TestCase{
                     public void run(){
                         Random r = new Random();
                         while(true){
-                            int rv = r.nextInt(900000);
+                            int rv = r.nextInt(index);
                             String expected = "INDEX-" + String.valueOf(rv);
                             try{
                                 String val = (String) cache.getObject(expected);
