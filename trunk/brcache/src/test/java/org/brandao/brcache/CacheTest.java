@@ -74,7 +74,7 @@ public class CacheTest extends TestCase{
         
         for(int i=0;i<100;i++){
             Thread th = null;
-            if(i % 50 == 0){
+            if(i % 2 == 0){
                 th = new Thread(){
                     public void run(){
                         int rv = index++;
@@ -179,7 +179,7 @@ public class CacheTest extends TestCase{
             }
         }
         
-        for(int i=0;i<10;i++){
+        for(int i=0;i<5;i++){
             Thread th = null;
             th = new Thread(){
                 public void run(){
