@@ -37,19 +37,9 @@ public class Cache implements Serializable{
     
     private int maxdataOnMemory;
     
-    private long writePerSec;
+    private volatile long countRead;
     
-    private long readPerSec;
-    
-    private long countRead;
-    
-    private long countWrite;
-    
-    private long lastCheckRead;
-
-    private long lastCheckWrite;
-    
-    private final Object lockReadCount = new Object();
+    private volatile long countWrite;
     
     public Cache(){
         /*
@@ -73,20 +63,17 @@ public class Cache implements Serializable{
                 0.01F);
         */
 
-        this.lastCheckWrite = System.currentTimeMillis();
-        this.lastCheckRead  = System.currentTimeMillis();
-        
-        double keyItens         = 600000.0;
-        double keySegments      = 5.0/keyItens;
-        double clearKeySegments = ((keyItens/5.0)*0.6)/(keySegments*keyItens);
+        double keyItens         = 10000;//600000.0;
+        double keySegments      = 100.0/keyItens;
+        double clearKeySegments = ((keyItens/keySegments)*0.2)/(keySegments*keyItens);
 
-        double nodeItens         = 300000.0;
-        double nodeSegments      = 5.0/nodeItens;
-        double clearNodeSegments = ((nodeItens/5.0)*0.6)/(nodeSegments*nodeItens);
+        double nodeItens         = 10000;//300000.0;
+        double nodeSegments      = 100.0/nodeItens;
+        double clearNodeSegments = ((nodeItens/nodeSegments)*0.2)/(nodeSegments*nodeItens);
 
-        double dataItens         = 200000.0;
-        double dataSegments      = 5.0/dataItens;
-        double clearDataSegments = ((dataItens/5.0)*0.6)/(dataSegments*dataItens);
+        double dataItens         = 4000;//200000.0;
+        double dataSegments      = 400.0/dataItens;
+        double clearDataSegments = ((dataItens/dataSegments)*0.2)/(dataSegments*dataItens);
         
         this.dataMap =
                 new TreeHugeMap<StringTreeKey, DataMap>(
@@ -154,16 +141,9 @@ public class Cache implements Serializable{
             return null;
     }
     
-    public synchronized void put(String key, long maxAliveTime, InputStream inputData) throws IOException{
+    public void put(String key, long maxAliveTime, InputStream inputData) throws IOException{
 
-        long currentTime = System.currentTimeMillis();
-        if(currentTime - this.lastCheckWrite >= 1000 ){
-            this.lastCheckWrite = currentTime;
-            this.writePerSec = this.countWrite;
-            this.countWrite = 0;
-        }
-        else
-            countWrite++;
+        countWrite++;
         
         int[] segments = this.putData(inputData);
         this.putSegments(key, maxAliveTime, segments);
@@ -171,17 +151,7 @@ public class Cache implements Serializable{
 
     public InputStream get(String key){
         
-        synchronized(lockReadCount){
-            long currentTime = System.currentTimeMillis();
-
-            if(currentTime - this.lastCheckRead >= 1000 ){
-                this.lastCheckRead = currentTime;
-                this.readPerSec = this.countRead;
-                this.countRead = 0;
-            }
-            else
-                countRead++;
-        }
+        countRead++;
         
         DataMap map = this.dataMap.get(new StringTreeKey(key));
         
@@ -191,7 +161,7 @@ public class Cache implements Serializable{
             return null;
     }
     
-    public synchronized boolean remove(String key){
+    public boolean remove(String key){
         
         DataMap data = this.dataMap.get(new StringTreeKey(key));
         
@@ -199,15 +169,17 @@ public class Cache implements Serializable{
             
             this.dataMap.put(new StringTreeKey(key), null);
             
-            int[] segments = data.getSegments();
-            
-            for(int segment: segments){
-                this.dataList.set(segment, null);
-                try{
-                    this.freeSegments.put(segment);
-                }
-                catch(Throwable e){
-                    throw new RuntimeException(e);
+            synchronized(this.dataList){
+                int[] segments = data.getSegments();
+
+                for(int segment: segments){
+                    this.dataList.set(segment, null);
+                    try{
+                        this.freeSegments.put(segment);
+                    }
+                    catch(Throwable e){
+                        throw new RuntimeException(e);
+                    }
                 }
             }
             return true;
@@ -237,14 +209,19 @@ public class Cache implements Serializable{
                 byte[] tmp = new byte[length];
                 System.arraycopy(buffer, 0, tmp, 0, length);
 
-                Integer segment = this.freeSegments.poll();
-                
-                if(segment == null){
-                    this.dataList.add(tmp);
-                    segment = this.dataList.size() - 1;
+                Integer segment;
+                synchronized(this.dataList){
+                    
+                    segment = this.freeSegments.poll();
+
+                    if(segment == null){
+                        this.dataList.add(tmp);
+                        segment = this.dataList.size() - 1;
+                    }
+                    else
+                        this.dataList.set(segment, tmp);
+                    
                 }
-                else
-                    this.dataList.set(segment, tmp);
 
                 segments.add(segment);
             }
@@ -260,12 +237,12 @@ public class Cache implements Serializable{
         return result;
     }
 
-    public long getWritePerSec() {
-        return writePerSec;
+    public long getCountRead(){
+        return this.countRead;
     }
 
-    public long getReadPerSec() {
-        return readPerSec;
+    public long getCountWrite(){
+        return this.countWrite;
     }
     
 }
