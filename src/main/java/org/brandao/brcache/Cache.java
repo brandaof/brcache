@@ -63,16 +63,16 @@ public class Cache implements Serializable{
                 0.01F);
         */
 
-        double keyItens         = 10000;//600000.0;
+        double keyItens         = 1000;//600000.0;
         double keySegments      = 5.0/keyItens;
         double clearKeySegments = ((keyItens/keySegments)*0.6)/(keySegments*keyItens);
 
-        double nodeItens         = 10000;//300000.0;
+        double nodeItens         = 1000;//300000.0;
         double nodeSegments      = 5.0/nodeItens;
         double clearNodeSegments = ((nodeItens/nodeSegments)*0.6)/(nodeSegments*nodeItens);
 
         double dataItens         = 4000;//200000.0;
-        double dataSegments      = 2.0/dataItens;
+        double dataSegments      = 1.0/dataItens;
         double clearDataSegments = ((dataItens/dataSegments)*0.6)/(dataSegments*dataItens);
         
         this.dataMap =
@@ -210,18 +210,18 @@ public class Cache implements Serializable{
                 System.arraycopy(buffer, 0, tmp, 0, length);
 
                 Integer segment;
-                synchronized(this.dataList){
                     
                     segment = this.freeSegments.poll();
 
                     if(segment == null){
-                        this.dataList.add(tmp);
-                        segment = this.dataList.size() - 1;
+                        synchronized(this.dataList){
+                            this.dataList.add(tmp);
+                            segment = this.dataList.size() - 1;
+                        }
                     }
                     else
                         this.dataList.set(segment, tmp);
                     
-                }
 
                 segments.add(segment);
             }
