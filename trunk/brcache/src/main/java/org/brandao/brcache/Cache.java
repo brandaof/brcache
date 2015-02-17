@@ -37,9 +37,13 @@ public class Cache implements Serializable{
     
     private int maxdataOnMemory;
     
-    private volatile long countRead;
+    volatile long countRead;
     
-    private volatile long countWrite;
+    volatile long countWrite;
+    
+    volatile long countReadData;
+
+    volatile long countWriteData;
     
     public Cache(){
         /*
@@ -63,17 +67,17 @@ public class Cache implements Serializable{
                 0.01F);
         */
 
-        double keyItens         = 10000;//600000.0;
+        double keyItens         = 1000;//600000.0;
         double keySegments      = 5.0/keyItens;
-        double clearKeySegments = ((keyItens/keySegments)*0.4)/(keySegments*keyItens);
+        double clearKeySegments = ((keyItens/keySegments)*0.1)/(keySegments*keyItens);
 
-        double nodeItens         = 10000;//300000.0;
+        double nodeItens         = 1000;//300000.0;
         double nodeSegments      = 5.0/nodeItens;
-        double clearNodeSegments = ((nodeItens/nodeSegments)*0.4)/(nodeSegments*nodeItens);
+        double clearNodeSegments = ((nodeItens/nodeSegments)*0.1)/(nodeSegments*nodeItens);
 
-        double dataItens         = 10000;//200000.0;
+        double dataItens         = 16000;//200000.0;
         double dataSegments      = 2.0/dataItens;
-        double clearDataSegments = ((dataItens/dataSegments)*0.4)/(dataSegments*dataItens);
+        double clearDataSegments = ((dataItens/dataSegments)*0.6)/(dataSegments*dataItens);
         
         this.dataMap =
                 new TreeHugeMap<StringTreeKey, DataMap>(
@@ -156,7 +160,7 @@ public class Cache implements Serializable{
         DataMap map = this.dataMap.get(new StringTreeKey(key));
         
         if(map != null)
-            return new CacheInputStream(map, this.dataList);
+            return new CacheInputStream(this, map, this.dataList);
         else
             return null;
     }
@@ -214,6 +218,7 @@ public class Cache implements Serializable{
                     segment = this.freeSegments.poll();
 
                     if(segment == null){
+                        this.countWriteData += length;
                         synchronized(this.dataList){
                             this.dataList.add(tmp);
                             segment = this.dataList.size() - 1;
@@ -243,6 +248,60 @@ public class Cache implements Serializable{
 
     public long getCountWrite(){
         return this.countWrite;
+    }
+
+    public long getCountReadData() {
+        return countReadData;
+    }
+    
+    public long getCountWriteData() {
+        return countWriteData;
+    }
+    
+    public long getReadPerSec(){
+        try{
+            long start = this.countRead;
+            Thread.sleep(1000);
+            return this.countRead - start;
+        }
+        catch(Exception e){
+            return -1;
+        }
+    }
+    
+    public long getWritePerSec(){
+        try{
+            long start = this.countWrite;
+            Thread.sleep(1000);
+            return this.countWrite - start;
+        }
+        catch(Exception e){
+            return -1;
+        }
+        
+    }
+
+    public long getReadDataPerSec(){
+        try{
+            long start = this.countReadData;
+            Thread.sleep(1000);
+            return this.countReadData - start;
+        }
+        catch(Exception e){
+            return -1;
+        }
+    }
+    
+    public long getWriteDataPerSec(){
+        try{
+            long start = this.countWriteData;
+            Thread.sleep(1000);
+            return this.countWriteData - start;
+        }
+        catch(Exception e){
+            return -1;
+        }
+        
     }
     
 }

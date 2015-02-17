@@ -24,11 +24,14 @@ public class CacheInputStream extends InputStream{
     
     private int currentDataindex;
     
-    public CacheInputStream(DataMap map, HugeArrayList<byte[]> dataList){
+    private Cache cache;
+    
+    public CacheInputStream(Cache cache, DataMap map, HugeArrayList<byte[]> dataList){
         this.map = map;
         this.dataList = dataList;
         this.currentDataindex = 0;
         this.currentSegmentIndex = 0;
+        this.cache = cache;
     }
     
     @Override
@@ -65,6 +68,7 @@ public class CacheInputStream extends InputStream{
                 
                 System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
                 
+                cache.countReadData += lenRead;
                 length -= lenRead;
                 read += lenRead;
                 destPos += lenRead;
@@ -79,6 +83,7 @@ public class CacheInputStream extends InputStream{
                 int lenRead = length;
                 System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
                 
+                cache.countReadData += lenRead;
                 destPos += lenRead;
                 read += lenRead;
                 length -= lenRead;

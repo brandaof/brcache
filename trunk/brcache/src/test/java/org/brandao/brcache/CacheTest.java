@@ -55,8 +55,9 @@ public class CacheTest extends TestCase{
                     long write = 0;
                     while(true){
                         try{
-                            System.out.println("write: " + (write-lastWrite) + "/sec read: " + (read-lastRead) + "/sec");
-                            //System.out.println("\"" + count++ +   "\",\"" + cache.getWritePerSec() + "\",\"" + cache.getReadPerSec() + "\"");
+                            System.out.println(
+                                "write entry: " + (write-lastWrite) + "/sec " +
+                                "read entry: " + (read-lastRead) + "/sec");
                             lastRead = cache.getCountRead();
                             lastWrite = cache.getCountWrite();
                             Thread.sleep(1000);
@@ -72,7 +73,7 @@ public class CacheTest extends TestCase{
         
         read.start();
         
-        for(int i=0;i<1000;i++){
+        for(int i=0;i<100;i++){
             Thread th = null;
             if(i % 2 == 0){
                 th = new Thread(){
