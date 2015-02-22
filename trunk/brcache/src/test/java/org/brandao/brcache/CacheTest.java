@@ -17,7 +17,6 @@ public class CacheTest extends TestCase{
     
     private static String text = 
             "kdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjgh" +
-            /*kdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjgh" +
             "kdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjgh" +
             "kdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjgh" +
             "kdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjgh" +
@@ -35,7 +34,8 @@ public class CacheTest extends TestCase{
             "kdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjgh" +
             "kdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjgh" +
             "kdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjgh" +
-            "kdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjgh" +*/
+            "kdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjgh" +
+            "kdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjgh" +
             "kdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjghkdjfgh kldjfghkdfjgh klsdjfghkldsjfhgksdhfg kfjgh sdkjgh";
          
     private static int index = 0;
@@ -55,10 +55,21 @@ public class CacheTest extends TestCase{
                     long write = 0;
                     while(true){
                         try{
+                            System.out.println("----------------------------------");
                             System.out.println(
                                 "write entry: " + (write-lastWrite) + "/sec " +
                                 "read entry: " + (read-lastRead) + "/sec");
+                            
+                            Runtime runtime = Runtime.getRuntime();
+                            // Run the garbage collector
+                            //runtime.gc();
+                            // Calculate the used memory
+                            long memory = runtime.totalMemory() - runtime.freeMemory();
+                            System.out.println("Total memory is MB: " + ((runtime.totalMemory()/1024L)/1024L));
+                            System.out.println("Used memory is B: " + memory);
+                            System.out.println("Used memory is MB: " + ((memory/1024L)/1024L));
                             lastRead = cache.getCountRead();
+                            
                             lastWrite = cache.getCountWrite();
                             Thread.sleep(1000);
                             read = cache.getCountRead();
@@ -73,25 +84,24 @@ public class CacheTest extends TestCase{
         
         read.start();
         
-        for(int i=0;i<100;i++){
-            Thread th = null;
+        for(int i=0;i<4;i++){
+            Thread th;
             if(i % 2 == 0){
                 th = new Thread(){
                     public void run(){
-                        int rv = index++;
-                        while(rv<1000000){
-                            String expected = "INDEX-" + String.valueOf(rv);
-                            
-                            if(rv % 10000 == 0)
-                                System.out.println(rv);
-                            
+                        Random r = new Random();
+                        while(true){
                             try{
-                                cache.putObject(expected, 0, expected + text);
+                                //int rv = index++;
+                                int rv = r.nextInt(200000);
+                                String key = String.valueOf(rv) + "- INDEX AJBK - ";
+                                String value = key + text;
+                                cache.putObject(key, 0, value);
                             }
                             catch(Exception e){
                                 e.printStackTrace();
                             }
-                            rv = index++;
+                            index++;
                         }
                     }
                 };
@@ -119,13 +129,15 @@ public class CacheTest extends TestCase{
                     public void run(){
                         Random r = new Random();
                         while(true){
-                            int rv = r.nextInt(index);
-                            String expected = "INDEX-" + String.valueOf(rv);
+                            int rv = r.nextInt(index <= 0? 1000000 : index);
+                                String key = String.valueOf(rv) + "- INDEX AJBK - ";
+                                String value = key + text;
+                                
                             try{
-                                String val = (String) cache.getObject(expected);
+                                String val = (String) cache.getObject(key);
                                 if(val != null){
                                     //System.out.println(val);
-                                    Assert.assertEquals(expected + text, val);
+                                    Assert.assertEquals(value, val);
                                 }
                             }
                             catch(Throwable e){
@@ -157,8 +169,20 @@ public class CacheTest extends TestCase{
                     long write = 0;
                     while(true){
                         try{
-                            System.out.println("write: " + (write-lastWrite) + "/sec read: " + (read-lastRead) + "/sec");
+                            System.out.println("----------------------------------");
+                            System.out.println(
+                                "write entry: " + (write-lastWrite) + "/sec " +
+                                "read entry: " + (read-lastRead) + "/sec");
+                            
+                            Runtime runtime = Runtime.getRuntime();
+                            // Run the garbage collector
+                            runtime.gc();
+                            // Calculate the used memory
+                            long memory = runtime.totalMemory() - runtime.freeMemory();
+                            System.out.println("Used memory is bytes: " + memory);
+                            System.out.println("Used memory is megabytes: " + ((memory/1024L)/1024L));
                             lastRead = cache.getCountRead();
+                            
                             lastWrite = cache.getCountWrite();
                             Thread.sleep(1000);
                             read = cache.getCountRead();
@@ -173,29 +197,32 @@ public class CacheTest extends TestCase{
         
         read.start();
         
-        for(int i=0;i<100000;i++){
+        for(int i=0;i<1000;i++){
             try{
-                String expected = "INDEX-" + String.valueOf(i);
-                cache.putObject(expected, 0, expected + text);
+                String key = String.valueOf(i) + "- INDEX AJBK - ";
+                String value = key + text;
+                cache.putObject(key, 0, value);
             }
             catch(Exception e){
                 e.printStackTrace();
             }
         }
         
-        for(int i=0;i<5;i++){
+        for(int i=0;i<1;i++){
             Thread th = null;
             th = new Thread(){
                 public void run(){
                     Random r = new Random();
+                    int i = 0;
                     while(true){
-                        int rv = r.nextInt(900000);
-                        String expected = "INDEX-" + String.valueOf(rv);
+                        int rv = r.nextInt(1000);
+                        String key = String.valueOf(rv) + "- INDEX AJBK - ";
+                        String value = key + text;
                         try{
-                            String val = (String) cache.getObject(expected);
+                            String val = (String) cache.getObject(key);
                             if(val != null){
                                 //System.out.println(val);
-                                Assert.assertEquals(expected + text, val);
+                                Assert.assertEquals(value, val);
                             }
                         }
                         catch(Throwable e){

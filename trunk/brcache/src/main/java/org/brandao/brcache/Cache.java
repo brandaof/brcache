@@ -6,8 +6,8 @@
 
 package org.brandao.brcache;
 
-import com.brandao.uoutec.commons.collections.GroupCharTreeKey;
 import com.brandao.uoutec.commons.collections.HugeArrayList;
+import com.brandao.uoutec.commons.collections.StringTreeKey;
 import com.brandao.uoutec.commons.collections.TreeHugeMap;
 import com.brandao.uoutec.commons.collections.TreeKey;
 import java.io.ByteArrayInputStream;
@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -28,9 +29,13 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class Cache implements Serializable{
     
-    private final TreeHugeMap<TreeKey,DataMap> dataMap;
+    //private final TreeHugeMap<TreeKey,DataMap> dataMap;
+
+    private final ConcurrentHashMap<TreeKey,DataMap> dataMap;
     
     private final HugeArrayList<byte[]> dataList;
+    
+    //private final List<byte[]> dataList;
     
     private final int segmentSize;
     
@@ -45,39 +50,22 @@ public class Cache implements Serializable{
     volatile long countWriteData;
     
     public Cache(){
-        /*
-        this.dataMap =
-                new TreeHugeMap<StringTreeKey, DataMap>(
-                "/mnt2/var/webcache/dataMap",
-                "data",
-                10000,
-                0.001F,
-                0.01F,
-                10000,
-                0.001F,
-                0.01F);
-
-        this.dataList =
-                new HugeArrayList<byte[]>(
-                "/mnt2/var/webcache/dataList",
-                "data",
-                10000,
-                0.001F,
-                0.01F);
-        */
-
-        double keyItens         = 1000000.0;//1000;//600000.0;
-        double keySegments      = 100000.0/keyItens;
-        double clearKeySegments = ((keyItens/keySegments)*0.2)/(keySegments*keyItens);
-
-        double nodeItens         = 100000.0;//1000;//300000.0;
-        double nodeSegments      = 50000.0/nodeItens;
-        double clearNodeSegments = ((nodeItens/nodeSegments)*0.01)/(nodeSegments*nodeItens);
-
-        double dataItens         = 100000.0;//16000;//200000.0;
-        double dataSegments      = 50000.0/dataItens;
-        double clearDataSegments = ((dataItens/dataSegments)*0.01)/(dataSegments*dataItens);
+        this.dataMap = new ConcurrentHashMap<TreeKey,DataMap>();
+        //this.dataList = new ArrayList<byte[]>();
         
+        double keyItens         = 900000000000.0;//12000000.0;
+        double keySegments      = 900000.0/keyItens;
+        double clearKeySegments = ((keyItens/keySegments)*0.3)/(keySegments*keyItens);
+
+        double nodeItens         = 900000000000.0;//1000;//300000.0;
+        double nodeSegments      = 900000.0/nodeItens;
+        double clearNodeSegments = ((nodeItens/nodeSegments)*0.3)/(nodeSegments*nodeItens);
+
+        double dataItens         = 200.0;
+        double dataSegments      = 2.0/dataItens;
+        double clearDataSegments = ((dataItens/dataSegments)*0.3)/(dataSegments*dataItens);
+        
+        /*
         this.dataMap =
                 new TreeHugeMap<TreeKey, DataMap>(
                 "/mnt2/var/webcache/dataMap",
@@ -89,38 +77,17 @@ public class Cache implements Serializable{
                 clearNodeSegments,
                 nodeSegments
                 );
-
+        */
+        
+        
         this.dataList =
                 new HugeArrayList<byte[]>(
                 "/mnt2/var/webcache/dataList",
                 "data",
-                (int)dataItens,
+                (int)(dataItens + dataItens*0.3),
                 clearDataSegments,
                 dataSegments
                 );
-        
-        /*
-        this.dataMap =
-                new TreeHugeMap<StringTreeKey, DataMap>(
-                "/mnt2/var/webcache/dataMap",
-                "data",
-                600000, //Quantidade de nós na memória
-                0.01F,//Fator de limpeza de segmentos
-                0.00005F,//Fator de agrupamentos dos nós
-                300000, //Quantidade de itens em memória
-                0.01F,//Fator de limpeza de segmentos
-                0.0001F //Fator de agrupamentos dos itens
-                );
-
-        this.dataList =
-                new HugeArrayList<byte[]>(
-                "/mnt2/var/webcache/dataList",
-                "data",
-                200000, //Quantidade de itens em memória
-                0.01F,//Fator de limpeza de segmentos
-                0.00005F //Fator de agrupamentos dos itens
-                );
-        */
         
         this.segmentSize = 1024*1024;
         this.freeSegments = new LinkedBlockingQueue<Integer>();
@@ -146,17 +113,17 @@ public class Cache implements Serializable{
     
     public void put(String key, long maxAliveTime, InputStream inputData) throws IOException{
 
-        countWrite++;
-        
         int[] segments = this.putData(inputData);
         this.putSegments(key, maxAliveTime, segments);
+        
+        countWrite++;
     }
 
     public InputStream get(String key){
         
         countRead++;
         
-        DataMap map = this.dataMap.get(new GroupCharTreeKey(key));
+        DataMap map = this.dataMap.get(new StringTreeKey(key));
         
         if(map != null)
             return new CacheInputStream(this, map, this.dataList);
@@ -166,11 +133,11 @@ public class Cache implements Serializable{
     
     public boolean remove(String key){
         
-        DataMap data = this.dataMap.get(new GroupCharTreeKey(key));
+        DataMap data = this.dataMap.get(new StringTreeKey(key));
         
         if(data != null){
             
-            this.dataMap.put(new GroupCharTreeKey(key), null);
+            this.dataMap.put(new StringTreeKey(key), null);
             
             synchronized(this.dataList){
                 int[] segments = data.getSegments();
@@ -196,7 +163,7 @@ public class Cache implements Serializable{
         DataMap map = new DataMap();
         map.setMaxLiveTime(maxAliveTime);
         map.setSegments(segmens);
-        this.dataMap.put(new GroupCharTreeKey(key), map);
+        this.dataMap.put(new StringTreeKey(key), map);
     }
     
     private int[] putData(InputStream inputData) throws IOException{

@@ -9,6 +9,7 @@ package org.brandao.brcache;
 import com.brandao.uoutec.commons.collections.HugeArrayList;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  *
@@ -18,7 +19,7 @@ public class CacheInputStream extends InputStream{
 
     private DataMap map;
     
-    private HugeArrayList<byte[]> dataList;
+    private List<byte[]> dataList;
     
     private int currentSegmentIndex;
     
@@ -26,7 +27,7 @@ public class CacheInputStream extends InputStream{
     
     private Cache cache;
     
-    public CacheInputStream(Cache cache, DataMap map, HugeArrayList<byte[]> dataList){
+    public CacheInputStream(Cache cache, DataMap map, List<byte[]> dataList){
         this.map = map;
         this.dataList = dataList;
         this.currentDataindex = 0;
