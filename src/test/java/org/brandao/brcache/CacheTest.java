@@ -84,18 +84,18 @@ public class CacheTest extends TestCase{
         
         read.start();
         
-        for(int i=0;i<4;i++){
+        for(int i=0;i<10;i++){
             Thread th;
-            if(true){
+            if(i % 2 == 0){
                 th = new Thread(){
                     public void run(){
                         Random r = new Random();
                         while(true){
                             try{
-                                //int rv = index++;
-                                int rv = r.nextInt(200000);
-                                String key = String.valueOf(rv) + "- INDEX AJBK - ";
-                                String value = key + text;
+                                int rv = index++;
+                                //int rv = r.nextInt(200000);
+                                String key = String.valueOf(rv)/* + "- INDEX AJBK - "*/;
+                                String value = key/* + text*/;
                                 cache.putObject(key, 0, value);
                             }
                             catch(Exception e){
@@ -130,8 +130,8 @@ public class CacheTest extends TestCase{
                         Random r = new Random();
                         while(true){
                             int rv = r.nextInt(index <= 0? 1000000 : index);
-                                String key = String.valueOf(rv) + "- INDEX AJBK - ";
-                                String value = key + text;
+                                String key = String.valueOf(rv)/* + "- INDEX AJBK - "*/;
+                                String value = key/* + text*/;
                                 
                             try{
                                 String val = (String) cache.getObject(key);

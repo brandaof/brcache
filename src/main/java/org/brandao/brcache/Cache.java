@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -31,11 +30,7 @@ public class Cache implements Serializable{
     
     private final TreeHugeMap<TreeKey,DataMap> dataMap;
 
-    //private final ConcurrentHashMap<TreeKey,DataMap> dataMap;
-    
     private final HugeArrayList<byte[]> dataList;
-    
-    //private final List<byte[]> dataList;
     
     private final int segmentSize;
     
@@ -50,30 +45,29 @@ public class Cache implements Serializable{
     volatile long countWriteData;
     
     public Cache(){
-        //this.dataMap = new ConcurrentHashMap<TreeKey,DataMap>();
-        //this.dataList = new ArrayList<byte[]>();
-        
-        double keyItens         = 2000000.0;//12000000.0;
-        double keySegments      = 1000.0/keyItens;
-        double clearKeySegments = ((keyItens/keySegments)*0.3)/(keySegments*keyItens);
+        //cada item 8B
+        double keyItens         = 1310720.0; // 10M
+        double keySegments      = 131.0/keyItens; //(10000 segmentos)
+        double clearKeySegments = ((keyItens/keySegments)*0.4)/(keySegments*keyItens);
 
-        double nodeItens         = 2000000.0;//1000;//300000.0;
-        double nodeSegments      = 1000.0/nodeItens;
-        double clearNodeSegments = ((nodeItens/nodeSegments)*0.3)/(nodeSegments*nodeItens);
+        // cada item 40B
+        double nodeItens         = 262144.0; //10MB
+        double nodeSegments      = 26.0/nodeItens; //(10000 segmentos)
+        double clearNodeSegments = ((nodeItens/nodeSegments)*0.4)/(nodeSegments*nodeItens);
 
-        double dataItens         = 120000.0;
-        double dataSegments      = 1.0/dataItens;
+        // cada item ?B
+        double dataItens         = 51200.0; //100MB
+        double dataSegments      = 51.0/dataItens;//(1000 segmentos)
         double clearDataSegments = ((dataItens/dataSegments)*0.3)/(dataSegments*dataItens);
-        
-        
+
         this.dataMap =
                 new TreeHugeMap<TreeKey, DataMap>(
                 "/mnt2/var/webcache/dataMap",
                 "data",
-                (int)keyItens,
+                (int)(keyItens + keyItens*0.6),
                 clearKeySegments,
                 keySegments,
-                (int)nodeItens,
+                (int)(nodeItens + nodeItens*0.6),
                 clearNodeSegments,
                 nodeSegments
                 );
@@ -82,12 +76,12 @@ public class Cache implements Serializable{
                 new HugeArrayList<byte[]>(
                 "/mnt2/var/webcache/dataList",
                 "data",
-                (int)(dataItens + dataItens*0.3),
+                (int)(dataItens + dataItens*0.6),
                 clearDataSegments,
                 dataSegments
                 );
         
-        this.segmentSize = 1024*1024;
+        this.segmentSize = 2*1024;
         this.freeSegments = new LinkedBlockingQueue<Integer>();
     }
 
@@ -111,8 +105,8 @@ public class Cache implements Serializable{
     
     public void put(String key, long maxAliveTime, InputStream inputData) throws IOException{
 
-        //int[] segments = this.putData(inputData);
-        int[] segments = new int[]{0,0,0,0};
+        int[] segments = this.putData(inputData);
+        //int[] segments = new int[]{0,0,0,0};
         this.putSegments(key, maxAliveTime, segments);
         
         countWrite++;
