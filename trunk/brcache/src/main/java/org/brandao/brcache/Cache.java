@@ -29,9 +29,9 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class Cache implements Serializable{
     
-    //private final TreeHugeMap<TreeKey,DataMap> dataMap;
+    private final TreeHugeMap<TreeKey,DataMap> dataMap;
 
-    private final ConcurrentHashMap<TreeKey,DataMap> dataMap;
+    //private final ConcurrentHashMap<TreeKey,DataMap> dataMap;
     
     private final HugeArrayList<byte[]> dataList;
     
@@ -50,22 +50,22 @@ public class Cache implements Serializable{
     volatile long countWriteData;
     
     public Cache(){
-        this.dataMap = new ConcurrentHashMap<TreeKey,DataMap>();
+        //this.dataMap = new ConcurrentHashMap<TreeKey,DataMap>();
         //this.dataList = new ArrayList<byte[]>();
         
-        double keyItens         = 900000000000.0;//12000000.0;
-        double keySegments      = 900000.0/keyItens;
+        double keyItens         = 2000000.0;//12000000.0;
+        double keySegments      = 1000.0/keyItens;
         double clearKeySegments = ((keyItens/keySegments)*0.3)/(keySegments*keyItens);
 
-        double nodeItens         = 900000000000.0;//1000;//300000.0;
-        double nodeSegments      = 900000.0/nodeItens;
+        double nodeItens         = 2000000.0;//1000;//300000.0;
+        double nodeSegments      = 1000.0/nodeItens;
         double clearNodeSegments = ((nodeItens/nodeSegments)*0.3)/(nodeSegments*nodeItens);
 
-        double dataItens         = 200.0;
-        double dataSegments      = 2.0/dataItens;
+        double dataItens         = 120000.0;
+        double dataSegments      = 1.0/dataItens;
         double clearDataSegments = ((dataItens/dataSegments)*0.3)/(dataSegments*dataItens);
         
-        /*
+        
         this.dataMap =
                 new TreeHugeMap<TreeKey, DataMap>(
                 "/mnt2/var/webcache/dataMap",
@@ -77,8 +77,6 @@ public class Cache implements Serializable{
                 clearNodeSegments,
                 nodeSegments
                 );
-        */
-        
         
         this.dataList =
                 new HugeArrayList<byte[]>(
@@ -113,7 +111,8 @@ public class Cache implements Serializable{
     
     public void put(String key, long maxAliveTime, InputStream inputData) throws IOException{
 
-        int[] segments = this.putData(inputData);
+        //int[] segments = this.putData(inputData);
+        int[] segments = new int[]{0,0,0,0};
         this.putSegments(key, maxAliveTime, segments);
         
         countWrite++;
