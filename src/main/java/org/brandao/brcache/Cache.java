@@ -18,6 +18,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -35,6 +36,8 @@ public class Cache implements Serializable{
     private final int segmentSize;
     
     private final BlockingQueue<Integer> freeSegments;
+
+    private final int writeBufferLength;
     
     volatile long countRead;
     
@@ -45,29 +48,46 @@ public class Cache implements Serializable{
     volatile long countWriteData;
     
     public Cache(){
+        /*
         //cada item 8B
-        double keyItens         = 1310720.0; // 10M
-        double keySegments      = 131.0/keyItens; //(10000 segmentos)
-        double clearKeySegments = ((keyItens/keySegments)*0.4)/(keySegments*keyItens);
+        double keyItens         = 13107200.0; // 100M
+        double keySegments      = 1310.0/keyItens; //(10000 segmentos)
+        double clearKeySegments = ((keyItens/keySegments)*0.3)/(keySegments*keyItens);
 
         // cada item 40B
-        double nodeItens         = 262144.0; //10MB
-        double nodeSegments      = 26.0/nodeItens; //(10000 segmentos)
-        double clearNodeSegments = ((nodeItens/nodeSegments)*0.4)/(nodeSegments*nodeItens);
+        double nodeItens         = 2621440.0; //100MB
+        double nodeSegments      = 262.0/nodeItens; //(10000 segmentos)
+        double clearNodeSegments = ((nodeItens/nodeSegments)*0.3)/(nodeSegments*nodeItens);
 
         // cada item ?B
-        double dataItens         = 51200.0; //100MB
-        double dataSegments      = 51.0/dataItens;//(1000 segmentos)
-        double clearDataSegments = ((dataItens/dataSegments)*0.3)/(dataSegments*dataItens);
+        double dataItens         = 100.0; //100MB
+        double dataSegments      = 1.0/dataItens;//(1000 segmentos)
+        double clearDataSegments = ((dataItens/dataSegments)*0.6)/(dataSegments*dataItens);
+        */
+        
+        //cada item 8B
+        double keyItens         = 32768000.0; // 2,5G
+        double keySegments      = 3276.0/keyItens; //(10000 segmentos)
+        double clearKeySegments = ((keyItens/keySegments)*0.3)/(keySegments*keyItens);
 
+        // cada item 40B
+        double nodeItens         = 6553600.0; //2,5G
+        double nodeSegments      = 655.0/nodeItens; //(10000 segmentos)
+        double clearNodeSegments = ((nodeItens/nodeSegments)*0.3)/(nodeSegments*nodeItens);
+
+        // cada item ?B
+        double dataItens         = 163840.0; //100MB
+        double dataSegments      = 16.0/dataItens;//(1000 segmentos)
+        double clearDataSegments = ((dataItens/dataSegments)*0.6)/(dataSegments*dataItens);
+        
         this.dataMap =
                 new TreeHugeMap<TreeKey, DataMap>(
                 "/mnt2/var/webcache/dataMap",
                 "data",
-                (int)(keyItens + keyItens*0.6),
+                (int)keyItens,
                 clearKeySegments,
                 keySegments,
-                (int)(nodeItens + nodeItens*0.6),
+                (int)nodeItens,
                 clearNodeSegments,
                 nodeSegments
                 );
@@ -76,13 +96,14 @@ public class Cache implements Serializable{
                 new HugeArrayList<byte[]>(
                 "/mnt2/var/webcache/dataList",
                 "data",
-                (int)(dataItens + dataItens*0.6),
+                (int)dataItens,
                 clearDataSegments,
                 dataSegments
                 );
         
-        this.segmentSize = 2*1024;
+        this.segmentSize = 16*1024;
         this.freeSegments = new LinkedBlockingQueue<Integer>();
+        this.writeBufferLength = 1024*1024;
     }
 
     public void putObject(String key, long maxAliveTime, Object inputData) throws IOException{
@@ -106,7 +127,6 @@ public class Cache implements Serializable{
     public void put(String key, long maxAliveTime, InputStream inputData) throws IOException{
 
         int[] segments = this.putData(inputData);
-        //int[] segments = new int[]{0,0,0,0};
         this.putSegments(key, maxAliveTime, segments);
         
         countWrite++;
@@ -161,37 +181,13 @@ public class Cache implements Serializable{
     
     private int[] putData(InputStream inputData) throws IOException{
         List<Integer> segments = new ArrayList<Integer>();
-        byte[] buffer = new byte[this.segmentSize];
-        int length = 0;
-
-        while(length > -1){
-
-            length = inputData.read(buffer, 0, buffer.length);
-
-            if(length > 0){
-                byte[] tmp = new byte[length];
-                System.arraycopy(buffer, 0, tmp, 0, length);
-
-                Integer segment;
-                    
-                    segment = this.freeSegments.poll();
-
-                    if(segment == null){
-                        this.countWriteData += length;
-                        synchronized(this.dataList){
-                            this.dataList.add(tmp);
-                            segment = this.dataList.size() - 1;
-                        }
-                    }
-                    else
-                        this.dataList.set(segment, tmp);
-                    
-
-                segments.add(segment);
-            }
-
+        byte[] buffer = new byte[this.writeBufferLength];
+        int read;
+        
+        while((read = inputData.read(buffer)) != -1){
+           this.writeOnCache(buffer, 0, read, segments);
         }
-
+        
         Integer[] segs = segments.toArray(new Integer[0]);
         int[] result = new int[segs.length];
 
@@ -201,6 +197,66 @@ public class Cache implements Serializable{
         return result;
     }
 
+    private void writeOnCache(byte[] readBuf, int start, int offset, List<Integer> segments){
+        
+        byte[] writeBuf = new byte[this.segmentSize];
+        int currentOffset = 0;
+        
+        int read = 0;
+        int limitRead = offset - start;
+        int maxWrite;
+        int maxRead = 0;
+        
+        while(read < limitRead){
+            
+            maxWrite = writeBuf.length - currentOffset;
+            maxRead  = limitRead - read;
+            
+            if(maxWrite > maxRead){
+                System.arraycopy(readBuf, read, writeBuf, currentOffset, maxRead);
+                currentOffset += maxRead;
+                read += maxRead;
+                this.countWriteData += maxRead;
+            }
+            else{
+                System.arraycopy(readBuf, read, writeBuf, currentOffset, maxWrite);
+                currentOffset += maxWrite;
+                read += maxWrite;
+                this.countWriteData += maxWrite;
+                
+                synchronized(this.dataList){
+                    Integer segment = this.freeSegments.poll();
+                    if(segment == null){
+                        segment = this.dataList.size();
+                        this.dataList.add(writeBuf);
+                    }
+                    else
+                        this.dataList.set(segment, writeBuf);
+                    
+                    segments.add(segment);
+                }
+
+                writeBuf = new byte[this.segmentSize];
+                currentOffset = 0;
+            }
+        }
+        
+        if(currentOffset != 0){
+            synchronized(this.dataList){
+                Integer segment = this.freeSegments.poll();
+                if(segment == null){
+                    segment = this.dataList.size();
+                    this.dataList.add(Arrays.copyOf(writeBuf, maxRead));
+                }
+                else
+                    this.dataList.set(segment, Arrays.copyOf(writeBuf, maxRead));
+
+                segments.add(segment);
+            }
+        }
+            
+    }
+    
     public long getCountRead(){
         return this.countRead;
     }
