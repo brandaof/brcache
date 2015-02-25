@@ -23,7 +23,7 @@ public class TextTerminalWriter implements TerminalWriter{
     }
     
     public void sendMessage(String message) throws IOException {
-        out.write((message + "\r\n").getBytes());
+        out.write((message + "\n").getBytes());
         out.flush();
     }
 

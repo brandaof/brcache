@@ -22,12 +22,15 @@ public class TextTerminalReader implements TerminalReader{
     
     private BufferedReader reader;
     
-    private StringBuilder buffer;
+    private StringBuffer buffer;
+    
+    private int offset;
     
     public TextTerminalReader(Socket socket) throws IOException{
         this.socket = socket;
         this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        this.buffer = new StringBuilder();
+        this.buffer = new StringBuffer(2048);
+        this.offset = 0;
     }
     
     public Command getCommand() throws IOException {
@@ -50,31 +53,25 @@ public class TextTerminalReader implements TerminalReader{
     }
 
     public InputStream getStream() {
-        return new TextInputStreamReader(buffer, reader);
+        return new TextInputStreamReader(buffer, this.offset, reader);
     }
 
     protected StringBuilder readLine() throws IOException{
-        char[] tmp = new char[2048];
-        int start  = this.buffer.length();
-        int pos    = start;
-        int end    = -1;
-        while(end == -1){
-            
-            if(pos >= this.buffer.length()){
-                int len = reader.read(tmp);
-                this.buffer.append(tmp, 0, len);
-            }
-            
-            if(this.buffer.charAt(pos) == '\r' || this.buffer.length() > 2048)
-                end = pos;
-            else
-                pos++;
+        
+        StringBuilder result = this.buffer.readLine();
+        
+        if(result == null){
+            char[] tmp = new char[2048];
+            int len = reader.read(tmp);
+            this.buffer.append(tmp, 0, len);
+            return this.buffer.readLine();
         }
-        
-        StringBuilder result = new StringBuilder(this.buffer.subSequence(start, end));
-        
-        this.buffer.delete(0, buffer.length());
-        return result;
+        else
+            return result;
+    }
+
+    public int getOffset() {
+        return offset;
     }
     
 }
