@@ -33,6 +33,7 @@ public class TextOutputStream extends OutputStream{
         out.write(i);
     }
  
+    @Override
     public void write(byte[] bytes, int i, int i1) throws IOException {
         
         if(closed)
@@ -41,6 +42,7 @@ public class TextOutputStream extends OutputStream{
         out.write(bytes, i, i1);
     }
     
+    @Override
     public void flush() throws IOException{
         
         if(closed)
@@ -49,6 +51,7 @@ public class TextOutputStream extends OutputStream{
         out.flush();
     }
     
+    @Override
     public void close() throws IOException{
         
         if(closed)
