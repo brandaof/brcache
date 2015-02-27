@@ -19,6 +19,8 @@ import org.brandao.brcache.Cache;
  */
 public class Terminal {
     
+    private static final byte[] CRLF = "\r\n".getBytes();
+    
     private final Cache cache;
     
     private final Socket socket;
@@ -116,6 +118,7 @@ public class Terminal {
                 }
             }
             
+            writer.sendMessage("");
             writer.sendMessage("END");
         }
         catch(Throwable e){
