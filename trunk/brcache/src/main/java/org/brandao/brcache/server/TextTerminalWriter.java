@@ -24,12 +24,28 @@ public class TextTerminalWriter implements TerminalWriter{
         this.out = socket.getOutputStream();
     }
 
-    public void sendMessage(String message) throws IOException {
-        out.write(message.getBytes());
-        out.write(CRLF);
-        out.flush();
+    public void sendMessage(String message) throws WriteDataException {
+        try{
+            out.write(message.getBytes());
+            out.write(CRLF);
+            out.flush();
+        }
+        catch(IOException e){
+            throw new WriteDataException("send message fail", e);
+        }
     }
 
+    public void sendCRLF() throws WriteDataException {
+        try{
+            out.write(CRLF);
+            out.flush();
+        }
+        catch(IOException e){
+            throw new WriteDataException("send CRLF fail", e);
+        }
+            
+    }
+    
     public OutputStream getStream() {
         return new TextOutputStream(out);
     }

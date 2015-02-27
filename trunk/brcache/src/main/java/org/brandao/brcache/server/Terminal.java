@@ -17,70 +17,130 @@ import org.brandao.brcache.Cache;
  *
  * @author Cliente
  */
-public class Terminal {
+public class Terminal implements Runnable{
     
     private static final byte[] CRLF = "\r\n".getBytes();
     
-    private final Cache cache;
+    private Cache cache;
     
-    private final Socket socket;
+    private Socket socket;
+    
+    private final ServerSocket serverSocket;
     
     private boolean run;
     
-    public Terminal(Socket socket, Cache cache){
-        this.socket = socket;
+    private TerminalReader reader;
+    
+    private TerminalWriter writer;
+    
+    public Terminal(ServerSocket serverSocket, Cache cache){
+        this.serverSocket = serverSocket;
         this.cache = cache;
         this.run = false;
     }
 
-    public void start() throws IOException{
-        TerminalReader reader = new TextTerminalReader(socket);
-        TerminalWriter writer = new TextTerminalWriter(socket);
-        this.run = true;
-        Command command;
+    public void init() throws IOException{
+        try{
+            this.socket = this.serverSocket.accept();
+            this.reader = new TextTerminalReader(this.socket);
+            this.writer = new TextTerminalWriter(this.socket);
+            this.run = true;
+        }
+        catch(Throwable e){
+            if(this.socket != null)
+                this.socket.close();
+        }
+        finally{
+            if(this.socket == null || this.socket.isClosed())
+                this.run = false;
+        }
+    }
+    
+    public void run(){
         while(this.run){
             try{
-                command = reader.getCommand();
-                
-                switch(command){
-                    case PUT:
-                        this.executePut(reader, writer);
-                        break;
-                    case GET:
-                        this.executeGet(reader, writer);
-                        break;
-                    case REMOVE:
-                        this.executeRemove(reader, writer);
-                        break;
-                    case STATS:
-                        this.executeStats(reader, writer);
-                        break;
-                    case EXIT:
-                        this.executeExit(reader, writer);
-                        break;
-                    default:
-                        writer.sendMessage("ERROR: UNKNOW COMMAND");
-                };
+                execute();
             }
-            catch(Exception e){
-                if(this.socket.isClosed())
-                    this.run = false;
-                else
-                    writer.sendMessage(e.getMessage());
-                e.printStackTrace();
+            catch (UnknowCommandException ex) {
+                try{
+                    this.writer.sendMessage("UNKNOW COMMAND: " + ex.getMessage());
+                }
+                catch(Exception e){
+                }
+            }
+            catch (ReadDataException ex) {
+                try{
+                    this.writer.sendMessage("READ DATA ERROR: " + ex.getMessage());
+                }
+                catch(Exception e){
+                }
+            }
+            catch (WriteDataException ex) {
+                try{
+                    this.writer.sendMessage("WRITE DATA ERROR: " + ex.getMessage());
+                }
+                catch(Exception e){
+                }
+            }
+            catch (ParameterException ex) {
+                try{
+                    this.writer.sendMessage(ex.getMessage());
+                }
+                catch(Exception e){
+                }
+            }
+            catch(Throwable ex){
+                try{
+                    this.writer.sendMessage("unknow error");
+                }
+                catch(Exception e){
+                }
+                ex.printStackTrace();
             }
         }
     }
     
-    private void executePut(TerminalReader reader, TerminalWriter writer) throws IOException{
+    public void execute() 
+        throws UnknowCommandException, ReadDataException, 
+        WriteDataException, ParameterException{
+        
+        Command command = reader.getCommand();
+        
+        switch(command){
+            case PUT:
+                this.executePut(reader, writer);
+                break;
+            case GET:
+                this.executeGet(reader, writer);
+                break;
+            case REMOVE:
+                this.executeRemove(reader, writer);
+                break;
+            case STATS:
+                this.executeStats(reader, writer);
+                break;
+            case EXIT:
+                this.executeExit(reader, writer);
+                break;
+            default:
+                throw new UnknowCommandException(command.name());
+        }
+    }
+    
+    public void stop() throws IOException{
+        this.run = false;
+        if(this.socket != null)
+            this.socket.close();
+    }
+    
+    private void executePut(TerminalReader reader, TerminalWriter writer) 
+            throws ReadDataException, WriteDataException, ParameterException {
         StringBuilder[] parameters = null;
         try{
             parameters = reader.getParameters(2);
             
-            if(parameters == null || parameters.length != 2){
-                writer.sendMessage("ERROR: EXPECTED THE KEY AND TIME");
-                return;
-            }
+            if(parameters == null || parameters.length != 2)
+                throw new ParameterException("EXPECTED THE KEY AND TIME");
             
             this.cache.put(
                 parameters[0].toString(), 
@@ -90,25 +150,25 @@ public class Terminal {
             writer.sendMessage("OK");
         }
         catch(NumberFormatException e){
-            throw new IOException("invalid time: " + parameters[1]);
+            throw new ReadDataException("invalid time: " + parameters[1]);
         }
-        catch(Throwable e){
-            e.printStackTrace();
-            writer.sendMessage("ERROR");
+        catch (IOException ex) {
+            throw new WriteDataException("insert entry fail");
         }
     }
 
-    private void executeGet(TerminalReader reader, TerminalWriter writer) throws IOException{
+    private void executeGet(TerminalReader reader, TerminalWriter writer) 
+            throws WriteDataException, ReadDataException, ParameterException{
+        
         try{
             StringBuilder[] parameters = reader.getParameters(1);
-            if(parameters == null || parameters.length != 1){
-                writer.sendMessage("ERROR: EXPECTED THE KEY");
-                return;
-            }
             
+            if(parameters == null || parameters.length != 1)
+                throw new ParameterException("EXPECTED THE KEY");
+
             String key = parameters[0].toString();
             InputStream in = this.cache.get(key);
-            
+
             if(in != null){
                 OutputStream out = writer.getStream();
                 byte[] buffer = new byte[2048];
@@ -117,54 +177,42 @@ public class Terminal {
                     out.write(buffer, 0, len);
                 }
             }
-            
+
             writer.sendMessage("");
             writer.sendMessage("END");
         }
-        catch(Throwable e){
-            e.printStackTrace();
-            writer.sendMessage("");
-            writer.sendMessage("ERROR: " + e.getMessage());
+        catch(IOException e){
+            throw new ReadDataException("read entry fail");
         }
     }
 
-    private void executeRemove(TerminalReader reader, TerminalWriter writer) throws IOException{
-        try{
-            StringBuilder[] parameters = reader.getParameters(1);
-            
-            if(parameters == null || parameters.length != 1){
-                writer.sendMessage("ERROR: EXPECTED THE KEY");
-                return;
-            }
-            
-            this.cache.remove(parameters[0].toString());
-            
-            writer.sendMessage("END");
-        }
-        catch(Throwable e){
-            e.printStackTrace();
-            writer.sendMessage("ERROR");
-        }
+    private void executeRemove(TerminalReader reader, TerminalWriter writer) 
+            throws ReadDataException, WriteDataException, ParameterException{
+        StringBuilder[] parameters = reader.getParameters(1);
+
+        if(parameters == null || parameters.length != 1)
+            throw new ParameterException("EXPECTED THE KEY");
+
+        this.cache.remove(parameters[0].toString());
+
+        writer.sendMessage("END");
     }
 
-    private void executeStats(TerminalReader reader, TerminalWriter writer) throws IOException{
-        try{
-            writer.sendMessage("read entry: " + this.cache.getCountRead());
-            writer.sendMessage("read data: " + this.cache.getCountReadData());
-            writer.sendMessage("write entry: " + this.cache.getCountWrite());
-            writer.sendMessage("write data: " + this.cache.getCountWriteData());
-            writer.sendMessage("END");
-        }
-        catch(Throwable e){
-            e.printStackTrace();
-            writer.sendMessage("ERROR");
-        }
+    private void executeStats(TerminalReader reader, TerminalWriter writer) 
+            throws WriteDataException{
+        writer.sendMessage("read entry: " + this.cache.getCountRead());
+        writer.sendMessage("read data: " + this.cache.getCountReadData());
+        writer.sendMessage("write entry: " + this.cache.getCountWrite());
+        writer.sendMessage("write data: " + this.cache.getCountWriteData());
+        writer.sendMessage("END");
     }
 
-    private void executeExit(TerminalReader reader, TerminalWriter writer) throws IOException{
+    private void executeExit(TerminalReader reader, TerminalWriter writer) throws WriteDataException{
         try{
             writer.sendMessage("goodbye!");
             this.socket.close();
+        }
+        catch(IOException e){
         }
         finally{
             this.run = false;
@@ -178,14 +226,5 @@ public class Terminal {
     public Cache getCache() {
         return cache;
     }
-
-    public static void main(String[] ss) throws IOException{
-        
-        ServerSocket s = new ServerSocket(1044);
-        while(true){
-            Socket sock = s.accept();
-            Terminal t = new Terminal(sock, new Cache());
-            t.start();
-        }
-    }
+    
 }
