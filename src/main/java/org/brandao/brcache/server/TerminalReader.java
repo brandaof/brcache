@@ -15,9 +15,9 @@ import java.io.InputStream;
  */
 public interface TerminalReader {
     
-    Command getCommand() throws IOException;
+    Command getCommand() throws UnknowCommandException, ReadDataException;
     
-    StringBuilder[] getParameters(int size) throws IOException;
+    StringBuilder[] getParameters(int size) throws ReadDataException;
     
     InputStream getStream() throws IOException;
     

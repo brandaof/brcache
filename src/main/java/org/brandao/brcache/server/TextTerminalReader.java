@@ -33,21 +33,31 @@ public class TextTerminalReader implements TerminalReader{
         this.offset = 0;
     }
     
-    public Command getCommand() throws IOException {
-        StringBuilder line = this.buffer.readLine();
+    public Command getCommand() throws UnknowCommandException, ReadDataException {
+        StringBuilder line = null;
         try{
+            line = this.buffer.readLine();
             return Command.valueOf(line.toString());
         }
-        catch(Exception e){
-            throw new IOException("UNKNOW COMMAND: " + line);
+        catch(IOException e){
+            throw new ReadDataException("can not read command!");
+        }
+        catch(IllegalArgumentException e){
+            throw new UnknowCommandException(line == null? "undefined" : line.toString());
         }
     }
 
-    public StringBuilder[] getParameters(int size) throws IOException {
+    public StringBuilder[] getParameters(int size) throws ReadDataException {
         StringBuilder[] params = new StringBuilder[size];
         
-        for(int i=0;i<size;i++)
-            params[i] = this.buffer.readLine();
+        for(int i=0;i<size;i++){
+            try{
+                params[i] = this.buffer.readLine();
+            }
+            catch(IOException e){
+                throw new ReadDataException("can not read parameter: " + i);
+            }
+        }
         
         return params;
     }

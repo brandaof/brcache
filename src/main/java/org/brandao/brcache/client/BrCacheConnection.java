@@ -10,10 +10,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import org.brandao.brcache.server.ReadDataException;
 import org.brandao.brcache.server.TerminalReader;
 import org.brandao.brcache.server.TerminalWriter;
 import org.brandao.brcache.server.TextTerminalReader;
 import org.brandao.brcache.server.TextTerminalWriter;
+import org.brandao.brcache.server.WriteDataException;
 
 /**
  *
@@ -63,7 +65,8 @@ public class BrCacheConnection {
         this.writer = null;
     }
     
-    public void put(String key, long time, Object value) throws IOException{
+    public void put(String key, long time, Object value) 
+            throws WriteDataException, ReadDataException{
         this.writer.sendMessage(PUT);
         this.writer.sendMessage(key);
         this.writer.sendMessage(String.valueOf(time));
@@ -74,21 +77,31 @@ public class BrCacheConnection {
             out.writeObject(value);
             out.flush();
         }
+        catch(IOException ex){
+            throw new WriteDataException("send entry fail", ex);
+        }
         finally{
-            if(out != null)
-                out.close();
+            if(out != null){
+                try{
+                    out.close();
+                }
+                catch(Exception ex){}
+            }
         }
         
-        this.writer.sendMessage("");
+        this.writer.sendCRLF();
         this.writer.sendMessage(END);
         
         StringBuilder[] result = this.reader.getParameters(1);
         
-        if(!result[0].toString().equals(OK))
-            throw new IOException(result[0].toString());
+        String resultSTR = result[0].toString();
+        
+        if(!resultSTR.equals(OK))
+            throw new WriteDataException(resultSTR);
     }
     
-    public Object get(String key) throws IOException, ClassNotFoundException{
+    public Object get(String key) 
+            throws WriteDataException, ReadDataException{
         this.writer.sendMessage(GET);
         this.writer.sendMessage(key);
         
@@ -97,30 +110,31 @@ public class BrCacheConnection {
             stream = new ObjectInputStream(this.reader.getStream());
             return stream.readObject();
         }
+        catch(IOException ex){
+            throw new ReadDataException("read entry fail", ex);
+        }
+        catch(ClassNotFoundException ex){
+            throw new ReadDataException("create instance fail", ex);
+        }
         finally{
-            if(stream != null)
-                stream.close();
+            if(stream != null){
+                try{
+                    stream.close();
+                }
+                catch(Exception e){}
+            }
         }
     }
 
-    public void remove(String key) throws IOException, ClassNotFoundException{
+    public void remove(String key) throws WriteDataException, ReadDataException{
         this.writer.sendMessage(REMOVE);
         this.writer.sendMessage(key);
         StringBuilder[] response = this.reader.getParameters(1);
         
-        if(!"OK".equals(response.toString()))
-            throw new IOException(response.toString());
+        if(!OK.equals(response.toString()))
+            throw new WriteDataException(response.toString());
     }
     
-    
-    public static void main(String[] aaa) throws IOException, ClassNotFoundException{
-        BrCacheConnection c = new BrCacheConnection("localhost", 1044);
-        c.connect();
-        c.put("TT", 0, "TESTE \n TESTE \n");
-        
-        String s = (String) c.get("TT");
-    }
-
     public String getHost() {
         return host;
     }

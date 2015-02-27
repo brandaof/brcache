@@ -6,7 +6,6 @@
 
 package org.brandao.brcache.server;
 
-import java.io.IOException;
 import java.io.OutputStream;
 
 /**
@@ -15,7 +14,9 @@ import java.io.OutputStream;
  */
 public interface TerminalWriter {
     
-    void sendMessage(String message) throws IOException;
+    void sendMessage(String message) throws WriteDataException;
+    
+    void sendCRLF() throws WriteDataException;
     
     OutputStream getStream();
     
