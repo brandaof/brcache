@@ -6,6 +6,9 @@
 
 package org.brandao.brcache.server;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+
 /**
  *
  * @author Cliente
@@ -18,37 +21,52 @@ public class StringBuffer {
     
     private int capacity;
     
-    public StringBuffer(int capacity){
+    private BufferedReader reader;
+
+    private boolean hasLineFeed;
+    
+    public StringBuffer(int capacity, BufferedReader reader){
         this.offset = 0;
         this.buffer = new StringBuilder(offset);
         this.capacity = capacity;
+        this.reader = reader;
     }
     
-    public void append(char[] data){
-        buffer.append(data, 0, data.length);
-    }
-    
-    public void append(char[] data, int start, int offset){
-        buffer.append(data, start, offset);
-    }
-    
-    public StringBuilder readLine(){
+    public StringBuilder readLine() throws IOException{
         int count = 0;
-        for(int i=this.offset;i<buffer.length();i++){
+        int start = this.offset;
+        while(true){
+
+            if(this.offset == buffer.length()){
+                char[] tmp = new char[2048];
+                int len = reader.read(tmp);
+                this.buffer.append(tmp, 0, len);
+            }
             
-            if(this.buffer.charAt(i) == '\n' || count > this.capacity){
-                StringBuilder result = (new StringBuilder()).append(this.buffer,this.offset, i);
-                this.offset = i + 1;
+            if(this.offset > 0 && this.buffer.charAt(this.offset-1) == '\r' && this.buffer.charAt(this.offset) == '\n'){
+                StringBuilder result = 
+                        this.offset == 0?
+                            new StringBuilder() :
+                            (new StringBuilder()).append(this.buffer, start, this.offset - 1);
+                this.buffer.delete(start, this.offset + 1);
+                this.offset = 0;
+                this.hasLineFeed = true;
                 return result;
             }
-        }
-        
-        if(this.offset == buffer.length())
-            return null;
-        else{
-            StringBuilder result = (new StringBuilder()).append(this.buffer);
-            this.clear();
-            return result;
+            else
+            if(count > this.capacity){
+                StringBuilder result = 
+                        this.offset == 0?
+                            new StringBuilder() :
+                            (new StringBuilder()).append(this.buffer, start, this.offset);
+                this.buffer.delete(start, this.offset);
+                this.offset = 0;
+                this.hasLineFeed = false;
+                return result;
+            }
+
+            this.offset++;
+            count ++;
         }
     }
     
@@ -56,4 +74,9 @@ public class StringBuffer {
         this.buffer.setLength(0);
         this.offset = 0;
     }
+
+    public boolean isHasLineFeed() {
+        return hasLineFeed;
+    }
+
 }

@@ -16,8 +16,10 @@ import java.util.Arrays;
  * @author Cliente
  */
 public class TextInputStreamReader extends InputStream{
+
+    private static final String CRLF = "\r\n";
     
-    private StringBuilder END = new StringBuilder("END");
+    private String END = "END";
     
     private StringBuffer buffer;
     
@@ -56,28 +58,28 @@ public class TextInputStreamReader extends InputStream{
         
         int limitRead = offset - start;
         int read = 0;
-        
-        while(read < limitRead){
+        boolean linefeed = false;
+
+        while(!closed && read < limitRead){
             
             int maxRead  = byteBuffer == null? 0 : byteBuffer.length - this.offsetBuf;
             int maxWrite = limitRead - read;
 
             if(maxRead == 0){
-                
                 StringBuilder line = this.buffer.readLine();
-                
-                String srt = line.toString();
-                
-                if(END.toString().equals(srt)){
+                if(line.length() > 2 && line.substring(0, 3).equals(END)){
                     this.closed = true;
                     return read;
                 }
                 
-                this.byteBuffer = srt.getBytes();
-                this.byteBuffer = Arrays.copyOf(this.byteBuffer, this.byteBuffer.length + 1);
-                this.byteBuffer[this.byteBuffer.length - 1] = '\r';
+                if(linefeed)
+                    line.insert(0, CRLF);
+                
+                this.byteBuffer = line.toString().getBytes();
+                this.byteBuffer = Arrays.copyOf(this.byteBuffer, this.byteBuffer.length);
                 this.offsetBuf = 0;
                 maxRead = byteBuffer.length - this.offsetBuf;
+                linefeed = this.buffer.isHasLineFeed();
             }
             
             if(maxWrite > maxRead){

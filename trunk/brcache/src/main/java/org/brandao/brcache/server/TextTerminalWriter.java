@@ -16,14 +16,17 @@ import java.net.Socket;
  */
 public class TextTerminalWriter implements TerminalWriter{
 
+    private static final byte[] CRLF = "\r\n".getBytes();
+    
     private OutputStream out;
     
     public TextTerminalWriter(Socket socket) throws IOException{
         this.out = socket.getOutputStream();
     }
-    
+
     public void sendMessage(String message) throws IOException {
-        out.write((message + "\n").getBytes());
+        out.write(message.getBytes());
+        out.write(CRLF);
         out.flush();
     }
 

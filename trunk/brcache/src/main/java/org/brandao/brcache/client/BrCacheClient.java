@@ -21,13 +21,21 @@ import org.brandao.brcache.server.TextTerminalWriter;
  */
 public class BrCacheClient {
     
+    public static final String CRLF   = "\r\n";
+    
+    public static final String END    = "END";
+
+    public static final String PUT    = "PUT";
+
+    public static final String GET    = "GET";
+    
+    public static final String REMOVE = "REMOVE";
+    
+    public static final String OK     = "OK";
+    
     private String host;
     
     private int port;
-    
-    private int writeBufferLength;
-    
-    private int readBufferLength;
     
     private Socket socket;
     
@@ -35,15 +43,13 @@ public class BrCacheClient {
     
     private TerminalWriter writer;
     
-    private BrCacheClient(String host, int port, int writeBufferLength, int readBufferLength){
+    private BrCacheClient(String host, int port){
         this.host = host;
         this.port = port;
-        this.readBufferLength = readBufferLength;
-        this.writeBufferLength = writeBufferLength;
     }
     
     public void connect() throws IOException{
-        this.socket = new Socket(this.host,this.port);
+        this.socket = new Socket(this.getHost(), this.getPort());
         this.reader = new TextTerminalReader(this.socket);
         this.writer = new TextTerminalWriter(this.socket);
     }
@@ -58,7 +64,7 @@ public class BrCacheClient {
     }
     
     public void put(String key, long time, Object value) throws IOException{
-        this.writer.sendMessage("PUT");
+        this.writer.sendMessage(PUT);
         this.writer.sendMessage(key);
         this.writer.sendMessage(String.valueOf(time));
         
@@ -74,11 +80,16 @@ public class BrCacheClient {
         }
         
         this.writer.sendMessage("");
-        this.writer.sendMessage("END");
+        this.writer.sendMessage(END);
+        
+        StringBuilder[] result = this.reader.getParameters(1);
+        
+        if(!result[0].toString().equals(OK))
+            throw new IOException(result[0].toString());
     }
     
     public Object get(String key) throws IOException, ClassNotFoundException{
-        this.writer.sendMessage("GET");
+        this.writer.sendMessage(GET);
         this.writer.sendMessage(key);
         
         ObjectInputStream stream = null;
@@ -93,7 +104,7 @@ public class BrCacheClient {
     }
 
     public void remove(String key) throws IOException, ClassNotFoundException{
-        this.writer.sendMessage("REMOVE");
+        this.writer.sendMessage(REMOVE);
         this.writer.sendMessage(key);
         StringBuilder[] response = this.reader.getParameters(1);
         
@@ -103,10 +114,18 @@ public class BrCacheClient {
     
     
     public static void main(String[] aaa) throws IOException, ClassNotFoundException{
-        BrCacheClient c = new BrCacheClient("localhost", 1044, 2048, 2048);
+        BrCacheClient c = new BrCacheClient("localhost", 1044);
         c.connect();
         c.put("TT", 0, "TESTE \n TESTE \n");
         
         String s = (String) c.get("TT");
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public int getPort() {
+        return port;
     }
 }
