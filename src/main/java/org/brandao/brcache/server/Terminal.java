@@ -9,7 +9,6 @@ package org.brandao.brcache.server;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 import org.brandao.brcache.Cache;
 
@@ -17,7 +16,7 @@ import org.brandao.brcache.Cache;
  *
  * @author Cliente
  */
-public class Terminal implements Runnable{
+public class Terminal {
     
     private static final byte[] CRLF = "\r\n".getBytes();
     
@@ -25,23 +24,20 @@ public class Terminal implements Runnable{
     
     private Socket socket;
     
-    private final ServerSocket serverSocket;
-    
     private boolean run;
     
     private TerminalReader reader;
     
     private TerminalWriter writer;
     
-    public Terminal(ServerSocket serverSocket, Cache cache){
-        this.serverSocket = serverSocket;
-        this.cache = cache;
+    public Terminal(){
         this.run = false;
     }
 
-    public void init() throws IOException{
+    protected void init(Socket socket, Cache cache) throws IOException{
         try{
-            this.socket = this.serverSocket.accept();
+            this.socket = socket;
+            this.cache  = cache;
             this.reader = new TextTerminalReader(this.socket);
             this.writer = new TextTerminalWriter(this.socket);
             this.run = true;
@@ -56,51 +52,44 @@ public class Terminal implements Runnable{
         }
     }
     
-    public void run(){
-        while(this.run){
+    public void destroy() throws IOException{
+        try{
+            if(this.socket != null)
+                this.socket.close();
+        }
+        finally{
+            this.run    = false;
+            this.cache  = null;
+            this.reader = null;
+            this.writer = null;
+        }
+    }
+    
+    public void execute() throws WriteDataException{
+        while(this.run && !this.socket.isInputShutdown()){
+            
             try{
-                execute();
+                executeCommand();
             }
             catch (UnknowCommandException ex) {
-                try{
-                    this.writer.sendMessage("UNKNOW COMMAND: " + ex.getMessage());
-                }
-                catch(Exception e){
-                }
+                this.writer.sendMessage("UNKNOW COMMAND: " + ex.getMessage());
             }
             catch (ReadDataException ex) {
-                try{
-                    this.writer.sendMessage("READ DATA ERROR: " + ex.getMessage());
-                }
-                catch(Exception e){
-                }
+                this.writer.sendMessage("READ DATA ERROR: " + ex.getMessage());
             }
             catch (WriteDataException ex) {
-                try{
-                    this.writer.sendMessage("WRITE DATA ERROR: " + ex.getMessage());
-                }
-                catch(Exception e){
-                }
+                this.writer.sendMessage("WRITE DATA ERROR: " + ex.getMessage());
             }
             catch (ParameterException ex) {
-                try{
-                    this.writer.sendMessage(ex.getMessage());
-                }
-                catch(Exception e){
-                }
+                this.writer.sendMessage(ex.getMessage());
             }
             catch(Throwable ex){
-                try{
-                    this.writer.sendMessage("unknow error");
-                }
-                catch(Exception e){
-                }
-                ex.printStackTrace();
+                this.writer.sendMessage("unknow error");
             }
         }
     }
     
-    public void execute() 
+    public void executeCommand() 
         throws UnknowCommandException, ReadDataException, 
         WriteDataException, ParameterException{
         
@@ -125,12 +114,6 @@ public class Terminal implements Runnable{
             default:
                 throw new UnknowCommandException(command.name());
         }
-    }
-    
-    public void stop() throws IOException{
-        this.run = false;
-        if(this.socket != null)
-            this.socket.close();
     }
     
     private void executePut(TerminalReader reader, TerminalWriter writer) 
@@ -217,14 +200,6 @@ public class Terminal implements Runnable{
         finally{
             this.run = false;
         }
-    }
-    
-    public Socket getSocket() {
-        return socket;
-    }
-
-    public Cache getCache() {
-        return cache;
     }
     
 }
