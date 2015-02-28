@@ -20,6 +20,8 @@ public class TextTerminalReader implements TerminalReader{
 
     private Socket socket;
     
+    private InputStream stream;
+    
     private BufferedReader reader;
     
     private StringBuffer buffer;
@@ -28,7 +30,8 @@ public class TextTerminalReader implements TerminalReader{
     
     public TextTerminalReader(Socket socket) throws IOException{
         this.socket = socket;
-        this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        this.stream = socket.getInputStream();
+        this.reader = new BufferedReader(new InputStreamReader(this.stream));
         this.buffer = new StringBuffer(2048, this.reader);
         this.offset = 0;
     }

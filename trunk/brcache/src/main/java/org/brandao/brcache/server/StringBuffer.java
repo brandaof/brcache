@@ -40,7 +40,10 @@ public class StringBuffer {
             if(this.offset == buffer.length()){
                 char[] tmp = new char[2048];
                 int len = reader.read(tmp);
-                this.buffer.append(tmp, 0, len);
+                if(len == -1)
+                    throw new IOException();
+                else
+                    this.buffer.append(tmp, 0, len);
             }
             
             if(this.offset > 0 && this.buffer.charAt(this.offset-1) == '\r' && this.buffer.charAt(this.offset) == '\n'){
