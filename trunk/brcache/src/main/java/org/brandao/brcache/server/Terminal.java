@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.brandao.brcache.Cache;
+import org.brandao.brcache.StorageException;
 
 /**
  *
@@ -133,10 +134,13 @@ public class Terminal {
             writer.sendMessage("OK");
         }
         catch(NumberFormatException e){
-            throw new ReadDataException("invalid time: " + parameters[1]);
+            throw new ReadDataException("invalid time: " + parameters[1], e);
         }
         catch (IOException ex) {
-            throw new WriteDataException("insert entry fail");
+            throw new WriteDataException("insert entry fail", ex);
+        }
+        catch(StorageException ex){
+            throw new WriteDataException("insert entry fail", ex);
         }
     }
 
