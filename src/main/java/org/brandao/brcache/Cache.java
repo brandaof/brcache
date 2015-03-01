@@ -38,6 +38,10 @@ public class Cache implements Serializable{
     private final BlockingQueue<Integer> freeSegments;
 
     private final int writeBufferLength;
+
+    private final int maxBytesToStorageEntry;
+    
+    private final int maxLengthKey;
     
     volatile long countRead;
     
@@ -46,25 +50,55 @@ public class Cache implements Serializable{
     volatile long countReadData;
 
     volatile long countWriteData;
+
+    public Cache(
+        double nodesOnMemory,
+        double nodesPerSegment,
+        double swapSegmentNodesFactor,
+        
+        double indexOnMemory,
+        double indexPerSegment,
+        double swapSegmentIndexFactor,
+        
+        double bytesOnMemory,
+        double bytesPerSegment,
+        double swapSegmentsFactor,
+        
+        String path,
+        int maxBytesStoragePerGroup,
+        int writeBufferSize,
+        int maxBytesToStorageEntry,
+        int maxLengthKey){
+        this.freeSegments           = new LinkedBlockingQueue<Integer>();
+        this.segmentSize            = maxBytesStoragePerGroup;
+        this.writeBufferLength      = writeBufferSize;
+        this.maxBytesToStorageEntry = maxBytesToStorageEntry;
+        this.maxLengthKey           = maxLengthKey;
+        
+        this.dataMap =
+                new TreeHugeMap<TreeKey, DataMap>(
+                path,
+                "data",
+                (int)nodesOnMemory,
+                (nodesOnMemory/nodesPerSegment)*swapSegmentNodesFactor,
+                nodesPerSegment,
+                (int)indexOnMemory,
+                (indexOnMemory/indexPerSegment)*swapSegmentIndexFactor,
+                indexPerSegment
+                );
+        
+        this.dataList =
+                new HugeArrayList<byte[]>(
+                path,
+                "data",
+                (int)(bytesOnMemory/this.segmentSize),
+                (bytesPerSegment/this.segmentSize)*swapSegmentsFactor,
+                bytesPerSegment/this.segmentSize
+                );
+        
+    }
     
     public Cache(){
-        /*
-        //cada item 8B
-        double keyItens         = 13107200.0; // 100M
-        double keySegments      = 1310.0/keyItens; //(10000 segmentos)
-        double clearKeySegments = ((keyItens/keySegments)*0.3)/(keySegments*keyItens);
-
-        // cada item 40B
-        double nodeItens         = 2621440.0; //100MB
-        double nodeSegments      = 262.0/nodeItens; //(10000 segmentos)
-        double clearNodeSegments = ((nodeItens/nodeSegments)*0.3)/(nodeSegments*nodeItens);
-
-        // cada item ?B
-        double dataItens         = 100.0; //100MB
-        double dataSegments      = 1.0/dataItens;//(1000 segmentos)
-        double clearDataSegments = ((dataItens/dataSegments)*0.6)/(dataSegments*dataItens);
-        */
-        
         //cada item 8B
         double keyItens         = 32768000.0; // 2,5G
         double keySegments      = 3276.0/keyItens; //(10000 segmentos)
@@ -101,17 +135,28 @@ public class Cache implements Serializable{
                 dataSegments
                 );
         
-        this.segmentSize = 16*1024;
-        this.freeSegments = new LinkedBlockingQueue<Integer>();
-        this.writeBufferLength = 1024*1024;
+        this.segmentSize            = 16*1024;
+        this.freeSegments           = new LinkedBlockingQueue<Integer>();
+        this.writeBufferLength      = 1024*1024;
+        this.maxBytesToStorageEntry = 10*1024*1024;
+        this.maxLengthKey           = 128;
     }
-
-    public void putObject(String key, long maxAliveTime, Object inputData) throws IOException{
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        ObjectOutputStream oout = new ObjectOutputStream(bout);
-        oout.writeObject(inputData);
-        oout.flush();
-        this.put(key, maxAliveTime, new ByteArrayInputStream(bout.toByteArray()));
+    
+    public void putObject(String key, long maxAliveTime, Object inputData) throws StorageException{
+        try{
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            ObjectOutputStream oout = new ObjectOutputStream(bout);
+            oout.writeObject(inputData);
+            oout.flush();
+            this.put(key, maxAliveTime, new ByteArrayInputStream(bout.toByteArray()));
+        }
+        catch(StorageException e){
+            throw e;
+        }
+        catch(Throwable e){
+            throw new StorageException(e);
+        }
+        
     }
 
     public Object getObject(String key) throws IOException, ClassNotFoundException{
@@ -124,12 +169,32 @@ public class Cache implements Serializable{
             return null;
     }
     
-    public void put(String key, long maxAliveTime, InputStream inputData) throws IOException{
-
-        int[] segments = this.putData(inputData);
-        this.putSegments(key, maxAliveTime, segments);
+    public void put(String key, long maxAliveTime, InputStream inputData) throws StorageException{
         
-        countWrite++;
+        int[] segments = null;
+        
+        if(key.length() > this.maxLengthKey)
+            throw new StorageException("key is very large");
+        
+        try{
+            segments = this.putData(inputData);
+            this.putSegments(key, maxAliveTime, segments);
+            countWrite++;
+        }
+        catch(StorageException e){
+            if(segments != null){
+                for(int segment: segments)
+                    this.freeSegments.add(segment);
+            }
+            throw e;
+        }
+        catch(Throwable e){
+            if(segments != null){
+                for(int segment: segments)
+                    this.freeSegments.add(segment);
+            }
+            throw new StorageException(e);
+        }
     }
 
     public InputStream get(String key){
@@ -179,22 +244,42 @@ public class Cache implements Serializable{
         this.dataMap.put(new StringTreeKey(key), map);
     }
     
-    private int[] putData(InputStream inputData) throws IOException{
-        List<Integer> segments = new ArrayList<Integer>();
-        byte[] buffer = new byte[this.writeBufferLength];
-        int read;
+    private int[] putData(InputStream inputData) throws StorageException{
         
-        while((read = inputData.read(buffer)) != -1){
-           this.writeOnCache(buffer, 0, read, segments);
+        int writeData = 0;
+        List<Integer> segments = new ArrayList<Integer>();
+        
+        try{
+            byte[] buffer = new byte[this.writeBufferLength];
+            int read;
+
+            while((read = inputData.read(buffer)) != -1){
+               this.writeOnCache(buffer, 0, read, segments);
+               writeData += read;
+               
+               if(writeData > this.maxBytesToStorageEntry)
+                   throw new StorageException("data is very large");
+            }
+            
+            Integer[] segs = segments.toArray(new Integer[0]);
+            int[] result = new int[segs.length];
+
+            for(int i=0;i<segs.length;i++)
+                result[i] = segs[i];
+            
+            return result;
+        }
+        catch(StorageException e){
+            for(int segment: segments)
+                this.freeSegments.add(segment);
+            throw e;
+        }
+        catch(IOException e){
+            for(int segment: segments)
+                this.freeSegments.add(segment);
+            throw new StorageException(e);
         }
         
-        Integer[] segs = segments.toArray(new Integer[0]);
-        int[] result = new int[segs.length];
-
-        for(int i=0;i<segs.length;i++)
-            result[i] = segs[i];
-
-        return result;
     }
 
     private void writeOnCache(byte[] readBuf, int start, int offset, List<Integer> segments){

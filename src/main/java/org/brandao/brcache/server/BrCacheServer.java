@@ -8,8 +8,6 @@ package org.brandao.brcache.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.brandao.brcache.Cache;
@@ -42,17 +40,23 @@ public class BrCacheServer {
     
     private boolean run;
     
-    public BrCacheServer(int port, int minConnections, int maxConnections, int timeout, boolean reuseAddress){
+    public BrCacheServer(
+            int port, 
+            int minConnections, 
+            int maxConnections, 
+            int timeout, 
+            boolean reuseAddress,
+            Cache cache){
         this.run            = false;
         this.timeout        = timeout;
         this.reuseAddress   = reuseAddress;
         this.maxConnections = maxConnections;
         this.minConnections = minConnections;
         this.port           = port;
+        this.cache          = cache;
     }
     
     public void start() throws IOException{
-        this.cache = new Cache();
         this.terminalFactory = new TerminalFactory(this.minConnections, this.maxConnections);
         this.serverSocket = new ServerSocket(this.port, 1);
         this.serverSocket.setSoTimeout(this.timeout);
@@ -86,11 +90,6 @@ public class BrCacheServer {
         finally{
             this.serverSocket.close();
         }
-    }
-    
-    public static void main(String[] a) throws IOException{
-        BrCacheServer server = new BrCacheServer(1044, 0, 1, 70000, false);
-        server.start();
     }
     
 }
