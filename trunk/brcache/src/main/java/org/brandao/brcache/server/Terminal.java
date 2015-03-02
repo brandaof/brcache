@@ -31,8 +31,11 @@ public class Terminal {
     
     private TerminalWriter writer;
     
-    public Terminal(){
+    private Configuration config;
+    
+    public Terminal(Configuration config){
         this.run = false;
+        this.config = config;
     }
 
     protected void init(Socket socket, Cache cache) throws IOException{
@@ -187,10 +190,13 @@ public class Terminal {
 
     private void executeStats(TerminalReader reader, TerminalWriter writer) 
             throws WriteDataException{
-        writer.sendMessage("read entry: " + this.cache.getCountRead());
-        writer.sendMessage("read data: " + this.cache.getCountReadData());
-        writer.sendMessage("write entry: " + this.cache.getCountWrite());
-        writer.sendMessage("write data: " + this.cache.getCountWriteData());
+        for(String prop: this.config.stringPropertyNames())
+            writer.sendMessage(prop + ": " + this.config.getProperty(prop));
+        
+        writer.sendMessage("read_entry: " + this.cache.getCountRead());
+        writer.sendMessage("read_data: " + this.cache.getCountReadData());
+        writer.sendMessage("write_entry: " + this.cache.getCountWrite());
+        writer.sendMessage("write_data: " + this.cache.getCountWriteData());
         writer.sendMessage("END");
     }
 

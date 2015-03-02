@@ -8,6 +8,7 @@ package org.brandao.brcache.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.brandao.brcache.Cache;
@@ -38,7 +39,13 @@ public class BrCacheServer {
     
     private ExecutorService executorService;
     
+    private Configuration config;
+    
     private boolean run;
+    
+    public BrCacheServer(Configuration config){
+        this.loadConfiguration(config);
+    }
     
     public BrCacheServer(
             int port, 
@@ -57,7 +64,7 @@ public class BrCacheServer {
     }
     
     public void start() throws IOException{
-        this.terminalFactory = new TerminalFactory(this.minConnections, this.maxConnections);
+        this.terminalFactory = new TerminalFactory(this.config, this.minConnections, this.maxConnections);
         this.serverSocket = new ServerSocket(this.port, 1);
         this.serverSocket.setSoTimeout(this.timeout);
         this.serverSocket.setReuseAddress(this.reuseAddress);
@@ -92,4 +99,69 @@ public class BrCacheServer {
         }
     }
     
+    private void loadConfiguration(Configuration config){
+
+        int port                  = config.getInt("port","1044");
+        int max_connections       = config.getInt("max_connections","10");
+        int timeout_connection    = config.getInt("timeout_connection","0");
+        boolean reuse_address     = config.getBoolean("reuse_address", "false");
+        double nodes_size         = config.getDouble("nodes_size","10m");
+        double nodes_swap_size    = config.getDouble("nodes_swap_size","16k");
+        double nodes_swap_factor  = config.getDouble("nodes_swap_factor","0.3");
+        double index_size         = config.getDouble("index_size","10m");
+        double index_swap_size    = config.getDouble("index_swap_size","16k");
+        double index_swap_factor  = config.getDouble("index_swap_factor","0.3");
+        double data_size          = config.getDouble("data_size","100m");
+        double data_swap_size     = config.getDouble("data_swap_size","128k");
+        double data_swap_factor   = config.getDouble("data_swap_factor","0.6");
+        String data_path          = config.getString("data_path","/var/brcache");
+        int max_slab_size         = config.getInt("max_slab_size","16k");
+        int write_buffer_size     = config.getInt("write_buffer_size","16k");
+        int max_size_entry        = config.getInt("max_size_entry","1m");
+        int max_size_key          = config.getInt("max_size_key","48");
+        
+        
+        double nodesOnMemory          = nodes_size/8.0;
+        double nodesPerSegment        = nodes_swap_size/8.0;
+        double swapSegmentNodesFactor = nodes_swap_factor;
+        
+        double indexOnMemory          = index_size/40.0;
+        double indexPerSegment        = index_swap_size/40.0;
+        double swapSegmentIndexFactor = index_swap_factor;
+        
+        double bytesOnMemory          = data_size/max_slab_size;
+        double bytesPerSegment        = data_swap_size/max_slab_size;
+        double swapSegmentsFactor     = data_swap_factor;
+        
+        String path                   = data_path;
+        int maxBytesStoragePerGroup   = max_slab_size;
+        int writeBufferSize           = write_buffer_size;
+        int maxBytesToStorageEntry    = max_size_entry;
+        int maxLengthKey              = max_size_key;
+        
+        this.run            = false;
+        this.config         = config;
+        this.timeout        = timeout_connection;
+        this.reuseAddress   = reuse_address;
+        this.maxConnections = max_connections;
+        this.minConnections = 0;
+        this.port           = port;
+        
+        
+        this.cache = new Cache(
+            nodesOnMemory,
+            nodesPerSegment,
+            swapSegmentNodesFactor,
+            indexOnMemory,
+            indexPerSegment,
+            swapSegmentIndexFactor,
+            bytesOnMemory,
+            bytesPerSegment,
+            swapSegmentsFactor,
+            path,
+            maxBytesStoragePerGroup,
+            writeBufferSize,
+            maxBytesToStorageEntry,
+            maxLengthKey);
+    }
 }
