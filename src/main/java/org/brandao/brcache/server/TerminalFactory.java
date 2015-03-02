@@ -22,9 +22,11 @@ public class TerminalFactory {
     
     private final int maxInstances;
     
+    private final Configuration config;
+    
     private final BlockingQueue<Terminal> instances;
 
-    public TerminalFactory(int minInstances, int maxInstances){
+    public TerminalFactory(Configuration config, int minInstances, int maxInstances){
 
         if(minInstances < 0)
             throw new IllegalArgumentException("minInstances");
@@ -35,13 +37,14 @@ public class TerminalFactory {
         if(minInstances > maxInstances)
             throw new IllegalArgumentException("minInstances");
 
+        this.config           = config;
         this.minInstances     = minInstances;
         this.maxInstances     = maxInstances;
         this.instances        = new ArrayBlockingQueue<Terminal>(this.maxInstances);
         this.createdInstances = 0;
         
         for(int i=0;i<this.minInstances;i++)
-            this.instances.add(new Terminal());
+            this.instances.add(new Terminal(config));
         
     }
     
@@ -53,7 +56,7 @@ public class TerminalFactory {
             return terminal;
         else
         if(this.createdInstances < this.maxInstances){
-            terminal = new Terminal();
+            terminal = new Terminal(config);
             this.createdInstances++;
             return terminal;
         }
@@ -70,7 +73,7 @@ public class TerminalFactory {
             return terminal;
         else
         if(this.createdInstances < this.maxInstances){
-            terminal = new Terminal();
+            terminal = new Terminal(this.config);
             this.createdInstances++;
             return terminal;
         }
