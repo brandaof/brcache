@@ -30,25 +30,43 @@ public class Main {
         config.load(new FileInputStream(f));
      
 
-        double port                    = getNumber(config.getProperty("port","1044"));
-        double minConnections          = getNumber(config.getProperty("min_connections","10"));
-        double maxConnections          = getNumber(config.getProperty("max_connections","1024"));
-        double timeoutConnection       = getNumber(config.getProperty("timeout_connection","0"));
-        boolean reuseAddress           = config.getProperty("reuse_address","false").equalsIgnoreCase("true");
-        double nodesOnMemory           = getNumber(config.getProperty("nodes_on_memory","32768000"));
-        double nodesPerSegment         = getNumber(config.getProperty("nodes_per_segment","3276"));
-        double swapSegmentNodesFactor  = getNumber(config.getProperty("swap_segment_nodes_factor","0.3"));
-        double indexOnMemory           = getNumber(config.getProperty("index_on_memory","6553600"));
-        double indexPerSegment         = getNumber(config.getProperty("index_per_segment","655"));
-        double swapSegmentIndexFactor  = getNumber(config.getProperty("swap_segment_index_factor","0.3"));
-        double bytesOnMemory           = getNumber(config.getProperty("bytes_on_memory","104857600"));
-        double bytesPerSegment         = getNumber(config.getProperty("bytes_per_segment","1048576"));
-        double swapSegmentsFactor      = getNumber(config.getProperty("swap_segments_factor","0.6"));
-        String dataPath                = config.getProperty("data_path","/var/brcache");
-        double maxBytesStoragePerGroup = getNumber(config.getProperty("max_bytes_storage_per_group","16384"));
-        double writeBufferSize         = getNumber(config.getProperty("write_buffer_size","1048576"));
-        double maxBytesToStorageEntry  = getNumber(config.getProperty("max_bytes_to_storage_entry","10485760"));
-        double maxLengthKey     = getNumber(config.getProperty("max_length_Key","48"));
+        double port               = getNumber(config.getProperty("port","1044"));
+        double max_connections    = getNumber(config.getProperty("max_connections","10"));
+        double timeout_connection = getNumber(config.getProperty("timeout_connection","0"));
+        boolean reuse_address     = config.getProperty("reuse_address","false").equalsIgnoreCase("true");
+        double nodes_size         = getNumber(config.getProperty("nodes_size","32768000"));
+        double nodes_swap_size    = getNumber(config.getProperty("nodes_swap_size","3276"));
+        double nodes_swap_factor  = getNumber(config.getProperty("nodes_swap_factor","0.3"));
+        double index_size         = getNumber(config.getProperty("index_size","6553600"));
+        double index_swap_size    = getNumber(config.getProperty("index_swap_size","655"));
+        double index_swap_factor  = getNumber(config.getProperty("index_swap_factor","0.3"));
+        double data_size          = getNumber(config.getProperty("data_size","104857600"));
+        double data_swap_size     = getNumber(config.getProperty("data_swap_size","1048576"));
+        double data_swap_factor   = getNumber(config.getProperty("data_swap_factor","0.6"));
+        String data_path          = config.getProperty("data_path","/var/brcache");
+        double max_slab_size      = getNumber(config.getProperty("max_slab_size","16384"));
+        double write_buffer_size  = getNumber(config.getProperty("write_buffer_size","1048576"));
+        double max_size_entry     = getNumber(config.getProperty("max_size_entry","10485760"));
+        double max_size_key       = getNumber(config.getProperty("max_size_key","48"));
+        
+        
+        double nodesOnMemory          = nodes_size/8.0;
+        double nodesPerSegment        = nodes_swap_size/8.0;
+        double swapSegmentNodesFactor = nodes_swap_factor;
+        
+        double indexOnMemory          = index_size/40.0;
+        double indexPerSegment        = index_swap_size/40.0;
+        double swapSegmentIndexFactor = index_swap_factor;
+        
+        double bytesOnMemory          = data_size/max_slab_size;
+        double bytesPerSegment        = data_swap_size/max_slab_size;
+        double swapSegmentsFactor     = data_swap_factor;
+        
+        String path                   = data_path;
+        int maxBytesStoragePerGroup   = (int)max_slab_size;
+        int writeBufferSize           = (int)write_buffer_size;
+        int maxBytesToStorageEntry    = (int)max_size_entry;
+        int maxLengthKey              = (int)max_size_key;
         
         Cache cache = new Cache(
             nodesOnMemory,
@@ -60,7 +78,7 @@ public class Main {
             bytesOnMemory,
             bytesPerSegment,
             swapSegmentsFactor,
-            dataPath,
+            path,
             (int)maxBytesStoragePerGroup,
             (int)writeBufferSize,
             (int)maxBytesToStorageEntry,
@@ -69,10 +87,10 @@ public class Main {
         BrCacheServer server = 
                 new BrCacheServer(
                         (int)port, 
-                        (int)minConnections, 
-                        (int)maxConnections, 
-                        (int)timeoutConnection, 
-                        reuseAddress, 
+                        0, 
+                        (int)max_connections, 
+                        (int)timeout_connection, 
+                        reuse_address, 
                         cache);
         
         server.start();

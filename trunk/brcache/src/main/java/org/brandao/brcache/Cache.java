@@ -60,8 +60,8 @@ public class Cache implements Serializable{
         double indexPerSegment,
         double swapSegmentIndexFactor,
         
-        double bytesOnMemory,
-        double bytesPerSegment,
+        double dataOnMemory,
+        double dataOnSegment,
         double swapSegmentsFactor,
         
         String path,
@@ -91,9 +91,9 @@ public class Cache implements Serializable{
                 new HugeArrayList<byte[]>(
                 path,
                 "data",
-                (int)(bytesOnMemory/this.segmentSize),
-                (bytesPerSegment/this.segmentSize)*swapSegmentsFactor,
-                bytesPerSegment/this.segmentSize
+                (int)dataOnMemory,
+                dataOnSegment*swapSegmentsFactor,
+                dataOnSegment
                 );
         
     }
