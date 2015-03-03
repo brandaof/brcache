@@ -34,6 +34,8 @@ public class BrCacheServer {
     
     private Cache cache;
     
+    private int readBufferSize;
+    
     private TerminalFactory terminalFactory;
     
     private ExecutorService executorService;
@@ -41,6 +43,7 @@ public class BrCacheServer {
     private Configuration config;
     
     private MonitorThread monitorThread;
+    
     private boolean run;
     
     public BrCacheServer(Configuration config){
@@ -79,6 +82,7 @@ public class BrCacheServer {
                             terminal, 
                             this.cache, 
                             this.serverSocket.accept(), 
+                            this.readBufferSize,
                             this.terminalFactory);
                 
                 this.executorService.execute(task);
@@ -117,6 +121,7 @@ public class BrCacheServer {
         String data_path          = config.getString("data_path","/var/brcache");
         int max_slab_size         = config.getInt("max_slab_size","16k");
         int write_buffer_size     = config.getInt("write_buffer_size","16k");
+        int read_buffer_size     = config.getInt("read_buffer_size","16k");
         int max_size_entry        = config.getInt("max_size_entry","1m");
         int max_size_key          = config.getInt("max_size_key","48");
         
@@ -161,6 +166,7 @@ public class BrCacheServer {
         this.maxConnections = max_connections;
         this.minConnections = 0;
         this.port           = port;
+        this.readBufferSize = read_buffer_size;
         
         
         this.cache = new Cache(

@@ -23,16 +23,19 @@ public class TerminalTask implements Runnable{
     
     private Socket socket;
     
-    public TerminalTask(Terminal terminal, Cache cache, Socket socket, TerminalFactory factory){
-        this.terminal = terminal;
-        this.factory  = factory;
-        this.cache    = cache;
-        this.socket   = socket;
+    private int readBufferSize;
+    
+    public TerminalTask(Terminal terminal, Cache cache, Socket socket, int readBufferSize, TerminalFactory factory){
+        this.terminal       = terminal;
+        this.factory        = factory;
+        this.cache          = cache;
+        this.socket         = socket;
+        this.readBufferSize = readBufferSize;
     }
     
     public void run() {
         try{
-            this.terminal.init(this.socket, this.cache);
+            this.terminal.init(this.socket, this.cache, this.readBufferSize);
             this.terminal.execute();
         }
         catch(Exception e){

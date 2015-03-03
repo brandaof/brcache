@@ -53,7 +53,7 @@ public class BrCacheConnection {
     
     public synchronized void connect() throws IOException{
         this.socket = new Socket(this.getHost(), this.getPort());
-        this.reader = new TextTerminalReader(this.socket);
+        this.reader = new TextTerminalReader(this.socket, 2048);
         this.writer = new TextTerminalWriter(this.socket);
     }
 

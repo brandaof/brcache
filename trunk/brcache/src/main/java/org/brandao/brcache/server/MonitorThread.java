@@ -36,25 +36,37 @@ public class MonitorThread extends Thread{
     
     @Override
     public void run(){
+        long lastEntryRead = 0;
+        long lastEntryWrite = 0;
+        long readEntry = 0;
+        long writeEntry = 0;
+        
         long lastRead = 0;
         long lastWrite = 0;
         long read = 0;
         long write = 0;
+        
         while(this.run){
             try{
                 Runtime runtime = Runtime.getRuntime();
                 long memory = runtime.totalMemory() - runtime.freeMemory();
-                this.config.setProperty("write_per_sec", String.valueOf(write-lastWrite));
-                this.config.setProperty("read_per_sec", String.valueOf(read-lastRead));
+                this.config.setProperty("write_entry_per_sec", String.valueOf(writeEntry-lastEntryWrite));
+                this.config.setProperty("read_entry_per_sec", String.valueOf(readEntry-lastEntryRead));
+                this.config.setProperty("write_data_per_sec", String.valueOf(write-lastWrite));
+                this.config.setProperty("read_data_per_sec", String.valueOf(read-lastRead));
                 this.config.setProperty("total_memory", String.valueOf(runtime.totalMemory()));
                 this.config.setProperty("used_memory", String.valueOf(memory));
                 this.config.setProperty("used_memory", String.valueOf(memory));
                 
-                lastRead = cache.getCountRead();
-                lastWrite = cache.getCountWrite();
+                lastEntryRead = cache.getCountRead();
+                lastEntryWrite = cache.getCountWrite();
+                lastRead = cache.getCountReadData();
+                lastWrite = cache.getCountWriteData();
                 Thread.sleep(1000);
-                read = cache.getCountRead();
-                write = cache.getCountWrite();
+                readEntry = cache.getCountRead();
+                writeEntry = cache.getCountWrite();
+                read = cache.getCountReadData();
+                write = cache.getCountWriteData();
             }
             catch(Exception e){
                 e.printStackTrace();
