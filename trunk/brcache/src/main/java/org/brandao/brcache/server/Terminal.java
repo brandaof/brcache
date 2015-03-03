@@ -76,18 +76,23 @@ public class Terminal {
                 executeCommand();
             }
             catch (UnknowCommandException ex) {
+                ex.printStackTrace();
                 this.writer.sendMessage("UNKNOW COMMAND: " + ex.getMessage());
             }
             catch (ReadDataException ex) {
+                ex.printStackTrace();
                 this.writer.sendMessage("READ DATA ERROR: " + ex.getMessage());
             }
             catch (WriteDataException ex) {
+                ex.printStackTrace();
                 this.writer.sendMessage("WRITE DATA ERROR: " + ex.getMessage());
             }
             catch (ParameterException ex) {
+                ex.printStackTrace();
                 this.writer.sendMessage(ex.getMessage());
             }
             catch(Throwable ex){
+                ex.printStackTrace();
                 this.writer.sendMessage("unknow error");
             }
         }
