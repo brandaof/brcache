@@ -6,6 +6,7 @@
 
 package org.brandao.brcache.client;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -81,12 +82,12 @@ public class BrCacheConnection {
             throw new WriteDataException("send entry fail", ex);
         }
         finally{
-            if(out != null){
+            /*if(out != null){
                 try{
                     out.close();
                 }
                 catch(Exception ex){}
-            }
+            }*/
         }
         
         this.writer.sendCRLF();
@@ -109,6 +110,9 @@ public class BrCacheConnection {
         try{
             stream = new ObjectInputStream(this.reader.getStream());
             return stream.readObject();
+        }
+        catch(EOFException ex){
+            return null;
         }
         catch(IOException ex){
             throw new ReadDataException("read entry fail", ex);
