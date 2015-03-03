@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.util.Random;
 import junit.framework.Assert;
 import junit.framework.TestCase;
-import org.brandao.brcache.Cache;
 
 /**
  *
@@ -24,7 +23,7 @@ public class BeCacheConnectionTest  extends TestCase{
     public void test() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
-        final BrCacheConnectionPoll poll = new BrCacheConnectionPoll("localhost", 1044, 2, 1000);
+        final BrCacheConnectionPool poll = new BrCacheConnectionPool("localhost", 1044, 2, 1000);
 
         for(int i=0;i<1;i++){
             Thread th;
@@ -110,5 +109,51 @@ public class BeCacheConnectionTest  extends TestCase{
         
         Thread.sleep(999999999);
         
+    }
+    
+    public void test2() 
+            throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
+        
+        BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 1044, 2, 10);
+
+        BrCacheConnection con = null;
+        try{
+            con = pool.getInstance();
+            String expected = "TESTE \n TESTE \n";
+            con.put("tt", 0, expected);
+            String value = (String) con.get("tt");
+            
+            Assert.assertEquals(expected, value);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        finally{
+            pool.release(con);
+        }
+        
+        
     }      
+
+    public void test3() 
+            throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
+        
+        BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 1044, 2, 10);
+
+        BrCacheConnection con = null;
+        try{
+            con = pool.getInstance();
+            String value = (String) con.get("tt");
+            Assert.assertNull(value);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        finally{
+            pool.release(con);
+        }
+        
+        
+    }      
+    
 }

@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Cliente
  */
-public class BrCacheConnectionPoll {
+public class BrCacheConnectionPool {
     
     private int createdInstances;
     
@@ -29,7 +29,7 @@ public class BrCacheConnectionPoll {
             
     private final BlockingQueue<BrCacheConnection> instances;
 
-    public BrCacheConnectionPoll(String host, int port, int minInstances, int maxInstances) 
+    public BrCacheConnectionPool(String host, int port, int minInstances, int maxInstances) 
             throws IOException{
 
         if(minInstances < 0)
