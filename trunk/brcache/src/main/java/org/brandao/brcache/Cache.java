@@ -176,9 +176,17 @@ public class Cache implements Serializable{
         if(key.length() > this.maxLengthKey)
             throw new StorageException("key is very large");
         
+        DataMap oldMap;
+        
         try{
+            oldMap = this.dataMap.get(new StringTreeKey(key));
             segments = this.putData(inputData);
             this.putSegments(key, maxAliveTime, segments);
+            
+            if(oldMap != null){
+                for(int segment: oldMap.getSegments())
+                    this.freeSegments.add(segment);
+            }
             countWrite++;
         }
         catch(StorageException e){

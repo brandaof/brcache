@@ -9,8 +9,6 @@ package org.brandao.brcache.server;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Properties;
-import org.brandao.brcache.Cache;
 
 /**
  *
@@ -29,9 +27,14 @@ public class Main {
         Configuration config = new Configuration();
         config.load(new FileInputStream(f));
      
-
-        BrCacheServer server = new BrCacheServer(config);
-        server.start();
+        try{
+            BrCacheServer server = new BrCacheServer(config);
+            server.start();
+        }
+        catch(Throwable e){
+            System.out.println("error on startup: " + e.getMessage());
+            System.exit(2);
+        }
     }
     
 }

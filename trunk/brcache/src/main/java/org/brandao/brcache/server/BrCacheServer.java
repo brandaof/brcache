@@ -8,7 +8,6 @@ package org.brandao.brcache.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.brandao.brcache.Cache;
@@ -41,6 +40,7 @@ public class BrCacheServer {
     
     private Configuration config;
     
+    private MonitorThread monitorThread;
     private boolean run;
     
     public BrCacheServer(Configuration config){
@@ -65,7 +65,7 @@ public class BrCacheServer {
     
     public void start() throws IOException{
         this.terminalFactory = new TerminalFactory(this.config, this.minConnections, this.maxConnections);
-        this.serverSocket = new ServerSocket(this.port, 1);
+        this.serverSocket = new ServerSocket(this.port);
         this.serverSocket.setSoTimeout(this.timeout);
         this.serverSocket.setReuseAddress(this.reuseAddress);
         this.executorService = Executors.newFixedThreadPool(this.maxConnections);
@@ -102,7 +102,7 @@ public class BrCacheServer {
     private void loadConfiguration(Configuration config){
 
         int port                  = config.getInt("port","1044");
-        int max_connections       = config.getInt("max_connections","10");
+        int max_connections       = config.getInt("max_connections","1024");
         int timeout_connection    = config.getInt("timeout_connection","0");
         boolean reuse_address     = config.getBoolean("reuse_address", "false");
         double nodes_size         = config.getDouble("nodes_size","10m");
@@ -120,6 +120,21 @@ public class BrCacheServer {
         int max_size_entry        = config.getInt("max_size_entry","1m");
         int max_size_key          = config.getInt("max_size_key","48");
         
+        
+        if(nodes_swap_size > nodes_size)
+            throw new RuntimeException("nodes_swap_size > nodes_size");
+
+        if(index_swap_size > index_swap_size)
+            throw new RuntimeException("index_swap_size > index_swap_size");
+
+        if(max_slab_size > data_swap_size)
+            throw new RuntimeException("max_slab_size > data_swap_size");
+
+        if(data_swap_size/max_slab_size < 1.0)
+            throw new RuntimeException("data_swap_size must be greater than " + max_slab_size);
+
+        if(data_swap_size > data_size)
+            throw new RuntimeException("data_swap_size > data_size");
         
         double nodesOnMemory          = nodes_size/8.0;
         double nodesPerSegment        = nodes_swap_size/8.0;
@@ -163,5 +178,9 @@ public class BrCacheServer {
             writeBufferSize,
             maxBytesToStorageEntry,
             maxLengthKey);
+        
+        this.monitorThread = new MonitorThread(this.cache, this.config);
+        this.monitorThread.start();
+        
     }
 }

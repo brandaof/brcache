@@ -18,6 +18,8 @@ public interface TerminalWriter {
     
     void sendCRLF() throws WriteDataException;
     
+    void flush() throws WriteDataException;
+    
     OutputStream getStream();
     
 }

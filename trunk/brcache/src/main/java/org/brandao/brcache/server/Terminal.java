@@ -140,6 +140,7 @@ public class Terminal {
                 reader.getStream());
             
             writer.sendMessage("OK");
+            writer.flush();
         }
         catch(NumberFormatException e){
             throw new ReadDataException("invalid time: " + parameters[1], e);
@@ -175,6 +176,7 @@ public class Terminal {
 
             writer.sendMessage("");
             writer.sendMessage("END");
+            writer.flush();
         }
         catch(IOException e){
             throw new ReadDataException("read entry fail");
@@ -191,6 +193,7 @@ public class Terminal {
         this.cache.remove(parameters[0].toString());
 
         writer.sendMessage("END");
+        writer.flush();
     }
 
     private void executeStats(TerminalReader reader, TerminalWriter writer) 
@@ -203,11 +206,13 @@ public class Terminal {
         writer.sendMessage("write_entry: " + this.cache.getCountWrite());
         writer.sendMessage("write_data: " + this.cache.getCountWriteData());
         writer.sendMessage("END");
+        writer.flush();
     }
 
     private void executeExit(TerminalReader reader, TerminalWriter writer) throws WriteDataException{
         try{
             writer.sendMessage("goodbye!");
+            writer.flush();
             this.socket.close();
         }
         catch(IOException e){
