@@ -45,7 +45,7 @@ public class BrCacheConnection {
     
     private TerminalWriter writer;
     
-    private BrCacheConnection(String host, int port){
+    public BrCacheConnection(String host, int port){
         this.host = host;
         this.port = port;
     }

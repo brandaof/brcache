@@ -80,11 +80,11 @@ public class Cache implements Serializable{
                 path,
                 "data",
                 (int)nodesOnMemory,
-                (nodesOnMemory/nodesPerSegment)*swapSegmentNodesFactor,
-                nodesPerSegment,
+                swapSegmentNodesFactor,
+                nodesPerSegment/nodesOnMemory,
                 (int)indexOnMemory,
-                (indexOnMemory/indexPerSegment)*swapSegmentIndexFactor,
-                indexPerSegment
+                swapSegmentIndexFactor,
+                indexPerSegment/indexOnMemory
                 );
         
         this.dataList =
@@ -92,8 +92,8 @@ public class Cache implements Serializable{
                 path,
                 "data",
                 (int)dataOnMemory,
-                dataOnSegment*swapSegmentsFactor,
-                dataOnSegment
+                swapSegmentsFactor,
+                dataOnSegment/dataOnMemory
                 );
         
     }
