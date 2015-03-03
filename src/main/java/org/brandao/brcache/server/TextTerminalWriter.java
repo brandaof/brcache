@@ -45,6 +45,15 @@ public class TextTerminalWriter implements TerminalWriter{
         }
             
     }
+
+    public void flush() throws WriteDataException {
+        try{
+            out.flush();
+        }
+        catch(IOException e){
+            throw new WriteDataException("send message fail", e);
+        }
+    }
     
     public OutputStream getStream() {
         return new TextOutputStream(out);

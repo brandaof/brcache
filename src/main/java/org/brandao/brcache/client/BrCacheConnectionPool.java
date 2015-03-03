@@ -56,7 +56,7 @@ public class BrCacheConnectionPool {
         
     }
     
-    public synchronized BrCacheConnection getInstance() throws InterruptedException {
+    public synchronized BrCacheConnection getInstance() throws InterruptedException, IOException {
         
         BrCacheConnection con = this.instances.poll();
         
@@ -65,6 +65,7 @@ public class BrCacheConnectionPool {
         else
         if(this.createdInstances < this.maxInstances){
             con = new BrCacheConnection(host,port);
+            con.connect();
             this.createdInstances++;
             return con;
         }
@@ -73,7 +74,7 @@ public class BrCacheConnectionPool {
         
     }
 
-    public synchronized BrCacheConnection tryGetInstance(long l, TimeUnit tu) throws InterruptedException {
+    public synchronized BrCacheConnection tryGetInstance(long l, TimeUnit tu) throws InterruptedException, IOException {
         
         BrCacheConnection con = this.instances.poll();
         
@@ -82,6 +83,7 @@ public class BrCacheConnectionPool {
         else
         if(this.createdInstances < this.maxInstances){
             con = new BrCacheConnection(host,port);
+            con.connect();
             this.createdInstances++;
             return con;
         }

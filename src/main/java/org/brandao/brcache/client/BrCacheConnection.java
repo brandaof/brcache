@@ -51,13 +51,13 @@ public class BrCacheConnection {
         this.port = port;
     }
     
-    public void connect() throws IOException{
+    public synchronized void connect() throws IOException{
         this.socket = new Socket(this.getHost(), this.getPort());
         this.reader = new TextTerminalReader(this.socket);
         this.writer = new TextTerminalWriter(this.socket);
     }
 
-    public void disconect() throws IOException{
+    public synchronized void disconect() throws IOException{
         
         if(this.socket != null)
             this.socket.close();
@@ -66,7 +66,7 @@ public class BrCacheConnection {
         this.writer = null;
     }
     
-    public void put(String key, long time, Object value) 
+    public synchronized void put(String key, long time, Object value) 
             throws WriteDataException, ReadDataException{
         this.writer.sendMessage(PUT);
         this.writer.sendMessage(key);
@@ -92,6 +92,7 @@ public class BrCacheConnection {
         
         this.writer.sendCRLF();
         this.writer.sendMessage(END);
+        this.writer.flush();
         
         StringBuilder[] result = this.reader.getParameters(1);
         
@@ -101,10 +102,11 @@ public class BrCacheConnection {
             throw new WriteDataException(resultSTR);
     }
     
-    public Object get(String key) 
+    public synchronized Object get(String key) 
             throws WriteDataException, ReadDataException{
         this.writer.sendMessage(GET);
         this.writer.sendMessage(key);
+        this.writer.flush();
         
         ObjectInputStream stream = null;
         try{
@@ -130,9 +132,11 @@ public class BrCacheConnection {
         }
     }
 
-    public void remove(String key) throws WriteDataException, ReadDataException{
+    public synchronized void remove(String key) throws WriteDataException, ReadDataException{
         this.writer.sendMessage(REMOVE);
         this.writer.sendMessage(key);
+        this.writer.flush();
+        
         StringBuilder[] response = this.reader.getParameters(1);
         
         if(!OK.equals(response.toString()))

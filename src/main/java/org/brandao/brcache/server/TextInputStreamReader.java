@@ -97,4 +97,19 @@ public class TextInputStreamReader extends InputStream{
         return read;
     }
     
+    @Override
+    public void close() throws IOException{
+        if(this.closed)
+            return;
+        
+        StringBuilder line;
+        while((line = this.buffer.readLine()) != null){
+
+            if(line.length() > 2 && line.substring(0, 3).equals(END)){
+                this.closed = true;
+                break;
+            }            
+        }
+            
+    }
 }

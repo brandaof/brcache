@@ -23,11 +23,11 @@ public class BeCacheConnectionTest  extends TestCase{
     public void test() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
-        final BrCacheConnectionPool pool = new BrCacheConnectionPool("192.168.0.100", 1044, 2, 1000);
+        final BrCacheConnectionPool pool = new BrCacheConnectionPool("192.168.0.100", 1044, 999, 1000);
 
-        for(int i=0;i<1;i++){
+        for(int i=0;i<900;i++){
             Thread th;
-            if(true){
+            if(i % 2 == 0){
                 th = new Thread(){
                     public void run(){
                         Random r = new Random();
@@ -40,6 +40,8 @@ public class BeCacheConnectionTest  extends TestCase{
                                 String key = String.valueOf(rv)/* + "- INDEX AJBK - "*/;
                                 String value = key;
                                 con.put(key, 0, value);
+                                if(index % 10000 == 0)
+                                    System.out.println(index);
                             }
                             catch(Exception e){
                                 e.printStackTrace();
@@ -114,16 +116,17 @@ public class BeCacheConnectionTest  extends TestCase{
     public void test2() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
-        BrCacheConnectionPool pool = new BrCacheConnectionPool("192.168.0.100", 1044, 2, 10);
+        BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 1044, 2, 10);
 
         BrCacheConnection con = null;
         try{
             con = pool.getInstance();
-            String expected = "TESTE \n TESTE \n";
+            String expected = "TESTE1";
+            String expected2 = "TESTE2";
             con.put("tt", 0, expected);
-            String value = (String) con.get("tt");
-            
-            Assert.assertEquals(expected, value);
+            Assert.assertEquals(expected, con.get("tt"));
+            con.put("tt", 0, expected2);
+            Assert.assertEquals(expected2, con.get("tt"));
         }
         catch(Exception e){
             e.printStackTrace();
@@ -151,6 +154,43 @@ public class BeCacheConnectionTest  extends TestCase{
         }
         finally{
             pool.release(con);
+        }
+        
+        
+    }      
+
+    public void test4() 
+            throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
+        
+        BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 1044, 2, 10);
+
+        for(int i=0;i<1000;i++){
+            BrCacheConnection con = null;
+            try{
+                con = pool.getInstance();
+                con.put(String.valueOf(i),0,i);
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+            finally{
+                pool.release(con);
+            }
+        }
+
+        for(int i=0;i<1000;i++){
+            BrCacheConnection con = null;
+            try{
+                con = pool.getInstance();
+                int value = (Integer) con.get(String.valueOf(i));
+                Assert.assertEquals(i, value);
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+            finally{
+                pool.release(con);
+            }
         }
         
         
