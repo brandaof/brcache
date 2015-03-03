@@ -16,7 +16,7 @@ import junit.framework.TestCase;
  *
  * @author Cliente
  */
-public class BeCacheConnectionTest  extends TestCase{
+public class BrCacheConnectionTest  extends TestCase{
     
     private static int index = 0;
     
