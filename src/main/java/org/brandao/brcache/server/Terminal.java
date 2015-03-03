@@ -38,11 +38,11 @@ public class Terminal {
         this.config = config;
     }
 
-    protected void init(Socket socket, Cache cache) throws IOException{
+    protected void init(Socket socket, Cache cache, int readBufferSize) throws IOException{
         try{
             this.socket = socket;
             this.cache  = cache;
-            this.reader = new TextTerminalReader(this.socket);
+            this.reader = new TextTerminalReader(this.socket, readBufferSize);
             this.writer = new TextTerminalWriter(this.socket);
             this.run = true;
         }

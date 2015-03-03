@@ -28,11 +28,11 @@ public class TextTerminalReader implements TerminalReader{
     
     private int offset;
     
-    public TextTerminalReader(Socket socket) throws IOException{
+    public TextTerminalReader(Socket socket, int readBufferSize) throws IOException{
         this.socket = socket;
         this.stream = socket.getInputStream();
         this.reader = new BufferedReader(new InputStreamReader(this.stream));
-        this.buffer = new StringBuffer(2048, this.reader);
+        this.buffer = new StringBuffer(readBufferSize, this.reader);
         this.offset = 0;
     }
     

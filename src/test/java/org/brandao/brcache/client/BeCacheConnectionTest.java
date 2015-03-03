@@ -23,7 +23,7 @@ public class BeCacheConnectionTest  extends TestCase{
     public void test() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
-        final BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 1044, 1000, 1020);
+        final BrCacheConnectionPool pool = new BrCacheConnectionPool("192.168.0.100", 1044, 1000, 1020);
 
         for(int i=0;i<1000;i++){
             Thread th;
