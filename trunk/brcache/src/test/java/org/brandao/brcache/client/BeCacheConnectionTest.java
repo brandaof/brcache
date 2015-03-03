@@ -23,9 +23,9 @@ public class BeCacheConnectionTest  extends TestCase{
     public void test() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
-        final BrCacheConnectionPool pool = new BrCacheConnectionPool("192.168.0.100", 1044, 999, 1000);
+        final BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 1044, 1000, 1020);
 
-        for(int i=0;i<900;i++){
+        for(int i=0;i<1000;i++){
             Thread th;
             if(i % 2 == 0){
                 th = new Thread(){
@@ -164,7 +164,7 @@ public class BeCacheConnectionTest  extends TestCase{
         
         BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 1044, 2, 10);
 
-        for(int i=0;i<1000;i++){
+        for(int i=0;i<1000000;i++){
             BrCacheConnection con = null;
             try{
                 con = pool.getInstance();
@@ -178,7 +178,7 @@ public class BeCacheConnectionTest  extends TestCase{
             }
         }
 
-        for(int i=0;i<1000;i++){
+        for(int i=0;i<1000000;i++){
             BrCacheConnection con = null;
             try{
                 con = pool.getInstance();
