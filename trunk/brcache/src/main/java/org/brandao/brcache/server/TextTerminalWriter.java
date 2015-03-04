@@ -28,7 +28,6 @@ public class TextTerminalWriter implements TerminalWriter{
         try{
             out.write(message.getBytes());
             out.write(CRLF);
-            out.flush();
         }
         catch(IOException e){
             throw new WriteDataException("send message fail", e);

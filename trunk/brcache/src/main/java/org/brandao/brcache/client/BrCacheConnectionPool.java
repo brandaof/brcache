@@ -93,7 +93,12 @@ public class BrCacheConnectionPool {
     }
     
     public void release(BrCacheConnection con){
-        this.instances.add(con);
+        try{
+            this.instances.put(con);
+        }
+        catch(Exception e){
+            
+        }
     }
     
     public int getMinInstances() {
