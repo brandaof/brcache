@@ -317,17 +317,17 @@ public class Cache implements Serializable{
                 read += maxWrite;
                 this.countWriteData += maxWrite;
                 
-                synchronized(this.dataList){
-                    Integer segment = this.freeSegments.poll();
-                    if(segment == null){
+                Integer segment = this.freeSegments.poll();
+                if(segment == null){
+                    synchronized(this.dataList){
                         segment = this.dataList.size();
                         this.dataList.add(writeBuf);
                     }
-                    else
-                        this.dataList.set(segment, writeBuf);
-                    
-                    segments.add(segment);
                 }
+                else
+                    this.dataList.set(segment, writeBuf);
+
+                segments.add(segment);
 
                 writeBuf = new byte[this.segmentSize];
                 currentOffset = 0;
@@ -335,17 +335,18 @@ public class Cache implements Serializable{
         }
         
         if(currentOffset != 0){
-            synchronized(this.dataList){
-                Integer segment = this.freeSegments.poll();
-                if(segment == null){
+            Integer segment = this.freeSegments.poll();
+            byte[] tmp = Arrays.copyOf(writeBuf, maxRead);
+            if(segment == null){
+                synchronized(this.dataList){
                     segment = this.dataList.size();
-                    this.dataList.add(Arrays.copyOf(writeBuf, maxRead));
+                    this.dataList.add(tmp);
                 }
-                else
-                    this.dataList.set(segment, Arrays.copyOf(writeBuf, maxRead));
-
-                segments.add(segment);
             }
+            else
+                this.dataList.set(segment, tmp);
+
+            segments.add(segment);
         }
             
     }

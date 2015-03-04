@@ -18,14 +18,14 @@ import junit.framework.TestCase;
  */
 public class BrCacheConnectionTest  extends TestCase{
     
-    private static int index = 0;
+    private static volatile int index = 0;
     
     public void test() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
-        final BrCacheConnectionPool pool = new BrCacheConnectionPool("192.168.0.100", 1044, 1000, 1020);
+        final BrCacheConnectionPool pool = new BrCacheConnectionPool("192.168.0.100", 1044, 100, 2000);
 
-        for(int i=0;i<1000;i++){
+        for(int i=0;i<2000;i++){
             Thread th;
             if(i % 2 == 0){
                 th = new Thread(){
@@ -39,9 +39,9 @@ public class BrCacheConnectionTest  extends TestCase{
                                 //int rv = r.nextInt(200000);
                                 String key = String.valueOf(rv)/* + "- INDEX AJBK - "*/;
                                 String value = key;
-                                con.put(key, 0, value);
-                                if(index % 10000 == 0)
-                                    System.out.println(index);
+                                con.put(key, 0, value );
+                                if(rv % 100 == 0)
+                                    System.out.println(rv);
                             }
                             catch(Exception e){
                                 e.printStackTrace();

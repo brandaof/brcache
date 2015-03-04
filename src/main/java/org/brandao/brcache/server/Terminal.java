@@ -69,7 +69,7 @@ public class Terminal {
         }
     }
     
-    public void execute() throws WriteDataException{
+    public void execute() throws WriteDataException, ReadDataException, StorageException{
         while(this.run && !this.socket.isInputShutdown()){
             
             try{
@@ -78,22 +78,20 @@ public class Terminal {
             catch (UnknowCommandException ex) {
                 ex.printStackTrace();
                 this.writer.sendMessage("UNKNOW COMMAND: " + ex.getMessage());
+                this.writer.flush();
             }
             catch (ReadDataException ex) {
-                ex.printStackTrace();
-                this.writer.sendMessage("READ DATA ERROR: " + ex.getMessage());
+                throw ex;
             }
             catch (WriteDataException ex) {
-                ex.printStackTrace();
-                this.writer.sendMessage("WRITE DATA ERROR: " + ex.getMessage());
+                throw ex;
             }
             catch (ParameterException ex) {
-                ex.printStackTrace();
                 this.writer.sendMessage(ex.getMessage());
+                this.writer.flush();
             }
             catch(Throwable ex){
-                ex.printStackTrace();
-                this.writer.sendMessage("unknow error");
+                throw new StorageException(ex);
             }
         }
     }
