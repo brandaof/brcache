@@ -18,16 +18,19 @@ public class TextTerminalWriter implements TerminalWriter{
 
     private static final byte[] CRLF = "\r\n".getBytes();
     
-    private OutputStream out;
+    private StringBufferWriter buffer;
     
-    public TextTerminalWriter(Socket socket) throws IOException{
-        this.out = socket.getOutputStream();
+    private int writeBufferSize;
+    
+    public TextTerminalWriter(Socket socket, int writeBufferSize) throws IOException{
+        this.writeBufferSize = writeBufferSize;
+        this.buffer = new StringBufferWriter(this.writeBufferSize, socket.getOutputStream());
     }
 
     public void sendMessage(String message) throws WriteDataException {
         try{
-            out.write(message.getBytes());
-            out.write(CRLF);
+            this.buffer.write(message.getBytes());
+            this.buffer.write(CRLF);
         }
         catch(IOException e){
             throw new WriteDataException("send message fail", e);
@@ -36,8 +39,7 @@ public class TextTerminalWriter implements TerminalWriter{
 
     public void sendCRLF() throws WriteDataException {
         try{
-            out.write(CRLF);
-            out.flush();
+            this.buffer.write(CRLF);
         }
         catch(IOException e){
             throw new WriteDataException("send CRLF fail", e);
@@ -47,7 +49,7 @@ public class TextTerminalWriter implements TerminalWriter{
 
     public void flush() throws WriteDataException {
         try{
-            out.flush();
+            this.buffer.flush();
         }
         catch(IOException e){
             throw new WriteDataException("send message fail", e);
@@ -55,7 +57,7 @@ public class TextTerminalWriter implements TerminalWriter{
     }
     
     public OutputStream getStream() {
-        return new TextOutputStream(out);
+        return new TextOutputStream(this.buffer);
     }
     
 }

@@ -6,10 +6,8 @@
 
 package org.brandao.brcache.server;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 
 /**
  *
@@ -17,13 +15,11 @@ import java.util.Arrays;
  */
 public class TextInputStreamReader extends InputStream{
 
-    private static final String CRLF = "\r\n";
+    private static final byte[] CRLF = "\r\n".getBytes();
     
-    private String END = "END";
+    private static final byte[] END = "END".getBytes();
     
-    private StringBuffer buffer;
-    
-    private BufferedReader reader;
+    private StringBufferReader buffer;
     
     private byte[] byteBuffer;
     
@@ -31,9 +27,8 @@ public class TextInputStreamReader extends InputStream{
     
     private boolean closed;
     
-    public TextInputStreamReader(StringBuffer buffer, int offset, BufferedReader reader){
+    public TextInputStreamReader(StringBufferReader buffer, int offset){
         this.buffer = buffer;
-        this.reader = reader;
         this.byteBuffer = null;
         this.offsetBuf = offset;
         this.closed = false;
@@ -59,36 +54,54 @@ public class TextInputStreamReader extends InputStream{
         int limitRead = offset - start;
         int read = 0;
         boolean linefeed = false;
-
+        boolean insertlinefeed = false;
+        
         while(!closed && read < limitRead){
             
             int maxRead  = byteBuffer == null? 0 : byteBuffer.length - this.offsetBuf;
             int maxWrite = limitRead - read;
 
             if(maxRead == 0){
-                StringBuilder line = this.buffer.readLine();
-                if(line.length() > 2 && line.substring(0, 3).equals(END)){
+                byte[] line = this.buffer.readLineInBytes();
+                if(line.length > 2 && line[0] == END[0] && line[1] == END[1] && line[2] == END[2]){
                     this.closed = true;
                     return read;
                 }
                 
-                if(linefeed)
-                    line.insert(0, CRLF);
+                insertlinefeed = linefeed;
                 
-                this.byteBuffer = line.toString().getBytes();
-                this.byteBuffer = Arrays.copyOf(this.byteBuffer, this.byteBuffer.length);
+                this.byteBuffer = line;
                 this.offsetBuf = 0;
-                maxRead = byteBuffer.length - this.offsetBuf;
+                maxRead = (insertlinefeed? 2 : 0) + byteBuffer.length - this.offsetBuf;
                 linefeed = this.buffer.isHasLineFeed();
             }
             
             if(maxWrite > maxRead){
-                System.arraycopy(this.byteBuffer, this.offsetBuf, bytes, read, maxRead);
+                
+                if(insertlinefeed)
+                    System.arraycopy(CRLF, 0, bytes, read, CRLF.length);
+                
+                System.arraycopy(
+                        this.byteBuffer, 
+                        this.offsetBuf, 
+                        bytes, 
+                        insertlinefeed? read + 2 : read, 
+                        insertlinefeed? maxRead - 2 : maxRead);
+                
                 this.offsetBuf += maxRead;
                 read += maxRead;
             }
             else{
-                System.arraycopy(this.byteBuffer, this.offsetBuf, bytes, read, maxWrite);
+                if(insertlinefeed)
+                    System.arraycopy(CRLF, 0, bytes, read, CRLF.length);
+                
+                System.arraycopy(
+                    this.byteBuffer, 
+                    this.offsetBuf, 
+                    bytes, 
+                    insertlinefeed? read + 2 : read, 
+                    insertlinefeed? maxWrite - 2 : maxWrite);
+                
                 this.offsetBuf += maxWrite;
                 read += maxWrite;
             }            

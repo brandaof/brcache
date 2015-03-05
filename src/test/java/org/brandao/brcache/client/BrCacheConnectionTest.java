@@ -23,11 +23,11 @@ public class BrCacheConnectionTest  extends TestCase{
     public void test() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
-        final BrCacheConnectionPool pool = new BrCacheConnectionPool("192.168.0.100", 1044, 100, 2000);
+        final BrCacheConnectionPool pool = new BrCacheConnectionPool("192.168.0.100", 1044, 10, 2000);
 
-        for(int i=0;i<2000;i++){
+        for(int i=0;i<1;i++){
             Thread th;
-            if(i % 2 == 0){
+            if(true){
                 th = new Thread(){
                     public void run(){
                         Random r = new Random();

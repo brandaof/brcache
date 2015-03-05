@@ -15,12 +15,12 @@ import java.io.OutputStream;
  */
 public class TextOutputStream extends OutputStream{
 
-    private OutputStream out;
+    private StringBufferWriter buffer;
     
     private boolean closed;
     
-    public TextOutputStream(OutputStream out){
-        this.out = out;
+    public TextOutputStream(StringBufferWriter buffer){
+        this.buffer = buffer;
         this.closed = false;
     }
     
@@ -30,7 +30,7 @@ public class TextOutputStream extends OutputStream{
         if(closed)
             throw new IOException("stream closed");
         
-        out.write(i);
+        this.buffer.write(i);
     }
  
     @Override
@@ -39,7 +39,7 @@ public class TextOutputStream extends OutputStream{
         if(closed)
             throw new IOException("stream closed");
         
-        out.write(bytes, i, i1);
+        this.buffer.write(bytes, i, i1);
     }
     
     @Override
@@ -48,7 +48,7 @@ public class TextOutputStream extends OutputStream{
         if(closed)
             throw new IOException("stream closed");
         
-        out.flush();
+        this.buffer.flush();
     }
     
     @Override
