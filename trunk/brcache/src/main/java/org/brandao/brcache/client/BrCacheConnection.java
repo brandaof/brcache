@@ -53,8 +53,8 @@ public class BrCacheConnection {
     
     public synchronized void connect() throws IOException{
         this.socket = new Socket(this.getHost(), this.getPort());
-        this.reader = new TextTerminalReader(this.socket, 2048);
-        this.writer = new TextTerminalWriter(this.socket);
+        this.reader = new TextTerminalReader(this.socket, 16384);
+        this.writer = new TextTerminalWriter(this.socket, 16384);
     }
 
     public synchronized void disconect() throws IOException{
@@ -82,12 +82,12 @@ public class BrCacheConnection {
             throw new WriteDataException("send entry fail", ex);
         }
         finally{
-            /*if(out != null){
+            if(out != null){
                 try{
-                    out.close();
+                    //out.close();
                 }
                 catch(Exception ex){}
-            }*/
+            }
         }
         
         this.writer.sendCRLF();

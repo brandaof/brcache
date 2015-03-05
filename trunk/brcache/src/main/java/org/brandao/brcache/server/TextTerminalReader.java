@@ -6,7 +6,6 @@
 
 package org.brandao.brcache.server;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -22,17 +21,14 @@ public class TextTerminalReader implements TerminalReader{
     
     private InputStream stream;
     
-    private BufferedReader reader;
-    
-    private StringBuffer buffer;
+    private StringBufferReader buffer;
     
     private int offset;
     
     public TextTerminalReader(Socket socket, int readBufferSize) throws IOException{
         this.socket = socket;
         this.stream = socket.getInputStream();
-        this.reader = new BufferedReader(new InputStreamReader(this.stream));
-        this.buffer = new StringBuffer(readBufferSize, this.reader);
+        this.buffer = new StringBufferReader(readBufferSize, this.stream);
         this.offset = 0;
     }
     
@@ -66,7 +62,7 @@ public class TextTerminalReader implements TerminalReader{
     }
 
     public InputStream getStream() {
-        return new TextInputStreamReader(buffer, this.offset, reader);
+        return new TextInputStreamReader(buffer, this.offset);
     }
 
     public int getOffset() {

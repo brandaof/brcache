@@ -38,12 +38,12 @@ public class Terminal {
         this.config = config;
     }
 
-    protected void init(Socket socket, Cache cache, int readBufferSize) throws IOException{
+    protected void init(Socket socket, Cache cache, int readBufferSize, int writeBufferSize) throws IOException{
         try{
             this.socket = socket;
             this.cache  = cache;
             this.reader = new TextTerminalReader(this.socket, readBufferSize);
-            this.writer = new TextTerminalWriter(this.socket);
+            this.writer = new TextTerminalWriter(this.socket, writeBufferSize);
             this.run = true;
         }
         catch(Throwable e){
@@ -136,8 +136,8 @@ public class Terminal {
                 parameters[0].toString(), 
                 Integer.parseInt(parameters[1].toString()), 
                 reader.getStream());
-            
             writer.sendMessage("OK");
+            
             writer.flush();
         }
         catch(NumberFormatException e){

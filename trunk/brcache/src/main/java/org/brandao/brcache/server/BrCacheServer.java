@@ -36,6 +36,8 @@ public class BrCacheServer {
     
     private int readBufferSize;
     
+    private int writeBufferSize;
+    
     private TerminalFactory terminalFactory;
     
     private ExecutorService executorService;
@@ -83,6 +85,7 @@ public class BrCacheServer {
                             this.cache, 
                             this.serverSocket.accept(), 
                             this.readBufferSize,
+                            this.writeBufferSize,
                             this.terminalFactory);
                 
                 this.executorService.execute(task);
@@ -159,15 +162,15 @@ public class BrCacheServer {
         int maxBytesToStorageEntry    = max_size_entry;
         int maxLengthKey              = max_size_key;
         
-        this.run            = false;
-        this.config         = config;
-        this.timeout        = timeout_connection;
-        this.reuseAddress   = reuse_address;
-        this.maxConnections = max_connections;
-        this.minConnections = 0;
-        this.port           = port;
-        this.readBufferSize = read_buffer_size;
-        
+        this.run             = false;
+        this.config          = config;
+        this.timeout         = timeout_connection;
+        this.reuseAddress    = reuse_address;
+        this.maxConnections  = max_connections;
+        this.minConnections  = 0;
+        this.port            = port;
+        this.readBufferSize  = read_buffer_size;
+        this.writeBufferSize = writeBufferSize;
         
         this.cache = new Cache(
             nodesOnMemory,
