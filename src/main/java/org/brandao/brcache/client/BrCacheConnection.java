@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import org.brandao.brcache.server.ParameterException;
 import org.brandao.brcache.server.ReadDataException;
 import org.brandao.brcache.server.TerminalReader;
 import org.brandao.brcache.server.TerminalWriter;
@@ -53,8 +54,8 @@ public class BrCacheConnection {
     
     public synchronized void connect() throws IOException{
         this.socket = new Socket(this.getHost(), this.getPort());
-        this.reader = new TextTerminalReader(this.socket, 16384);
-        this.writer = new TextTerminalWriter(this.socket, 16384);
+        this.reader = new TextTerminalReader(this.socket, 1*1024*1024);
+        this.writer = new TextTerminalWriter(this.socket, 1*1024*1024);
     }
 
     public synchronized void disconect() throws IOException{
@@ -67,7 +68,7 @@ public class BrCacheConnection {
     }
     
     public synchronized void put(String key, long time, Object value) 
-            throws WriteDataException, ReadDataException{
+            throws WriteDataException, ReadDataException, ParameterException{
         this.writer.sendMessage(PUT);
         this.writer.sendMessage(key);
         this.writer.sendMessage(String.valueOf(time));
@@ -79,20 +80,20 @@ public class BrCacheConnection {
             out.flush();
         }
         catch(IOException ex){
-            throw new WriteDataException("send entry fail", ex);
+            throw new WriteDataException("send entry fail: " + key, ex);
         }
         finally{
             if(out != null){
                 try{
-                    //out.close();
+                    out.close();
                 }
                 catch(Exception ex){}
             }
+            this.writer.sendCRLF();
+            this.writer.sendMessage(END);
+            this.writer.flush();
         }
         
-        this.writer.sendCRLF();
-        this.writer.sendMessage(END);
-        this.writer.flush();
         
         StringBuilder[] result = this.reader.getParameters(1);
         
@@ -117,10 +118,10 @@ public class BrCacheConnection {
             return null;
         }
         catch(IOException ex){
-            throw new ReadDataException("read entry fail", ex);
+            throw new ReadDataException("read entry fail: " + key, ex);
         }
         catch(ClassNotFoundException ex){
-            throw new ReadDataException("create instance fail", ex);
+            throw new ReadDataException("create instance fail: " + key, ex);
         }
         finally{
             if(stream != null){
@@ -132,7 +133,7 @@ public class BrCacheConnection {
         }
     }
 
-    public synchronized void remove(String key) throws WriteDataException, ReadDataException{
+    public synchronized void remove(String key) throws WriteDataException, ReadDataException, ParameterException{
         this.writer.sendMessage(REMOVE);
         this.writer.sendMessage(key);
         this.writer.flush();

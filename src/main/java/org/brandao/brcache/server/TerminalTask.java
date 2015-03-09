@@ -43,7 +43,7 @@ public class TerminalTask implements Runnable{
             this.terminal.execute();
         }
         catch(Exception e){
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         finally{
             try{

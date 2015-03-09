@@ -132,12 +132,29 @@ public class Terminal {
             if(parameters == null || parameters.length != 2)
                 throw new ParameterException("EXPECTED THE KEY AND TIME");
             
-            this.cache.put(
-                parameters[0].toString(), 
-                Integer.parseInt(parameters[1].toString()), 
-                reader.getStream());
-            writer.sendMessage("OK");
+            int time;
+            try{
+                time = Integer.parseInt(parameters[1].toString());
+            }
+            catch(NumberFormatException e){
+                throw new ParameterException("invalid time");
+            }
             
+            InputStream stream = null;
+            try{
+                stream = reader.getStream();
+                this.cache.put(
+                    parameters[0].toString(), 
+                    time, 
+                    stream);
+            }
+            finally{
+                if(stream != null)
+                    stream.close();
+            }
+            
+            
+            writer.sendMessage("OK");
             writer.flush();
         }
         catch(NumberFormatException e){
@@ -161,15 +178,29 @@ public class Terminal {
                 throw new ParameterException("EXPECTED THE KEY");
 
             String key = parameters[0].toString();
-            InputStream in = this.cache.get(key);
+            InputStream in = null;
 
-            if(in != null){
-                OutputStream out = writer.getStream();
-                byte[] buffer = new byte[2048];
-                int len;
-                while((len = in.read(buffer)) != -1){
-                    out.write(buffer, 0, len);
+            try{
+                in = this.cache.get(key);
+                if(in != null){
+                    OutputStream out = null;
+                    try{
+                        out = writer.getStream();
+                        byte[] buffer = new byte[2048];
+                        int len;
+                        while((len = in.read(buffer)) != -1){
+                            out.write(buffer, 0, len);
+                        }
+                    }
+                    finally{
+                        if(out != null)
+                            out.close();
+                    }
                 }
+            }
+            finally{
+                if(in != null)
+                    in.close();
             }
 
             writer.sendMessage("");

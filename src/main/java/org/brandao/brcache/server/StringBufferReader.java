@@ -8,8 +8,6 @@ package org.brandao.brcache.server;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.util.Arrays;
 
 /**
@@ -30,9 +28,9 @@ public class StringBufferReader {
 
     private boolean hasLineFeed;
     
-    private Charset charset;
+    private byte[] result;
     
-    private CharsetDecoder decoder;
+    private int offsetResult;
     
     public StringBufferReader(int capacity, InputStream stream){
         this.offset   = 0;
@@ -40,24 +38,38 @@ public class StringBufferReader {
         this.buffer   = new byte[capacity];
         this.capacity = capacity;
         this.stream   = stream;
-        this.charset  = Charset.defaultCharset();
-        this.decoder  = this.charset.newDecoder();
     }
 
     public StringBuilder readLine() throws IOException{
         byte[] data = readLineInBytes();
-        return new StringBuilder(new String(data));
+        return data == null? null : new StringBuilder(new String(data));
     }
     
     public byte[] readLineInBytes() throws IOException{
+        this.result = new byte[0];
+        this.offsetResult = 0;
+        
         int start = this.offset;
         while(true){
 
             if(this.offset == this.limit){
+                
                 if(this.limit == this.capacity){
-                    this.offset = 0;
-                    this.limit  = 0;
+                    
+                    if(start < this.limit){
+                        this.updateResult(this.buffer, start, this.offset - start - 1);
+                        this.buffer[0] = this.buffer[this.buffer.length - 1];
+                        this.offset = 1;
+                        this.limit  = 1;
+                    }
+                    else{
+                        this.offset = 0;
+                        this.limit  = 0;
+                    }
+                    
+                    start  = 0;
                 }
+                
                 int len = stream.read(this.buffer, this.limit, this.buffer.length - limit);
                 if(this.limit == -1)
                     throw new IOException();
@@ -66,23 +78,39 @@ public class StringBufferReader {
             }
             
             if(this.offset > 0 && this.buffer[this.offset-1] == '\r' && this.buffer[this.offset] == '\n'){
-                byte[] result = new byte[this.offset - start - 1];
-                System.arraycopy(this.buffer, start, result, 0, result.length);
+                this.updateResult(this.buffer, start, this.offset - start - 1);
                 this.hasLineFeed = true;
                 this.offset++;
-                return result;
+                return this.result;
             }
             else
-            if(this.offset == this.limit){
-                byte[] result = new byte[this.offset - start];
-                System.arraycopy(this.buffer, start, result, 0, result.length);
+            if(this.offset == this.buffer.length){
+                this.updateResult(this.buffer, start, this.offset - start - 1);
                 this.hasLineFeed = false;
-                this.offset++;
-                return result;
+                this.offset = 1;
+                this.limit  = 1;
+                this.buffer[0] = this.buffer[this.buffer.length - 1];
+                return this.result;
             }
-
-            this.offset++;
+            else{
+                this.offset++;
+            }
         }
+    }
+    
+    private void updateResult(byte[] data, int offset, int len){
+        
+        if(len == 0)
+            return;
+        
+        if(this.result == null)
+            this.result = new byte[len];
+        else
+            this.result = Arrays.copyOf(this.result, this.result.length + len);
+        
+        System.arraycopy(data, offset, this.result, this.offsetResult, len);
+        this.offsetResult += len;
+        
     }
     
     public void clear(){
@@ -92,16 +120,6 @@ public class StringBufferReader {
 
     public boolean isHasLineFeed() {
         return hasLineFeed;
-    }
-
-    private char[] bytesToStringUTFCustom(byte[] bytes, int start, int offset) {
-        char[] buffer = new char[offset - start];
-        int index = 0;
-        for(int i = start; i < offset; i++) {
-            char c = (char)bytes[i];
-            buffer[index++] = c;
-        }
-        return buffer;
     }
     
 }

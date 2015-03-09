@@ -44,6 +44,29 @@ public class StringBufferWriter {
         this.write(new byte[]{(byte)i}, 0, 1);
     }
     
+    public void write(byte[] buffer, int offset, int len) throws IOException{
+        
+        int limitOffset  = offset + len;
+        
+        while(offset < limitOffset){
+            int maxRead  = limitOffset - offset;
+            int maxWrite = this.capacity - this.offset;
+            
+            if(maxRead > maxWrite){
+                System.arraycopy(buffer, offset, this.buffer, this.offset, maxWrite);
+                offset += maxWrite;
+                this.offset += maxWrite;
+                this.flush();
+            }
+            else{
+                System.arraycopy(buffer, offset, this.buffer, this.offset, maxRead);
+                offset       += maxRead;
+                this.offset += maxRead;
+            }
+        }
+    }
+
+    /*
     public void write(byte[] buffer, int start, int offset) throws IOException{
         
         while(start<offset){
@@ -52,8 +75,9 @@ public class StringBufferWriter {
             
             if(maxRead > maxWrite){
                 System.arraycopy(buffer, start, this.buffer, this.offset, maxWrite);
-                this.flush();
                 start += maxWrite;
+                this.offset += maxWrite;
+                this.flush();
             }
             else{
                 System.arraycopy(buffer, start, this.buffer, this.offset, maxRead);
@@ -62,6 +86,7 @@ public class StringBufferWriter {
             }
         }
     }
+    */
     
     public void flush() throws IOException{
         this.out.write(this.buffer, 0, this.offset);
