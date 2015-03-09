@@ -17,7 +17,7 @@ public interface TerminalReader {
     
     Command getCommand() throws UnknowCommandException, ReadDataException;
     
-    StringBuilder[] getParameters(int size) throws ReadDataException;
+    StringBuilder[] getParameters(int size) throws ReadDataException, ParameterException;
     
     InputStream getStream() throws IOException;
     

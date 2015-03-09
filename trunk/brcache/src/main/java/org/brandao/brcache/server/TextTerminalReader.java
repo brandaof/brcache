@@ -8,7 +8,6 @@ package org.brandao.brcache.server;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.Socket;
 
 /**
@@ -39,19 +38,24 @@ public class TextTerminalReader implements TerminalReader{
             return Command.valueOf(line.toString());
         }
         catch(IOException e){
-            throw new ReadDataException("can not read command!");
+            throw new ReadDataException("can not read command: " + line);
+        }
+        catch(NullPointerException e){
+            throw new UnknowCommandException("undefined");
         }
         catch(IllegalArgumentException e){
             throw new UnknowCommandException(line == null? "undefined" : line.toString());
         }
     }
 
-    public StringBuilder[] getParameters(int size) throws ReadDataException {
+    public StringBuilder[] getParameters(int size) throws ReadDataException, ParameterException {
         StringBuilder[] params = new StringBuilder[size];
         
         for(int i=0;i<size;i++){
             try{
                 params[i] = this.buffer.readLine();
+                if(params[i] == null)
+                    throw new ParameterException("empty parameter: " + i);
             }
             catch(IOException e){
                 throw new ReadDataException("can not read parameter: " + i);

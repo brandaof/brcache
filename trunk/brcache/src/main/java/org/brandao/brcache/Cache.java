@@ -168,25 +168,45 @@ public class Cache implements Serializable{
         else
             return null;
     }
+
+    /*
+    public void put(String StringKey, long maxAliveTime, InputStream inputData) throws StorageException{
+        try{
+            int read;
+            byte[] buffer = new byte[this.writeBufferLength];
+            while((read = inputData.read(buffer)) != -1){
+                this.countWriteData += read;
+            }
+            this.countWrite++;
+        }
+        catch(IOException e){
+            throw new StorageException(e);
+        }
+        
+    }
+    */
     
-    public void put(String key, long maxAliveTime, InputStream inputData) throws StorageException{
+    public void put(String StringKey, long maxAliveTime, InputStream inputData) throws StorageException{
+        
+        TreeKey key = new StringTreeKey(StringKey);
         
         int[] segments = null;
         
-        if(key.length() > this.maxLengthKey)
+        if(StringKey.length() > this.maxLengthKey)
             throw new StorageException("key is very large");
         
-        DataMap oldMap;
+        //DataMap oldMap;
         
         try{
-            oldMap = this.dataMap.get(new StringTreeKey(key));
+            //oldMap = this.dataMap.get(key);
+            
             segments = this.putData(inputData);
             this.putSegments(key, maxAliveTime, segments);
             
-            if(oldMap != null){
-                for(int segment: oldMap.getSegments())
-                    this.freeSegments.add(segment);
-            }
+            //if(oldMap != null){
+            //    for(int segment: oldMap.getSegments())
+            //        this.freeSegments.add(segment);
+            //}
             countWrite++;
         }
         catch(StorageException e){
@@ -245,11 +265,11 @@ public class Cache implements Serializable{
         
     }
     
-    private void putSegments(String key, long maxAliveTime, int[] segmens){
+    private void putSegments(TreeKey key, long maxAliveTime, int[] segmens){
         DataMap map = new DataMap();
         map.setMaxLiveTime(maxAliveTime);
         map.setSegments(segmens);
-        this.dataMap.put(new StringTreeKey(key), map);
+        this.dataMap.put(key, map);
     }
     
     private int[] putData(InputStream inputData) throws StorageException{
@@ -318,14 +338,14 @@ public class Cache implements Serializable{
                 this.countWriteData += maxWrite;
                 
                 Integer segment = this.freeSegments.poll();
-                if(segment == null){
-                    synchronized(this.dataList){
-                        segment = this.dataList.size();
-                        this.dataList.add(writeBuf);
+                synchronized(this.dataList){
+                    if(segment == null){
+                            segment = this.dataList.size();
+                            this.dataList.add(writeBuf);
                     }
+                    else
+                        this.dataList.set(segment, writeBuf);
                 }
-                else
-                    this.dataList.set(segment, writeBuf);
 
                 segments.add(segment);
 
@@ -337,14 +357,14 @@ public class Cache implements Serializable{
         if(currentOffset != 0){
             Integer segment = this.freeSegments.poll();
             byte[] tmp = Arrays.copyOf(writeBuf, maxRead);
-            if(segment == null){
-                synchronized(this.dataList){
+            synchronized(this.dataList){
+                if(segment == null){
                     segment = this.dataList.size();
                     this.dataList.add(tmp);
                 }
+                else
+                    this.dataList.set(segment, tmp);
             }
-            else
-                this.dataList.set(segment, tmp);
 
             segments.add(segment);
         }

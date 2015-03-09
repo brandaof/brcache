@@ -48,7 +48,7 @@ public class TextOutputStream extends OutputStream{
         if(closed)
             throw new IOException("stream closed");
         
-        this.buffer.flush();
+        //this.buffer.flush();
     }
     
     @Override

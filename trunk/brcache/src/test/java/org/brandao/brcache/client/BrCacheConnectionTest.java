@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.util.Random;
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import org.brandao.brcache.server.ReadDataException;
+import org.brandao.brcache.server.WriteDataException;
 
 /**
  *
@@ -23,11 +25,11 @@ public class BrCacheConnectionTest  extends TestCase{
     public void test() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
-        final BrCacheConnectionPool pool = new BrCacheConnectionPool("192.168.0.100", 1044, 10, 2000);
+        final BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 1044, 100, 1000);
 
-        for(int i=0;i<1;i++){
+        for(int i=0;i<10;i++){
             Thread th;
-            if(true){
+            if(i % 2 == 0){
                 th = new Thread(){
                     public void run(){
                         Random r = new Random();
@@ -40,8 +42,8 @@ public class BrCacheConnectionTest  extends TestCase{
                                 String key = String.valueOf(rv)/* + "- INDEX AJBK - "*/;
                                 String value = key;
                                 con.put(key, 0, value );
-                                if(rv % 100 == 0)
-                                    System.out.println(rv);
+                                //if(rv % 10 == 0)
+                                //    System.out.println(rv);
                             }
                             catch(Exception e){
                                 e.printStackTrace();
@@ -164,11 +166,13 @@ public class BrCacheConnectionTest  extends TestCase{
         
         BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 1044, 2, 10);
 
-        for(int i=0;i<1000000;i++){
+        for(int i=0;i<10000000;i++){
             BrCacheConnection con = null;
             try{
                 con = pool.getInstance();
                 con.put(String.valueOf(i),0,i);
+                if(i % 100 == 0)
+                    System.out.println("added: " + i);
             }
             catch(Exception e){
                 e.printStackTrace();
@@ -178,9 +182,11 @@ public class BrCacheConnectionTest  extends TestCase{
             }
         }
 
-        for(int i=0;i<1000000;i++){
+        for(int i=0;i<100000;i++){
             BrCacheConnection con = null;
             try{
+                if(i % 100 == 0)
+                    System.out.println("test: " + i);
                 con = pool.getInstance();
                 int value = (Integer) con.get(String.valueOf(i));
                 Assert.assertEquals(i, value);
@@ -194,6 +200,14 @@ public class BrCacheConnectionTest  extends TestCase{
         }
         
         
+    }      
+
+    public void test5() 
+            throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException, WriteDataException, ReadDataException{
+        
+        BrCacheConnectionPool pool = new BrCacheConnectionPool("192.168.0.100", 1044, 2, 10);
+        BrCacheConnection con = pool.getInstance();
+        Object o = con.get("GLOBAL_LIST:192.168.0.101#i7156hoj#24en-0");
     }      
     
 }
