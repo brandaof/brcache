@@ -193,8 +193,14 @@ public class Terminal {
                         }
                     }
                     finally{
-                        if(out != null)
-                            out.close();
+                        if(out != null){
+                            try{
+                                out.close();
+                            }
+                            catch(Throwable e){
+                            }
+                        }
+                        writer.sendCRLF();
                     }
                 }
             }
@@ -203,7 +209,6 @@ public class Terminal {
                     in.close();
             }
 
-            writer.sendMessage("");
             writer.sendMessage("END");
             writer.flush();
         }
