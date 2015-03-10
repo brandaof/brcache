@@ -13,7 +13,7 @@ import java.io.OutputStream;
  *
  * @author Cliente
  */
-public class StringBufferWriter {
+public class TextBufferWriter {
     
     private int offset;
     
@@ -25,7 +25,7 @@ public class StringBufferWriter {
 
     private boolean hasLineFeed;
     
-    public StringBufferWriter(int capacity, OutputStream out){
+    public TextBufferWriter(int capacity, OutputStream out){
         
         if(capacity < 1)
             throw new IllegalArgumentException("capacity");

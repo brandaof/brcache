@@ -16,33 +16,31 @@ import java.net.Socket;
  */
 public class TextTerminalWriter implements TerminalWriter{
 
-    private static final byte[] CRLF = "\r\n".getBytes();
-    
-    private StringBufferWriter buffer;
+    private TextBufferWriter buffer;
     
     private int writeBufferSize;
     
     public TextTerminalWriter(Socket socket, int writeBufferSize) throws IOException{
         this.writeBufferSize = writeBufferSize;
-        this.buffer = new StringBufferWriter(this.writeBufferSize, socket.getOutputStream());
+        this.buffer = new TextBufferWriter(this.writeBufferSize, socket.getOutputStream());
     }
 
     public void sendMessage(String message) throws WriteDataException {
         try{
             this.buffer.write(message.getBytes());
-            this.buffer.write(CRLF);
+            this.buffer.write(TerminalConstants.CRLF);
         }
         catch(IOException e){
-            throw new WriteDataException("send message fail", e);
+            throw new WriteDataException(TerminalConstants.SEND_MESSAGE_FAIL, e);
         }
     }
 
     public void sendCRLF() throws WriteDataException {
         try{
-            this.buffer.write(CRLF);
+            this.buffer.write(TerminalConstants.CRLF);
         }
         catch(IOException e){
-            throw new WriteDataException("send CRLF fail", e);
+            throw new WriteDataException(TerminalConstants.SEND_MESSAGE_FAIL, e);
         }
             
     }
@@ -52,7 +50,7 @@ public class TextTerminalWriter implements TerminalWriter{
             this.buffer.flush();
         }
         catch(IOException e){
-            throw new WriteDataException("send message fail", e);
+            throw new WriteDataException(TerminalConstants.SEND_MESSAGE_FAIL, e);
         }
     }
     

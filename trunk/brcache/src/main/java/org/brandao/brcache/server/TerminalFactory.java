@@ -26,6 +26,10 @@ public class TerminalFactory {
     
     private final BlockingQueue<Terminal> instances;
 
+    private int countInstances;
+    
+    private int currentInstances;
+    
     public TerminalFactory(Configuration config, int minInstances, int maxInstances){
 
         if(minInstances < 0)
@@ -52,37 +56,40 @@ public class TerminalFactory {
         
         Terminal terminal = this.instances.poll();
         
-        if(terminal != null)
-            return terminal;
-        else
-        if(this.createdInstances < this.maxInstances){
-            terminal = new Terminal(config);
-            this.createdInstances++;
-            return terminal;
+        if(terminal == null){
+            if(this.createdInstances < this.maxInstances){
+                terminal = new Terminal(config);
+                this.createdInstances++;
+            }
+            else
+                terminal = this.instances.take();
         }
-        else
-            return this.instances.take();
         
+        this.countInstances++;
+        this.currentInstances++;
+        return terminal;
     }
 
     public synchronized Terminal tryGetInstance(long l, TimeUnit tu) throws InterruptedException {
         
         Terminal terminal = this.instances.poll();
         
-        if(terminal != null)
-            return terminal;
-        else
-        if(this.createdInstances < this.maxInstances){
-            terminal = new Terminal(this.config);
-            this.createdInstances++;
-            return terminal;
+        if(terminal == null){
+            if(this.createdInstances < this.maxInstances){
+                terminal = new Terminal(this.config);
+                this.createdInstances++;
+            }
+            else
+                terminal = this.instances.poll(l, tu);
         }
-        else
-            return this.instances.poll(l, tu);
         
+        this.countInstances++;
+        this.currentInstances++;
+        return terminal;
     }
     
-    public void release(Terminal terminal){
+    public synchronized void release(Terminal terminal){
+        this.currentInstances--;
         this.instances.add(terminal);
     }
     
@@ -92,6 +99,14 @@ public class TerminalFactory {
 
     public int getMaxInstances() {
         return maxInstances;
+    }
+
+    public synchronized int getCountInstances() {
+        return countInstances;
+    }
+
+    public synchronized int getCurrentInstances() {
+        return currentInstances;
     }
     
 }

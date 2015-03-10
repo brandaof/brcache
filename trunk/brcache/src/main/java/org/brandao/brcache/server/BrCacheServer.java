@@ -8,6 +8,7 @@ package org.brandao.brcache.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.brandao.brcache.Cache;
@@ -78,20 +79,21 @@ public class BrCacheServer {
         this.run = true;
         while(this.run){
             try{
+                Socket socket = this.serverSocket.accept();
                 Terminal terminal = this.terminalFactory.getInstance();
                 TerminalTask task = 
                     new TerminalTask(
                             terminal, 
                             this.cache, 
-                            this.serverSocket.accept(), 
+                            socket, 
                             this.readBufferSize,
                             this.writeBufferSize,
-                            this.terminalFactory);
+                            this.terminalFactory,
+                            this.config);
                 
                 this.executorService.execute(task);
             }
             catch(Exception e){
-                e.printStackTrace();
             }
         }
     }
@@ -124,7 +126,7 @@ public class BrCacheServer {
         String data_path          = config.getString("data_path","/var/brcache");
         int max_slab_size         = config.getInt("max_slab_size","16k");
         int write_buffer_size     = config.getInt("write_buffer_size","16k");
-        int read_buffer_size     = config.getInt("read_buffer_size","16k");
+        int read_buffer_size      = config.getInt("read_buffer_size","16k");
         int max_size_entry        = config.getInt("max_size_entry","1m");
         int max_size_key          = config.getInt("max_size_key","48");
         

@@ -19,6 +19,8 @@ public class TerminalTask implements Runnable{
     
     private final TerminalFactory factory;
     
+    private final Configuration config;
+    
     private Cache cache;
     
     private Socket socket;
@@ -28,17 +30,21 @@ public class TerminalTask implements Runnable{
     private int writeBufferSize;
     
     public TerminalTask(Terminal terminal, Cache cache, Socket socket, 
-            int readBufferSize, int writeBufferSize, TerminalFactory factory){
+            int readBufferSize, int writeBufferSize, 
+            TerminalFactory factory,
+            Configuration config){
         this.terminal        = terminal;
         this.factory         = factory;
         this.cache           = cache;
         this.socket          = socket;
         this.readBufferSize  = readBufferSize;
         this.writeBufferSize = writeBufferSize;
+        this.config          = config;
     }
     
     public void run() {
         try{
+            updateInfo();
             this.terminal.init(this.socket, this.cache, this.readBufferSize, this.writeBufferSize);
             this.terminal.execute();
         }
@@ -52,7 +58,14 @@ public class TerminalTask implements Runnable{
             catch(Exception e){
             }
             this.factory.release(this.terminal);
+            updateInfo();
         }
     }
     
+    private void updateInfo(){
+        synchronized(TerminalTask.class){
+            this.config.setProperty("curr_connections", String.valueOf(this.factory.getCurrentInstances()));
+            this.config.setProperty("total_connections", String.valueOf(this.factory.getCountInstances()));
+        }
+    }
 }

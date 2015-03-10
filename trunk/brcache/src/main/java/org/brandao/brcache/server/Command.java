@@ -12,11 +12,11 @@ package org.brandao.brcache.server;
  */
 public enum Command {
     
-    PUT,
-    GET,
-    REMOVE,
-    STATS,
-    EXIT,
-    DISCONECT;
+    put,
+    get,
+    remove,
+    stats,
+    stat,
+    exit;
     
 }
