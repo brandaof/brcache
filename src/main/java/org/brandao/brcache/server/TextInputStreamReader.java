@@ -50,6 +50,7 @@ public class TextInputStreamReader extends InputStream{
         
     }
     
+    @Override
     public int read(byte[] bytes, int offset, int len) throws IOException {    
         
         if(closed)
