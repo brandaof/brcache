@@ -16,11 +16,11 @@ import java.util.Arrays;
  */
 public class TextInputStreamReader extends InputStream{
 
-    private static final byte[] CRLF = "\r\n".getBytes();
+    private static final byte[] CRLF = TerminalConstants.CRLF;
     
-    private static final byte[] END = "END".getBytes();
+    private static final byte[] BOUNDARY = TerminalConstants.BOUNDARY;
     
-    private StringBufferReader buffer;
+    private TextBufferReader buffer;
     
     private byte[] byteBuffer;
     
@@ -30,7 +30,7 @@ public class TextInputStreamReader extends InputStream{
     
     private boolean hasLineFeed;
     
-    public TextInputStreamReader(StringBufferReader buffer, int offset){
+    public TextInputStreamReader(TextBufferReader buffer, int offset){
         this.buffer = buffer;
         this.byteBuffer = null;
         this.offsetBuf = offset;
@@ -67,7 +67,7 @@ public class TextInputStreamReader extends InputStream{
 
             if(maxRead == 0){
                 byte[] line = this.buffer.readLineInBytes();
-                if(line.length > 2 && line[0] == END[0] && line[1] == END[1] && line[2] == END[2]){
+                if(line.length > 2 && line[0] == BOUNDARY[0] && line[1] == BOUNDARY[1] && line[2] == BOUNDARY[2]){
                     this.closed = true;
                     return offset - initOffset;
                 }
@@ -121,7 +121,7 @@ public class TextInputStreamReader extends InputStream{
         byte[] line;
         while((line = this.buffer.readLineInBytes()) != null){
 
-            if(line.length > 2 && line[0] == END[0] && line[1] == END[1] && line[2] == END[2]){
+            if(line.length > 2 && line[0] == BOUNDARY[0] && line[1] == BOUNDARY[1] && line[2] == BOUNDARY[2]){
                 this.closed = true;
                 break;
             }            

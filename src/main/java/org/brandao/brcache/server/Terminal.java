@@ -211,7 +211,7 @@ public class Terminal {
                     in.close();
             }
 
-            writer.sendMessage(TerminalConstants.BOUNDARY);
+            writer.sendMessage(TerminalConstants.BOUNDARY_MESSAGE);
             writer.flush();
         }
         catch(IOException e){
@@ -228,7 +228,7 @@ public class Terminal {
 
         this.cache.remove(parameters[0].toString());
 
-        writer.sendMessage(TerminalConstants.BOUNDARY);
+        writer.sendMessage(TerminalConstants.BOUNDARY_MESSAGE);
         writer.flush();
     }
 
@@ -242,7 +242,7 @@ public class Terminal {
         writer.sendMessage("read_data: " + this.cache.getCountReadData());
         writer.sendMessage("write_entry: " + this.cache.getCountWrite());
         writer.sendMessage("write_data: " + this.cache.getCountWriteData());
-        writer.sendMessage(TerminalConstants.BOUNDARY);
+        writer.sendMessage(TerminalConstants.BOUNDARY_MESSAGE);
         writer.flush();
     }
 

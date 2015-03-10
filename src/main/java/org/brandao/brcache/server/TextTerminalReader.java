@@ -20,14 +20,14 @@ public class TextTerminalReader implements TerminalReader{
     
     private InputStream stream;
     
-    private StringBufferReader buffer;
+    private TextBufferReader buffer;
     
     private int offset;
     
     public TextTerminalReader(Socket socket, int readBufferSize) throws IOException{
         this.socket = socket;
         this.stream = socket.getInputStream();
-        this.buffer = new StringBufferReader(readBufferSize, this.stream);
+        this.buffer = new TextBufferReader(readBufferSize, this.stream);
         this.offset = 0;
     }
     
@@ -38,13 +38,13 @@ public class TextTerminalReader implements TerminalReader{
             return Command.valueOf(line.toString());
         }
         catch(IOException e){
-            throw new ReadDataException("can not read command: " + line);
+            throw new ReadDataException(String.format(TerminalConstants.CANT_READ_COMMAND, String.valueOf(line)));
         }
         catch(NullPointerException e){
             throw new UnknowCommandException("undefined");
         }
         catch(IllegalArgumentException e){
-            throw new UnknowCommandException(line == null? "undefined" : line.toString());
+            throw new UnknowCommandException(String.valueOf(line));
         }
     }
 
@@ -55,10 +55,10 @@ public class TextTerminalReader implements TerminalReader{
             try{
                 params[i] = this.buffer.readLine();
                 if(params[i] == null)
-                    throw new ParameterException("empty parameter: " + i);
+                    throw new ParameterException(String.format(TerminalConstants.EMPTY_PARAMETER, String.valueOf(i)));
             }
             catch(IOException e){
-                throw new ReadDataException("can not read parameter: " + i);
+                throw new ReadDataException(String.format(TerminalConstants.CANT_READ_PARAMETER, String.valueOf(i)));
             }
         }
         
