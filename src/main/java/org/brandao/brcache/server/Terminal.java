@@ -19,8 +19,6 @@ import org.brandao.brcache.StorageException;
  */
 public class Terminal {
     
-    private static final byte[] CRLF = "\r\n".getBytes();
-    
     private Cache cache;
     
     private Socket socket;
@@ -33,6 +31,10 @@ public class Terminal {
     
     private Configuration config;
     
+    private int readBufferSize;
+    
+    private int writeBufferSize;
+    
     public Terminal(Configuration config){
         this.run = false;
         this.config = config;
@@ -42,6 +44,8 @@ public class Terminal {
         try{
             this.socket = socket;
             this.cache  = cache;
+            this.readBufferSize  = readBufferSize;
+            this.writeBufferSize = writeBufferSize;
             this.reader = new TextTerminalReader(this.socket, readBufferSize);
             this.writer = new TextTerminalWriter(this.socket, writeBufferSize);
             this.run = true;
@@ -76,8 +80,7 @@ public class Terminal {
                 executeCommand();
             }
             catch (UnknowCommandException ex) {
-                ex.printStackTrace();
-                this.writer.sendMessage("UNKNOW COMMAND: " + ex.getMessage());
+                this.writer.sendMessage(String.format(TerminalConstants.UNKNOW_COMMAND, ex.getMessage()));
                 this.writer.flush();
             }
             catch (ReadDataException ex) {
@@ -103,19 +106,19 @@ public class Terminal {
         Command command = reader.getCommand();
         
         switch(command){
-            case PUT:
+            case put:
                 this.executePut(reader, writer);
                 break;
-            case GET:
+            case get:
                 this.executeGet(reader, writer);
                 break;
-            case REMOVE:
+            case remove:
                 this.executeRemove(reader, writer);
                 break;
-            case STATS:
+            case stats:
                 this.executeStats(reader, writer);
                 break;
-            case EXIT:
+            case exit:
                 this.executeExit(reader, writer);
                 break;
             default:
@@ -125,19 +128,21 @@ public class Terminal {
     
     private void executePut(TerminalReader reader, TerminalWriter writer) 
             throws ReadDataException, WriteDataException, ParameterException {
-        StringBuilder[] parameters = null;
+        
+        StringBuilder[] parameters;
+        int time;
+        
         try{
             parameters = reader.getParameters(2);
             
             if(parameters == null || parameters.length != 2)
-                throw new ParameterException("EXPECTED THE KEY AND TIME");
+                throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
             
-            int time;
             try{
                 time = Integer.parseInt(parameters[1].toString());
             }
             catch(NumberFormatException e){
-                throw new ParameterException("invalid time");
+                throw new ParameterException(TerminalConstants.INVALID_TIME);
             }
             
             InputStream stream = null;
@@ -154,17 +159,14 @@ public class Terminal {
             }
             
             
-            writer.sendMessage("OK");
+            writer.sendMessage(TerminalConstants.SUCCESS);
             writer.flush();
         }
-        catch(NumberFormatException e){
-            throw new ReadDataException("invalid time: " + parameters[1], e);
-        }
         catch (IOException ex) {
-            throw new WriteDataException("insert entry fail", ex);
+            throw new WriteDataException(TerminalConstants.INSERT_ENTRY_FAIL, ex);
         }
         catch(StorageException ex){
-            throw new WriteDataException("insert entry fail", ex);
+            throw new WriteDataException(TerminalConstants.INSERT_ENTRY_FAIL, ex);
         }
     }
 
@@ -175,7 +177,7 @@ public class Terminal {
             StringBuilder[] parameters = reader.getParameters(1);
             
             if(parameters == null || parameters.length != 1)
-                throw new ParameterException("EXPECTED THE KEY");
+                throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
 
             String key = parameters[0].toString();
             InputStream in = null;
@@ -186,7 +188,7 @@ public class Terminal {
                     OutputStream out = null;
                     try{
                         out = writer.getStream();
-                        byte[] buffer = new byte[2048];
+                        byte[] buffer = new byte[8192];
                         int len;
                         while((len = in.read(buffer)) != -1){
                             out.write(buffer, 0, len);
@@ -209,11 +211,11 @@ public class Terminal {
                     in.close();
             }
 
-            writer.sendMessage("END");
+            writer.sendMessage(TerminalConstants.BOUNDARY);
             writer.flush();
         }
         catch(IOException e){
-            throw new ReadDataException("read entry fail");
+            throw new ReadDataException(TerminalConstants.READ_ENTRY_FAIL);
         }
     }
 
@@ -222,16 +224,17 @@ public class Terminal {
         StringBuilder[] parameters = reader.getParameters(1);
 
         if(parameters == null || parameters.length != 1)
-            throw new ParameterException("EXPECTED THE KEY");
+            throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
 
         this.cache.remove(parameters[0].toString());
 
-        writer.sendMessage("END");
+        writer.sendMessage(TerminalConstants.BOUNDARY);
         writer.flush();
     }
 
     private void executeStats(TerminalReader reader, TerminalWriter writer) 
             throws WriteDataException{
+        
         for(String prop: this.config.stringPropertyNames())
             writer.sendMessage(prop + ": " + this.config.getProperty(prop));
         
@@ -239,13 +242,13 @@ public class Terminal {
         writer.sendMessage("read_data: " + this.cache.getCountReadData());
         writer.sendMessage("write_entry: " + this.cache.getCountWrite());
         writer.sendMessage("write_data: " + this.cache.getCountWriteData());
-        writer.sendMessage("END");
+        writer.sendMessage(TerminalConstants.BOUNDARY);
         writer.flush();
     }
 
     private void executeExit(TerminalReader reader, TerminalWriter writer) throws WriteDataException{
         try{
-            writer.sendMessage("goodbye!");
+            writer.sendMessage(TerminalConstants.DISCONNECT_MESSAGE);
             writer.flush();
             this.socket.close();
         }
