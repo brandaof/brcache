@@ -14,7 +14,7 @@ import java.util.Arrays;
  *
  * @author Cliente
  */
-public class StringBufferReader {
+public class TextBufferReader {
     
     private int offset;
     
@@ -32,7 +32,7 @@ public class StringBufferReader {
     
     private int offsetResult;
     
-    public StringBufferReader(int capacity, InputStream stream){
+    public TextBufferReader(int capacity, InputStream stream){
         this.offset   = 0;
         this.limit    = 0;
         this.buffer   = new byte[capacity];
