@@ -25,17 +25,17 @@ import org.brandao.brcache.server.WriteDataException;
  */
 public class BrCacheConnection {
     
-    public static final String CRLF   = "\r\n";
+    public static final String CRLF     = "\r\n";
     
-    public static final String END    = "END";
+    public static final String BOUNDARY = "end";
 
-    public static final String PUT    = "PUT";
+    public static final String PUT      = "put";
 
-    public static final String GET    = "GET";
+    public static final String GET      = "get";
     
-    public static final String REMOVE = "REMOVE";
+    public static final String REMOVE   = "remove";
     
-    public static final String OK     = "OK";
+    public static final String SUCCESS  = "ok";
     
     private String host;
     
@@ -90,7 +90,7 @@ public class BrCacheConnection {
                 catch(Exception ex){}
             }
             this.writer.sendCRLF();
-            this.writer.sendMessage(END);
+            this.writer.sendMessage(BOUNDARY);
             this.writer.flush();
         }
         
@@ -99,7 +99,7 @@ public class BrCacheConnection {
         
         String resultSTR = result[0].toString();
         
-        if(!resultSTR.equals(OK))
+        if(!resultSTR.equals(SUCCESS))
             throw new WriteDataException(resultSTR);
     }
     
@@ -140,7 +140,7 @@ public class BrCacheConnection {
         
         StringBuilder[] response = this.reader.getParameters(1);
         
-        if(!OK.equals(response.toString()))
+        if(!SUCCESS.equals(response.toString()))
             throw new WriteDataException(response.toString());
     }
     

@@ -36,7 +36,7 @@ public class BrCacheConnectionTest  extends TestCase{
                         while(true){
                             BrCacheConnection con = null;
                             try{
-                                con = pool.getInstance();
+                                con = pool.getConnection();
                                 int rv = index++;
                                 //int rv = r.nextInt(200000);
                                 String key = String.valueOf(rv)/* + "- INDEX AJBK - "*/;
@@ -87,7 +87,7 @@ public class BrCacheConnectionTest  extends TestCase{
                                 
                             BrCacheConnection con = null;
                             try{
-                                con = pool.getInstance();
+                                con = pool.getConnection();
                                 String val = (String) con.get(key);
                                 if(val != null){
                                     //System.out.println(val);
@@ -122,7 +122,7 @@ public class BrCacheConnectionTest  extends TestCase{
 
         BrCacheConnection con = null;
         try{
-            con = pool.getInstance();
+            con = pool.getConnection();
             String expected = "TESTE1";
             String expected2 = "TESTE2";
             con.put("tt", 0, expected);
@@ -147,7 +147,7 @@ public class BrCacheConnectionTest  extends TestCase{
 
         BrCacheConnection con = null;
         try{
-            con = pool.getInstance();
+            con = pool.getConnection();
             String value = (String) con.get("tt");
             Assert.assertNull(value);
         }
@@ -169,7 +169,7 @@ public class BrCacheConnectionTest  extends TestCase{
         for(int i=0;i<10000000;i++){
             BrCacheConnection con = null;
             try{
-                con = pool.getInstance();
+                con = pool.getConnection();
                 con.put(String.valueOf(i),0,i);
                 if(i % 100 == 0)
                     System.out.println("added: " + i);
@@ -187,7 +187,7 @@ public class BrCacheConnectionTest  extends TestCase{
             try{
                 if(i % 100 == 0)
                     System.out.println("test: " + i);
-                con = pool.getInstance();
+                con = pool.getConnection();
                 int value = (Integer) con.get(String.valueOf(i));
                 Assert.assertEquals(i, value);
             }
@@ -206,7 +206,7 @@ public class BrCacheConnectionTest  extends TestCase{
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException, WriteDataException, ReadDataException{
         
         BrCacheConnectionPool pool = new BrCacheConnectionPool("192.168.0.100", 1044, 2, 10);
-        BrCacheConnection con = pool.getInstance();
+        BrCacheConnection con = pool.getConnection();
         Object o = con.get("GLOBAL_LIST:192.168.0.101#i7156hoj#24en-0");
     }      
     
