@@ -17,10 +17,10 @@
 
 package org.brandao.brcache;
 
-import com.brandao.uoutec.commons.collections.HugeArrayList;
-import com.brandao.uoutec.commons.collections.StringTreeKey;
-import com.brandao.uoutec.commons.collections.TreeHugeMap;
-import com.brandao.uoutec.commons.collections.TreeKey;
+import org.brandao.brcache.collections.HugeArrayList;
+import org.brandao.brcache.collections.StringTreeKey;
+import org.brandao.brcache.collections.TreeHugeMap;
+import org.brandao.brcache.collections.TreeKey;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
