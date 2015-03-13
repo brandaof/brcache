@@ -1,7 +1,18 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * BRCache http://brcache.brandao.org/
+ * Copyright (C) 2015 Afonso Brandao. (afonso.rbn@gmail.com)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.brandao.brcache.server;
@@ -14,8 +25,9 @@ import java.util.concurrent.Executors;
 import org.brandao.brcache.Cache;
 
 /**
- *
- * @author Cliente
+ * Representa o servidor do cache.
+ * 
+ * @author Brandao
  */
 public class BrCacheServer {
     
@@ -24,8 +36,6 @@ public class BrCacheServer {
     private int port;
     
     private int maxConnections;
-    
-    private int minConnections;
     
     private int timeout;
     
@@ -49,13 +59,26 @@ public class BrCacheServer {
     
     private boolean run;
     
+    /**
+     * Cria uma nova instância do cache.
+     * 
+     * @param config Configuração.
+     */
     public BrCacheServer(Configuration config){
         this.loadConfiguration(config);
     }
     
+    /**
+     * Cria uma nova instância do cache.
+     * 
+     * @param port Porta que o servidor irá escutar.
+     * @param maxConnections Número máximo de conexões permitidas.
+     * @param timeout Define o timeout da conexão em milesegundos.
+     * @param reuseAddress Liga ou desliga a opção do socket SO_REUSEADDR.
+     * @param cache Cache.
+     */
     public BrCacheServer(
             int port, 
-            int minConnections, 
             int maxConnections, 
             int timeout, 
             boolean reuseAddress,
@@ -64,13 +87,18 @@ public class BrCacheServer {
         this.timeout        = timeout;
         this.reuseAddress   = reuseAddress;
         this.maxConnections = maxConnections;
-        this.minConnections = minConnections;
         this.port           = port;
         this.cache          = cache;
     }
     
+    /**
+     * Inicia o servidor.
+     * 
+     * @throws IOException Lançada se ocorrer alguma falha ao tentar iniciar 
+     * o servidor.
+     */
     public void start() throws IOException{
-        this.terminalFactory = new TerminalFactory(this.config, this.minConnections, this.maxConnections);
+        this.terminalFactory = new TerminalFactory(this.config, 0, this.maxConnections);
         this.serverSocket = new ServerSocket(this.port);
         this.serverSocket.setSoTimeout(this.timeout);
         this.serverSocket.setReuseAddress(this.reuseAddress);
@@ -98,6 +126,12 @@ public class BrCacheServer {
         }
     }
     
+    /**
+     * Para o servidor.
+     * 
+     * @throws IOException Lançada se ocorrer alguma falha ao tentar parar 
+     * o servidor.
+     */
     public void stop() throws IOException{
         this.run = false;
         try{
@@ -110,18 +144,18 @@ public class BrCacheServer {
     
     private void loadConfiguration(Configuration config){
 
-        int port                  = config.getInt("port","1044");
+        int portNumber            = config.getInt("port","1044");
         int max_connections       = config.getInt("max_connections","1024");
         int timeout_connection    = config.getInt("timeout_connection","0");
         boolean reuse_address     = config.getBoolean("reuse_address", "false");
-        double nodes_size         = config.getDouble("nodes_size","10m");
-        double nodes_swap_size    = config.getDouble("nodes_swap_size","16k");
+        int nodes_size            = config.getInt("nodes_size","10m");
+        int nodes_swap_size       = config.getInt("nodes_swap_size","16k");
         double nodes_swap_factor  = config.getDouble("nodes_swap_factor","0.3");
-        double index_size         = config.getDouble("index_size","10m");
-        double index_swap_size    = config.getDouble("index_swap_size","16k");
+        int index_size            = config.getInt("index_size","10m");
+        int index_swap_size       = config.getInt("index_swap_size","16k");
         double index_swap_factor  = config.getDouble("index_swap_factor","0.3");
-        double data_size          = config.getDouble("data_size","100m");
-        double data_swap_size     = config.getDouble("data_swap_size","128k");
+        int data_size             = config.getInt("data_size","100m");
+        int data_swap_size        = config.getInt("data_swap_size","128k");
         double data_swap_factor   = config.getDouble("data_swap_factor","0.6");
         String data_path          = config.getString("data_path","/var/brcache");
         int max_slab_size         = config.getInt("max_slab_size","16k");
@@ -146,52 +180,33 @@ public class BrCacheServer {
         if(data_swap_size > data_size)
             throw new RuntimeException("data_swap_size > data_size");
         
-        double nodesOnMemory          = nodes_size/8.0;
-        double nodesPerSegment        = nodes_swap_size/8.0;
-        double swapSegmentNodesFactor = nodes_swap_factor;
-        
-        double indexOnMemory          = index_size/40.0;
-        double indexPerSegment        = index_swap_size/40.0;
-        double swapSegmentIndexFactor = index_swap_factor;
-        
-        double bytesOnMemory          = data_size/max_slab_size;
-        double bytesPerSegment        = data_swap_size/max_slab_size;
-        double swapSegmentsFactor     = data_swap_factor;
-        
-        String path                   = data_path;
-        int maxBytesStoragePerGroup   = max_slab_size;
-        int writeBufferSize           = write_buffer_size;
-        int maxBytesToStorageEntry    = max_size_entry;
-        int maxLengthKey              = max_size_key;
-        
         this.run             = false;
         this.config          = config;
         this.timeout         = timeout_connection;
         this.reuseAddress    = reuse_address;
         this.maxConnections  = max_connections;
-        this.minConnections  = 0;
-        this.port            = port;
+        this.port            = portNumber;
         this.readBufferSize  = read_buffer_size;
-        this.writeBufferSize = writeBufferSize;
+        this.writeBufferSize = write_buffer_size;
         
         this.cache = new Cache(
-            nodesOnMemory,
-            nodesPerSegment,
-            swapSegmentNodesFactor,
-            indexOnMemory,
-            indexPerSegment,
-            swapSegmentIndexFactor,
-            bytesOnMemory,
-            bytesPerSegment,
-            swapSegmentsFactor,
-            path,
-            maxBytesStoragePerGroup,
-            writeBufferSize,
-            maxBytesToStorageEntry,
-            maxLengthKey);
+            nodes_size,
+            nodes_swap_size,
+            nodes_swap_factor,
+            index_size,
+            index_swap_size,
+            index_swap_factor,
+            data_size,
+            data_swap_size,
+            data_swap_factor,
+            max_slab_size,
+            write_buffer_size,
+            max_size_entry,
+            max_size_key,
+            data_path);
         
         this.monitorThread = new MonitorThread(this.cache, this.config);
         this.monitorThread.start();
-        
     }
+    
 }
