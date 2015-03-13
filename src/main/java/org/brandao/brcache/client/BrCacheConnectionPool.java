@@ -18,6 +18,7 @@
 package org.brandao.brcache.client;
 
 import java.io.IOException;
+import java.lang.reflect.Proxy;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -70,11 +71,20 @@ public class BrCacheConnectionPool {
         this.createdInstances = 0;
         
         for(int i=0;i<this.minInstances;i++){
-            BrCacheConnection con = new BrCacheConnection(host, port);
-            con.connect();
+            BrCacheConnection con = createConnection(host, port);
             this.instances.add(con);
         }
         
+    }
+    
+    private BrCacheConnection createConnection(String host, int port) throws IOException{
+        BrCacheConnectionImp con = new BrCacheConnectionImp(host, port);
+        con.connect();
+        return 
+            (BrCacheConnection)Proxy.newProxyInstance(
+                getClass().getClassLoader(), 
+                new Class[]{BrCacheConnection.class}, 
+                new BrConnectionInvocationHandler(this, con));
     }
     
     /**
@@ -95,8 +105,7 @@ public class BrCacheConnectionPool {
             return con;
         else
         if(this.createdInstances < this.maxInstances){
-            con = new BrCacheConnection(host,port);
-            con.connect();
+            con = createConnection(host, port);
             this.createdInstances++;
             return con;
         }
@@ -123,7 +132,7 @@ public class BrCacheConnectionPool {
             return con;
         else
         if(this.createdInstances < this.maxInstances){
-            con = new BrCacheConnection(host,port);
+            con = createConnection(host, port);
             con.connect();
             this.createdInstances++;
             return con;
@@ -137,13 +146,22 @@ public class BrCacheConnectionPool {
      * Libera o uso da conexão.
      * @param con Conexão.
      */
-    public void release(BrCacheConnection con){
+    synchronized void release(BrCacheConnection con){
         try{
             this.instances.put(con);
         }
         catch(Exception e){
-            
+            this.createdInstances--;
         }
+    }
+
+    /**
+     * Remove a conexão do pool e libera o espaço para ser criada uma nova.
+     * @param con Conexão.
+     */
+    synchronized void shutdown(BrCacheConnection con){
+        this.createdInstances--;
+        this.instances.remove(con);
     }
     
 }

@@ -239,7 +239,7 @@ public class CacheTest extends TestCase{
         
     }    
     
-    public void test3() throws StorageException, IOException, ClassNotFoundException{
+    public void test3() throws StorageException, IOException, ClassNotFoundException, RecoverException{
         Cache cache = new Cache();
         String expected1 = "TESTE";
         String expected2 = "TESTE2";
