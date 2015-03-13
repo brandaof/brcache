@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.util.Random;
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import org.brandao.brcache.RecoverException;
+import org.brandao.brcache.StorageException;
 import org.brandao.brcache.server.ReadDataException;
 import org.brandao.brcache.server.WriteDataException;
 
@@ -134,7 +136,7 @@ public class BrCacheConnectionTest  extends TestCase{
             e.printStackTrace();
         }
         finally{
-            pool.release(con);
+            con.close();
         }
         
         
@@ -202,12 +204,24 @@ public class BrCacheConnectionTest  extends TestCase{
         
     }      
 
-    public void test5() 
-            throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException, WriteDataException, ReadDataException{
+    public void test5() throws IOException, InterruptedException, StorageException, RecoverException {
         
-        BrCacheConnectionPool pool = new BrCacheConnectionPool("192.168.0.100", 1044, 2, 10);
-        BrCacheConnection con = pool.getConnection();
-        Object o = con.get("GLOBAL_LIST:192.168.0.101#i7156hoj#24en-0");
+        BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 1044, 2, 10);
+        BrCacheConnection con = null;
+        try{
+            con = pool.getConnection();
+            con.put("TESTE", 0, "TESTE-VALUE");
+            String value = (String) con.get("TESTE");
+            Assert.assertEquals("TESTE-VALUE", value);
+            con.remove("TESTE");
+            value = (String) con.get("TESTE");
+            Assert.assertNull(value);
+        }
+        finally{
+            if(con != null)
+                con.close();
+        }
+        
     }      
     
 }
