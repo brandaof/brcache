@@ -17,42 +17,27 @@
 
 package org.brandao.brcache;
 
-import java.io.Serializable;
-
 /**
+ * Exceção lançada quando ocorre uma falha ao tentar recuperar um item em um cache.
  * 
- * @author Brandao
+ * @author Brandao.
  */
-public class DataMap implements Serializable{
+public class RecoverException extends Exception{
     
-    private long maxLiveTime;
-    
-    private int[] segments;
-
-    private long length;
-    
-    public long getMaxLiveTime() {
-        return maxLiveTime;
+    public RecoverException() {
+        super();
     }
 
-    public void setMaxLiveTime(long maxLiveTime) {
-        this.maxLiveTime = maxLiveTime;
+    public RecoverException(String string) {
+        super(string);
     }
 
-    public int[] getSegments() {
-        return segments;
+    public RecoverException(String string, Throwable thrwbl) {
+        super(string, thrwbl);
     }
 
-    public void setSegments(int[] segments) {
-        this.segments = segments;
-    }
-
-    public long getLength() {
-        return length;
-    }
-
-    public void setLength(long length) {
-        this.length = length;
+    public RecoverException(Throwable thrwbl) {
+        super(thrwbl);
     }
 
 }

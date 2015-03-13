@@ -1,7 +1,18 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * BRCache http://brcache.brandao.org/
+ * Copyright (C) 2015 Afonso Brandao. (afonso.rbn@gmail.com)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.brandao.brcache.client;
@@ -12,8 +23,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
- * @author Cliente
+ * Representa um pool de conexões.
+ * 
+ * @author Brandao
  */
 public class BrCacheConnectionPool {
     
@@ -29,6 +41,15 @@ public class BrCacheConnectionPool {
             
     private final BlockingQueue<BrCacheConnection> instances;
 
+    /**
+     * Cria um novo pool de conexões.
+     * 
+     * @param host Endereço do servidor.
+     * @param port Porta que o servidor está escutando.
+     * @param minInstances Conexões que serão iniciadas na criação da instância.
+     * @param maxInstances Quantidade máxima de conexões que serão criadas.
+     * @throws IOException Lançada se ocorrer alguma falha ao tentar iniciar as conexões.
+     */
     public BrCacheConnectionPool(String host, int port, int minInstances, int maxInstances) 
             throws IOException{
 
@@ -56,7 +77,17 @@ public class BrCacheConnectionPool {
         
     }
     
-    public synchronized BrCacheConnection getConnection() throws InterruptedException, IOException {
+    /**
+     * Obtém uma conexão.
+     * 
+     * @return Conexão.
+     * @throws InterruptedException Lançada se ocorrer uma falha ao tentar 
+     * recuperar uma conexão.
+     * @throws IOException Lançada se ocorrer uma falha ao tentar 
+     * criar uma conexão.
+     */
+    public synchronized BrCacheConnection getConnection() 
+            throws InterruptedException, IOException {
         
         BrCacheConnection con = this.instances.poll();
         
@@ -74,7 +105,17 @@ public class BrCacheConnectionPool {
         
     }
 
-    public synchronized BrCacheConnection tryGetConnection(long l, TimeUnit tu) throws InterruptedException, IOException {
+    /**
+     * Tenta obtém uma conexão.
+     * 
+     * @return Conexão.
+     * @throws InterruptedException Lançada se ocorrer uma falha ao tentar 
+     * recuperar uma conexão.
+     * @throws IOException Lançada se ocorrer uma falha ao tentar 
+     * criar uma conexão.
+     */
+    public synchronized BrCacheConnection tryGetConnection(long l, TimeUnit tu) 
+            throws InterruptedException, IOException {
         
         BrCacheConnection con = this.instances.poll();
         
@@ -92,6 +133,10 @@ public class BrCacheConnectionPool {
         
     }
     
+    /**
+     * Libera o uso da conexão.
+     * @param con Conexão.
+     */
     public void release(BrCacheConnection con){
         try{
             this.instances.put(con);
@@ -99,14 +144,6 @@ public class BrCacheConnectionPool {
         catch(Exception e){
             
         }
-    }
-    
-    public int getMinConnections() {
-        return minInstances;
-    }
-
-    public int getMaxConnections() {
-        return maxInstances;
     }
     
 }
