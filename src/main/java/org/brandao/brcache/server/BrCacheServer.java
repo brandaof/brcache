@@ -144,25 +144,25 @@ public class BrCacheServer {
     
     private void loadConfiguration(Configuration config){
 
-        int portNumber            = config.getInt("port","1044");
-        int max_connections       = config.getInt("max_connections","1024");
-        int timeout_connection    = config.getInt("timeout_connection","0");
-        boolean reuse_address     = config.getBoolean("reuse_address", "false");
-        int nodes_size            = config.getInt("nodes_size","10m");
-        int nodes_swap_size       = config.getInt("nodes_swap_size","16k");
-        double nodes_swap_factor  = config.getDouble("nodes_swap_factor","0.3");
-        int index_size            = config.getInt("index_size","10m");
-        int index_swap_size       = config.getInt("index_swap_size","16k");
-        double index_swap_factor  = config.getDouble("index_swap_factor","0.3");
-        int data_size             = config.getInt("data_size","100m");
-        int data_swap_size        = config.getInt("data_swap_size","128k");
-        double data_swap_factor   = config.getDouble("data_swap_factor","0.6");
-        String data_path          = config.getString("data_path","/var/brcache");
-        int max_slab_size         = config.getInt("max_slab_size","16k");
-        int write_buffer_size     = config.getInt("write_buffer_size","16k");
-        int read_buffer_size      = config.getInt("read_buffer_size","16k");
-        int max_size_entry        = config.getInt("max_size_entry","1m");
-        int max_size_key          = config.getInt("max_size_key","48");
+        long portNumber            = config.getLong("port","1044");
+        long max_connections       = config.getLong("max_connections","1024");
+        long timeout_connection    = config.getLong("timeout_connection","0");
+        boolean reuse_address      = config.getBoolean("reuse_address", "false");
+        long nodes_size            = config.getLong("nodes_size","10m");
+        long nodes_swap_size       = config.getLong("nodes_swap_size","16k");
+        double nodes_swap_factor   = config.getDouble("nodes_swap_factor","0.3");
+        long index_size            = config.getLong("index_size","10m");
+        long index_swap_size       = config.getLong("index_swap_size","16k");
+        double index_swap_factor   = config.getDouble("index_swap_factor","0.3");
+        long data_size             = config.getLong("data_size","100m");
+        long data_swap_size        = config.getLong("data_swap_size","128k");
+        double data_swap_factor    = config.getDouble("data_swap_factor","0.6");
+        String data_path           = config.getString("data_path","/var/brcache");
+        long max_slab_size         = config.getLong("max_slab_size","16k");
+        long write_buffer_size     = config.getLong("write_buffer_size","16k");
+        long read_buffer_size      = config.getLong("read_buffer_size","16k");
+        long max_size_entry        = config.getLong("max_size_entry","1m");
+        long max_size_key          = config.getLong("max_size_key","48");
         
         
         if(nodes_swap_size > nodes_size)
@@ -182,12 +182,12 @@ public class BrCacheServer {
         
         this.run             = false;
         this.config          = config;
-        this.timeout         = timeout_connection;
+        this.timeout         = (int)timeout_connection;
         this.reuseAddress    = reuse_address;
-        this.maxConnections  = max_connections;
-        this.port            = portNumber;
-        this.readBufferSize  = read_buffer_size;
-        this.writeBufferSize = write_buffer_size;
+        this.maxConnections  = (int)max_connections;
+        this.port            = (int)portNumber;
+        this.readBufferSize  = (int)read_buffer_size;
+        this.writeBufferSize = (int)write_buffer_size;
         
         this.cache = new Cache(
             nodes_size,
@@ -199,10 +199,10 @@ public class BrCacheServer {
             data_size,
             data_swap_size,
             data_swap_factor,
-            max_slab_size,
-            write_buffer_size,
-            max_size_entry,
-            max_size_key,
+            (int)max_slab_size,
+            (int)write_buffer_size,
+            (int)max_size_entry,
+            (int)max_size_key,
             data_path);
         
         this.monitorThread = new MonitorThread(this.cache, this.config);
