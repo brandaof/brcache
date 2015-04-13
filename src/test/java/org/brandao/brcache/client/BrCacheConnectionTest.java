@@ -13,12 +13,10 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
-import org.brandao.brcache.server.ReadDataException;
-import org.brandao.brcache.server.WriteDataException;
 
 /**
  *
- * @author Cliente
+ * @author Brandao
  */
 public class BrCacheConnectionTest  extends TestCase{
     
@@ -29,7 +27,7 @@ public class BrCacheConnectionTest  extends TestCase{
         
         final BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 1044, 100, 1000);
 
-        for(int i=0;i<10;i++){
+        for(int i=0;i<20;i++){
             Thread th;
             if(i % 2 == 0){
                 th = new Thread(){
@@ -44,8 +42,8 @@ public class BrCacheConnectionTest  extends TestCase{
                                 String key = String.valueOf(rv)/* + "- INDEX AJBK - "*/;
                                 String value = key;
                                 con.put(key, 0, value );
-                                //if(rv % 10 == 0)
-                                //    System.out.println(rv);
+                                if(rv % 1000 == 0)
+                                    System.out.println(rv);
                             }
                             catch(Exception e){
                                 e.printStackTrace();
