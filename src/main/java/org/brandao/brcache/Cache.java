@@ -82,14 +82,14 @@ public class Cache implements Serializable{
      * @param dataPath Pasta onde os dados do cache serão armazenados no processo de swap.
      */
     public Cache(
-        int nodesSize,
-        int nodesSwapSize,
+        long nodesSize,
+        long nodesSwapSize,
         double nodesSwapFactor,
-        int indexSize,
-        int indexSwapSize,
+        long indexSize,
+        long indexSwapSize,
         double indexSwapFactor,
-        int dataSize,
-        int dataSwapSize,
+        long dataSize,
+        long dataSwapSize,
         double dataSwapFactor,
         int maxSlabSize,
         int writeBufferSize,
