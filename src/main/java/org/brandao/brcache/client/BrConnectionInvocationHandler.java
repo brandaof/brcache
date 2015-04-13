@@ -41,8 +41,7 @@ public class BrConnectionInvocationHandler implements InvocationHandler{
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         
         if(method.getName().equals(CLOSE_METHOD)){
-            pool.release(this.connection);
-            this.connection = null;
+            pool.release((BrCacheConnection)proxy);
             return null;
         }
         else{

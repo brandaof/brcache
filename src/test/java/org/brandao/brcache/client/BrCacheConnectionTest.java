@@ -25,11 +25,11 @@ public class BrCacheConnectionTest  extends TestCase{
     public void test() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
-        final BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 1044, 100, 1000);
+        final BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 1044, 1, 1);
 
-        for(int i=0;i<20;i++){
+        for(int i=0;i<1;i++){
             Thread th;
-            if(i % 2 == 0){
+            if(true){
                 th = new Thread(){
                     public void run(){
                         Random r = new Random();
@@ -49,8 +49,12 @@ public class BrCacheConnectionTest  extends TestCase{
                                 e.printStackTrace();
                             }
                             finally{
-                                if(con != null)
-                                    pool.release(con);
+                                try{
+                                    if(con != null)
+                                        con.close();
+                                }
+                                catch(Throwable e){
+                                }
                             }
                             index++;
                         }
@@ -98,8 +102,12 @@ public class BrCacheConnectionTest  extends TestCase{
                                 e.printStackTrace();
                             }
                             finally{
-                                if(con != null)
-                                    pool.release(con);
+                                try{
+                                    if(con != null)
+                                        con.close();
+                                }
+                                catch(Throwable e){
+                                }
                             }
                             
                         }
