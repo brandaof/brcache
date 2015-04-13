@@ -88,7 +88,7 @@ public abstract class AbstractCollectionSegment<I,T>
         for(int i=0;i<locks.length;i++)
             locks[i] = new Object();
         
-        Thread[] clearThread = new Thread[1];
+        Thread[] clearThread = new Thread[4];
         
         for(int i=0;i<clearThread.length;i++){
             clearThread[i] =
