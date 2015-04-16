@@ -17,7 +17,6 @@
 
 package org.brandao.brcache.client;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
@@ -40,25 +39,10 @@ public class BrConnectionInvocationHandler implements InvocationHandler{
     
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         
-        if(method.getName().equals(CLOSE_METHOD)){
-            pool.release((BrCacheConnection)proxy);
+        if(!method.getName().equals(CLOSE_METHOD))
+            return method.invoke(connection, args);
+        else
             return null;
-        }
-        else{
-            try{
-               return method.invoke(connection, args);
-            }
-            catch(Throwable e){
-                if(e instanceof IOException){
-                    try{
-                        pool.shutdown(this.connection);
-                    }
-                    catch(Throwable ex){
-                    }
-                }
-                throw e;
-            }
-        }
     }
     
 }

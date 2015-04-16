@@ -15,30 +15,29 @@
  * limitations under the License.
  */
 
-
 package org.brandao.brcache;
 
 /**
- * Exceção lançada quando ocorre uma falha ao tentar armazenar um item em um cache.
+ * Exceção lançada quando ocorre uma falha ao interagir com o cache.
  * 
  * @author Brandao
  */
-public class StorageException extends CacheException{
+public class CacheException  extends Exception{
     
-    public StorageException() {
+    public CacheException() {
         super();
     }
 
-    public StorageException(String string) {
+    public CacheException(String string) {
         super(string);
     }
 
-    public StorageException(String string, Throwable thrwbl) {
+    public CacheException(String string, Throwable thrwbl) {
         super(string, thrwbl);
     }
 
-    public StorageException(Throwable thrwbl) {
+    public CacheException(Throwable thrwbl) {
         super(thrwbl);
     }
-
+    
 }

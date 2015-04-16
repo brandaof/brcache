@@ -24,10 +24,13 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
+import org.brandao.brcache.server.ParameterException;
+import org.brandao.brcache.server.ReadDataException;
 import org.brandao.brcache.server.TerminalReader;
 import org.brandao.brcache.server.TerminalWriter;
 import org.brandao.brcache.server.TextTerminalReader;
 import org.brandao.brcache.server.TextTerminalWriter;
+import org.brandao.brcache.server.WriteDataException;
 
 /**
  * Permite o armazenamento, atualização, remoção de um item em um servidor BRCache.
@@ -125,8 +128,11 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         }
         catch(StorageException e){
             throw e;
-        }
-        catch(Throwable e){
+        } catch (ParameterException e) {
+            throw new StorageException(e);
+        } catch (ReadDataException e) {
+            throw new StorageException(e);
+        } catch (WriteDataException e) {
             throw new StorageException(e);
         }
     }
@@ -163,8 +169,7 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         }
         catch(RecoverException e){
             throw e;
-        }
-        catch(Throwable e){
+        } catch (WriteDataException e) {
             throw new RecoverException(e);
         }
     }
@@ -186,8 +191,11 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         }
         catch(RecoverException e){
             throw e;
-        }
-        catch(Throwable e){
+        } catch (ParameterException e) {
+            throw new RecoverException(e);
+        } catch (ReadDataException e) {
+            throw new RecoverException(e);
+        } catch (WriteDataException e) {
             throw new RecoverException(e);
         }
     }
