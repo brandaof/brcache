@@ -163,5 +163,11 @@ public class BrCacheConnectionPool {
         this.createdInstances--;
         this.instances.remove(con);
     }
+
+    /**
+     * Destroi o pool de conexões.
+     */
+    public synchronized void shutdown(){
+    }
     
 }

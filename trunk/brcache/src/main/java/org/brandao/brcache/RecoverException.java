@@ -22,7 +22,7 @@ package org.brandao.brcache;
  * 
  * @author Brandao.
  */
-public class RecoverException extends Exception{
+public class RecoverException extends CacheException{
     
     public RecoverException() {
         super();
