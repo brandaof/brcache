@@ -60,13 +60,14 @@ public class TerminalTask implements Runnable{
             this.terminal.execute();
         }
         catch(Exception e){
-            //e.printStackTrace();
+            e.printStackTrace();
         }
         finally{
             try{
                 terminal.destroy();
             }
             catch(Exception e){
+                e.printStackTrace();
             }
             this.factory.release(this.terminal);
             updateInfo();
