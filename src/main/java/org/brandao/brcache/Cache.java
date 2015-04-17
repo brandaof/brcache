@@ -133,7 +133,7 @@ public class Cache implements Serializable{
         this.dataMap =
                 new TreeHugeMap<TreeKey, DataMap>(
                 dataPath,
-                "data",
+                "dataMap",
                 (int)nodesOnMemory,
                 swapSegmentNodesFactor,
                 nodesPerSegment/nodesOnMemory,
@@ -145,7 +145,7 @@ public class Cache implements Serializable{
         this.dataList =
                 new HugeArrayList<byte[]>(
                 dataPath,
-                "data",
+                "dataList",
                 (int)bytesOnMemory,
                 swapSegmentsFactor,
                 bytesPerSegment/bytesOnMemory
