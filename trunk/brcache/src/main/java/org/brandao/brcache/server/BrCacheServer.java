@@ -106,8 +106,9 @@ public class BrCacheServer {
         
         this.run = true;
         while(this.run){
+            Socket socket = null;
             try{
-                Socket socket = this.serverSocket.accept();
+                socket = this.serverSocket.accept();
                 Terminal terminal = this.terminalFactory.getInstance();
                 TerminalTask task = 
                     new TerminalTask(
@@ -122,6 +123,7 @@ public class BrCacheServer {
                 this.executorService.execute(task);
             }
             catch(Exception e){
+                //e.printStackTrace();
             }
         }
     }
