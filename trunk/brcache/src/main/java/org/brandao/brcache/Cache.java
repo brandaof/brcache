@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import org.brandao.brcache.collections.DefaultSwaper;
-import org.brandao.brcache.collections.Swaper;
+import org.brandao.brcache.collections.Swapper;
 
 /**
  * Representa um cache.
@@ -186,7 +186,7 @@ public class Cache implements Serializable{
      * @param strategy Tipo da estratégia.
      * @return Estratégia.
      */
-    protected Swaper getSwaper(SwaperStrategy strategy){
+    protected Swapper getSwaper(SwaperStrategy strategy){
         return new DefaultSwaper();
     }
     

@@ -31,7 +31,7 @@ import java.util.Arrays;
  *
  * @author Brandao
  */
-public class FileSwaper<T> implements Swaper<T> {
+public class FileSwaper<T> implements Swapper<T> {
     
     private String id;
     

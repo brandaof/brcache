@@ -54,7 +54,7 @@ public class HugeArrayList<T> implements HugeList<T>,Serializable{
             int maxCapacityElements,
             double clearFactorElements, 
             double fragmentFactorElements,
-            Swaper<ArraySegment<T>> swap,
+            Swapper<ArraySegment<T>> swap,
             int quantityLock,
             int quantityClearThread) {
         
@@ -73,6 +73,14 @@ public class HugeArrayList<T> implements HugeList<T>,Serializable{
                 swap,
                 quantityLock,
                 quantityClearThread);
+    }
+    
+    public boolean isForceSwap() {
+        return this.elements.isForceSwap();
+    }
+
+    public void setForceSwap(boolean forceSwap) {
+        this.elements.setForceSwap(forceSwap);
     }
     
     public int size() {

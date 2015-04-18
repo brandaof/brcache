@@ -33,7 +33,7 @@ public class CollectionSegmentImp<I>
             int maxCapacity, 
             double clearFactor,
             double fragmentFactor,
-            Swaper<ArraySegment<I>> swap,
+            Swapper<ArraySegment<I>> swap,
             int quantityLock,
             int quantitySwaperThread){
         super(pathName, id, maxCapacity, 
