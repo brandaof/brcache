@@ -166,8 +166,8 @@ public class BrCacheServer {
         long read_buffer_size      = config.getLong("read_buffer_size","16k");
         long max_size_entry        = config.getLong("max_size_entry","1m");
         long max_size_key          = config.getLong("max_size_key","48");
-        String swaper              = config.getString("swaper","file_tree");
-        int swaper_thread          = config.getInt("swaper_thread","1");
+        String swapper             = config.getString("swapper","file_tree");
+        int swapper_thread         = config.getInt("swapper_thread","1");
         double lock_factor         = config.getDouble("lock_factor","0.1");
         
         
@@ -210,9 +210,9 @@ public class BrCacheServer {
             (int)max_size_entry,
             (int)max_size_key,
             data_path,
-            SwaperStrategy.valueOf(swaper.toUpperCase()),
+            SwaperStrategy.valueOf(swapper.toUpperCase()),
             lock_factor,
-            swaper_thread);
+            swapper_thread);
         
         this.monitorThread = new MonitorThread(this.cache, this.config);
         this.monitorThread.start();
