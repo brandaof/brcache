@@ -54,7 +54,7 @@ public abstract class AbstractCollectionSegment<I,T>
     
     private volatile int lastSegment;
     
-    private Swaper<T> swap;
+    private Swapper<T> swap;
 
     private final BlockingQueue<Entry<T>> listedItensOnMemory;
 
@@ -66,7 +66,7 @@ public abstract class AbstractCollectionSegment<I,T>
             String pathName,
             String id, int maxCapacity, double clearFactor,
             double fragmentFactor,
-            Swaper<T> swap,
+            Swapper<T> swap,
             int quantityLock,
             int quantitySwaperThread) {
         

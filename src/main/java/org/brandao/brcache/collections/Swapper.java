@@ -21,7 +21,7 @@ package org.brandao.brcache.collections;
  *
  * @author Brandao
  */
-public interface Swaper<T> {
+public interface Swapper<T> {
     
     void setPath(String value);
     

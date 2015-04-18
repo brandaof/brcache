@@ -30,7 +30,7 @@ import java.io.OutputStream;
  *
  * @author Brandao
  */
-public class DefaultSwaper<T> implements Swaper<T> {
+public class DefaultSwaper<T> implements Swapper<T> {
     
     private String id;
     

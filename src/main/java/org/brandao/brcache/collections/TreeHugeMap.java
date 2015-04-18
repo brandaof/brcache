@@ -68,13 +68,13 @@ public class TreeHugeMap<K extends TreeKey,T> implements Map<K,T>, Serializable{
             int maxCapacityNodes,
             double clearFactorNodes, 
             double fragmentFactorNodes,
-            Swaper<ArraySegment<T>> swapNodes,
+            Swapper<ArraySegment<T>> swapNodes,
             int quantityLockNodes,
             int quantitySwaperThreadNodes,            
             int maxCapacityElements,
             double clearFactorElements, 
             double fragmentFactorElements,
-            Swaper<ArraySegment<T>> swapElements,
+            Swapper<ArraySegment<T>> swapElements,
             int quantityLockElements,
             int quantitySwaperThreadElements){
         
