@@ -56,7 +56,7 @@ public class BrCacheClient implements BrCacheConnection{
         try{
             this.host = host;
             this.port = port;
-            this.maxConnections = minConnections;
+            this.minConnections = minConnections;
             this.maxConnections = maxConnections;
             this.putMethod = 
                     BrCacheConnection.class

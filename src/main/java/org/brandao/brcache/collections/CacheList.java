@@ -38,7 +38,7 @@ public class CacheList<T>
 
     private final HugeArrayList<T> internalList;
     
-    private CacheList(
+    public CacheList(
             int maxCapacityElementsOnMemory,
             double clearFactorElements, 
             double fragmentFactorElements){
