@@ -39,6 +39,10 @@ public class DefaultSwaper<T> implements Swaper<T> {
     private transient File path;
     
     private transient boolean hasCreatePath;
+
+    public DefaultSwaper(){
+        this(null,null);
+    }
     
     public DefaultSwaper(String id, String path){
         this.id = id;

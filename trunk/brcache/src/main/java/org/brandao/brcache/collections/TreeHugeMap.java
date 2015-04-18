@@ -51,9 +51,15 @@ public class TreeHugeMap<K extends TreeKey,T> implements Map<K,T>, Serializable{
             DEFAULT_MAX_CAPACITY_NODE, 
             DEFAULT_CLEAR_FACTOR_NODE, 
             DEFAULT_FRAGMENT_FACTOR_NODE,
+            null,
+            1,
+            1,
             DEFAULT_MAX_CAPACITY_ELEMENT, 
             DEFAULT_CLEAR_FACTOR_ELEMENT, 
-            DEFAULT_FRAGMENT_FACTOR_ELEMENT);
+            DEFAULT_FRAGMENT_FACTOR_ELEMENT,
+            null,
+            1,
+            1);
     }
 
     public TreeHugeMap(
@@ -62,13 +68,38 @@ public class TreeHugeMap<K extends TreeKey,T> implements Map<K,T>, Serializable{
             int maxCapacityNodes,
             double clearFactorNodes, 
             double fragmentFactorNodes,
+            Swaper<ArraySegment<T>> swapNodes,
+            int quantityLockNodes,
+            int quantitySwaperThreadNodes,            
             int maxCapacityElements,
             double clearFactorElements, 
-            double fragmentFactorElements){
-        this.values = new HugeArrayList(path, id == null? null : id + "Values", maxCapacityElements, 
-                clearFactorElements, fragmentFactorElements);
-        this.nodes = new HugeArrayList(path, id == null? null : id + "Nodes", maxCapacityNodes, 
-                clearFactorNodes, fragmentFactorNodes);
+            double fragmentFactorElements,
+            Swaper<ArraySegment<T>> swapElements,
+            int quantityLockElements,
+            int quantitySwaperThreadElements){
+        
+        this.values = 
+            new HugeArrayList(
+                path, 
+                id == null? null : id + "Values", 
+                maxCapacityElements, 
+                clearFactorElements, 
+                fragmentFactorElements,
+                swapElements,
+                quantityLockElements,
+                quantitySwaperThreadElements);
+        
+        this.nodes = 
+            new HugeArrayList(
+                path,
+                id == null? null : id + "Nodes", 
+                maxCapacityNodes, 
+                clearFactorNodes, 
+                fragmentFactorNodes,
+                swapNodes,
+                quantityLockNodes,
+                quantitySwaperThreadNodes);
+
     }
     
     private boolean put(Object[] keys, int index, int limit, TreeHugeMapNode<T> node, 

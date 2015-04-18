@@ -23,6 +23,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.brandao.brcache.Cache;
+import org.brandao.brcache.SwaperStrategy;
 
 /**
  * Representa o servidor do cache.
@@ -165,6 +166,9 @@ public class BrCacheServer {
         long read_buffer_size      = config.getLong("read_buffer_size","16k");
         long max_size_entry        = config.getLong("max_size_entry","1m");
         long max_size_key          = config.getLong("max_size_key","48");
+        String swaper              = config.getString("swaper","file_tree");
+        int swaper_thread          = config.getInt("swaper_thread","1");
+        double lock_factor         = config.getDouble("lock_factor","0.1");
         
         
         if(nodes_swap_size > nodes_size)
@@ -205,7 +209,10 @@ public class BrCacheServer {
             (int)write_buffer_size,
             (int)max_size_entry,
             (int)max_size_key,
-            data_path);
+            data_path,
+            SwaperStrategy.valueOf(swaper.toUpperCase()),
+            lock_factor,
+            swaper_thread);
         
         this.monitorThread = new MonitorThread(this.cache, this.config);
         this.monitorThread.start();

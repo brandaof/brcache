@@ -39,28 +39,40 @@ public class HugeArrayList<T> implements HugeList<T>,Serializable{
     public HugeArrayList() {
         this(
             null,
-            Collections.getNextId(), 
+            null, 
             DEFAULT_MAX_CAPACITY_ELEMENT, 
             DEFAULT_CLEAR_FACTOR_ELEMENT, 
-            DEFAULT_FRAGMENT_FACTOR_ELEMENT);
+            DEFAULT_FRAGMENT_FACTOR_ELEMENT,
+            null,
+            10,
+            1);
     }
-    
+
     public HugeArrayList(
             String pathName,
             String id, 
             int maxCapacityElements,
             double clearFactorElements, 
-            double fragmentFactorElements) {
+            double fragmentFactorElements,
+            Swaper<ArraySegment<T>> swap,
+            int quantityLock,
+            int quantityClearThread) {
         
         this.size = 0;
         id = id == null? Collections.getNextId() : id;
+        pathName = pathName == null? Collections.getPath().getAbsolutePath() : pathName;
+        swap = swap == null? new DefaultSwaper<ArraySegment<T>>(id, pathName) : swap;
+        
         this.elements = 
                 new CollectionSegmentImp<T>(
                 pathName,
                 id,
                 maxCapacityElements, 
                 clearFactorElements, 
-                fragmentFactorElements);
+                fragmentFactorElements,
+                swap,
+                quantityLock,
+                quantityClearThread);
     }
     
     public int size() {
