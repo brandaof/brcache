@@ -33,6 +33,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import org.brandao.brcache.collections.DefaultSwaper;
+import org.brandao.brcache.collections.Swaper;
 
 /**
  * Representa um cache.
@@ -80,6 +82,9 @@ public class Cache implements Serializable{
      * @param maxSizeEntry Tamanho máximo em bytes que um item pode ter para ser armazenado no cache.
      * @param maxSizeKey Tamanho máximo em bytes que uma chave pode ter.
      * @param dataPath Pasta onde os dados do cache serão armazenados no processo de swap.
+     * @param swaperType Estratégia de swap.
+     * @param lockFactor Fator de lock. Determina quantos locks serão usados para bloquear os segmentos.
+     * @param quantitySwaperThread Quantidade de threads que irão fazer o swap.
      */
     public Cache(
         long nodesSize,
@@ -95,7 +100,10 @@ public class Cache implements Serializable{
         int writeBufferSize,
         int maxSizeEntry,
         int maxSizeKey,
-        String dataPath){
+        String dataPath,
+        SwaperStrategy swaperType,
+        double lockFactor,
+        int quantitySwaperThread){
         
         if(nodesSwapSize > nodesSize)
             throw new RuntimeException("nodesSwap_size > nodesSize");
@@ -111,7 +119,13 @@ public class Cache implements Serializable{
 
         if(dataSwapSize > dataSize)
             throw new RuntimeException("dataSwapSize > dataSize");
+
+        if(lockFactor < 0)
+            throw new RuntimeException("quantityLock < 0.0");
         
+        if(quantitySwaperThread < 1)
+            throw new RuntimeException("quantitySwaperThread < 1");
+            
         double nodesOnMemory          = nodesSize/8.0;
         double nodesPerSegment        = nodesSwapSize/8.0;
         double swapSegmentNodesFactor = nodesSwapFactor;
@@ -137,9 +151,15 @@ public class Cache implements Serializable{
                 (int)nodesOnMemory,
                 swapSegmentNodesFactor,
                 nodesPerSegment/nodesOnMemory,
+                this.getSwaper(swaperType),
+                (int)((nodesOnMemory/nodesPerSegment)*lockFactor) + 1,
+                quantitySwaperThread,
                 (int)indexOnMemory,
                 swapSegmentIndexFactor,
-                indexPerSegment/indexOnMemory
+                indexPerSegment/indexOnMemory,
+                this.getSwaper(swaperType),
+                (int)((indexOnMemory/indexPerSegment)*lockFactor) + 1,
+                quantitySwaperThread
                 );
         
         this.dataList =
@@ -148,13 +168,26 @@ public class Cache implements Serializable{
                 "dataList",
                 (int)bytesOnMemory,
                 swapSegmentsFactor,
-                bytesPerSegment/bytesOnMemory
+                bytesPerSegment/bytesOnMemory,
+                this.getSwaper(swaperType),
+                (int)((bytesOnMemory/bytesPerSegment)*lockFactor) + 1,
+                quantitySwaperThread
                 );
         
     }
     
     public Cache(){
         throw new UnsupportedOperationException();
+    }
+    
+    /**
+     * Obtém a estratégia de swap dos dados do cache.
+     * 
+     * @param strategy Tipo da estratégia.
+     * @return Estratégia.
+     */
+    protected Swaper getSwaper(SwaperStrategy strategy){
+        return new DefaultSwaper();
     }
     
     /**

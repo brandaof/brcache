@@ -32,8 +32,12 @@ public class CollectionSegmentImp<I>
             String id, 
             int maxCapacity, 
             double clearFactor,
-            double fragmentFactor){
-        super(pathName, id, maxCapacity, clearFactor, fragmentFactor);
+            double fragmentFactor,
+            Swaper<ArraySegment<I>> swap,
+            int quantityLock,
+            int quantitySwaperThread){
+        super(pathName, id, maxCapacity, 
+                clearFactor, fragmentFactor, swap, quantityLock, quantitySwaperThread);
         
         int fragmentSize        = (int)(maxCapacity * fragmentFactor);
         int maxSegmentCapacity  = (int)(maxCapacity/fragmentSize);

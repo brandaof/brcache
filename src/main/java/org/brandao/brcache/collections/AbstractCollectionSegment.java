@@ -60,10 +60,16 @@ public abstract class AbstractCollectionSegment<I,T>
 
     private Object[] locks;
     
+    private boolean forceSwap;
+    
     public AbstractCollectionSegment(
             String pathName,
             String id, int maxCapacity, double clearFactor,
-            double fragmentFactor) {
+            double fragmentFactor,
+            Swaper<T> swap,
+            int quantityLock,
+            int quantitySwaperThread) {
+        
         this.id                  = id;
         this.pathName            = pathName;
         this.fragmentSize        = (int)(maxCapacity * fragmentFactor);
@@ -73,9 +79,12 @@ public abstract class AbstractCollectionSegment<I,T>
         this.segments            = new ConcurrentHashMap<Integer, Entry<T>>();
         this.readOnly            = false;
         this.lastSegment         = -1;
-        this.swap                = new DefaultSwaper<T>(this.id, this.pathName);//new FileSwaper<T>(this.id, this.pathName, (1024*2)*1024);//new DefaultSwaper<T>(this.id, this.pathName);
+        this.swap                = swap;//new DefaultSwaper<T>(this.id, this.pathName);
         this.listedItensOnMemory = new LinkedBlockingQueue<Entry<T>>();
-        this.locks               = new Object[1000];
+        this.locks               = new Object[quantityLock];
+        this.forceSwap           = false;
+        this.swap.setPath(this.pathName);
+        this.swap.setId(this.id);
         
         int max = (int)(this.maxSegmentCapacity*0.3 + 1.0);
         
@@ -88,7 +97,7 @@ public abstract class AbstractCollectionSegment<I,T>
         for(int i=0;i<locks.length;i++)
             locks[i] = new Object();
         
-        Thread[] clearThread = new Thread[4];
+        Thread[] clearThread = new Thread[quantitySwaperThread];
         
         for(int i=0;i<clearThread.length;i++){
             clearThread[i] =
@@ -99,15 +108,6 @@ public abstract class AbstractCollectionSegment<I,T>
                             try{
                                 clearLimitLength();
                                 Thread.sleep(1000);
-                                /*
-                                if(listedItensOnMemory.size() < maxSegmentCapacity)
-                                    Thread.sleep(1000);
-                                
-                                Entry<T> segment = listedItensOnMemory.poll();
-                                
-                                if(segment != null)
-                                    swapOnDisk(segment.getIndex(), segment);
-                                */
                             }
                             catch(Exception e){
                                 e.printStackTrace();
@@ -161,6 +161,9 @@ public abstract class AbstractCollectionSegment<I,T>
     protected void addEntry(Integer key, Entry<T> item) {
         
         synchronized(this.getLock(key)){
+            if(forceSwap)
+                this.clearLimitLength();
+            
             segments.put(key, item);
             this.listedItensOnMemory.add(item);
             this.lastSegment = key;
@@ -200,6 +203,9 @@ public abstract class AbstractCollectionSegment<I,T>
             if(onMemoryEntity != null)
                 return onMemoryEntity;
 
+            if(forceSwap)
+                this.clearLimitLength();
+            
             Entry<T> entity = this.swap.readDiskItem(key);
 
             if(entity != null){
@@ -307,6 +313,14 @@ public abstract class AbstractCollectionSegment<I,T>
     
     public boolean isReadOnly(){
         return this.readOnly;
+    }
+
+    public boolean isForceSwap() {
+        return forceSwap;
+    }
+
+    public void setForceSwap(boolean forceSwap) {
+        this.forceSwap = forceSwap;
     }
 
 }
