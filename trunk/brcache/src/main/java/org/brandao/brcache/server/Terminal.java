@@ -52,14 +52,16 @@ public class Terminal {
         this.config = config;
     }
 
-    protected void init(Socket socket, Cache cache, int readBufferSize, int writeBufferSize) throws IOException{
+    protected void init(Socket socket, Cache cache, 
+            StreamFactory streamFactory,
+            int readBufferSize, int writeBufferSize) throws IOException{
         try{
             this.socket = socket;
             this.cache  = cache;
             this.readBufferSize  = readBufferSize;
             this.writeBufferSize = writeBufferSize;
-            this.reader = new TextTerminalReader(this.socket, readBufferSize);
-            this.writer = new TextTerminalWriter(this.socket, writeBufferSize);
+            this.reader = new TextTerminalReader(this.socket, streamFactory, readBufferSize);
+            this.writer = new TextTerminalWriter(this.socket, streamFactory, writeBufferSize);
             this.run = true;
         }
         catch(Throwable e){

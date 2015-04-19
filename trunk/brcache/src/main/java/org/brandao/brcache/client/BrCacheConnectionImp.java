@@ -24,8 +24,10 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
+import org.brandao.brcache.server.DefaultStreamFactory;
 import org.brandao.brcache.server.ParameterException;
 import org.brandao.brcache.server.ReadDataException;
+import org.brandao.brcache.server.StreamFactory;
 import org.brandao.brcache.server.TerminalReader;
 import org.brandao.brcache.server.TerminalWriter;
 import org.brandao.brcache.server.TextTerminalReader;
@@ -61,21 +63,28 @@ public class BrCacheConnectionImp implements BrCacheConnection{
     
     private TerminalWriter writer;
     
+    private StreamFactory streamFactory;
+
+    public BrCacheConnectionImp(String host, int port){
+        this(host, port, new DefaultStreamFactory());
+    }
+    
     /**
      * Cria uma nova instância de {@link BrCacheConnection}
      * @param host Endereço do servidor.
      * @param port Porta que o servidor está escutando.
      */
-    public BrCacheConnectionImp(String host, int port){
+    public BrCacheConnectionImp(String host, int port, StreamFactory streamFactory){
         this.host = host;
         this.port = port;
+        this.streamFactory = streamFactory;
     }
     
     @Override
     public synchronized void connect() throws IOException{
         this.socket = new Socket(this.getHost(), this.getPort());
-        this.reader = new TextTerminalReader(this.socket, 1*1024*1024);
-        this.writer = new TextTerminalWriter(this.socket, 1*1024*1024);
+        this.reader = new TextTerminalReader(this.socket, this.streamFactory, 1*1024*1024);
+        this.writer = new TextTerminalWriter(this.socket, this.streamFactory, 1*1024*1024);
     }
     
     @Override
@@ -212,6 +221,10 @@ public class BrCacheConnectionImp implements BrCacheConnection{
 
     public void close() throws IOException {
         this.socket.close();
+    }
+
+    public StreamFactory getStreamFactory() {
+        return streamFactory;
     }
     
 }

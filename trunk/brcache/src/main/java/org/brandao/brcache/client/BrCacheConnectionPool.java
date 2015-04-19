@@ -22,6 +22,8 @@ import java.lang.reflect.Proxy;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import org.brandao.brcache.server.DefaultStreamFactory;
+import org.brandao.brcache.server.StreamFactory;
 
 /**
  * Representa um pool de conexões.
@@ -42,6 +44,8 @@ public class BrCacheConnectionPool {
             
     private final BlockingQueue<BrCacheConnection> instances;
 
+    private StreamFactory streamFactory;
+    
     /**
      * Cria um novo pool de conexões.
      * 
@@ -51,7 +55,15 @@ public class BrCacheConnectionPool {
      * @param maxInstances Quantidade máxima de conexões que serão criadas.
      * @throws IOException Lançada se ocorrer alguma falha ao tentar iniciar as conexões.
      */
-    public BrCacheConnectionPool(String host, int port, int minInstances, int maxInstances) 
+    public BrCacheConnectionPool(String host, int port, int minInstances, 
+            int maxInstances) 
+            throws IOException{
+
+        this(host, port, minInstances, maxInstances, new DefaultStreamFactory());
+    }
+    
+    public BrCacheConnectionPool(String host, int port, int minInstances, 
+            int maxInstances, StreamFactory streamFactory) 
             throws IOException{
 
         if(minInstances < 0)
@@ -69,16 +81,17 @@ public class BrCacheConnectionPool {
         this.maxInstances     = maxInstances;
         this.instances        = new ArrayBlockingQueue<BrCacheConnection>(this.maxInstances);
         this.createdInstances = 0;
+        this.streamFactory    = streamFactory;
         
         for(int i=0;i<this.minInstances;i++){
-            BrCacheConnection con = createConnection(host, port);
+            BrCacheConnection con = createConnection(host, port, streamFactory);
             this.instances.add(con);
         }
         
     }
     
-    private BrCacheConnection createConnection(String host, int port) throws IOException{
-        BrCacheConnectionImp con = new BrCacheConnectionImp(host, port);
+    private BrCacheConnection createConnection(String host, int port, StreamFactory streamFactory) throws IOException{
+        BrCacheConnectionImp con = new BrCacheConnectionImp(host, port, streamFactory);
         con.connect();
         return 
             (BrCacheConnection)Proxy.newProxyInstance(
@@ -105,7 +118,7 @@ public class BrCacheConnectionPool {
             return con;
         else
         if(this.createdInstances < this.maxInstances){
-            con = createConnection(host, port);
+            con = createConnection(host, port, this.streamFactory);
             this.createdInstances++;
             return con;
         }
@@ -132,7 +145,7 @@ public class BrCacheConnectionPool {
             return con;
         else
         if(this.createdInstances < this.maxInstances){
-            con = createConnection(host, port);
+            con = createConnection(host, port, this.streamFactory);
             con.connect();
             this.createdInstances++;
             return con;
