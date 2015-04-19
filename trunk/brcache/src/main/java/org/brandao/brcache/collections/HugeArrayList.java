@@ -205,9 +205,8 @@ public class HugeArrayList<T> implements HugeList<T>,Serializable{
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void clear() {
+    public synchronized void clear() {
         this.elements.clear();
-        this.size = 0;
     }
 
     public void add(int index, T element) {
@@ -248,5 +247,18 @@ public class HugeArrayList<T> implements HugeList<T>,Serializable{
     public boolean isReadOnly() {
         return this.elements.isReadOnly();
     }
+
+    public String getUniqueId(){
+        return this.elements.getId();
+    }
     
+    @Override
+    protected void finalize() throws Throwable{
+        try{
+            this.clear();
+        }
+        finally{
+            super.finalize();
+        }
+    }
 }

@@ -31,4 +31,6 @@ public interface Swapper<T> {
 
     Entry<T> readDiskItem(Integer index);
     
+    void clear();
+    
 }

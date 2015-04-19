@@ -25,40 +25,29 @@ import java.io.Serializable;
  */
 public class NodeEntry implements Serializable{
 
-	private Entry entry;
-	
-	private NodeEntry next;
+    private Entry entry;
 
-	private NodeEntry prev;
-	
-	public NodeEntry(Entry entry){
-		this.entry = entry;
-		this.prev = null;
-		this.next  = null;
-	}
-	
-	public Entry getEntry() {
-		return entry;
-	}
+    private NodeEntry next;
 
-	public void setEntry(Entry entry) {
-		this.entry = entry;
-	}
+    public NodeEntry(Entry entry){
+        this.entry = entry;
+        this.next  = null;
+    }
 
-	public NodeEntry getNext() {
-		return next;
-	}
+    public Entry getEntry() {
+        return entry;
+    }
 
-	public void setNext(NodeEntry next) {
-		this.next = next;
-	}
+    public void setEntry(Entry entry) {
+        this.entry = entry;
+    }
 
-	public NodeEntry getPrev() {
-		return prev;
-	}
+    public NodeEntry getNext() {
+        return next;
+    }
 
-	public void setPrev(NodeEntry prev) {
-		this.prev = prev;
-	}
-	
+    public void setNext(NodeEntry next) {
+        this.next = next;
+    }
+
 }
