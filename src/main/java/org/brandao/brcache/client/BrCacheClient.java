@@ -25,7 +25,9 @@ import java.lang.reflect.UndeclaredThrowableException;
 import org.brandao.brcache.CacheException;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
+import org.brandao.brcache.server.DefaultStreamFactory;
 import org.brandao.brcache.server.ReadDataException;
+import org.brandao.brcache.server.StreamFactory;
 import org.brandao.brcache.server.WriteDataException;
 
 /**
@@ -49,15 +51,24 @@ public class BrCacheClient implements BrCacheConnection{
     private final Method getMethod;
     
     private final Method removeMethod;
+
+    private StreamFactory streamFactory;
     
     public BrCacheClient(String host, int port, 
             int minConnections, int maxConnections) throws CacheException {
+        this(host, port, minConnections, maxConnections, new DefaultStreamFactory());
+    }
+    
+    public BrCacheClient(String host, int port, 
+            int minConnections, int maxConnections, StreamFactory streamFactory) throws CacheException {
         
         try{
             this.host = host;
             this.port = port;
             this.minConnections = minConnections;
             this.maxConnections = maxConnections;
+            this.streamFactory = streamFactory;
+            
             this.putMethod = 
                     BrCacheConnection.class
                             .getMethod("put", new Class[] {String.class, long.class, Object.class});
@@ -75,7 +86,7 @@ public class BrCacheClient implements BrCacheConnection{
     
     public void connect() throws IOException {
         this.pool =
-            new BrCacheConnectionPool(host, port, minConnections, maxConnections);
+            new BrCacheConnectionPool(host, port, minConnections, maxConnections, streamFactory);
     }
 
     public void disconect() throws IOException {

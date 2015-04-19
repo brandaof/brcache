@@ -35,9 +35,9 @@ public class TextTerminalReader implements TerminalReader{
     
     private int offset;
     
-    public TextTerminalReader(Socket socket, int readBufferSize) throws IOException{
+    public TextTerminalReader(Socket socket, StreamFactory streamFactory, int readBufferSize) throws IOException{
         this.socket = socket;
-        this.stream = socket.getInputStream();
+        this.stream = streamFactory.createInpuStream(socket);
         this.buffer = new TextBufferReader(readBufferSize, this.stream);
         this.offset = 0;
     }
@@ -49,7 +49,9 @@ public class TextTerminalReader implements TerminalReader{
             return Command.valueOf(line.toString());
         }
         catch(IOException e){
-            throw new ReadDataException(String.format(TerminalConstants.CANT_READ_COMMAND, String.valueOf(line)));
+            throw new ReadDataException(
+                    String.format(TerminalConstants.CANT_READ_COMMAND, 
+                    String.valueOf(line)), e);
         }
         catch(NullPointerException e){
             throw new UnknowCommandException("undefined");

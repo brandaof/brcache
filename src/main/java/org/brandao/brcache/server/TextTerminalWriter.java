@@ -31,9 +31,12 @@ public class TextTerminalWriter implements TerminalWriter{
     
     private int writeBufferSize;
     
-    public TextTerminalWriter(Socket socket, int writeBufferSize) throws IOException{
+    public TextTerminalWriter(Socket socket, StreamFactory streamFactory, 
+            int writeBufferSize) throws IOException{
         this.writeBufferSize = writeBufferSize;
-        this.buffer = new TextBufferWriter(this.writeBufferSize, socket.getOutputStream());
+        this.buffer = new TextBufferWriter(
+                this.writeBufferSize, 
+                streamFactory.createOutputStream(socket));
     }
 
     public void sendMessage(String message) throws WriteDataException {

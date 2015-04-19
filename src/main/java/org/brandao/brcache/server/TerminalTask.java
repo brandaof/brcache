@@ -40,23 +40,30 @@ public class TerminalTask implements Runnable{
     
     private int writeBufferSize;
     
-    public TerminalTask(Terminal terminal, Cache cache, Socket socket, 
+    private StreamFactory streamFactory;
+    
+    public TerminalTask(Terminal terminal, Cache cache, 
+            Socket socket,
+            StreamFactory streamFactory,
             int readBufferSize, int writeBufferSize, 
             TerminalFactory factory,
             Configuration config){
-        this.terminal        = terminal;
-        this.factory         = factory;
-        this.cache           = cache;
-        this.socket          = socket;
-        this.readBufferSize  = readBufferSize;
-        this.writeBufferSize = writeBufferSize;
-        this.config          = config;
+        this.terminal            = terminal;
+        this.factory             = factory;
+        this.cache               = cache;
+        this.socket              = socket;
+        this.readBufferSize      = readBufferSize;
+        this.writeBufferSize     = writeBufferSize;
+        this.config              = config;
+        this.streamFactory       = streamFactory;
     }
     
     public void run() {
         try{
             updateInfo();
-            this.terminal.init(this.socket, this.cache, this.readBufferSize, this.writeBufferSize);
+            this.terminal.init(this.socket, this.cache, 
+                    this.streamFactory,
+                    this.readBufferSize, this.writeBufferSize);
             this.terminal.execute();
         }
         catch(Exception e){

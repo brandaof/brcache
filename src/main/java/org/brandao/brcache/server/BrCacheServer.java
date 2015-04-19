@@ -60,6 +60,10 @@ public class BrCacheServer {
     
     private boolean run;
     
+    private boolean compress;
+    
+    private StreamFactory streamFactory;
+    
     /**
      * Cria uma nova instância do cache.
      * 
@@ -104,6 +108,7 @@ public class BrCacheServer {
         this.serverSocket.setSoTimeout(this.timeout);
         this.serverSocket.setReuseAddress(this.reuseAddress);
         this.executorService = Executors.newFixedThreadPool(this.maxConnections);
+        this.streamFactory = this.createStreamFactory();
         
         this.run = true;
         while(this.run){
@@ -116,6 +121,7 @@ public class BrCacheServer {
                             terminal, 
                             this.cache, 
                             socket, 
+                            this.streamFactory,
                             this.readBufferSize,
                             this.writeBufferSize,
                             this.terminalFactory,
@@ -145,6 +151,17 @@ public class BrCacheServer {
         }
     }
     
+    private StreamFactory createStreamFactory(){
+        StreamFactory factory;
+        if(this.compress)
+            factory = new CompressStreamFactory();
+        else
+            factory = new DefaultStreamFactory();
+        
+        factory.setConfiguration(this.config);
+        return factory;
+    }
+    
     private void loadConfiguration(Configuration config){
 
         long portNumber            = config.getLong("port","1044");
@@ -169,7 +186,7 @@ public class BrCacheServer {
         String swapper             = config.getString("swapper","file_tree");
         int swapper_thread         = config.getInt("swapper_thread","1");
         double lock_factor         = config.getDouble("lock_factor","0.1");
-        
+        boolean compressState      = config.getBoolean("compress_stream","false");
         
         if(nodes_swap_size > nodes_size)
             throw new RuntimeException("nodes_swap_size > nodes_size");
@@ -194,6 +211,7 @@ public class BrCacheServer {
         this.port            = (int)portNumber;
         this.readBufferSize  = (int)read_buffer_size;
         this.writeBufferSize = (int)write_buffer_size;
+        this.compress        = compressState;
         
         this.cache = new Cache(
             nodes_size,
@@ -216,6 +234,10 @@ public class BrCacheServer {
         
         this.monitorThread = new MonitorThread(this.cache, this.config);
         this.monitorThread.start();
+    }
+
+    public StreamFactory getStreamFactory() {
+        return streamFactory;
     }
     
 }

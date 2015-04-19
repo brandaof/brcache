@@ -82,7 +82,7 @@ public class TextBufferReader {
                 }
                 
                 int len = stream.read(this.buffer, this.limit, this.buffer.length - limit);
-                if(this.limit == -1)
+                if(len == -1)
                     throw new IOException();
                 
                 this.limit += len;
