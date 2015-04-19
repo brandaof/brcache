@@ -53,7 +53,9 @@ public class Collections {
 
         return 
             new String(
-                serverId + 
+                serverId +
+                "#" +
+                "BRC" +
                 "#" +
                 Long.toString(collectionID++, 36)
             );

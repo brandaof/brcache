@@ -18,10 +18,8 @@
 package org.brandao.brcache.collections;
 
 import java.io.*;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  *
@@ -32,7 +30,7 @@ public abstract class AbstractCollectionSegment<I,T>
     
     private int globalID = 0;
     
-    protected final ConcurrentMap<Integer, Entry<T>> segments;
+    protected ConcurrentMap<Integer, Entry<T>> segments;
     
     private transient File path;
     
@@ -344,6 +342,49 @@ public abstract class AbstractCollectionSegment<I,T>
             lastItem = null;
         }
         return result;
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException{
+        this.flush();
+        out.writeDouble(this.clearFactor);
+        out.writeObject(this.firstItem);
+        out.writeBoolean(this.forceSwap);
+        out.writeDouble(this.fragmentSize);
+        out.writeInt(this.globalID);
+        out.writeObject(this.id);
+        out.writeObject(this.lastItem);
+        out.writeInt(this.locks.length);
+        out.writeInt(this.lastSegment);
+        out.writeInt(this.maxCapacity);
+        out.writeInt(this.maxSegmentCapacity);
+        out.writeObject(this.pathName);
+        out.writeBoolean(this.readOnly);
+        out.writeObject(this.segments);
+        out.writeObject(this.swap);
+    }
+    
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException{
+
+        this.clearFactor = in.readDouble();
+        this.firstItem = (NodeEntry) in.readObject();
+        this.forceSwap = in.readBoolean();
+        this.fragmentSize = in.readDouble();
+        this.globalID = in.readInt();
+        this.id = (String) in.readObject();
+        this.lastItem = (NodeEntry) in.readObject();
+        
+        int locksSize = in.readInt();
+        this.locks = new Object[locksSize];
+        for(int i=0;i<locksSize;i++)
+            this.locks[i] = new Object();
+        
+        this.lastSegment = in.readInt();
+        this.maxCapacity = in.readInt();
+        this.maxSegmentCapacity = in.readInt();
+        this.pathName = (String) in.readObject();
+        this.readOnly = in.readBoolean();
+        this.segments = (ConcurrentMap<Integer, Entry<T>>) in.readObject();
+        this.swap = (Swapper<T>) in.readObject();
     }
     
 }
