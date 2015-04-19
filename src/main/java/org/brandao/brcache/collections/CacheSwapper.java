@@ -89,13 +89,13 @@ public class CacheSwapper<T> implements Swapper<T>{
         try{
             if(CacheList.getCache() != null){
                 Cache cache = CacheList.getCache();
-                for(int i=0;i<this.maxIndex;i++){
+                for(int i=0;i<=this.maxIndex;i++){
                     cache.remove(new String(this.id + ":" + i));
                 }
             }
             else{
                 BrCacheClient client = CacheList.getClient();
-                for(int i=0;i<this.maxIndex;i++){
+                for(int i=0;i<=this.maxIndex;i++){
                     client.remove(new String(this.id + ":" + i));
                 }
             }
