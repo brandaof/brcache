@@ -40,7 +40,7 @@ public class CollectionSegmentImp<I>
                 clearFactor, fragmentFactor, swap, quantityLock, quantitySwaperThread);
         
         int fragmentSize        = (int)(maxCapacity * fragmentFactor);
-        int maxSegmentCapacity  = (int)(maxCapacity/fragmentSize);
+        //int maxSegmentCapacity  = (int)(maxCapacity/fragmentSize);
         
         /*
         int max = (int)(maxSegmentCapacity*(1-clearFactor) + 1.0);

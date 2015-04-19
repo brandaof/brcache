@@ -18,6 +18,7 @@
 
 package org.brandao.brcache.collections;
 
+import java.io.Serializable;
 import org.brandao.brcache.Cache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
@@ -27,7 +28,8 @@ import org.brandao.brcache.client.BrCacheClient;
  *
  * @author Brandao
  */
-public class CacheSwapper<T> implements Swapper<T>{
+public class CacheSwapper<T> 
+    implements Swapper<T>, Serializable{
 
     private String id;
     
