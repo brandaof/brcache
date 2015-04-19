@@ -165,6 +165,13 @@ public class DefaultSwaper<T> implements Swapper<T> {
     public void setId(String value) {
         this.id = value;
     }
+
+    public void clear() {
+        File root = this.pathName == null? Collections.getPath() : new File(this.pathName);
+        File rootPath = new File(root, id);
+        if(rootPath.exists())
+            Collections.deleteDir(rootPath);
+    }
     
     
 }

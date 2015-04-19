@@ -41,6 +41,8 @@ public class CollectionSegmentImp<I>
         
         int fragmentSize        = (int)(maxCapacity * fragmentFactor);
         int maxSegmentCapacity  = (int)(maxCapacity/fragmentSize);
+        
+        /*
         int max = (int)(maxSegmentCapacity*(1-clearFactor) + 1.0);
         
         for(int i=0;i<max;i++){
@@ -48,6 +50,7 @@ public class CollectionSegmentImp<I>
             Entry entry = new Entry<ArraySegment<I>>(i, seg);
             this.segments.put(i, entry);
         }
+        */
         
     }
     

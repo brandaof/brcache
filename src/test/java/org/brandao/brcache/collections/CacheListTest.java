@@ -21,7 +21,6 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.brandao.brcache.CacheException;
 import org.brandao.brcache.client.BrCacheClient;
-import org.brandao.brcache.server.Main;
 
 /**
  *
@@ -51,6 +50,29 @@ public class CacheListTest extends TestCase{
                 System.out.println("retrieve " + i);
             Assert.assertEquals(i, list.get(i).intValue());
         }
+        
+    }
+
+    public void testFinalize() throws IOException, CacheException{
+        BrCacheClient client = new BrCacheClient("localhost", 1044, 1, 10);
+        client.connect();
+        
+        CacheList.setClient(client);
+        
+        CacheList<Integer> list = new CacheList<Integer>(100, 0.3, 0.1);
+        for(int i=0;i<1000;i++){
+            list.add(i);
+        }
+        
+        list.flush();
+        
+        String id = list.getUniqueId();
+        int idLastIndex = (1000/10) - 1;
+        Object o = client.get(id + ":" + idLastIndex);
+        Assert.assertNotNull(o);
+        list.clear();
+        o = client.get(id + ":" + idLastIndex);
+        Assert.assertNull(o);
         
     }
     

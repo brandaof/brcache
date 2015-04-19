@@ -166,5 +166,13 @@ public class CacheList<T>
     public static void setClient(BrCacheClient aClient) {
         client = aClient;
     }
+
+    public String getUniqueId(){
+        return this.internalList.getUniqueId();
+    }
+
+    public void flush(){
+        this.internalList.flush();
+    }
     
 }

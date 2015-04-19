@@ -56,11 +56,13 @@ public abstract class AbstractCollectionSegment<I,T>
     
     private Swapper<T> swap;
 
-    private final BlockingQueue<Entry<T>> listedItensOnMemory;
-
     private Object[] locks;
     
     private boolean forceSwap;
+    
+    private NodeEntry firstItem;
+
+    private NodeEntry lastItem;
     
     public AbstractCollectionSegment(
             String pathName,
@@ -80,20 +82,11 @@ public abstract class AbstractCollectionSegment<I,T>
         this.readOnly            = false;
         this.lastSegment         = -1;
         this.swap                = swap;//new DefaultSwaper<T>(this.id, this.pathName);
-        this.listedItensOnMemory = new LinkedBlockingQueue<Entry<T>>();
         this.locks               = new Object[quantityLock];
         this.forceSwap           = false;
         this.swap.setPath(this.pathName);
         this.swap.setId(this.id);
-        
-        int max = (int)(this.maxSegmentCapacity*0.3 + 1.0);
-        
-        for(int i=0;i<max;i++){
-            Entry<T> e = new Entry<T>(i, false, null);
-            e.setOnDisk(false);
-            this.segments.put(i, e);
-        }
-            
+
         for(int i=0;i<locks.length;i++)
             locks[i] = new Object();
         
@@ -140,17 +133,21 @@ public abstract class AbstractCollectionSegment<I,T>
     private void clearSegments(double quantity){
         int count = 0;
         while(count < quantity){
-            Entry<T> item = this.listedItensOnMemory.poll();
+            Entry<T> item = this.getAndRemoveFirstListedItemOnMemory();
             if(item != null)
                 this.swapOnDisk(item.getIndex(), item);
             count++;
         }
     }
-    
-    private void clearAllSegments(){
-        segments.clear();
-    }
 
+    public void flush(){
+        Entry<T> item;
+        while((item = this.getAndRemoveFirstListedItemOnMemory()) != null){
+            if(item != null)
+                this.swapOnDisk(item.getIndex(), item);
+        }
+    }
+    
     public Entry<T> reload(Entry<T> entity){
         if(entity.isOnDisk())
             return swapOnMemory(entity.getIndex());
@@ -165,7 +162,7 @@ public abstract class AbstractCollectionSegment<I,T>
                 this.clearLimitLength();
             
             segments.put(key, item);
-            this.listedItensOnMemory.add(item);
+            this.addListedItemOnMemory(item);
             this.lastSegment = key;
         }
         
@@ -177,7 +174,7 @@ public abstract class AbstractCollectionSegment<I,T>
             if(!this.readOnly && item.isNeedUpdate())
                 this.swap.persistDiskItem(index, item);
 
-            this.listedItensOnMemory.remove(item);
+            //this.listedItensOnMemory.remove(item);
 
             Entry<T> removedItem = segments.remove(index);
 
@@ -210,7 +207,7 @@ public abstract class AbstractCollectionSegment<I,T>
 
             if(entity != null){
                 segments.put(key, entity);
-                this.listedItensOnMemory.add(entity);
+                this.addListedItemOnMemory(entity);
             }
 
             return entity;
@@ -288,23 +285,12 @@ public abstract class AbstractCollectionSegment<I,T>
         this.clearFactor = clearFactor;
     }
 
-    public void clear(){
-        this.segments.clear();
-        File path = Collections.getPath();
-        File swp = new File(path,this.id);
-        Collections.deleteDir(swp);
-    }
-
     public String getPathName() {
         return pathName;
     }
 
     public void setPathName(String pathName) {
         this.pathName = pathName;
-    }
-    
-    public void flush(){
-        this.clearAllSegments();
     }
     
     public void setReadOnly(boolean value){
@@ -323,4 +309,41 @@ public abstract class AbstractCollectionSegment<I,T>
         this.forceSwap = forceSwap;
     }
 
+    public void clear(){
+        this.swap.clear();
+    }
+    
+    private synchronized void addListedItemOnMemory(Entry<T> item){
+        
+        NodeEntry currentItem = new NodeEntry(item);
+
+        item.setNode(currentItem);
+        
+        if(firstItem == null){
+            firstItem = currentItem;
+            lastItem = currentItem;
+        }
+        else{
+            lastItem.setNext(currentItem);
+            lastItem = currentItem;
+        }
+    }
+
+    private synchronized Entry<T> getAndRemoveFirstListedItemOnMemory(){
+        
+        if(this.firstItem == null)
+            return null;
+        
+        NodeEntry next  = this.firstItem.getNext();
+        Entry<T> result = this.firstItem.getEntry();
+        
+        if(next != null)
+            firstItem = next;
+        else{
+            firstItem = null;
+            lastItem = null;
+        }
+        return result;
+    }
+    
 }

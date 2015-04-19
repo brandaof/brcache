@@ -18,8 +18,10 @@
 
 package org.brandao.brcache.collections;
 
+import org.brandao.brcache.Cache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
+import org.brandao.brcache.client.BrCacheClient;
 
 /**
  *
@@ -31,6 +33,12 @@ public class CacheSwapper<T> implements Swapper<T>{
     
     private long maxalive;
     
+    private Integer maxIndex;
+    
+    public CacheSwapper(){
+        this.maxIndex = -1;
+    }
+    
     public void setPath(String value) {
     }
 
@@ -39,6 +47,11 @@ public class CacheSwapper<T> implements Swapper<T>{
     }
 
     public void persistDiskItem(Integer index, Entry<T> item) {
+        synchronized(this){
+            if(this.maxIndex < index)
+                this.maxIndex = index;
+        }
+        
         try{
             if(CacheList.getCache() != null)
                 CacheList.getCache().putObject(new String(this.id + ":" + index), this.getMaxalive(), item);
@@ -70,6 +83,27 @@ public class CacheSwapper<T> implements Swapper<T>{
 
     public void setMaxalive(long maxalive) {
         this.maxalive = maxalive;
+    }
+
+    public void clear() {
+        try{
+            if(CacheList.getCache() != null){
+                Cache cache = CacheList.getCache();
+                for(int i=0;i<this.maxIndex;i++){
+                    cache.remove(new String(this.id + ":" + i));
+                }
+            }
+            else{
+                BrCacheClient client = CacheList.getClient();
+                for(int i=0;i<this.maxIndex;i++){
+                    client.remove(new String(this.id + ":" + i));
+                }
+            }
+                
+        }
+        catch (RecoverException ex) {
+            throw new RuntimeException(ex);
+        }
     }
     
 }
