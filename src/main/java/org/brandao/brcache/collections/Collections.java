@@ -18,6 +18,7 @@
 package org.brandao.brcache.collections;
 
 import java.io.File;
+import java.net.InetAddress;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -28,21 +29,34 @@ import java.util.Map;
 public class Collections {
 
     public static final String DEFAULT_TMP_DIR = System.getProperty("java.io.tmpdir");
+    
     private static boolean initialized = false;
+    
     private static Map<String, Object> locks = new LinkedHashMap<String, Object>();
+    
     private static File path;
+    
     private static String defaultPath = DEFAULT_TMP_DIR + "/collections";
+    
     private static File defaultFilePath = new File(defaultPath);
+    
     private static int defaultSegmentSize = 120;
-    private static long collectionID = 0;
+    
+    private volatile static long collectionID = 0;
 
+    private static String serverId;
+    
     public static String getNextId() {
 
-        if (!initialized) {
+        if (!initialized)
             initialize();
-        }
 
-        return String.valueOf(System.currentTimeMillis()) + String.valueOf(collectionID++);
+        return 
+            new String(
+                serverId + 
+                "#" +
+                Long.toString(collectionID++, 36)
+            );
     }
 
     public static void setPath(String aPath) {
@@ -73,11 +87,19 @@ public class Collections {
     }
 
     private static synchronized void initialize() {
-        if (initialized) {
+        if (initialized)
             return;
-        }
 
         initialized = true;
+        
+        try{
+            InetAddress addr = InetAddress.getLocalHost();	
+            serverId = addr.getHostAddress();
+        }
+        catch(Exception e){
+            serverId = "localhost";
+        }
+        
         deleteDir(defaultFilePath);
     }
 
