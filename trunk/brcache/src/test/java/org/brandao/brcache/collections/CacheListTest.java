@@ -37,16 +37,16 @@ public class CacheListTest extends TestCase{
         CacheList<Integer> list = new CacheList<Integer>(100, 0.3, 0.1);
         
         System.out.println("insert");
-        for(int i=0;i<1000000;i++){
+        for(int i=0;i<100000;i++){
             list.add(i);
-            if(i % 10000 == 0)
+            if(i % 1000 == 0)
                 System.out.println("insert " + i);
         }
         
         System.out.println("retrieve");
         
-        for(int i=0;i<1000000;i++){
-            if(i % 10000 == 0)
+        for(int i=0;i<100000;i++){
+            if(i % 1000 == 0)
                 System.out.println("retrieve " + i);
             Assert.assertEquals(i, list.get(i).intValue());
         }
