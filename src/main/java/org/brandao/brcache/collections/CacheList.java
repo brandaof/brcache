@@ -187,7 +187,6 @@ public class CacheList<T>
     }
     
     private void writeObject(ObjectOutputStream stream) throws IOException {
-        System.out.println("start write");
         boolean original = this.internalList.isReadOnly();
         try{
             this.internalList.flush();
@@ -196,7 +195,6 @@ public class CacheList<T>
         }
         finally{
             this.internalList.setReadOnly(original);
-            System.out.println("end write");
         }
     }
 
