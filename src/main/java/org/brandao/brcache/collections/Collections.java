@@ -46,6 +46,8 @@ public class Collections {
 
     private static String serverId;
     
+    private static String startTime;
+    
     public static String getNextId() {
 
         if (!initialized)
@@ -54,6 +56,8 @@ public class Collections {
         return 
             new String(
                 serverId +
+                "#" +
+                startTime + 
                 "#" +
                 "BRC" +
                 "#" +
@@ -97,6 +101,7 @@ public class Collections {
         try{
             InetAddress addr = InetAddress.getLocalHost();	
             serverId = addr.getHostAddress();
+            startTime = Long.toString(System.currentTimeMillis(), 36);
         }
         catch(Exception e){
             serverId = "localhost";
