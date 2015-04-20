@@ -86,7 +86,7 @@ public abstract class AbstractCollectionSegment<I,T>
         this.swap.setId(this.id);
 
         for(int i=0;i<locks.length;i++)
-            locks[i] = new Object();
+            locks[i] = new Integer(i);
         
         Thread[] clearThread = new Thread[quantitySwaperThread];
         
@@ -131,19 +131,25 @@ public abstract class AbstractCollectionSegment<I,T>
     private void clearSegments(double quantity){
         int count = 0;
         while(count < quantity){
-            Entry<T> item = this.getAndRemoveFirstListedItemOnMemory();
-            if(item != null)
+            Integer index = this.getAndRemoveFirstListedItemOnMemory();
+            Entry<T> item = this.segments.get(index);
+            if(item != null){
                 this.swapOnDisk(item.getIndex(), item);
+            }
             count++;
         }
     }
 
     public void flush(){
-        Entry<T> item;
-        while((item = this.getAndRemoveFirstListedItemOnMemory()) != null){
-            if(item != null)
+        Integer index;
+        while((index = this.getAndRemoveFirstListedItemOnMemory()) != null){
+            Entry<T> item = this.segments.get(index);
+            if(item != null){
                 this.swapOnDisk(item.getIndex(), item);
+            }
         }
+        this.firstItem = null;
+        this.lastItem  = null;
     }
     
     public Entry<T> reload(Entry<T> entity){
@@ -160,7 +166,7 @@ public abstract class AbstractCollectionSegment<I,T>
                 this.clearLimitLength();
             
             segments.put(key, item);
-            this.addListedItemOnMemory(item);
+            this.addListedItemOnMemory(item.getIndex());
             this.lastSegment = key;
         }
         
@@ -205,7 +211,7 @@ public abstract class AbstractCollectionSegment<I,T>
 
             if(entity != null){
                 segments.put(key, entity);
-                this.addListedItemOnMemory(entity);
+                this.addListedItemOnMemory(entity.getIndex());
             }
 
             return entity;
@@ -311,11 +317,11 @@ public abstract class AbstractCollectionSegment<I,T>
         this.swap.clear();
     }
     
-    private synchronized void addListedItemOnMemory(Entry<T> item){
+    private synchronized void addListedItemOnMemory(Integer item){
         
         NodeEntry currentItem = new NodeEntry(item);
 
-        item.setNode(currentItem);
+        //item.setNode(currentItem);
         
         if(firstItem == null){
             firstItem = currentItem;
@@ -327,13 +333,13 @@ public abstract class AbstractCollectionSegment<I,T>
         }
     }
 
-    private synchronized Entry<T> getAndRemoveFirstListedItemOnMemory(){
+    private synchronized Integer getAndRemoveFirstListedItemOnMemory(){
         
         if(this.firstItem == null)
             return null;
         
         NodeEntry next  = this.firstItem.getNext();
-        Entry<T> result = this.firstItem.getEntry();
+        Integer result = this.firstItem.getEntry();
         
         if(next != null)
             firstItem = next;
@@ -343,9 +349,8 @@ public abstract class AbstractCollectionSegment<I,T>
         }
         return result;
     }
-    
-    private void writeObject(ObjectOutputStream out) throws IOException{
-        this.flush();
+    /*
+    private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeDouble(this.clearFactor);
         out.writeObject(this.firstItem);
         out.writeBoolean(this.forceSwap);
@@ -363,8 +368,9 @@ public abstract class AbstractCollectionSegment<I,T>
         out.writeObject(this.swap);
     }
     
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException{
-
+    private void readObject(ObjectInputStream in)
+            throws IOException, ClassNotFoundException {
+        
         this.clearFactor = in.readDouble();
         this.firstItem = (NodeEntry) in.readObject();
         this.forceSwap = in.readBoolean();
@@ -386,5 +392,5 @@ public abstract class AbstractCollectionSegment<I,T>
         this.segments = (ConcurrentMap<Integer, Entry<T>>) in.readObject();
         this.swap = (Swapper<T>) in.readObject();
     }
-    
+    */    
 }

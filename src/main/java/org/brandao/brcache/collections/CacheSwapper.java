@@ -53,32 +53,57 @@ public class CacheSwapper<T>
             if(this.maxIndex < index)
                 this.maxIndex = index;
         }
+
+        if(item.getItem() == null)
+            throw new IllegalStateException("invalid item: " + index);
         
         try{
             if(CacheList.getCache() != null)
-                CacheList.getCache().putObject(new String(this.id + ":" + index), this.getMaxalive(), item);
+                this.persistDiskItem(index, item.getItem(), CacheList.getCache());
             else
-                CacheList.getClient().put(new String(this.id + ":" + index), this.getMaxalive(), item);
-
+                this.persistDiskItem(index, item.getItem(), CacheList.getClient());
         }
         catch (StorageException ex) {
             throw new RuntimeException(ex);
         }
     }
 
+    public void persistDiskItem(Integer index, T item, Cache cache) throws StorageException {
+        cache.putObject(new String(this.id + ":" + index), this.getMaxalive(), item);
+    }
+
+    public void persistDiskItem(Integer index, T item, BrCacheClient client) throws StorageException {
+        client.put(new String(this.id + ":" + index), this.getMaxalive(), item);
+    }
+    
     public Entry<T> readDiskItem(Integer index) {
         try{
+            T item;
             if(CacheList.getCache() != null)
-                return (Entry<T>) CacheList.getCache().getObject(new String(this.id + ":" + index));
+                item = this.readDiskItem(index, CacheList.getCache());
             else
-                return (Entry<T>) CacheList.getClient().get(new String(this.id + ":" + index));
-                
+                item = this.readDiskItem(index, CacheList.getClient());
+            
+            if(item == null)
+                return null;
+            
+            Entry<T> entry = new Entry<T>(index, false, item);
+            entry.setOnDisk(false);
+            return entry;
         }
         catch (RecoverException ex) {
             throw new RuntimeException(ex);
         }
     }
 
+    public T readDiskItem(Integer index, Cache cache) throws RecoverException {
+        return (T) cache.getObject(new String(this.id + ":" + index));
+    }
+
+    public T readDiskItem(Integer index, BrCacheClient client) throws RecoverException {
+        return (T) client.get(new String(this.id + ":" + index));
+    }
+    
     public long getMaxalive() {
         return maxalive;
     }
@@ -89,22 +114,26 @@ public class CacheSwapper<T>
 
     public void clear() {
         try{
-            if(CacheList.getCache() != null){
-                Cache cache = CacheList.getCache();
-                for(int i=0;i<=this.maxIndex;i++){
-                    cache.remove(new String(this.id + ":" + i));
-                }
-            }
-            else{
-                BrCacheClient client = CacheList.getClient();
-                for(int i=0;i<=this.maxIndex;i++){
-                    client.remove(new String(this.id + ":" + i));
-                }
-            }
+            if(CacheList.getCache() != null)
+                this.clear(CacheList.getCache());
+            else
+                this.clear(CacheList.getClient());
                 
         }
         catch (RecoverException ex) {
             throw new RuntimeException(ex);
+        }
+    }
+    
+    private void clear(Cache cache) throws RecoverException{
+        for(int i=0;i<=this.maxIndex;i++){
+            cache.remove(new String(this.id + ":" + i));
+        }
+    }
+    
+    private void clear(BrCacheClient client) throws RecoverException{
+        for(int i=0;i<=this.maxIndex;i++){
+            client.remove(new String(this.id + ":" + i));
         }
     }
     

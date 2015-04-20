@@ -167,6 +167,14 @@ public class CacheList<T>
         client = aClient;
     }
 
+    public void setReadOnly(boolean value) {
+        this.internalList.setReadOnly(value);
+    }
+    
+    public boolean isReadOnly() {
+        return this.internalList.isReadOnly();
+    }
+
     public String getUniqueId(){
         return this.internalList.getUniqueId();
     }

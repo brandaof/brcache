@@ -17,10 +17,15 @@
 package org.brandao.brcache.collections;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.brandao.brcache.CacheException;
 import org.brandao.brcache.client.BrCacheClient;
+import org.brandao.brcache.server.BrCacheServer;
+import org.brandao.brcache.server.Configuration;
 
 /**
  *
@@ -28,7 +33,31 @@ import org.brandao.brcache.client.BrCacheClient;
  */
 public class CacheListTest extends TestCase{
     
-    public void testConnection() throws IOException, CacheException{
+    public CacheListTest() throws InterruptedException{
+        /*Configuration config = new Configuration();
+        config.setProperty("port", "1044");
+        
+        final BrCacheServer server = new BrCacheServer(config);
+        
+        Thread serverThread = new Thread(){
+          
+            public void run(){
+                try{
+                    server.start();
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                }
+            }
+        };
+        
+        serverThread.start();
+        Thread.sleep(2000);
+        */
+    }
+    
+    
+    public void testInsertAndRetrieve() throws IOException, CacheException{
         BrCacheClient client = new BrCacheClient("localhost", 1044, 1, 10);
         client.connect();
         
@@ -53,27 +82,113 @@ public class CacheListTest extends TestCase{
         
     }
 
-    public void testFinalize() throws IOException, CacheException{
+    public void testSerialize() throws IOException, CacheException {
         BrCacheClient client = new BrCacheClient("localhost", 1044, 1, 10);
         client.connect();
         
         CacheList.setClient(client);
         
         CacheList<Integer> list = new CacheList<Integer>(100, 0.3, 0.1);
+        
         for(int i=0;i<1000;i++){
             list.add(i);
         }
+
+        client.put("cache:teste", 0, list);
         
-        list.flush();
-        
+        int totalSegments = (1000/10) - 1;
+
         String id = list.getUniqueId();
-        int idLastIndex = (1000/10) - 1;
-        Object o = client.get(id + ":" + idLastIndex);
-        Assert.assertNotNull(o);
-        list.clear();
-        o = client.get(id + ":" + idLastIndex);
-        Assert.assertNull(o);
+        
+        for(int i=0;i<totalSegments;i++){
+            Object o = client.get(id + ":" + i);
+            Assert.assertNotNull(o);
+        }
+        
+        list = (CacheList<Integer>)client.get("cache:teste");
+
+        for(int i=0;i<1000;i++){
+            Assert.assertEquals(i, list.get(i).intValue());
+        }
+        
         
     }
-    
+
+    public void testConcurrentAccess() throws CacheException, IOException, InterruptedException{
+        final BrCacheClient client = new BrCacheClient("localhost", 1044, 1, 10);
+        client.connect();
+        final List<Throwable> erros = new ArrayList<Throwable>();
+        
+        CacheList.setClient(client);
+        
+        final CacheList<Integer> list = new CacheList<Integer>(100, 0.3, 0.1);
+        final Random r = new Random();
+        for(int i=0;i<200;i++){
+            Thread insertTask = new Thread(){
+                public void run(){
+                    try{
+                        while(true){
+                            synchronized(list){
+                                list.add(r.nextInt(1000000));
+                            }
+                            Thread.sleep(800);
+                        }
+                    }
+                    catch(Exception e){
+                        erros.add(e);
+                        e.printStackTrace();
+                    }
+                }
+            };
+            insertTask.start();
+        }
+        
+        Thread sendCache = new Thread(){
+                public void run(){
+                    try{
+                        while(true){
+                            synchronized(list){
+                                client.put("cache:teste", 0, list);
+                            }
+                            Thread.sleep(1000);
+                        }
+                    }
+                    catch(Exception e){
+                        erros.add(e);
+                        e.printStackTrace();
+                    }
+                }
+            };
+            sendCache.start();
+            
+        Thread readCache = new Thread(){
+                public void run(){
+                    CacheList<Integer> tmp;
+                    try{
+                        while(true){
+                            tmp = (CacheList<Integer>) client.get("cache:teste");
+                            for(int i=0;i<tmp.size();i++){
+                                tmp.get(i);
+                            }
+                            Thread.sleep(1000);
+                        }
+                    }
+                    catch(Exception e){
+                        erros.add(e);
+                        e.printStackTrace();
+                    }
+                }
+            };
+            readCache.start();
+            
+            Thread.sleep(60000);
+
+            System.out.println("end -------------------------------------");
+            
+            if(!erros.isEmpty()){
+                for(Throwable e: erros)
+                    e.printStackTrace();
+                Assert.fail();
+            }
+    }
 }
