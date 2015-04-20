@@ -17,6 +17,9 @@
 
 package org.brandao.brcache.collections;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
@@ -182,5 +185,23 @@ public class CacheList<T>
     public void flush(){
         this.internalList.flush();
     }
+    
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        System.out.println("start write");
+        boolean original = this.internalList.isReadOnly();
+        try{
+            this.internalList.flush();
+            this.internalList.setReadOnly(true);
+            stream.defaultWriteObject();
+        }
+        finally{
+            this.internalList.setReadOnly(original);
+            System.out.println("end write");
+        }
+    }
+
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        stream.defaultReadObject();
+    }    
     
 }

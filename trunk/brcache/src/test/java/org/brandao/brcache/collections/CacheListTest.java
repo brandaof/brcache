@@ -24,36 +24,16 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.brandao.brcache.CacheException;
 import org.brandao.brcache.client.BrCacheClient;
-import org.brandao.brcache.server.BrCacheServer;
-import org.brandao.brcache.server.Configuration;
 
 /**
  *
  * @author Brandao
  */
 public class CacheListTest extends TestCase{
+
+    private static final Object lock = new Object();
     
     public CacheListTest() throws InterruptedException{
-        /*Configuration config = new Configuration();
-        config.setProperty("port", "1044");
-        
-        final BrCacheServer server = new BrCacheServer(config);
-        
-        Thread serverThread = new Thread(){
-          
-            public void run(){
-                try{
-                    server.start();
-                }
-                catch(IOException e){
-                    e.printStackTrace();
-                }
-            }
-        };
-        
-        serverThread.start();
-        Thread.sleep(2000);
-        */
     }
     
     
@@ -123,12 +103,12 @@ public class CacheListTest extends TestCase{
         
         final CacheList<Integer> list = new CacheList<Integer>(100, 0.3, 0.1);
         final Random r = new Random();
-        for(int i=0;i<200;i++){
+        for(int i=0;i<350;i++){
             Thread insertTask = new Thread(){
                 public void run(){
                     try{
                         while(true){
-                            synchronized(list){
+                            synchronized(lock){
                                 list.add(r.nextInt(1000000));
                             }
                             Thread.sleep(800);
@@ -147,7 +127,7 @@ public class CacheListTest extends TestCase{
                 public void run(){
                     try{
                         while(true){
-                            synchronized(list){
+                            synchronized(lock){
                                 client.put("cache:teste", 0, list);
                             }
                             Thread.sleep(1000);
@@ -167,8 +147,10 @@ public class CacheListTest extends TestCase{
                     try{
                         while(true){
                             tmp = (CacheList<Integer>) client.get("cache:teste");
-                            for(int i=0;i<tmp.size();i++){
-                                tmp.get(i);
+                            if(tmp != null){
+                                for(int i=0;i<tmp.size();i++){
+                                    tmp.get(i);
+                                }
                             }
                             Thread.sleep(1000);
                         }

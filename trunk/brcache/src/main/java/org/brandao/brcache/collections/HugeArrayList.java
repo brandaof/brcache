@@ -17,6 +17,9 @@
 
 package org.brandao.brcache.collections;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.*;
 
@@ -118,12 +121,19 @@ public class HugeArrayList<T> implements HugeList<T>,Serializable{
     }
 
     public T get(int index) {
-        if(index>size)
-            throw new IndexOutOfBoundsException(index + " > " + size);
-        
-        int segmentId = (int)(index/this.elements.getFragmentSize());
-        int idx     = (int)(index%this.elements.getFragmentSize());
-        return this.elements.getEntity(segmentId, idx);
+        System.out.println("start insert");
+        try{
+            if(index>size)
+                throw new IndexOutOfBoundsException(index + " > " + size);
+
+            int segmentId = (int)(index/this.elements.getFragmentSize());
+            int idx     = (int)(index%this.elements.getFragmentSize());
+
+            return this.elements.getEntity(segmentId, idx);
+        }
+        finally{
+            System.out.println("end insert");
+        }
     }
     
     public boolean add(T e) {
