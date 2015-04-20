@@ -25,20 +25,20 @@ import java.io.Serializable;
  */
 public class NodeEntry implements Serializable{
 
-    private Entry entry;
+    private Integer entry;
 
     private NodeEntry next;
 
-    public NodeEntry(Entry entry){
+    public NodeEntry(Integer entry){
         this.entry = entry;
         this.next  = null;
     }
 
-    public Entry getEntry() {
+    public Integer getEntry() {
         return entry;
     }
 
-    public void setEntry(Entry entry) {
+    public void setEntry(Integer entry) {
         this.entry = entry;
     }
 
