@@ -23,7 +23,7 @@ import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 
 /**
- * Permite o armazenamento, atualização, remoção de um item em um servidor BRCache.
+ * Permite o armazenamento, atualização, remoção de um item em um servidor BrCache.
  * 
  * @author Brandao.
  */

@@ -24,7 +24,7 @@ import java.lang.reflect.Method;
  *
  * @author Brandao
  */
-public class BrConnectionInvocationHandler implements InvocationHandler{
+class BrConnectionInvocationHandler implements InvocationHandler{
 
     private static final String CLOSE_METHOD = "close";
     

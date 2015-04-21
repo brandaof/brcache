@@ -22,10 +22,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- *
  * @author Brandao
  */
-public abstract class AbstractCollectionSegment<I,T> 
+abstract class AbstractCollectionSegment<I,T> 
     implements CollectionSegment<I>, Serializable{
     
     private int globalID = 0;
@@ -37,8 +36,6 @@ public abstract class AbstractCollectionSegment<I,T>
     private transient boolean hasCreatePath;
     
     private String id;
-    
-    private String pathName;
     
     private int maxCapacity;
     
@@ -63,7 +60,6 @@ public abstract class AbstractCollectionSegment<I,T>
     private NodeEntry lastItem;
     
     public AbstractCollectionSegment(
-            String pathName,
             String id, int maxCapacity, double clearFactor,
             double fragmentFactor,
             Swapper<T> swap,
@@ -71,7 +67,6 @@ public abstract class AbstractCollectionSegment<I,T>
             int quantitySwaperThread) {
         
         this.id                  = id;
-        this.pathName            = pathName;
         this.fragmentSize        = (int)(maxCapacity * fragmentFactor);
         this.maxCapacity         = maxCapacity;
         this.clearFactor         = clearFactor;
@@ -82,7 +77,6 @@ public abstract class AbstractCollectionSegment<I,T>
         this.swap                = swap;//new DefaultSwaper<T>(this.id, this.pathName);
         this.locks               = new Object[quantityLock];
         this.forceSwap           = false;
-        this.swap.setPath(this.pathName);
         this.swap.setId(this.id);
 
         for(int i=0;i<locks.length;i++)
@@ -176,7 +170,7 @@ public abstract class AbstractCollectionSegment<I,T>
         
         synchronized(this.getLock(index)){
             if(!this.readOnly && item.isNeedUpdate())
-                this.swap.persistDiskItem(index, item);
+                this.swap.sendItem(index, item);
 
             //this.listedItensOnMemory.remove(item);
 
@@ -207,7 +201,7 @@ public abstract class AbstractCollectionSegment<I,T>
             if(forceSwap)
                 this.clearLimitLength();
             
-            Entry<T> entity = this.swap.readDiskItem(key);
+            Entry<T> entity = this.swap.getItem(key);
 
             if(entity != null){
                 segments.put(key, entity);
@@ -289,14 +283,6 @@ public abstract class AbstractCollectionSegment<I,T>
         this.clearFactor = clearFactor;
     }
 
-    public String getPathName() {
-        return pathName;
-    }
-
-    public void setPathName(String pathName) {
-        this.pathName = pathName;
-    }
-    
     public void setReadOnly(boolean value){
         this.readOnly = value;
     }

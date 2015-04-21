@@ -35,7 +35,7 @@ import org.brandao.brcache.server.TextTerminalWriter;
 import org.brandao.brcache.server.WriteDataException;
 
 /**
- * Permite o armazenamento, atualização, remoção de um item em um servidor BRCache.
+ * Permite o armazenamento, atualização, remoção de um item em um servidor BrCache.
  * 
  * @author Brandao.
  */

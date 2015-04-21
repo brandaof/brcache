@@ -25,7 +25,8 @@ import org.brandao.brcache.StorageException;
 import org.brandao.brcache.client.BrCacheClient;
 
 /**
- *
+ * Faz com que entidades sejam enviadas para um determinado cache.
+ * 
  * @author Brandao
  */
 public class CacheSwapper<T> 
@@ -41,14 +42,12 @@ public class CacheSwapper<T>
         this.maxIndex = -1;
     }
     
-    public void setPath(String value) {
-    }
-
     public void setId(String value) {
         this.id = value;
     }
 
-    public void persistDiskItem(Integer index, Entry<T> item) {
+    @Override
+    public void sendItem(Integer index, Entry<T> item) {
         synchronized(this){
             if(this.maxIndex < index)
                 this.maxIndex = index;
@@ -59,30 +58,31 @@ public class CacheSwapper<T>
         
         try{
             if(CacheList.getCache() != null)
-                this.persistDiskItem(index, item.getItem(), CacheList.getCache());
+                this.sendItem(index, item.getItem(), CacheList.getCache());
             else
-                this.persistDiskItem(index, item.getItem(), CacheList.getClient());
+                this.sendItem(index, item.getItem(), CacheList.getClient());
         }
         catch (StorageException ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    public void persistDiskItem(Integer index, T item, Cache cache) throws StorageException {
+    public void sendItem(Integer index, T item, Cache cache) throws StorageException {
         cache.putObject(new String(this.id + ":" + index), this.getMaxalive(), item);
     }
 
-    public void persistDiskItem(Integer index, T item, BrCacheClient client) throws StorageException {
+    public void sendItem(Integer index, T item, BrCacheClient client) throws StorageException {
         client.put(new String(this.id + ":" + index), this.getMaxalive(), item);
     }
     
-    public Entry<T> readDiskItem(Integer index) {
+    @Override
+    public Entry<T> getItem(Integer index) {
         try{
             T item;
             if(CacheList.getCache() != null)
-                item = this.readDiskItem(index, CacheList.getCache());
+                item = this.getItem(index, CacheList.getCache());
             else
-                item = this.readDiskItem(index, CacheList.getClient());
+                item = this.getItem(index, CacheList.getClient());
             
             if(item == null)
                 return null;
@@ -96,11 +96,11 @@ public class CacheSwapper<T>
         }
     }
 
-    public T readDiskItem(Integer index, Cache cache) throws RecoverException {
+    public T getItem(Integer index, Cache cache) throws RecoverException {
         return (T) cache.getObject(new String(this.id + ":" + index));
     }
 
-    public T readDiskItem(Integer index, BrCacheClient client) throws RecoverException {
+    public T getItem(Integer index, BrCacheClient client) throws RecoverException {
         return (T) client.get(new String(this.id + ":" + index));
     }
     

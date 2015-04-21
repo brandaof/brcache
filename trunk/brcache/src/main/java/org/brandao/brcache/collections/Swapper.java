@@ -18,19 +18,36 @@
 package org.brandao.brcache.collections;
 
 /**
- *
+ * Permite o envio e recebimento de entidades de outro nível. 
+ * Por exemplo, as entidades podem ser enviadas para o disco ou outro cache.
+ * 
  * @author Brandao
  */
 public interface Swapper<T> {
     
-    void setPath(String value);
-    
+    /**
+     * Define a identificação do agrupamento de entidades.
+     * @param value Identificação do agrupamento.
+     */
     void setId(String value);
     
-    void persistDiskItem(Integer index, Entry<T> item);
+    /**
+     * Envia uma entidade para o agrupamento.
+     * @param index Índice da entidade.
+     * @param item Item.
+     */
+    void sendItem(Integer index, Entry<T> item);
 
-    Entry<T> readDiskItem(Integer index);
+    /**
+     * Recupera uma entidade do agrupamento.
+     * @param index Índice
+     * @return item.
+     */
+    Entry<T> getItem(Integer index);
     
+    /**
+     * Remove todas as entidade do agrupamento.
+     */
     void clear();
     
 }

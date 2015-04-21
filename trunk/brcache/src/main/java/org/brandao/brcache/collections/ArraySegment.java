@@ -29,7 +29,7 @@ import java.util.Arrays;
  * 
  */
 @SuppressWarnings("serial")
-public class ArraySegment<K> implements Serializable {
+class ArraySegment<K> implements Serializable {
 
     private int id;
     private int size;
