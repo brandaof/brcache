@@ -19,20 +19,20 @@ package org.brandao.brcache.collections;
 
 import java.io.File;
 import java.net.InetAddress;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Properties;
 
 /**
- *
+ * Permite alterar as configurações comuns das coleções.
+ * 
  * @author Brandao
  */
 public class Collections {
 
     public static final String DEFAULT_TMP_DIR = System.getProperty("java.io.tmpdir");
     
-    private static boolean initialized = false;
+    private static final Properties configuration = new Properties();
     
-    private static Map<String, Object> locks = new LinkedHashMap<String, Object>();
+    private static boolean initialized = false;
     
     private static File path;
     
@@ -48,6 +48,18 @@ public class Collections {
     
     private static String startTime;
     
+    /**
+     * Obtém as configuração comuns às todas as coleções.
+     * @return Configuração.
+     */
+    public static Properties getConfiguration(){
+        return configuration;
+    }
+    
+    /**
+     * Gera uma identificação única usada para identificar uma coleção.
+     * @return Identificação.
+     */
     public static String getNextId() {
 
         if (!initialized)
@@ -65,6 +77,10 @@ public class Collections {
             );
     }
 
+    /**
+     * Defie a pasta raiz onde serão persistidas as entidades de uma coleção.
+     * @param aPath Pasta.
+     */
     public static void setPath(String aPath) {
         path = new File(aPath);
         if (!path.exists()) {
@@ -72,24 +88,12 @@ public class Collections {
         }
     }
 
+    /**
+     * Obtém a pasta raiz onde serão persistidas as entidades de uma coleção.
+     * @return Pasta.
+     */
     public static File getPath() {
         return path == null ? defaultFilePath : path;
-    }
-
-    public static void registerLock(String id, Object lock) {
-        locks.put(id, lock);
-    }
-
-    public static Object getLock(String id) {
-        return locks.remove(id);
-    }
-
-    public static int getDefaultSegmentSize() {
-        return defaultSegmentSize;
-    }
-
-    public static void setDefaultSegmentSize(int aDefaultSegmentSize) {
-        defaultSegmentSize = aDefaultSegmentSize;
     }
 
     private static synchronized void initialize() {
@@ -110,7 +114,7 @@ public class Collections {
         deleteDir(defaultFilePath);
     }
 
-    public static boolean deleteDir(File dir) {
+    static boolean deleteDir(File dir) {
         if (dir.isDirectory()) {
             String[] children = dir.list();
             for (int i = 0; i < children.length; i++) {

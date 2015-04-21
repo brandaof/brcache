@@ -23,12 +23,11 @@ import java.io.Serializable;
  *
  * @author Brandao
  */
-public class CollectionSegmentImp<I> 
+class CollectionSegmentImp<I> 
     extends AbstractCollectionSegment<I,ArraySegment<I>> 
     implements Serializable{
     
     public CollectionSegmentImp(
-            String pathName,
             String id, 
             int maxCapacity, 
             double clearFactor,
@@ -36,22 +35,9 @@ public class CollectionSegmentImp<I>
             Swapper<ArraySegment<I>> swap,
             int quantityLock,
             int quantitySwaperThread){
-        super(pathName, id, maxCapacity, 
-                clearFactor, fragmentFactor, swap, quantityLock, quantitySwaperThread);
-        
-        //int fragmentSize        = (int)(maxCapacity * fragmentFactor);
-        //int maxSegmentCapacity  = (int)(maxCapacity/fragmentSize);
-        
-        /*
-        int max = (int)(maxSegmentCapacity*(1-clearFactor) + 1.0);
-        
-        for(int i=0;i<max;i++){
-            ArraySegment<I> seg = new ArraySegment<I>(i, (int) getFragmentSize());
-            Entry entry = new Entry<ArraySegment<I>>(i, seg);
-            this.segments.put(i, entry);
-        }
-        */
-        
+        super(id, maxCapacity, 
+                clearFactor, fragmentFactor, swap, 
+                quantityLock, quantitySwaperThread);
     }
     
     @Override

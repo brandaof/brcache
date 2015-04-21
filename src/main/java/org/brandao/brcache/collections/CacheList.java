@@ -29,7 +29,9 @@ import org.brandao.brcache.Cache;
 import org.brandao.brcache.client.BrCacheClient;
 
 /**
- *
+ * Representa uma coleção de objetos de um determinado tipo. Os objetos dessa
+ * coleção são armazenados em cache de forma segmentada.
+ * 
  * @author Brandao
  */
 public class CacheList<T> 
@@ -41,19 +43,25 @@ public class CacheList<T>
 
     private final HugeArrayList<T> internalList;
     
+    /**
+     * Cria uma nova instância.
+     * 
+     * @param maxCapacityElementsOnMemory Número máximo de item que ficaram em memória.
+     * @param swapFactorElements Fator de transferência dos segmentos para o cache.
+     * @param fragmentFactorElements Fator de fragmentação da coleção dos itens.
+     */
     public CacheList(
             int maxCapacityElementsOnMemory,
-            double clearFactorElements, 
+            double swapFactorElements, 
             double fragmentFactorElements){
         
         CacheSwapper<ArraySegment<T>> swap = new CacheSwapper<ArraySegment<T>>();
         
         this.internalList = 
             new HugeArrayList<T>(
-                Collections.getPath().getAbsolutePath(),
                 Collections.getNextId(), 
                 maxCapacityElementsOnMemory, 
-                clearFactorElements, 
+                swapFactorElements, 
                 fragmentFactorElements, 
                 swap, 
                 1, 
@@ -62,126 +70,250 @@ public class CacheList<T>
         this.internalList.setForceSwap(true);
     }
     
+    /**
+     * @see List#size() 
+     * @return 
+     */
     public int size() {
         return this.internalList.size();
     }
 
+    /**
+     * @see List#isEmpty() 
+     * @return 
+     */
     public boolean isEmpty() {
         return this.internalList.isEmpty();
     }
 
+    /**
+     * @see List#contains(java.lang.Object) 
+     * @return 
+     */
     public boolean contains(Object o) {
         return this.internalList.contains(o);
     }
 
+    /**
+     * @see List#iterator() 
+     * @return 
+     */
     public Iterator<T> iterator() {
         return this.internalList.iterator();
     }
 
+    /**
+     * @see List#toArray() 
+     * @return 
+     */
     public Object[] toArray() {
         return this.internalList.toArray();
     }
 
+    /**
+     * @see List#toArray(T[]) 
+     * @return 
+     */
     public <T> T[] toArray(T[] a) {
         return this.internalList.toArray(a);
     }
 
+    /**
+     * @see List#add(java.lang.Object) 
+     * @return 
+     */
     public boolean add(T e) {
         return this.internalList.add(e);
     }
 
+    /**
+     * @see List#remove(java.lang.Object) 
+     * @return 
+     */
     public boolean remove(Object o) {
         return this.internalList.remove(o);
     }
 
+    /**
+     * @see List#containsAll(java.util.Collection) 
+     * @return 
+     */
     public boolean containsAll(Collection<?> c) {
         return this.internalList.containsAll(c);
     }
 
+    /**
+     * @see List#addAll(java.util.Collection) 
+     * @return 
+     */
     public boolean addAll(Collection<? extends T> c) {
         return this.internalList.addAll(c);
     }
 
+    /**
+     * @see List#addAll(int, java.util.Collection) 
+     * @return 
+     */
     public boolean addAll(int index, Collection<? extends T> c) {
         return this.addAll(index, c);
     }
 
+    /**
+     * @see List#removeAll(java.util.Collection) 
+     * @return 
+     */
     public boolean removeAll(Collection<?> c) {
         return this.internalList.removeAll(c);
     }
 
+    /**
+     * @see List#retainAll(java.util.Collection) 
+     * @return 
+     */
     public boolean retainAll(Collection<?> c) {
         return this.internalList.removeAll(c);
     }
 
+    /**
+     * @see List#clear() 
+     */
     public void clear() {
         this.internalList.clear();
     }
 
+    /**
+     * @see List#get(int) 
+     * @return 
+     */
     public T get(int index) {
         return this.internalList.get(index);
     }
 
+    /**
+     * @see List#set(int, java.lang.Object) 
+     * @return 
+     */
     public T set(int index, T element) {
         return this.internalList.set(index, element);
     }
 
+    /**
+     * @see List#addAll(int, java.util.Collection) 
+     * @return 
+     */
     public void add(int index, T element) {
         this.internalList.add(index, element);
     }
 
+    /**
+     * @see List#remove(int) 
+     * @return 
+     */
     public T remove(int index) {
         return this.remove(index);
     }
 
+    /**
+     * @see List#indexOf(java.lang.Object) 
+     * @return 
+     */
     public int indexOf(Object o) {
         return this.internalList.indexOf(o);
     }
 
+    /**
+     * @see List#lastIndexOf(java.lang.Object) 
+     * @return 
+     */
     public int lastIndexOf(Object o) {
         return this.internalList.lastIndexOf(o);
     }
 
+    /**
+     * @see List#listIterator() 
+     * @return 
+     */
     public ListIterator<T> listIterator() {
         return this.internalList.listIterator();
     }
 
+    /**
+     * @see List#listIterator(int) 
+     * @return 
+     */
     public ListIterator<T> listIterator(int index) {
         return this.internalList.listIterator(index);
     }
 
+    /**
+     * @see List#subList(int, int) 
+     * @return 
+     */
     public List<T> subList(int fromIndex, int toIndex) {
         return this.internalList.subList(fromIndex, toIndex);
     }
 
+    /**
+     * Obtém o cache associado à coleção.
+     * @return Cache
+     */
     public static Cache getCache() {
         return cache;
     }
 
+    /**
+     * Define o cache associado à coleção.
+     * @param aCache Cache.
+     */
     public static void setCache(Cache aCache) {
         cache = aCache;
     }
 
+    /**
+     * Obtém o cliente do cache associado à coleção
+     * @return Cliente.
+     */
     public static BrCacheClient getClient() {
         return client;
     }
 
+    /**
+     * Define o cliente do cache associado à coleção
+     * @param aClient Cliente
+     */
     public static void setClient(BrCacheClient aClient) {
         client = aClient;
     }
 
+    /**
+     * Define se itens podem ser incluidos, atualizados ou removidos.
+     * @param value Verdadeiro para permitir somente a obtenção dos itens.
+     * Caso contrário, além de obter, será permitido incluir, atualizar e remover itens.
+     */
     public void setReadOnly(boolean value) {
         this.internalList.setReadOnly(value);
     }
-    
+
+    /**
+     * Verifica se itens podem ser incluidos, atualizados ou removidos.
+     * @return Verdadeiro para permitir somente a obtenção dos itens.
+     * Caso contrário, além de obter, será permitido incluir, atualizar e remover itens.
+     */
     public boolean isReadOnly() {
         return this.internalList.isReadOnly();
     }
 
+    /**
+     * Obtém a identificação da coleção no cache.
+     * @return Identificação.
+     */
     public String getUniqueId(){
         return this.internalList.getUniqueId();
     }
 
+    /**
+     * Envia todos os segmentos que estão em memória para o cache.
+     */
     public void flush(){
         this.internalList.flush();
     }

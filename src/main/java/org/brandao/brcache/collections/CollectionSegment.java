@@ -21,7 +21,7 @@ package org.brandao.brcache.collections;
  *
  * @author Brandao
  */
-public interface CollectionSegment<T> {
+interface CollectionSegment<T> {
     
     T getEntity(Integer segment, Integer index);
 

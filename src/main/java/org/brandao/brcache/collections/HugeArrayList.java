@@ -24,7 +24,8 @@ import java.util.*;
  *
  * @author Brandao
  */
-public class HugeArrayList<T> implements HugeList<T>,Serializable{
+public class HugeArrayList<T> 
+    implements HugeList<T>,Serializable{
 
     public static final int DEFAULT_MAX_CAPACITY_ELEMENT = 1000;
     
@@ -40,7 +41,6 @@ public class HugeArrayList<T> implements HugeList<T>,Serializable{
     
     public HugeArrayList() {
         this(
-            null,
             null, 
             DEFAULT_MAX_CAPACITY_ELEMENT, 
             DEFAULT_CLEAR_FACTOR_ELEMENT, 
@@ -51,7 +51,6 @@ public class HugeArrayList<T> implements HugeList<T>,Serializable{
     }
 
     public HugeArrayList(
-            String pathName,
             String id, 
             int maxCapacityElements,
             double clearFactorElements, 
@@ -63,12 +62,10 @@ public class HugeArrayList<T> implements HugeList<T>,Serializable{
         this.size = 0;
         this.enableFinalize = false;
         id = id == null? Collections.getNextId() : id;
-        pathName = pathName == null? Collections.getPath().getAbsolutePath() : pathName;
-        swap = swap == null? new DefaultSwaper<ArraySegment<T>>(id, pathName) : swap;
+        swap = swap == null? new DefaultSwaper<ArraySegment<T>>() : swap;
         
         this.elements = 
                 new CollectionSegmentImp<T>(
-                pathName,
                 id,
                 maxCapacityElements, 
                 clearFactorElements, 

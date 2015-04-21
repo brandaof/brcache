@@ -32,6 +32,8 @@ import java.io.OutputStream;
  */
 public class DefaultSwaper<T> implements Swapper<T> {
     
+    public static final String PATH = "brcache.swapper.path";
+    
     private String id;
     
     private String pathName;
@@ -41,15 +43,10 @@ public class DefaultSwaper<T> implements Swapper<T> {
     private transient boolean hasCreatePath;
 
     public DefaultSwaper(){
-        this(null,null);
+        this.pathName = Collections.getConfiguration().getProperty(PATH);
     }
     
-    public DefaultSwaper(String id, String path){
-        this.id = id;
-        this.pathName = path;
-    }
-    
-    public void persistDiskItem(Integer index, Entry<T> item) {
+    public void sendItem(Integer index, Entry<T> item) {
         try {
             if (!hasCreatePath)
                 createPath();
@@ -87,7 +84,7 @@ public class DefaultSwaper<T> implements Swapper<T> {
     }
 
     @SuppressWarnings({"unchecked"})
-    public Entry<T> readDiskItem(Integer index) {
+    public Entry<T> getItem(Integer index) {
         try {
             if (!hasCreatePath)
                 createPath();

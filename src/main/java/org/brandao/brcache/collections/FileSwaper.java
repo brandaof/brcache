@@ -33,6 +33,10 @@ import java.util.Arrays;
  */
 public class FileSwaper<T> implements Swapper<T> {
     
+    public static final String SEGMENT_SIZE = "brcache.swapper.segment_size";
+    
+    public static final String PATH = "brcache.swapper.path";
+    
     private String id;
     
     private String pathName;
@@ -45,13 +49,12 @@ public class FileSwaper<T> implements Swapper<T> {
     
     private long segmentSize;
     
-    public FileSwaper(String id, String path, int segmentSize){
-        this.id = id;
-        this.pathName = path;
-        this.segmentSize = segmentSize;
+    public FileSwaper(){
+        throw new UnsupportedOperationException("not implemented yet");
     }
     
-    public synchronized void persistDiskItem(Integer index, Entry<T> item) {
+    @Override
+    public synchronized void sendItem(Integer index, Entry<T> item) {
         try {
             if (!hasCreatePath)
                 createPath();
@@ -86,7 +89,8 @@ public class FileSwaper<T> implements Swapper<T> {
     }
 
     @SuppressWarnings({"unchecked"})
-    public synchronized Entry<T> readDiskItem(Integer index) {
+    @Override
+    public synchronized Entry<T> getItem(Integer index) {
         long actual;
         long pos;
         long length;
