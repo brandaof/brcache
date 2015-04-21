@@ -19,11 +19,26 @@
 package org.brandao.brcache;
 
 /**
- *
+ * Descreve as estratégias de swap.
+ * 
  * @author Brandao
  */
 public enum SwaperStrategy {
     
-    FILE_TREE;
+    /**
+     * Os dados são enviados para outro cache.
+     */
+    CACHE,
+    
+    /**
+     * Os dados são persistidos em disco usando uma 
+     * árvore de diretórios.
+     */
+    FILE_TREE,
+    
+    /**
+     * Os dados são persistidos em disco em um único arquivo.
+     */
+    FILE;
     
 }

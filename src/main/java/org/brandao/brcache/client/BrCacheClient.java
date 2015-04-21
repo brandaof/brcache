@@ -18,6 +18,7 @@
 
 package org.brandao.brcache.client;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -31,6 +32,7 @@ import org.brandao.brcache.server.StreamFactory;
 import org.brandao.brcache.server.WriteDataException;
 
 /**
+ * Cliente para um servidor BrCache.
  * 
  * @author Brandao
  */
@@ -54,10 +56,33 @@ public class BrCacheClient implements BrCacheConnection{
 
     private StreamFactory streamFactory;
     
+    /**
+     * Cria um novo cliente.
+     * 
+     * @param host Endereço do servidor.
+     * @param port Porta de conexão com o servidor.
+     * @param minConnections Número de conexões que serão inicialmente criadas.
+     * @param maxConnections Número máximo de conexões.
+     * @throws CacheException Lançada caso ocorra algum problema ao fazer as 
+     * configurações iniciais.
+     */
+    
     public BrCacheClient(String host, int port, 
             int minConnections, int maxConnections) throws CacheException {
         this(host, port, minConnections, maxConnections, new DefaultStreamFactory());
     }
+    
+    /**
+     * Cria um novo cliente.
+     * 
+     * @param host Endereço do servidor.
+     * @param port Porta de conexão com o servidor.
+     * @param minConnections Número de conexões que serão inicialmente criadas.
+     * @param maxConnections Número máximo de conexões.
+     * @param streamFactory Fábrica das entidades que representam o fluxo de bytes.
+     * @throws CacheException Lançada caso ocorra algum problema ao fazer as 
+     * configurações iniciais.
+     */
     
     public BrCacheClient(String host, int port, 
             int minConnections, int maxConnections, StreamFactory streamFactory) throws CacheException {
@@ -84,15 +109,35 @@ public class BrCacheClient implements BrCacheConnection{
         }
     }
     
+    /**
+     * Inicia as conexões com o servidor.
+     * 
+     * @throws IOException Lançada caso não seja possível a conexão com o servidor.
+     */
     public void connect() throws IOException {
         this.pool =
             new BrCacheConnectionPool(host, port, minConnections, maxConnections, streamFactory);
     }
 
+    /**
+     * Destrói as conexões com o servidor.
+     * 
+     * @see BrCacheClient#close() 
+     * @throws IOException Lançada caso ocorra alguma falha ao 
+     * tentar desconectar do servidor.
+     */
     public void disconect() throws IOException {
         this.close();
     }
 
+    /**
+     * Insere um item no cache.
+     * @param key Identificação do item no cache.
+     * @param time Tempo máximo de vida do item no cache.
+     * @param value Item.
+     * @throws StorageException Lançada caso ocorra alguma falha ao tentar 
+     * inserir o item no cache.
+     */
     public void put(String key, long time, Object value) throws StorageException {
         try{
             tryExecuteAction(putMethod, new Object[]{key, time, value});
@@ -102,6 +147,13 @@ public class BrCacheClient implements BrCacheConnection{
         }
     }
 
+    /**
+     * Recupera um item do cache.
+     * @param key Identificação do item no cache.
+     * @return Item.
+     * @throws RecoverException Lançada caso ocorra alguma falha ao tentar 
+     * recuperar o item do cache.
+     */
     public Object get(String key) throws RecoverException {
         try{
             return tryExecuteAction(getMethod, new Object[]{key});
@@ -111,6 +163,13 @@ public class BrCacheClient implements BrCacheConnection{
         }
     }
 
+    /**
+     * Remove um item do cache.
+     * @param key Identificação do item no cache.
+     * @return Verdadeiro se o item for removido. Caso contrário falso.
+     * @throws RecoverException Lançada se ocorrer alguma falha ao 
+     * tentar remover o item do cache.
+     */
     public boolean remove(String key) throws RecoverException {
         try{
             return (Boolean)tryExecuteAction(removeMethod, new Object[]{key});
@@ -120,14 +179,26 @@ public class BrCacheClient implements BrCacheConnection{
         }
     }
 
+    /**
+     * Obtém o endereço do servidor.
+     * @return Endereço.
+     */
     public String getHost() {
         return this.host;
     }
 
+    /**
+     * Obtém a porta o servidor.
+     * @return Porta.
+     */
     public int getPort() {
         return this.port;
     }
 
+    /**
+     * @see Closeable#close() 
+     * @throws IOException 
+     */
     public void close() throws IOException {
         if(this.pool != null)
             this.pool.shutdown();
@@ -135,7 +206,7 @@ public class BrCacheClient implements BrCacheConnection{
     
     private Object tryExecuteAction(Method method, Object[] args) throws Throwable{
         int countTry = 0;
-        
+        Throwable x = null;
         while(countTry < 360){
             countTry++;
             
@@ -147,7 +218,8 @@ public class BrCacheClient implements BrCacheConnection{
                 return result;
             }
             catch(Throwable e){
-                e.printStackTrace();
+                if(x == null)
+                    x = e;
                 Throwable i = e;
                 while(i != null){
                     
@@ -184,7 +256,6 @@ public class BrCacheClient implements BrCacheConnection{
             }
             
         }
-        
-        throw new CacheException("communication fail");
+        throw new CacheException(x);
     }    
 }

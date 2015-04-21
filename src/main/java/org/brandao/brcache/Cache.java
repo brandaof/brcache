@@ -176,8 +176,29 @@ public class Cache implements Serializable{
         
     }
     
+    /**
+     * Cria um novo cache.
+     * 
+     */
     public Cache(){
-        throw new UnsupportedOperationException();
+        this(
+        29360128L,   //28kb
+        16384L,      //16kb
+        0.3,
+        29360128L,   //28kb
+        16384L,      // 16kb
+        0.3,
+        536870912L,  //512mb
+        1048576L,    //1mb
+        0.6,
+        16*1024,
+        8012,
+        1048576,     //1mb
+        128,
+        "/mnt/brcache",
+        SwaperStrategy.FILE_TREE,
+        0.1,
+        1);
     }
     
     /**
