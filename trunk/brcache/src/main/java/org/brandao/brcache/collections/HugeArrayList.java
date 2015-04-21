@@ -36,6 +36,8 @@ public class HugeArrayList<T> implements HugeList<T>,Serializable{
     
     private CollectionSegmentImp<T> elements;
     
+    private boolean enableFinalize;
+    
     public HugeArrayList() {
         this(
             null,
@@ -59,6 +61,7 @@ public class HugeArrayList<T> implements HugeList<T>,Serializable{
             int quantityClearThread) {
         
         this.size = 0;
+        this.enableFinalize = false;
         id = id == null? Collections.getNextId() : id;
         pathName = pathName == null? Collections.getPath().getAbsolutePath() : pathName;
         swap = swap == null? new DefaultSwaper<ArraySegment<T>>(id, pathName) : swap;
@@ -252,15 +255,24 @@ public class HugeArrayList<T> implements HugeList<T>,Serializable{
     public String getUniqueId(){
         return this.elements.getId();
     }
+
+    public boolean isEnableFinalize() {
+        return enableFinalize;
+    }
+
+    public void setEnableFinalize(boolean enableFinalize) {
+        this.enableFinalize = enableFinalize;
+    }
     
     @Override
     protected void finalize() throws Throwable{
         try{
-            if(!this.elements.isReadOnly())
+            if(this.enableFinalize && !this.elements.isReadOnly())
                 this.clear();
         }
         finally{
             super.finalize();
         }
     }
+
 }
