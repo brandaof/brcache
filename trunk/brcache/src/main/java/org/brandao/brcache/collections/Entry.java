@@ -20,7 +20,7 @@ package org.brandao.brcache.collections;
 import java.io.Serializable;
 
 /**
- * Encapisula uma entidade. Necessário para sua manipulação.
+ * Encapsula uma entidade. Necessário para sua manipulação.
  * 
  * @author Brandao
  */
