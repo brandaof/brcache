@@ -88,7 +88,7 @@ public class CacheSwapper<T>
                 return null;
             
             Entry<T> entry = new Entry<T>(index, false, item);
-            entry.setOnDisk(false);
+            entry.setNeedReload(false);
             return entry;
         }
         catch (RecoverException ex) {

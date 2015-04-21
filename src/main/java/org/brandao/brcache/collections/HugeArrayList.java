@@ -62,7 +62,7 @@ public class HugeArrayList<T>
         this.size = 0;
         this.enableFinalize = false;
         id = id == null? Collections.getNextId() : id;
-        swap = swap == null? new DefaultSwaper<ArraySegment<T>>() : swap;
+        swap = swap == null? new TreeFileSwaper<ArraySegment<T>>() : swap;
         
         this.elements = 
                 new CollectionSegmentImp<T>(

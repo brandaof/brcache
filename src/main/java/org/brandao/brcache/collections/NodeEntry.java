@@ -20,32 +20,53 @@ package org.brandao.brcache.collections;
 import java.io.Serializable;
 
 /**
+ * Define a posição do item na memória.
  * 
  * @author Brandao
  */
 public class NodeEntry implements Serializable{
 
-    private Integer entry;
+    private Integer index;
 
     private NodeEntry next;
 
-    public NodeEntry(Integer entry){
-        this.entry = entry;
+    /**
+     * Cria uma nova instância.
+     * 
+     * @param value Índice do item.
+     */
+    public NodeEntry(Integer value){
+        this.index = value;
         this.next  = null;
     }
 
-    public Integer getEntry() {
-        return entry;
+    /**
+     * Obtém o índice do item.
+     * @return Índice.
+     */
+    public Integer getIndex() {
+        return index;
+    }
+    /**
+     * Define o índice do item.
+     * @param value Índice.
+     */
+    public void setIndex(Integer value) {
+        this.index = value;
     }
 
-    public void setEntry(Integer entry) {
-        this.entry = entry;
-    }
-
+    /**
+     * Obtém o proximo item.
+     * @return Item.
+     */
     public NodeEntry getNext() {
         return next;
     }
 
+    /**
+     * Define o proximo item.
+     * @param next Item.
+     */
     public void setNext(NodeEntry next) {
         this.next = next;
     }

@@ -23,10 +23,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- *
+ * 
  * @author Brandao
  */
-public class TreeHugeMap<K extends TreeKey,T> implements Map<K,T>, Serializable{
+public class TreeHugeMap<K extends TreeKey,T> 
+    implements Map<K,T>, Serializable{
 
     public static final int DEFAULT_MAX_CAPACITY_NODE = 2000;
     
@@ -44,9 +45,12 @@ public class TreeHugeMap<K extends TreeKey,T> implements Map<K,T>, Serializable{
     private HugeArrayList<Map<Object,TreeHugeMapNode>> nodes;
     private TreeHugeMapNode<T> rootNode;
     
+    /**
+     * Cria uma nova instância usando os valores padrão.
+     * 
+     */
     public TreeHugeMap(){
         this(
-            null,
             null, 
             DEFAULT_MAX_CAPACITY_NODE, 
             DEFAULT_CLEAR_FACTOR_NODE, 
@@ -62,8 +66,23 @@ public class TreeHugeMap<K extends TreeKey,T> implements Map<K,T>, Serializable{
             1);
     }
 
+    /**
+     * Cria uma nova instância.
+     * @param id Identificação.
+     * @param maxCapacityNodes
+     * @param clearFactorNodes
+     * @param fragmentFactorNodes
+     * @param swapNodes
+     * @param quantityLockNodes
+     * @param quantitySwaperThreadNodes
+     * @param maxCapacityElements
+     * @param clearFactorElements
+     * @param fragmentFactorElements
+     * @param swapElements
+     * @param quantityLockElements
+     * @param quantitySwaperThreadElements 
+     */
     public TreeHugeMap(
-            String path,
             String id, 
             int maxCapacityNodes,
             double clearFactorNodes, 
@@ -80,7 +99,6 @@ public class TreeHugeMap<K extends TreeKey,T> implements Map<K,T>, Serializable{
         
         this.values = 
             new HugeArrayList(
-                path, 
                 id == null? null : id + "Values", 
                 maxCapacityElements, 
                 clearFactorElements, 
@@ -91,7 +109,6 @@ public class TreeHugeMap<K extends TreeKey,T> implements Map<K,T>, Serializable{
         
         this.nodes = 
             new HugeArrayList(
-                path,
                 id == null? null : id + "Nodes", 
                 maxCapacityNodes, 
                 clearFactorNodes, 

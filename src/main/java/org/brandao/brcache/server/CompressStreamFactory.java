@@ -32,6 +32,10 @@ import java.util.zip.Inflater;
 public class CompressStreamFactory 
     implements StreamFactory{
 
+    public CompressStreamFactory(){
+        throw new UnsupportedOperationException("not implemented yet");
+    }
+    
     public InputStream createInpuStream(Socket socket) throws IOException {
         return new CompressInputStream(
             socket.getInputStream(), new Inflater(true), 1024);

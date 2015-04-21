@@ -29,7 +29,7 @@ import org.brandao.brcache.StorageException;
  *
  * @author Brandao
  */
-public class Terminal {
+class Terminal {
     
     private Cache cache;
     

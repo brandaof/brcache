@@ -24,7 +24,7 @@ import java.io.OutputStream;
  *
  * @author Brandao
  */
-public class TextOutputStream extends OutputStream{
+class TextOutputStream extends OutputStream{
 
     private final TextBufferWriter buffer;
     

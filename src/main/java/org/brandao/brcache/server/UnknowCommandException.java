@@ -21,7 +21,7 @@ package org.brandao.brcache.server;
  *
  * @author Brandao
  */
-public class UnknowCommandException extends Exception{
+class UnknowCommandException extends Exception{
     
     public UnknowCommandException() {
         super();

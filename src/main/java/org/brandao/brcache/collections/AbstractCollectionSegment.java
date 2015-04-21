@@ -147,7 +147,7 @@ abstract class AbstractCollectionSegment<I,T>
     }
     
     public Entry<T> reload(Entry<T> entity){
-        if(entity.isOnDisk())
+        if(entity.isNeedReload())
             return swapOnMemory(entity.getIndex());
         else
             return entity;
@@ -181,7 +181,7 @@ abstract class AbstractCollectionSegment<I,T>
 
             item.setItem(null);
             item.setNeedUpdate(false);
-            item.setOnDisk(true);
+            item.setNeedReload(true);
         }
         
     }
@@ -325,7 +325,7 @@ abstract class AbstractCollectionSegment<I,T>
             return null;
         
         NodeEntry next  = this.firstItem.getNext();
-        Integer result = this.firstItem.getEntry();
+        Integer result = this.firstItem.getIndex();
         
         if(next != null)
             firstItem = next;

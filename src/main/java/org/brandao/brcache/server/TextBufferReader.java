@@ -25,7 +25,7 @@ import java.util.Arrays;
  *
  * @author Brandao
  */
-public class TextBufferReader {
+class TextBufferReader {
     
     private int offset;
     

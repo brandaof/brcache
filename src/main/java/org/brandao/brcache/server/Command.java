@@ -21,7 +21,7 @@ package org.brandao.brcache.server;
  *
  * @author Brandao
  */
-public enum Command {
+enum Command {
     
     put,
     get,

@@ -18,7 +18,9 @@
 package org.brandao.brcache.server;
 
 /**
- *
+ * Lançada caso ocorra algum falha ao tentar ler os dados 
+ * de uma solicitação.
+ * 
  * @author Brandao
  */
 public class ReadDataException extends Exception{

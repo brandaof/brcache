@@ -18,7 +18,9 @@
 package org.brandao.brcache.server;
 
 /**
- *
+ * Lançada caso ocorra algum falha ao tentar enviar os dados 
+ * em uma solicitação.
+ * 
  * @author Brandao
  */
 public class WriteDataException extends Exception{

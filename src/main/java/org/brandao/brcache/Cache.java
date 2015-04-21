@@ -33,7 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import org.brandao.brcache.collections.DefaultSwaper;
+import org.brandao.brcache.collections.TreeFileSwaper;
 import org.brandao.brcache.collections.Swapper;
 
 /**
@@ -100,7 +100,6 @@ public class Cache implements Serializable{
         int writeBufferSize,
         int maxSizeEntry,
         int maxSizeKey,
-        String dataPath,
         SwaperStrategy swaperType,
         double lockFactor,
         int quantitySwaperThread){
@@ -146,7 +145,6 @@ public class Cache implements Serializable{
         
         this.dataMap =
                 new TreeHugeMap<TreeKey, DataMap>(
-                dataPath,
                 "dataMap",
                 (int)nodesOnMemory,
                 swapSegmentNodesFactor,
@@ -164,7 +162,6 @@ public class Cache implements Serializable{
         
         this.dataList =
                 new HugeArrayList<byte[]>(
-                dataPath,
                 "dataList",
                 (int)bytesOnMemory,
                 swapSegmentsFactor,
@@ -195,7 +192,6 @@ public class Cache implements Serializable{
         8012,
         1048576,     //1mb
         128,
-        "/mnt/brcache",
         SwaperStrategy.FILE_TREE,
         0.1,
         1);
@@ -208,7 +204,7 @@ public class Cache implements Serializable{
      * @return Estratégia.
      */
     protected Swapper getSwaper(SwaperStrategy strategy){
-        return new DefaultSwaper();
+        return new TreeFileSwaper();
     }
     
     /**

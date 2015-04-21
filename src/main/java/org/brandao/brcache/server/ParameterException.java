@@ -18,7 +18,9 @@
 package org.brandao.brcache.server;
 
 /**
- *
+ * Lançada caso ocorra algum falha ao tentar processar os parâmetros 
+ * de uma solicitação.
+ * 
  * @author Brandao
  */
 public class ParameterException extends Exception{

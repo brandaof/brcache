@@ -23,7 +23,7 @@ import org.brandao.brcache.Cache;
  *
  * @author Brandao
  */
-public class MonitorThread extends Thread{
+class MonitorThread extends Thread{
     
     private boolean run;
     

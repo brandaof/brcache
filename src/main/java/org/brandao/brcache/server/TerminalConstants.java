@@ -21,7 +21,7 @@ package org.brandao.brcache.server;
  *
  * @author Brandao
  */
-public class TerminalConstants {
+class TerminalConstants {
 
     public static final byte[] CRLF = "\r\n".getBytes();
     
