@@ -27,10 +27,12 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
 /**
- *
+ * As entidades são enviadas para o disco e armazenadas 
+ * em uma árvore de diretórios.
+ * 
  * @author Brandao
  */
-public class DefaultSwaper<T> implements Swapper<T> {
+public class TreeFileSwaper<T> implements Swapper<T> {
     
     public static final String PATH = "brcache.swapper.path";
     
@@ -42,7 +44,7 @@ public class DefaultSwaper<T> implements Swapper<T> {
     
     private transient boolean hasCreatePath;
 
-    public DefaultSwaper(){
+    public TreeFileSwaper(){
         this.pathName = Collections.getConfiguration().getProperty(PATH);
     }
     
@@ -104,7 +106,7 @@ public class DefaultSwaper<T> implements Swapper<T> {
                 T item = (T) iIn.readObject();
 
                 Entry<T> entry = new Entry<T>(index, false, item);
-                entry.setOnDisk(false);
+                entry.setNeedReload(false);
                 return entry;
             }
             finally {

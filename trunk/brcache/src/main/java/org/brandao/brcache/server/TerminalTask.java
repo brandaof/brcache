@@ -24,7 +24,7 @@ import org.brandao.brcache.Cache;
  *
  * @author Brandao
  */
-public class TerminalTask implements Runnable{
+class TerminalTask implements Runnable{
 
     private final Terminal terminal;
     

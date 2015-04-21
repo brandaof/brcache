@@ -25,7 +25,7 @@ import java.util.Arrays;
  *
  * @author Brandao
  */
-public class TextInputStreamReader extends InputStream{
+class TextInputStreamReader extends InputStream{
 
     private static final byte[] CRLF = TerminalConstants.CRLF;
     

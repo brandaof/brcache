@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.brandao.brcache.Cache;
 import org.brandao.brcache.SwaperStrategy;
+import org.brandao.brcache.collections.Collections;
 
 /**
  * Representa o servidor do cache.
@@ -213,6 +214,8 @@ public class BrCacheServer {
         this.writeBufferSize = (int)write_buffer_size;
         this.compress        = compressState;
         
+        Collections.setPath(data_path);
+        
         this.cache = new Cache(
             nodes_size,
             nodes_swap_size,
@@ -227,7 +230,6 @@ public class BrCacheServer {
             (int)write_buffer_size,
             (int)max_size_entry,
             (int)max_size_key,
-            data_path,
             SwaperStrategy.valueOf(swapper.toUpperCase()),
             lock_factor,
             swapper_thread);

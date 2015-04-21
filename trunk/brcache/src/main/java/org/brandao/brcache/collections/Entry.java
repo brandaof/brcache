@@ -20,7 +20,8 @@ package org.brandao.brcache.collections;
 import java.io.Serializable;
 
 /**
- *
+ * Encapisula uma entidade. Necessário para sua manipulação.
+ * 
  * @author Brandao
  */
 public class Entry<T> implements Serializable {
@@ -29,60 +30,114 @@ public class Entry<T> implements Serializable {
     
     private T item;
     
-    private boolean onDisk;
+    private boolean needReload;
     
     private NodeEntry node;
     
     private boolean needUpdate;
 
+    /**
+     * Cria uma nova instância.
+     * 
+     * @param index ìndice da entidade.
+     * @param update Indica que a entidade sofreu alteração. Verdadeiro indica
+     * que a entidade sofreu alteração.
+     * @param item Entidade.
+     */
     public Entry(Integer index, boolean update, T item) {
         this.index = index;
         this.item = item;
         this.needUpdate = update;
     }
     
+    /**
+     * Cria uma nova instância.
+     * 
+     * @param index ìndice da entidade.
+     * @param item Entidade.
+     */
     public Entry(Integer index, T item) {
         this.index = index;
         this.item = item;
         this.needUpdate = true;
     }
 
+    /**
+     * Obtém o índice da entidade.
+     * @return Índice.
+     */
     public Integer getIndex() {
         return index;
     }
 
+    /**
+     * Define o índice da entidade.
+     * @param index Índice.
+     */
     public void setIndex(Integer index) {
         this.index = index;
     }
 
+    /**
+     * Obtém a entidade.
+     * @return Entidade.
+     */
     public T getItem() {
         return item;
     }
 
+    /**
+     * Define a entidade.
+     * @param item Entidade.
+     */
     public void setItem(T item) {
         this.item = item;
     }
 
+    /**
+     * Obtém a posição do item na memória.
+     * @return Posição.
+     */
     public NodeEntry getNode() {
         return node;
     }
 
+    /**
+     * Define a posição do item na memória.
+     * @param node Posição
+     */
     public void setNode(NodeEntry node) {
         this.node = node;
     }
 
-    public boolean isOnDisk() {
-        return onDisk;
+    /**
+     * Verifica se a entidade precisa ser recarregada.
+     * @return Verdadeiro se existe a necessidade de ser recarregada. Caso contrário falso.
+     */
+    public boolean isNeedReload() {
+        return needReload;
     }
 
-    public void setOnDisk(boolean onDisk) {
-        this.onDisk = onDisk;
+    /**
+     * Define que a entidade precisa ser recarregada.
+     * @param value Verdadeiro se existe a necessidade de ser recarregada. Caso contrário falso.
+     */
+    public void setNeedReload(boolean value) {
+        this.needReload = value;
     }
 
+    /**
+     * Verifica se a entidade precisa ser atualizada.
+     * @return Verdadeiro se existe a necessidade de ser atualizada. Caso contrário falso.
+     */
     public boolean isNeedUpdate() {
         return needUpdate;
     }
 
+    /**
+     * Define que a entidade precisa ser atualizada.
+     * @param needUpdate Verdadeiro se existe a necessidade de ser atualizada. Caso contrário falso.
+     */
     public void setNeedUpdate(boolean needUpdate) {
         this.needUpdate = needUpdate;
     }

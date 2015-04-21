@@ -25,15 +25,32 @@ import java.net.Socket;
 import java.util.Properties;
 
 /**
- *
+ * Fábrica que produz objetos que auxiliam na manipulação do 
+ * fluxo de dados de uma conexão.
+ * 
  * @author Brandao
  */
 public interface StreamFactory {
-    
+    /**
+     * Aplica as configurações na fábrica.
+     * @param config Configuração.
+     */
     void setConfiguration(Properties config);
     
+    /**
+     * Produz um objeto que auxilia na manipulação do fluxo de entrada de uma conexão.
+     * @param socket Conexão.
+     * @return Objeto.
+     * @throws IOException Lançada caso ocorra alguma falha ao tentar produzir o objeto.
+     */
     InputStream createInpuStream(Socket socket) throws IOException;
     
+    /**
+     * Produz um objeto que auxilia na manipulação do fluxo de saída de uma conexão.
+     * @param socket Conexão.
+     * @return Objeto.
+     * @throws IOException Lançada caso ocorra alguma falha ao tentar produzir o objeto.
+     */
     OutputStream createOutputStream(Socket socket) throws IOException;
     
 }

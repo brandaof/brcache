@@ -24,7 +24,7 @@ import java.io.OutputStream;
  *
  * @author Brandao
  */
-public class TextBufferWriter {
+class TextBufferWriter {
     
     private int offset;
     

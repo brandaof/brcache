@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Brandao
  */
-public class TerminalFactory {
+class TerminalFactory {
     
     private int createdInstances;
     
