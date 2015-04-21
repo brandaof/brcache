@@ -79,7 +79,8 @@ public class BrCacheClient implements BrCacheConnection{
      * @param port Porta de conexão com o servidor.
      * @param minConnections Número de conexões que serão inicialmente criadas.
      * @param maxConnections Número máximo de conexões.
-     * @param streamFactory Fábrica das entidades que representam o fluxo de bytes.
+     * @param streamFactory Fábrica que produz os objetos que auxiliarão na 
+     * manipulação do fluxo de dados das conexões.
      * @throws CacheException Lançada caso ocorra algum problema ao fazer as 
      * configurações iniciais.
      */
