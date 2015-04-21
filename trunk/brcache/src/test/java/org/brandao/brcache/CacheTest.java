@@ -8,6 +8,7 @@ import java.io.*;
 import java.util.Random;
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import org.brandao.brcache.collections.Collections;
 
 /**
  *
@@ -44,6 +45,7 @@ public class CacheTest extends TestCase{
     
     public void test() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
+        Collections.setPath("/mnt/brcache");
         final Cache cache = new Cache();
 
         Thread read =
@@ -159,6 +161,7 @@ public class CacheTest extends TestCase{
     
     public void test2() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
+        Collections.setPath("/mnt/brcache");
         final Cache cache = new Cache();
 
         Thread read =
@@ -240,6 +243,7 @@ public class CacheTest extends TestCase{
     }    
     
     public void test3() throws StorageException, IOException, ClassNotFoundException, RecoverException{
+        Collections.setPath("/mnt/brcache");
         Cache cache = new Cache();
         String expected1 = "TESTE";
         String expected2 = "TESTE2";
