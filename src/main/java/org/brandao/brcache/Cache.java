@@ -81,7 +81,6 @@ public class Cache implements Serializable{
      * @param writeBufferSize Tamanho do buffer de escrita no cache.
      * @param maxSizeEntry Tamanho máximo em bytes que um item pode ter para ser armazenado no cache.
      * @param maxSizeKey Tamanho máximo em bytes que uma chave pode ter.
-     * @param dataPath Pasta onde os dados do cache serão armazenados no processo de swap.
      * @param swaperType Estratégia de swap.
      * @param lockFactor Fator de lock. Determina quantos locks serão usados para bloquear os segmentos.
      * @param quantitySwaperThread Quantidade de threads que irão fazer o swap.
