@@ -32,7 +32,7 @@ import java.io.OutputStream;
  * 
  * @author Brandao
  */
-public class TreeFileSwaper<T> implements Swapper<T> {
+public class TreeFileSwaper<T> implements DiskSwapper<T> {
     
     public static final String PATH = "brcache.swapper.path";
     
@@ -170,6 +170,14 @@ public class TreeFileSwaper<T> implements Swapper<T> {
         File rootPath = new File(root, id);
         if(rootPath.exists())
             Collections.deleteDir(rootPath);
+    }
+
+    public void setRootPath(String path) {
+        this.pathName = path;
+    }
+
+    public String getRootPath() {
+        return this.pathName;
     }
     
     

@@ -33,6 +33,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import org.brandao.brcache.collections.Collections;
+import org.brandao.brcache.collections.DiskSwapper;
 import org.brandao.brcache.collections.TreeFileSwaper;
 import org.brandao.brcache.collections.Swapper;
 
@@ -65,6 +67,8 @@ public class Cache implements Serializable{
 
     volatile long countWriteData;
 
+    private String dataPath;
+    
     /**
      * Cria um novo cache.
      * 
@@ -81,6 +85,7 @@ public class Cache implements Serializable{
      * @param writeBufferSize Tamanho do buffer de escrita no cache.
      * @param maxSizeEntry Tamanho máximo em bytes que um item pode ter para ser armazenado no cache.
      * @param maxSizeKey Tamanho máximo em bytes que uma chave pode ter.
+     * @param dataPath Pasta onde os dados do cache serão armazenados no processo de swap.
      * @param swaperType Estratégia de swap.
      * @param lockFactor Fator de lock. Determina quantos locks serão usados para bloquear os segmentos.
      * @param quantitySwaperThread Quantidade de threads que irão fazer o swap.
@@ -99,6 +104,7 @@ public class Cache implements Serializable{
         int writeBufferSize,
         int maxSizeEntry,
         int maxSizeKey,
+        String dataPath,
         SwaperStrategy swaperType,
         double lockFactor,
         int quantitySwaperThread){
@@ -136,40 +142,42 @@ public class Cache implements Serializable{
         double bytesPerSegment        = dataSwapSize/maxSlabSize;
         double swapSegmentsFactor     = dataSwapFactor;
         
+        this.dataPath               = dataPath;
         this.freeSegments           = new LinkedBlockingQueue<Integer>();
         this.segmentSize            = maxSlabSize;
         this.writeBufferLength      = writeBufferSize;
         this.maxBytesToStorageEntry = maxSizeEntry;
         this.maxLengthKey           = maxSizeKey;
         
-        this.dataMap =
-                new TreeHugeMap<TreeKey, DataMap>(
-                "dataMap",
-                (int)nodesOnMemory,
-                swapSegmentNodesFactor,
-                nodesPerSegment/nodesOnMemory,
-                this.getSwaper(swaperType),
-                (int)((nodesOnMemory/nodesPerSegment)*lockFactor) + 1,
-                quantitySwaperThread,
-                (int)indexOnMemory,
-                swapSegmentIndexFactor,
-                indexPerSegment/indexOnMemory,
-                this.getSwaper(swaperType),
-                (int)((indexOnMemory/indexPerSegment)*lockFactor) + 1,
-                quantitySwaperThread
-                );
-        
-        this.dataList =
-                new HugeArrayList<byte[]>(
-                "dataList",
-                (int)bytesOnMemory,
-                swapSegmentsFactor,
-                bytesPerSegment/bytesOnMemory,
-                this.getSwaper(swaperType),
-                (int)((bytesOnMemory/bytesPerSegment)*lockFactor) + 1,
-                quantitySwaperThread
-                );
-        
+        synchronized(Collections.class){
+            this.dataMap =
+                    new TreeHugeMap<TreeKey, DataMap>(
+                    "dataMap",
+                    (int)nodesOnMemory,
+                    swapSegmentNodesFactor,
+                    nodesPerSegment/nodesOnMemory,
+                    this.getSwaper(swaperType),
+                    (int)((nodesOnMemory/nodesPerSegment)*lockFactor) + 1,
+                    quantitySwaperThread,
+                    (int)indexOnMemory,
+                    swapSegmentIndexFactor,
+                    indexPerSegment/indexOnMemory,
+                    this.getSwaper(swaperType),
+                    (int)((indexOnMemory/indexPerSegment)*lockFactor) + 1,
+                    quantitySwaperThread
+                    );
+
+            this.dataList =
+                    new HugeArrayList<byte[]>(
+                    "dataList",
+                    (int)bytesOnMemory,
+                    swapSegmentsFactor,
+                    bytesPerSegment/bytesOnMemory,
+                    this.getSwaper(swaperType),
+                    (int)((bytesOnMemory/bytesPerSegment)*lockFactor) + 1,
+                    quantitySwaperThread
+                    );
+        }   
     }
     
     /**
@@ -191,6 +199,7 @@ public class Cache implements Serializable{
         8012,
         1048576,     //1mb
         128,
+        "/mnt/brcache",
         SwaperStrategy.FILE_TREE,
         0.1,
         1);
@@ -203,7 +212,12 @@ public class Cache implements Serializable{
      * @return Estratégia.
      */
     protected Swapper getSwaper(SwaperStrategy strategy){
-        return new TreeFileSwaper();
+        Swapper swapper = new TreeFileSwaper();
+        
+        if(swapper instanceof DiskSwapper)
+            ((DiskSwapper)swapper).setRootPath(this.dataPath);
+        
+        return swapper;
     }
     
     /**
