@@ -230,6 +230,7 @@ public class BrCacheServer {
             (int)write_buffer_size,
             (int)max_size_entry,
             (int)max_size_key,
+            data_path,
             SwaperStrategy.valueOf(swapper.toUpperCase()),
             lock_factor,
             swapper_thread);
