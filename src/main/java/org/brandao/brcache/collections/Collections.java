@@ -36,7 +36,7 @@ public class Collections {
     
     private static File path;
     
-    private static String defaultPath = DEFAULT_TMP_DIR + "/collections";
+    private static String defaultPath = DEFAULT_TMP_DIR + "/brcache_collections";
     
     private static File defaultFilePath = new File(defaultPath);
     
