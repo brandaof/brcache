@@ -19,6 +19,7 @@ package org.brandao.brcache;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -104,6 +105,16 @@ public class CacheInputStream extends InputStream{
         }
         
         return read;
+    }
+    
+    public void transfer(OutputStream out) throws IOException{
+    	
+        int[] segments = this.map.getSegments();
+
+        for(int i=0;i<segments.length;i++){
+            byte[] origin  = this.dataList.get(segments[i]);
+        	out.write(origin);
+        }
     }
     
     public long getSize(){

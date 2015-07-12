@@ -214,11 +214,20 @@ public class BrCacheConnectionTest  extends TestCase{
         
         BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 1044, 2, 10);
         BrCacheConnection con = null;
+        
+		StringBuilder buildData = new StringBuilder();
+		
+		for(int i=0;i<16000;i++){
+			buildData.append("X");
+		}
+		
+		String valueToStorage = buildData.toString();
+        
         try{
             con = pool.getConnection();
-            con.put("TESTE", 0, "TESTE-VALUE");
+            con.put("TESTE", 0, valueToStorage);
             String value = (String) con.get("TESTE");
-            Assert.assertEquals("TESTE-VALUE", value);
+            Assert.assertEquals(valueToStorage, value);
             con.remove("TESTE");
             value = (String) con.get("TESTE");
             Assert.assertNull(value);
