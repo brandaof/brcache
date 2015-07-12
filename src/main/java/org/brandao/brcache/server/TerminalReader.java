@@ -31,5 +31,7 @@ public interface TerminalReader {
     StringBuilder[] getParameters(int size) throws ReadDataException, ParameterException;
     
     InputStream getStream() throws IOException;
+
+    InputStream getStream(int size) throws IOException;
     
 }

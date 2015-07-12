@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import org.brandao.brcache.Cache;
+import org.brandao.brcache.CacheInputStream;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 
@@ -47,6 +48,8 @@ class Terminal {
     
     private int writeBufferSize;
     
+    private byte[] buffer;
+    
     public Terminal(Configuration config){
         this.run = false;
         this.config = config;
@@ -62,6 +65,7 @@ class Terminal {
             this.writeBufferSize = writeBufferSize;
             this.reader = new TextTerminalReader(this.socket, streamFactory, readBufferSize);
             this.writer = new TextTerminalWriter(this.socket, streamFactory, writeBufferSize);
+            this.buffer = new byte[this.readBufferSize];
             this.run = true;
         }
         catch(Throwable e){
@@ -91,7 +95,7 @@ class Terminal {
         while(this.run && !this.socket.isInputShutdown()){
             
             try{
-                executeCommand();
+                this.executeCommand();
             }
             catch (UnknowCommandException ex) {
                 this.writer.sendMessage(String.format(TerminalConstants.UNKNOW_COMMAND, ex.getMessage()));
@@ -145,11 +149,12 @@ class Terminal {
         
         StringBuilder[] parameters;
         int time;
+        int size;
         
         try{
-            parameters = reader.getParameters(2);
+            parameters = reader.getParameters(3);
             
-            if(parameters == null || parameters.length != 2)
+            if(parameters == null || parameters.length != 3)
                 throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
             
             try{
@@ -158,10 +163,18 @@ class Terminal {
             catch(NumberFormatException e){
                 throw new ParameterException(TerminalConstants.INVALID_TIME);
             }
+
+            try{
+                size = Integer.parseInt(parameters[2].toString());
+            }
+            catch(NumberFormatException e){
+                throw new ParameterException(TerminalConstants.INVALID_TIME);
+            }
             
             InputStream stream = null;
             try{
-                stream = reader.getStream();
+                //stream = reader.getStream();
+            	stream = reader.getStream(size);
                 this.cache.put(
                     parameters[0].toString(), 
                     time, 
@@ -171,7 +184,6 @@ class Terminal {
                 if(stream != null)
                     stream.close();
             }
-            
             
             writer.sendMessage(TerminalConstants.SUCCESS);
             writer.flush();
@@ -194,15 +206,16 @@ class Terminal {
                 throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
 
             String key = parameters[0].toString();
-            InputStream in = null;
+            CacheInputStream in = null;
 
             try{
-                in = this.cache.get(key);
+                in = (CacheInputStream) this.cache.get(key);
+            	writer.sendMessage(key);
                 if(in != null){
+                	writer.sendMessage(String.valueOf(in.getSize()));
                     OutputStream out = null;
                     try{
                         out = writer.getStream();
-                        byte[] buffer = new byte[8192];
                         int len;
                         while((len = in.read(buffer)) != -1){
                             out.write(buffer, 0, len);
@@ -216,16 +229,18 @@ class Terminal {
                             catch(Throwable e){
                             }
                         }
-                        writer.sendCRLF();
+                        //writer.sendCRLF();
                     }
                 }
+                else
+	            	writer.sendMessage("0");
             }
             finally{
                 if(in != null)
                     in.close();
             }
 
-            writer.sendMessage(TerminalConstants.BOUNDARY_MESSAGE);
+            //writer.sendMessage(TerminalConstants.BOUNDARY_MESSAGE);
             writer.flush();
         }
         catch(IOException e){

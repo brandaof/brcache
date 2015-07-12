@@ -174,7 +174,7 @@ public class BrCacheConnectionTest  extends TestCase{
         
         BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 1044, 2, 10);
 
-        for(int i=0;i<10000000;i++){
+        for(int i=0;i<10000;i++){
             BrCacheConnection con = null;
             try{
                 con = pool.getConnection();
@@ -190,7 +190,7 @@ public class BrCacheConnectionTest  extends TestCase{
             }
         }
 
-        for(int i=0;i<100000;i++){
+        for(int i=0;i<10000;i++){
             BrCacheConnection con = null;
             try{
                 if(i % 100 == 0)

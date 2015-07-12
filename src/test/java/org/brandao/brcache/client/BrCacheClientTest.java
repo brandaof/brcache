@@ -22,7 +22,7 @@ public class BrCacheClientTest extends TestCase{
         final BrCacheClient client = new BrCacheClient("localhost", 1044, 1, 100);
         client.connect();
         
-        for(int i=0;i<100;i++){
+        for(int i=0;i<10;i++){
             Thread th;
             if(i%2==0){
                 th = new Thread(){

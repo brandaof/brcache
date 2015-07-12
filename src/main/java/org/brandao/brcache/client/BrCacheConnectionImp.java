@@ -17,6 +17,7 @@
 
 package org.brandao.brcache.client;
 
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -80,14 +81,12 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         this.streamFactory = streamFactory;
     }
     
-    @Override
     public synchronized void connect() throws IOException{
         this.socket = new Socket(this.getHost(), this.getPort());
-        this.reader = new TextTerminalReader(this.socket, this.streamFactory, 1*1024*1024);
-        this.writer = new TextTerminalWriter(this.socket, this.streamFactory, 1*1024*1024);
+        this.reader = new TextTerminalReader(this.socket, this.streamFactory, 16*1024);
+        this.writer = new TextTerminalWriter(this.socket, this.streamFactory, 16*1024);
     }
     
-    @Override
     public synchronized void disconect() throws IOException{
         
         if(this.socket != null)
@@ -97,7 +96,6 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         this.writer = null;
     }
     
-    @Override
     public synchronized void put(String key, long time, Object value) 
             throws StorageException{
         
@@ -106,24 +104,33 @@ public class BrCacheConnectionImp implements BrCacheConnection{
             this.writer.sendMessage(key);
             this.writer.sendMessage(String.valueOf(time));
 
-            ObjectOutputStream out = null;
+            ObjectOutputStream out     = null;
+        	ByteArrayOutputStream bout = null;
             try{
-                out = new ObjectOutputStream(this.writer.getStream());
+            	bout = new ByteArrayOutputStream();
+                out = new ObjectOutputStream(bout);
                 out.writeObject(value);
                 out.flush();
+                
+                byte[] stream = bout.toByteArray();
+                int size      = stream.length;
+                
+                this.writer.sendMessage(String.valueOf(size));
+                this.writer.getStream().write(stream);
             }
             catch(IOException ex){
                 throw new StorageException("send entry fail: " + key, ex);
             }
             finally{
-                if(out != null){
-                    try{
-                        out.close();
-                    }
-                    catch(Exception ex){}
+                try{
+                    if(bout != null)
+                    	bout.close();
+                    
+                    if(out != null)
+                    	out.close();
                 }
-                this.writer.sendCRLF();
-                this.writer.sendMessage(BOUNDARY);
+                catch(Exception ex){
+                }
                 this.writer.flush();
             }
 
@@ -146,16 +153,27 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         }
     }
     
-    @Override
     public synchronized Object get(String key) throws RecoverException{
         try{
             this.writer.sendMessage(GET);
             this.writer.sendMessage(key);
             this.writer.flush();
 
+            StringBuilder[] result = this.reader.getParameters(2);
+
+            String nameSTR = result[0].toString();
+            String sizeSTR = result[1].toString();
+            int size = Integer.parseInt(sizeSTR);
+            
+            if(!nameSTR.equals(key))
+            	throw new ReadDataException("Invalid data. Expected " + key + " but found " + nameSTR);
+            
+            if(size == 0)
+            	return null;
+            
             ObjectInputStream stream = null;
             try{
-                stream = new ObjectInputStream(this.reader.getStream());
+                stream = new ObjectInputStream(this.reader.getStream(size));
                 return stream.readObject();
             }
             catch(EOFException ex){
@@ -176,6 +194,12 @@ public class BrCacheConnectionImp implements BrCacheConnection{
                 }
             }
         }
+        catch (ParameterException e) {
+            throw new RecoverException(e);
+        }
+        catch (ReadDataException e) {
+            throw new RecoverException(e);
+        }
         catch(RecoverException e){
             throw e;
         } catch (WriteDataException e) {
@@ -183,7 +207,6 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         }
     }
 
-    @Override
     public synchronized boolean remove(String key) throws RecoverException{
         
         try{
@@ -209,12 +232,10 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         }
     }
     
-    @Override
     public String getHost() {
         return host;
     }
 
-    @Override
     public int getPort() {
         return port;
     }

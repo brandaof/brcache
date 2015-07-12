@@ -55,8 +55,15 @@ class TextBufferReader {
         byte[] data = readLineInBytes();
         return data == null? null : new StringBuilder(new String(data));
     }
-    
+
     public byte[] readLineInBytes() throws IOException{
+    	return this.readLineInBytes(-1);
+    }
+    
+    public byte[] readLineInBytes(int maxRead) throws IOException{
+    	
+    	int remainingToMaxRead = maxRead;
+    	
         this.result = new byte[0];
         this.offsetResult = 0;
         
@@ -88,13 +95,6 @@ class TextBufferReader {
                 this.limit += len;
             }
             
-            if(this.offset > 0 && this.buffer[this.offset-1] == '\r' && this.buffer[this.offset] == '\n'){
-                this.updateResult(this.buffer, start, this.offset - start - 1);
-                this.hasLineFeed = true;
-                this.offset++;
-                return this.result;
-            }
-            else
             if(this.offset == this.buffer.length){
                 this.updateResult(this.buffer, start, this.offset - start - 1);
                 this.hasLineFeed = false;
@@ -103,8 +103,23 @@ class TextBufferReader {
                 this.buffer[0] = this.buffer[this.buffer.length - 1];
                 return this.result;
             }
+            else
+            if(maxRead != -1 && remainingToMaxRead == 1){
+                this.updateResult(this.buffer, start, this.offset - start + 1);
+                this.hasLineFeed = false;
+                this.offset++;
+                return this.result;
+            }
+            else
+            if(maxRead == -1 && this.offset > 0 && this.buffer[this.offset-1] == '\r' && this.buffer[this.offset] == '\n'){
+                this.updateResult(this.buffer, start, this.offset - start - 1);
+                this.hasLineFeed = true;
+                this.offset++;
+                return this.result;
+            }
             else{
                 this.offset++;
+                remainingToMaxRead--;
             }
         }
     }

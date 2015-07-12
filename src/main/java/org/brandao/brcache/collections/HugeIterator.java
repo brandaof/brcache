@@ -33,18 +33,15 @@ public class HugeIterator<T> implements Iterator<T> {
         this.collection = collection;
     }
 
-    @Override
     public boolean hasNext() {
         return index < collection.size();
     }
 
-    @Override
     public T next() {
         int pos = index++;
         return collection.get(pos);
     }
 
-    @Override
     public void remove() {
         collection.remove(index - 1);
     }

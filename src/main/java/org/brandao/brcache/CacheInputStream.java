@@ -106,4 +106,8 @@ public class CacheInputStream extends InputStream{
         return read;
     }
     
+    public long getSize(){
+    	return this.map.getLength();
+    }
+    
 }
