@@ -57,8 +57,8 @@ class LimitedTextInputStreamReader
 
 	@Override
 	protected boolean closeData(TextBufferReader buffer) throws IOException {
-        byte[] line;
-        while((line = readData(buffer)) != null);
+        //byte[] line;
+        //while((line = readData(buffer)) != null);
         return true;
 	}
 

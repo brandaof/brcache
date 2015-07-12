@@ -216,10 +216,12 @@ class Terminal {
                     OutputStream out = null;
                     try{
                         out = writer.getStream();
-                        int len;
-                        while((len = in.read(buffer)) != -1){
-                            out.write(buffer, 0, len);
-                        }
+                        in.transfer(out);
+                        //int len;
+                        //while((len = in.read(buffer)) != -1){
+                        //    out.write(buffer, 0, len);
+                        //}
+                        
                     }
                     finally{
                         if(out != null){
