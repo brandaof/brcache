@@ -23,36 +23,51 @@ import java.io.IOException;
  *
  * @author Brandao
  */
-class TextInputStreamReader 
+class LimitedTextInputStreamReader 
 	extends AbstractTextInputStreamReader{
 
-    private static final byte[] BOUNDARY = TerminalConstants.BOUNDARY;
-    
-    public TextInputStreamReader(TextBufferReader buffer, int offset){
+	private int size;
+	
+	private int read;
+	
+    public LimitedTextInputStreamReader(TextBufferReader buffer, int offset, int size){
     	super(buffer, offset);
+    	this.size = size;
+    	this.read = 0;
     }
     
 	@Override
 	protected byte[] readData(TextBufferReader buffer) throws IOException {
 		
-        byte[] line = buffer.readLineInBytes();
-        
-        if(line.length > 2 && line[0] == BOUNDARY[0] && line[1] == BOUNDARY[1] && line[2] == BOUNDARY[2])
-            return null;
-        else
+		if(size == read)
+			return null;
+		
+		int toRead = size - read;
+        byte[] line = buffer.readLineInBytes(toRead);
+        if(line != null){
+        	read += line.length;
         	return line;
+        }
+        else{
+        	this.read = this.size;
+        	return null;
+        }
+        
 	}
 
 	@Override
 	protected boolean closeData(TextBufferReader buffer) throws IOException {
         byte[] line;
-        while((line = buffer.readLineInBytes()) != null){
+        while((line = readData(buffer)) != null);
+        return true;
+	}
 
-            if(line.length > 2 && line[0] == BOUNDARY[0] && line[1] == BOUNDARY[1] && line[2] == BOUNDARY[2]){
-                return true;
-            }            
-        }
-        return false;
+	public int getSize() {
+		return size;
+	}
+
+	public void setSize(int size) {
+		this.size = size;
 	}
 	
 }

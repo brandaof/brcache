@@ -82,6 +82,10 @@ public class TextTerminalReader implements TerminalReader{
         return new TextInputStreamReader(buffer, this.offset);
     }
 
+    public InputStream getStream(int size) {
+        return new LimitedTextInputStreamReader(buffer, this.offset, size);
+    }
+    
     public int getOffset() {
         return offset;
     }

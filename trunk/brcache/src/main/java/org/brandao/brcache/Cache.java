@@ -281,32 +281,28 @@ public class Cache implements Serializable{
      */
     public void put(String key, long maxAliveTime, InputStream inputData) throws StorageException{
         
-        TreeKey treeKey = new StringTreeKey(key);
-        
-        int[] segments = null;
-        
         if(key.length() > this.maxLengthKey)
             throw new StorageException("key is very large");
         
+        TreeKey treeKey = new StringTreeKey(key);
+        DataMap map     = new DataMap();
         try{
-            segments = this.putData(inputData);
-            this.putSegments(treeKey, maxAliveTime, segments);
-            
+            map.setMaxLiveTime(maxAliveTime);
+            this.putData(map, inputData);
+            this.dataMap.put(treeKey, map);
             countWrite++;
         }
-        catch(StorageException e){
-            if(segments != null){
-                for(int segment: segments)
-                    this.freeSegments.add(segment);
-            }
-            throw e;
-        }
         catch(Throwable e){
+        	int[] segments = map.getSegments();
+        	
             if(segments != null){
                 for(int segment: segments)
                     this.freeSegments.add(segment);
             }
-            throw new StorageException(e);
+            throw 
+            	e instanceof StorageException? 
+            		(StorageException)e : 
+            		new StorageException(e);
         }
     }
 
@@ -378,10 +374,10 @@ public class Cache implements Serializable{
         this.dataMap.put(key, map);
     }
     
-    private int[] putData(InputStream inputData) throws StorageException{
+    private void putData(DataMap map, InputStream inputData) throws StorageException{
         
         int writeData = 0;
-        List<Integer> segments = new ArrayList<Integer>();
+        List<Integer> segments = new ArrayList<Integer>(5);
         
         try{
             byte[] buffer = new byte[this.writeBufferLength];
@@ -401,7 +397,8 @@ public class Cache implements Serializable{
             for(int i=0;i<segs.length;i++)
                 result[i] = segs[i];
             
-            return result;
+            map.setLength(writeData);
+            map.setSegments(result);
         }
         catch(StorageException e){
             for(int segment: segments)

@@ -46,7 +46,6 @@ public class CacheSwapper<T>
         this.id = value;
     }
 
-    @Override
     public void sendItem(Integer index, Entry<T> item) {
         synchronized(this){
             if(this.maxIndex < index)
@@ -75,7 +74,6 @@ public class CacheSwapper<T>
         client.put(new String(this.id + ":" + index), this.getMaxalive(), item);
     }
     
-    @Override
     public Entry<T> getItem(Integer index) {
         try{
             T item;

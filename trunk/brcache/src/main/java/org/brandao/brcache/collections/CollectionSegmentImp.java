@@ -40,7 +40,6 @@ class CollectionSegmentImp<I>
                 quantityLock, quantitySwaperThread);
     }
     
-    @Override
     public I getEntity(Integer segment, Integer index) {
         
         Entry<ArraySegment<I>> entry = this.getEntry(segment);
@@ -55,7 +54,6 @@ class CollectionSegmentImp<I>
         
     }
 
-    @Override
     public int putEntity(Integer segment, Integer index, I value) {
         
         if(this.readOnly)
@@ -86,7 +84,6 @@ class CollectionSegmentImp<I>
         
     }
 
-    @Override
     public I removeEntity(Integer segment, Integer index){
         throw new UnsupportedOperationException();
     }
