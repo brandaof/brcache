@@ -57,8 +57,15 @@ class LimitedTextInputStreamReader
 
 	@Override
 	protected boolean closeData(TextBufferReader buffer) throws IOException {
-        //byte[] line;
-        //while((line = readData(buffer)) != null);
+        byte[] line;
+        
+        while((line = readData(buffer)) != null);
+        
+        line = buffer.readLineInBytes();
+        
+        if(line == null || line.length != 0)
+        	throw new IOException("premature end of data");
+        
         return true;
 	}
 

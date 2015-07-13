@@ -21,16 +21,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.brandao.brcache.Cache;
 import org.brandao.brcache.CacheInputStream;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
+import org.brandao.brcache.server.command.ExitCommand;
+import org.brandao.brcache.server.command.GetCommand;
+import org.brandao.brcache.server.command.PutCommand;
+import org.brandao.brcache.server.command.RemoveCommand;
+import org.brandao.brcache.server.command.StatsCommand;
 
 /**
  *
  * @author Brandao
  */
-class Terminal {
+public class Terminal {
     
     private Cache cache;
     
@@ -50,6 +58,8 @@ class Terminal {
     
     private byte[] buffer;
     
+    private Map<String, Command> commands;
+    
     public Terminal(Configuration config){
         this.run = false;
         this.config = config;
@@ -59,6 +69,28 @@ class Terminal {
             StreamFactory streamFactory,
             int readBufferSize, int writeBufferSize) throws IOException{
         try{
+        	this.commands = new LinkedHashMap<String, Command>();
+        	
+        	Command cmd = new PutCommand();
+        	cmd.setTerminal(this);
+        	this.commands.put("PUT", cmd);
+        	
+        	cmd = new GetCommand();
+        	cmd.setTerminal(this);
+        	this.commands.put("GET", cmd);
+        	
+        	cmd = new RemoveCommand();
+        	cmd.setTerminal(this);
+        	this.commands.put("REMOVE", cmd);
+        	
+        	cmd = new StatsCommand();
+        	cmd.setTerminal(this);
+        	this.commands.put("STATS", cmd);
+        	
+        	cmd = new ExitCommand();
+        	cmd.setTerminal(this);
+        	this.commands.put("EXIT", new ExitCommand());
+        	
             this.socket = socket;
             this.cache  = cache;
             this.readBufferSize  = readBufferSize;
@@ -78,7 +110,11 @@ class Terminal {
         }
     }
     
-    public void destroy() throws IOException{
+    public Configuration getConfiguration() {
+		return config;
+	}
+
+	public void destroy() throws IOException{
         try{
             if(this.socket != null)
                 this.socket.close();
@@ -121,173 +157,26 @@ class Terminal {
         throws UnknowCommandException, ReadDataException, 
         WriteDataException, ParameterException, RecoverException{
         
-        Command command = reader.getCommand();
+        StringBuilder message = reader.getMessage();
+        String[] command = message.toString().split(" ");
         
-        switch(command){
-            case put:
-                this.executePut(reader, writer);
-                break;
-            case get:
-                this.executeGet(reader, writer);
-                break;
-            case remove:
-                this.executeRemove(reader, writer);
-                break;
-            case stats:
-                this.executeStats(reader, writer);
-                break;
-            case exit:
-                this.executeExit(reader, writer);
-                break;
-            default:
-                throw new UnknowCommandException(command.name());
-        }
-    }
-    
-    private void executePut(TerminalReader reader, TerminalWriter writer) 
-            throws ReadDataException, WriteDataException, ParameterException {
+        if(command.length < 1)
+        	throw new UnknowCommandException(String.format(TerminalConstants.UNKNOW_COMMAND, "empty"));
         
-        StringBuilder[] parameters;
-        int time;
-        int size;
+        String[] parameters;
+        if(command.length < 2)
+        	parameters = TerminalConstants.EMPTY_STR_ARRAY;
+        else{
+        	parameters = new String[command.length - 1];
+        	System.arraycopy(command, 1, parameters, 0, parameters.length);
+        }
         
-        try{
-            parameters = reader.getParameters(3);
-            
-            if(parameters == null || parameters.length != 3)
-                throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
-            
-            try{
-                time = Integer.parseInt(parameters[1].toString());
-            }
-            catch(NumberFormatException e){
-                throw new ParameterException(TerminalConstants.INVALID_TIME);
-            }
-
-            try{
-                size = Integer.parseInt(parameters[2].toString());
-            }
-            catch(NumberFormatException e){
-                throw new ParameterException(TerminalConstants.INVALID_TIME);
-            }
-            
-            InputStream stream = null;
-            try{
-                //stream = reader.getStream();
-            	stream = reader.getStream(size);
-                this.cache.put(
-                    parameters[0].toString(), 
-                    time, 
-                    stream);
-            }
-            finally{
-                if(stream != null)
-                    stream.close();
-            }
-            
-            writer.sendMessage(TerminalConstants.SUCCESS);
-            writer.flush();
-        }
-        catch (IOException ex) {
-            throw new WriteDataException(TerminalConstants.INSERT_ENTRY_FAIL, ex);
-        }
-        catch(StorageException ex){
-            throw new WriteDataException(TerminalConstants.INSERT_ENTRY_FAIL, ex);
-        }
-    }
-
-    private void executeGet(TerminalReader reader, TerminalWriter writer) 
-            throws WriteDataException, ReadDataException, ParameterException, RecoverException{
+        Command cmd = this.commands.get(command[0]);
         
-        try{
-            StringBuilder[] parameters = reader.getParameters(1);
-            
-            if(parameters == null || parameters.length != 1)
-                throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
-
-            String key = parameters[0].toString();
-            CacheInputStream in = null;
-
-            try{
-                in = (CacheInputStream) this.cache.get(key);
-            	writer.sendMessage(key);
-                if(in != null){
-                	writer.sendMessage(String.valueOf(in.getSize()));
-                    OutputStream out = null;
-                    try{
-                        out = writer.getStream();
-                        in.transfer(out);
-                        //int len;
-                        //while((len = in.read(buffer)) != -1){
-                        //    out.write(buffer, 0, len);
-                        //}
-                        
-                    }
-                    finally{
-                        if(out != null){
-                            try{
-                                out.close();
-                            }
-                            catch(Throwable e){
-                            }
-                        }
-                        //writer.sendCRLF();
-                    }
-                }
-                else
-	            	writer.sendMessage("0");
-            }
-            finally{
-                if(in != null)
-                    in.close();
-            }
-
-            //writer.sendMessage(TerminalConstants.BOUNDARY_MESSAGE);
-            writer.flush();
-        }
-        catch(IOException e){
-            throw new ReadDataException(TerminalConstants.READ_ENTRY_FAIL);
-        }
-    }
-
-    private void executeRemove(TerminalReader reader, TerminalWriter writer) 
-            throws ReadDataException, WriteDataException, ParameterException, RecoverException{
-        StringBuilder[] parameters = reader.getParameters(1);
-
-        if(parameters == null || parameters.length != 1)
-            throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
-
-        this.cache.remove(parameters[0].toString());
-
-        writer.sendMessage(TerminalConstants.SUCCESS);
-        writer.flush();
-    }
-
-    private void executeStats(TerminalReader reader, TerminalWriter writer) 
-            throws WriteDataException{
+        if(cmd == null)
+        	throw new UnknowCommandException(String.format(TerminalConstants.UNKNOW_COMMAND, command[0]));
         
-        for(String prop: this.config.stringPropertyNames())
-            writer.sendMessage(prop + ": " + this.config.getProperty(prop));
-        
-        writer.sendMessage("read_entry: " + this.cache.getCountRead());
-        writer.sendMessage("read_data: " + this.cache.getCountReadData());
-        writer.sendMessage("write_entry: " + this.cache.getCountWrite());
-        writer.sendMessage("write_data: " + this.cache.getCountWriteData());
-        writer.sendMessage(TerminalConstants.BOUNDARY_MESSAGE);
-        writer.flush();
-    }
-
-    private void executeExit(TerminalReader reader, TerminalWriter writer) throws WriteDataException{
-        try{
-            writer.sendMessage(TerminalConstants.DISCONNECT_MESSAGE);
-            writer.flush();
-            this.socket.close();
-        }
-        catch(IOException e){
-        }
-        finally{
-            this.run = false;
-        }
+        cmd.execute(cache, reader, writer, parameters);
     }
     
 }

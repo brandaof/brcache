@@ -21,35 +21,38 @@ package org.brandao.brcache.server;
  *
  * @author Brandao
  */
-class TerminalConstants {
+public class TerminalConstants {
 
+	public static final String[] EMPTY_STR_ARRAY = new String[]{};
+	
     public static final byte[] CRLF = "\r\n".getBytes();
     
-    public static final String BOUNDARY_MESSAGE = "end";
+    public static final String BOUNDARY_MESSAGE = "END";
 
     public static final byte[] BOUNDARY = BOUNDARY_MESSAGE.getBytes();
     
     public static final String UNKNOW_COMMAND = "UNKNOW COMMAND: %s";
     
-    public static final String INVALID_NUMBER_OF_PARAMETERS = "invalid number of parameters";
+    public static final String INVALID_NUMBER_OF_PARAMETERS = "INVALID NUMBER OF PARAMETERS";
     
-    public static final String INVALID_TIME = "invalid time";
+    public static final String INVALID_TIME = "INVALID TYPE";
     
-    public static final String SUCCESS = "ok";
+    public static final String SUCCESS = "OK";
 
-    public static final String INSERT_ENTRY_FAIL = "insert entry fail";
+    public static final String INSERT_ENTRY_FAIL = "INSERT ENTRY FAIL";
     
-    public static final String READ_ENTRY_FAIL = "read entry fail";
+    public static final String READ_ENTRY_FAIL = "READ ENTRY FAIL";
     
-    public static final String SEND_MESSAGE_FAIL  = "send message fail";
+    public static final String SEND_MESSAGE_FAIL  = "SEND MESSAGE FAIL";
     
-    public static final String STREAM_CLOSED = "stream closed";
+    public static final String STREAM_CLOSED = "STREAM CLOSED";
     
-    public static final String CANT_READ_COMMAND = "can't read command: %s";
+    public static final String CANT_READ_COMMAND = "CANT READ COMMAND: %s";
     
-    public static final String EMPTY_PARAMETER = "empty parameter: %s";
+    public static final String EMPTY_PARAMETER = "EMPTY PARAMETER: %s";
 
-    public static final String CANT_READ_PARAMETER = "can not read parameter: %s";
+    public static final String CANT_READ_PARAMETER = "CANT READ PARAMETER: %s";
     
     public static final String DISCONNECT_MESSAGE = "goodbye!";
+    
 }

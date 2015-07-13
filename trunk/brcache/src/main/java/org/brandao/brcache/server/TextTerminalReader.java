@@ -42,42 +42,6 @@ public class TextTerminalReader implements TerminalReader{
         this.offset = 0;
     }
     
-    public Command getCommand() throws UnknowCommandException, ReadDataException {
-        StringBuilder line = null;
-        try{
-            line = this.buffer.readLine();
-            return Command.valueOf(line.toString());
-        }
-        catch(IOException e){
-            throw new ReadDataException(
-                    String.format(TerminalConstants.CANT_READ_COMMAND, 
-                    String.valueOf(line)), e);
-        }
-        catch(NullPointerException e){
-            throw new UnknowCommandException("undefined");
-        }
-        catch(IllegalArgumentException e){
-            throw new UnknowCommandException(String.valueOf(line));
-        }
-    }
-
-    public StringBuilder[] getParameters(int size) throws ReadDataException, ParameterException {
-        StringBuilder[] params = new StringBuilder[size];
-        
-        for(int i=0;i<size;i++){
-            try{
-                params[i] = this.buffer.readLine();
-                if(params[i] == null)
-                    throw new ParameterException(String.format(TerminalConstants.EMPTY_PARAMETER, String.valueOf(i)));
-            }
-            catch(IOException e){
-                throw new ReadDataException(String.format(TerminalConstants.CANT_READ_PARAMETER, String.valueOf(i)));
-            }
-        }
-        
-        return params;
-    }
-
     public InputStream getStream() {
         return new TextInputStreamReader(buffer, this.offset);
     }
@@ -89,5 +53,14 @@ public class TextTerminalReader implements TerminalReader{
     public int getOffset() {
         return offset;
     }
+
+	public StringBuilder getMessage() throws ReadDataException {
+		try{
+			return this.buffer.readLine();
+		}
+		catch(IOException e){
+			throw new ReadDataException(e);
+		}
+	}
     
 }

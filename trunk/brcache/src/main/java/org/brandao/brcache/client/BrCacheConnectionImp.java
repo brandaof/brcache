@@ -26,7 +26,6 @@ import java.net.Socket;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 import org.brandao.brcache.server.DefaultStreamFactory;
-import org.brandao.brcache.server.ParameterException;
 import org.brandao.brcache.server.ReadDataException;
 import org.brandao.brcache.server.StreamFactory;
 import org.brandao.brcache.server.TerminalReader;
@@ -42,17 +41,23 @@ import org.brandao.brcache.server.WriteDataException;
  */
 public class BrCacheConnectionImp implements BrCacheConnection{
     
-    public static final String CRLF     = "\r\n";
+    public static final String CRLF       = "\r\n";
     
-    public static final String BOUNDARY = "end";
+    public static final String BOUNDARY   = "END";
 
-    public static final String PUT      = "put";
+    public static final String PUT        = "PUT";
 
-    public static final String GET      = "get";
+    public static final String ERROR      = "ERROR";
     
-    public static final String REMOVE   = "remove";
+    public static final String GET        = "GET";
     
-    public static final String SUCCESS  = "ok";
+    public static final String REMOVE     = "REMOVE";
+
+    public static final String VALUE      = "VALUE";
+    
+    public static final String SUCCESS    = "OK";
+
+    public static final String SEPARATOR  = " ";
     
     private String host;
     
@@ -100,9 +105,10 @@ public class BrCacheConnectionImp implements BrCacheConnection{
             throws StorageException{
         
         try{
-            this.writer.sendMessage(PUT);
-            this.writer.sendMessage(key);
-            this.writer.sendMessage(String.valueOf(time));
+        	StringBuilder cmd = 
+    			new StringBuilder(PUT).append(SEPARATOR)
+    			.append(key).append(SEPARATOR)
+    			.append(time).append(SEPARATOR);
 
             ObjectOutputStream out     = null;
         	ByteArrayOutputStream bout = null;
@@ -115,10 +121,15 @@ public class BrCacheConnectionImp implements BrCacheConnection{
                 byte[] stream = bout.toByteArray();
                 int size      = stream.length;
                 
-                this.writer.sendMessage(String.valueOf(size));
+                cmd.append(size);
+                this.writer.sendMessage(cmd.toString());
                 this.writer.getStream().write(stream);
+                this.writer.sendCRLF();
+                this.writer.sendMessage(BOUNDARY);
             }
             catch(IOException ex){
+                this.writer.sendCRLF();
+                this.writer.sendMessage(ERROR);
                 throw new StorageException("send entry fail: " + key, ex);
             }
             finally{
@@ -135,17 +146,15 @@ public class BrCacheConnectionImp implements BrCacheConnection{
             }
 
 
-            StringBuilder[] result = this.reader.getParameters(1);
+            StringBuilder result = this.reader.getMessage();
 
-            String resultSTR = result[0].toString();
+            String resultSTR = result.toString();
 
             if(!resultSTR.equals(SUCCESS))
                 throw new StorageException(resultSTR);
         }
         catch(StorageException e){
             throw e;
-        } catch (ParameterException e) {
-            throw new StorageException(e);
         } catch (ReadDataException e) {
             throw new StorageException(e);
         } catch (WriteDataException e) {
@@ -155,18 +164,20 @@ public class BrCacheConnectionImp implements BrCacheConnection{
     
     public synchronized Object get(String key) throws RecoverException{
         try{
-            this.writer.sendMessage(GET);
-            this.writer.sendMessage(key);
-            this.writer.flush();
+        	StringBuilder cmd = 
+    			new StringBuilder(GET).append(SEPARATOR)
+    			.append(key);
 
-            StringBuilder[] result = this.reader.getParameters(2);
-
-            String nameSTR = result[0].toString();
-            String sizeSTR = result[1].toString();
-            int size = Integer.parseInt(sizeSTR);
+        	this.writer.sendMessage(cmd.toString());
+        	this.writer.flush();
+        	
+            StringBuilder result = this.reader.getMessage();
+            String[] resultParams = result.toString().split(" ");
             
-            if(!nameSTR.equals(key))
-            	throw new ReadDataException("Invalid data. Expected " + key + " but found " + nameSTR);
+            if(resultParams.length != 4 || !VALUE.equals(resultParams[0]))
+                throw new RecoverException(result.toString());
+
+            int size = Integer.parseInt(resultParams[2]);
             
             if(size == 0)
             	return null;
@@ -192,10 +203,12 @@ public class BrCacheConnectionImp implements BrCacheConnection{
                     }
                     catch(Exception e){}
                 }
+                
+                StringBuilder end = this.reader.getMessage();
+                
+                if(!BOUNDARY.equals(end.toString()))
+                    throw new RecoverException("read entry fail");
             }
-        }
-        catch (ParameterException e) {
-            throw new RecoverException(e);
         }
         catch (ReadDataException e) {
             throw new RecoverException(e);
@@ -210,12 +223,16 @@ public class BrCacheConnectionImp implements BrCacheConnection{
     public synchronized boolean remove(String key) throws RecoverException{
         
         try{
-            this.writer.sendMessage(REMOVE);
-            this.writer.sendMessage(key);
-            this.writer.flush();
+        	StringBuilder cmd = 
+    			new StringBuilder(REMOVE).append(SEPARATOR)
+    			.append(key);
 
-            StringBuilder[] response = this.reader.getParameters(1);
-            String responseSTR = response[0].toString();
+        	this.writer.sendMessage(cmd.toString());
+        	this.writer.flush();
+
+            StringBuilder response = this.reader.getMessage();
+            String responseSTR = response.toString();
+            
             if(!SUCCESS.equals(responseSTR))
                 throw new RecoverException(responseSTR);
 
@@ -223,8 +240,6 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         }
         catch(RecoverException e){
             throw e;
-        } catch (ParameterException e) {
-            throw new RecoverException(e);
         } catch (ReadDataException e) {
             throw new RecoverException(e);
         } catch (WriteDataException e) {
