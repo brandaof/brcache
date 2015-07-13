@@ -17,17 +17,18 @@
 
 package org.brandao.brcache.server;
 
+import org.brandao.brcache.Cache;
+
 /**
  *
  * @author Brandao
  */
-enum Command {
+public interface Command {
     
-    put,
-    get,
-    remove,
-    stats,
-    stat,
-    exit;
+	void setTerminal(Terminal terminal);
+	
+    void execute(Cache cache, TerminalReader reader, 
+    		TerminalWriter writer, String[] parameters) 
+            throws ReadDataException, WriteDataException, ParameterException;
     
 }
