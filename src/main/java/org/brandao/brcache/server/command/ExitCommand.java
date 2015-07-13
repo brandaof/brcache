@@ -18,7 +18,7 @@ public class ExitCommand
 			throws ReadDataException, WriteDataException, ParameterException {
 		
         try{
-            writer.sendMessage(TerminalConstants.DISCONNECT_MESSAGE);
+            writer.sendMessage(TerminalConstants.DISCONNECT);
             writer.flush();
             this.terminal.destroy();
         }

@@ -23,8 +23,12 @@ package org.brandao.brcache.server;
  */
 public class TerminalConstants {
 
+	public static final String SEPARATOR_COMMAND = " ";
+	
 	public static final String[] EMPTY_STR_ARRAY = new String[]{};
 	
+    public static final String CRLFText = "\r\n";
+    
     public static final byte[] CRLF = "\r\n".getBytes();
     
     public static final String BOUNDARY_MESSAGE = "END";
@@ -53,6 +57,6 @@ public class TerminalConstants {
 
     public static final String CANT_READ_PARAMETER = "CANT READ PARAMETER: %s";
     
-    public static final String DISCONNECT_MESSAGE = "goodbye!";
+    public static final String DISCONNECT = "goodbye!";
     
 }

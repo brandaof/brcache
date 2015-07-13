@@ -28,15 +28,20 @@ public class GetCommand extends AbstractCommand{
 			throws ReadDataException, WriteDataException, ParameterException {
 
         try{
-            if(parameters == null || parameters.length < 1)
+            if(parameters == null || parameters.length < 2)
                 throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
 
             CacheInputStream in = null;
-
             try{
-                in = (CacheInputStream) cache.get(parameters[0]);
+                in = (CacheInputStream) cache.get(parameters[1]);
                 if(in != null){
-                	writer.sendMessage("VALUE " + parameters[0] + " " + String.valueOf(in.getSize()) + " 0");
+                    String responseMessage = 
+                		"VALUE " +
+                		parameters[1] +
+                		TerminalConstants.SEPARATOR_COMMAND +
+                		in.getSize() +
+                		" 0";
+                	writer.sendMessage(responseMessage);
                     OutputStream out = null;
                     try{
                         out = writer.getStream();
@@ -53,8 +58,13 @@ public class GetCommand extends AbstractCommand{
                         writer.sendCRLF();
                     }
                 }
-                else
-                	writer.sendMessage("VALUE " + parameters[0] + " 0 0");
+                else{
+                    String responseMessage =
+                		"VALUE " +
+        				parameters[1] +
+        				" 0 0";
+                	writer.sendMessage(responseMessage);
+                }
             }
             finally{
                 if(in != null)

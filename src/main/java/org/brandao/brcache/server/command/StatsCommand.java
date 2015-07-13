@@ -17,16 +17,21 @@ public class StatsCommand
 			TerminalWriter writer, String[] parameters)
 			throws ReadDataException, WriteDataException, ParameterException {
 		
+		StringBuilder result = new StringBuilder();
 		Properties config = this.terminal.getConfiguration();
 		
-        for(String prop: config.stringPropertyNames())
-            writer.sendMessage(prop + ": " + config.getProperty(prop));
+        for(String prop: config.stringPropertyNames()){
+            result
+            	.append(prop).append(": ")
+            	.append(config.getProperty(prop)).append(TerminalConstants.CRLFText);
+        }
         
-        writer.sendMessage("read_entry: " + cache.getCountRead());
-        writer.sendMessage("read_data: " + cache.getCountReadData());
-        writer.sendMessage("write_entry: " + cache.getCountWrite());
-        writer.sendMessage("write_data: " + cache.getCountWriteData());
-        writer.sendMessage(TerminalConstants.BOUNDARY_MESSAGE);
+        result.append("read_entry: ").append(cache.getCountRead()).append(TerminalConstants.CRLFText);
+        result.append("read_data: ").append(cache.getCountReadData()).append(TerminalConstants.CRLFText);
+        result.append("write_entry: ").append(cache.getCountWrite()).append(TerminalConstants.CRLFText);
+        result.append("write_data: ").append(cache.getCountWriteData()).append(TerminalConstants.CRLFText);
+        result.append(TerminalConstants.BOUNDARY_MESSAGE);
+        writer.sendMessage(result.toString());
         writer.flush();
 	}
 

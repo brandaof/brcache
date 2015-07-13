@@ -31,18 +31,18 @@ public class PutCommand extends AbstractCommand{
         int size;
         
         try{
-            if(parameters == null || parameters.length < 3)
+            if(parameters == null || parameters.length < 4)
                 throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
             
             try{
-                time = Integer.parseInt(parameters[1]);
+                time = Integer.parseInt(parameters[2]);
             }
             catch(NumberFormatException e){
                 throw new ParameterException(TerminalConstants.INVALID_TIME);
             }
 
             try{
-                size = Integer.parseInt(parameters[2].toString());
+                size = Integer.parseInt(parameters[3]);
             }
             catch(NumberFormatException e){
                 throw new ParameterException(TerminalConstants.INVALID_TIME);
@@ -52,7 +52,7 @@ public class PutCommand extends AbstractCommand{
             try{
             	stream = reader.getStream(size);
                 cache.put(
-                    parameters[0], 
+                    parameters[1], 
                     time, 
                     stream);
             }

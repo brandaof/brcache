@@ -68,6 +68,7 @@ class TextBufferReader {
         this.offsetResult = 0;
         
         int start = this.offset;
+        
         while(true){
 
             if(this.offset == this.limit){
