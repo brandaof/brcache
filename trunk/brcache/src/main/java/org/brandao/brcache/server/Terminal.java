@@ -18,15 +18,11 @@
 package org.brandao.brcache.server;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.brandao.brcache.Cache;
-import org.brandao.brcache.CacheInputStream;
-import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 import org.brandao.brcache.server.command.ExitCommand;
 import org.brandao.brcache.server.command.GetCommand;
@@ -55,8 +51,6 @@ public class Terminal {
     private int readBufferSize;
     
     private int writeBufferSize;
-    
-    private byte[] buffer;
     
     private Map<String, Command> commands;
     
@@ -97,7 +91,6 @@ public class Terminal {
             this.writeBufferSize = writeBufferSize;
             this.reader = new TextTerminalReader(this.socket, streamFactory, readBufferSize);
             this.writer = new TextTerminalWriter(this.socket, streamFactory, writeBufferSize);
-            this.buffer = new byte[this.readBufferSize];
             this.run = true;
         }
         catch(Throwable e){
@@ -128,10 +121,22 @@ public class Terminal {
     }
     
     public void execute() throws WriteDataException, ReadDataException, StorageException{
-        while(this.run && !this.socket.isInputShutdown()){
-            
+        while(this.run){
             try{
-                this.executeCommand();
+                StringBuilder message = reader.getMessage();
+                String[] command = message.toString().split(" ");
+                
+                if(command.length < 1){
+                	throw new UnknowCommandException(
+                			String.format(TerminalConstants.UNKNOW_COMMAND, "empty"));
+                }
+                
+                Command cmd = this.commands.get(command[0]);
+                
+                if(cmd == null)
+                	throw new UnknowCommandException(String.format(TerminalConstants.UNKNOW_COMMAND, command[0]));
+                
+                cmd.execute(cache, reader, writer, command);
             }
             catch (UnknowCommandException ex) {
                 this.writer.sendMessage(String.format(TerminalConstants.UNKNOW_COMMAND, ex.getMessage()));
@@ -151,32 +156,6 @@ public class Terminal {
                 throw new StorageException(ex);
             }
         }
-    }
-    
-    public void executeCommand() 
-        throws UnknowCommandException, ReadDataException, 
-        WriteDataException, ParameterException, RecoverException{
-        
-        StringBuilder message = reader.getMessage();
-        String[] command = message.toString().split(" ");
-        
-        if(command.length < 1)
-        	throw new UnknowCommandException(String.format(TerminalConstants.UNKNOW_COMMAND, "empty"));
-        
-        String[] parameters;
-        if(command.length < 2)
-        	parameters = TerminalConstants.EMPTY_STR_ARRAY;
-        else{
-        	parameters = new String[command.length - 1];
-        	System.arraycopy(command, 1, parameters, 0, parameters.length);
-        }
-        
-        Command cmd = this.commands.get(command[0]);
-        
-        if(cmd == null)
-        	throw new UnknowCommandException(String.format(TerminalConstants.UNKNOW_COMMAND, command[0]));
-        
-        cmd.execute(cache, reader, writer, parameters);
     }
     
 }

@@ -18,8 +18,9 @@
 package org.brandao.brcache.collections;
 
 import java.io.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author Brandao
@@ -29,7 +30,7 @@ abstract class AbstractCollectionSegment<I,T>
     
     private int globalID = 0;
     
-    protected ConcurrentMap<Integer, Entry<T>> segments;
+    protected Map<Integer, Entry<T>> segments;
     
     private transient File path;
     
@@ -71,7 +72,7 @@ abstract class AbstractCollectionSegment<I,T>
         this.maxCapacity         = maxCapacity;
         this.clearFactor         = clearFactor;
         this.maxSegmentCapacity  = (int)(maxCapacity/fragmentSize);
-        this.segments            = new ConcurrentHashMap<Integer, Entry<T>>();
+        this.segments            = new LinkedHashMap<Integer, Entry<T>>();//new ConcurrentHashMap<Integer, Entry<T>>();
         this.readOnly            = false;
         this.lastSegment         = -1;
         this.swap                = swap;//new DefaultSwaper<T>(this.id, this.pathName);
@@ -114,7 +115,6 @@ abstract class AbstractCollectionSegment<I,T>
         return this.locks[segment % this.locks.length];
     }
     
-    @SuppressWarnings("unchecked")
     protected void clearLimitLength() {
         if (maxSegmentCapacity > 0 && segments.size() > maxSegmentCapacity) {
             double quantity = maxSegmentCapacity * clearFactor;
@@ -223,7 +223,7 @@ abstract class AbstractCollectionSegment<I,T>
             return e;
     }
 
-    public ConcurrentMap<Integer, Entry<T>> getSegments() {
+    public Map<Integer, Entry<T>> getSegments() {
         return segments;
     }
 

@@ -41,23 +41,23 @@ import org.brandao.brcache.server.WriteDataException;
  */
 public class BrCacheConnectionImp implements BrCacheConnection{
     
-    public static final String CRLF       = "\r\n";
+    public static final String CRLF                      = "\r\n";
     
-    public static final String BOUNDARY   = "END";
-
-    public static final String PUT        = "PUT";
-
-    public static final String ERROR      = "ERROR";
+    public static final String BOUNDARY                  = "END";
     
-    public static final String GET        = "GET";
-    
-    public static final String REMOVE     = "REMOVE";
+    public static final String PUT_COMMAND               = "PUT";
 
-    public static final String VALUE      = "VALUE";
+    public static final String ERROR                     = "ERROR";
     
-    public static final String SUCCESS    = "OK";
+    public static final String GET_COMMAND               = "GET";
+    
+    public static final String REMOVE_COMMAND            = "REMOVE";
 
-    public static final String SEPARATOR  = " ";
+    public static final String VALUE_RESULT              = "VALUE";
+    
+    public static final String SUCCESS                   = "OK";
+
+    public static final String SEPARATOR_COMMAND         = " ";
     
     private String host;
     
@@ -88,8 +88,8 @@ public class BrCacheConnectionImp implements BrCacheConnection{
     
     public synchronized void connect() throws IOException{
         this.socket = new Socket(this.getHost(), this.getPort());
-        this.reader = new TextTerminalReader(this.socket, this.streamFactory, 16*1024);
-        this.writer = new TextTerminalWriter(this.socket, this.streamFactory, 16*1024);
+        this.reader = new TextTerminalReader(this.socket, this.streamFactory, 8*1024);
+        this.writer = new TextTerminalWriter(this.socket, this.streamFactory, 8*1024);
     }
     
     public synchronized void disconect() throws IOException{
@@ -105,10 +105,10 @@ public class BrCacheConnectionImp implements BrCacheConnection{
             throws StorageException{
         
         try{
-        	StringBuilder cmd = 
-    			new StringBuilder(PUT).append(SEPARATOR)
-    			.append(key).append(SEPARATOR)
-    			.append(time).append(SEPARATOR);
+        	String cmd = 
+        			PUT_COMMAND + SEPARATOR_COMMAND +
+        			key + SEPARATOR_COMMAND +
+        			time + SEPARATOR_COMMAND;
 
             ObjectOutputStream out     = null;
         	ByteArrayOutputStream bout = null;
@@ -121,8 +121,8 @@ public class BrCacheConnectionImp implements BrCacheConnection{
                 byte[] stream = bout.toByteArray();
                 int size      = stream.length;
                 
-                cmd.append(size);
-                this.writer.sendMessage(cmd.toString());
+                cmd += size;
+                this.writer.sendMessage(cmd);
                 this.writer.getStream().write(stream);
                 this.writer.sendCRLF();
                 this.writer.sendMessage(BOUNDARY);
@@ -164,17 +164,17 @@ public class BrCacheConnectionImp implements BrCacheConnection{
     
     public synchronized Object get(String key) throws RecoverException{
         try{
-        	StringBuilder cmd = 
-    			new StringBuilder(GET).append(SEPARATOR)
-    			.append(key);
+        	String cmd =
+        			GET_COMMAND + SEPARATOR_COMMAND +
+        			key;
 
-        	this.writer.sendMessage(cmd.toString());
+        	this.writer.sendMessage(cmd);
         	this.writer.flush();
         	
             StringBuilder result = this.reader.getMessage();
             String[] resultParams = result.toString().split(" ");
             
-            if(resultParams.length != 4 || !VALUE.equals(resultParams[0]))
+            if(resultParams.length != 4 || !VALUE_RESULT.equals(resultParams[0]))
                 throw new RecoverException(result.toString());
 
             int size = Integer.parseInt(resultParams[2]);
@@ -223,11 +223,11 @@ public class BrCacheConnectionImp implements BrCacheConnection{
     public synchronized boolean remove(String key) throws RecoverException{
         
         try{
-        	StringBuilder cmd = 
-    			new StringBuilder(REMOVE).append(SEPARATOR)
-    			.append(key);
+        	String cmd = 
+        			REMOVE_COMMAND + SEPARATOR_COMMAND +
+        			key;
 
-        	this.writer.sendMessage(cmd.toString());
+        	this.writer.sendMessage(cmd);
         	this.writer.flush();
 
             StringBuilder response = this.reader.getMessage();

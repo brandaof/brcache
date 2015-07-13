@@ -23,11 +23,11 @@ public class RemoveCommand extends AbstractCommand{
 			TerminalWriter writer, String[] parameters)
 			throws ReadDataException, WriteDataException, ParameterException {
 
-        if(parameters == null || parameters.length < 1)
+        if(parameters == null || parameters.length < 2)
             throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
 
         try {
-			cache.remove(parameters[0].toString());
+			cache.remove(parameters[1]);
 		}
         catch (RecoverException e) {
 			throw new ParameterException(e);
