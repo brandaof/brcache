@@ -19,6 +19,7 @@ package org.brandao.brcache.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 /**
  *
@@ -28,7 +29,7 @@ class TextBufferWriter {
     
     private int offset;
     
-    private byte[] buffer;
+    private ByteBuffer buffer;
     
     private int capacity;
     
@@ -42,7 +43,7 @@ class TextBufferWriter {
             throw new IllegalArgumentException("capacity");
         
         this.offset = 0;
-        this.buffer = new byte[capacity];
+        this.buffer = ByteBuffer.allocateDirect(capacity);
         this.capacity = capacity;
         this.out = out;
     }
@@ -56,7 +57,24 @@ class TextBufferWriter {
     }
     
     public void write(byte[] buffer, int offset, int len) throws IOException{
+    	
+        int limitOffset  = offset + len;
         
+        while(offset < limitOffset){
+            int maxRead  = limitOffset - offset;
+            int maxWrite = this.buffer.remaining();
+            
+            if(maxRead > maxWrite){
+                this.buffer.put(buffer, offset, maxWrite);
+                offset += maxWrite;
+                this.flush();
+            }
+            else{
+            	this.buffer.put(buffer, offset, maxRead);
+                offset       += maxRead;
+            }
+        }    	
+    	/*
         int limitOffset  = offset + len;
         
         while(offset < limitOffset){
@@ -75,16 +93,26 @@ class TextBufferWriter {
                 this.offset += maxRead;
             }
         }
+        */
     }
 
     public void flush() throws IOException{
+        this.buffer.flip();
+        byte[] tmp = new byte[this.buffer.limit()];
+        this.buffer.get(tmp);
+        this.out.write(tmp, 0, tmp.length);
+        this.out.flush();
+    	this.buffer.clear();
+    	/*
         this.out.write(this.buffer, 0, this.offset);
         this.out.flush();
         this.offset = 0;
+        */
     }
-    
+
     public void clear(){
-        this.offset = 0;
+    	this.buffer.clear();
+        //this.offset = 0;
     }
 
     public boolean isHasLineFeed() {

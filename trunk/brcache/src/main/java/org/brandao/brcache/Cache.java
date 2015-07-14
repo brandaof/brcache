@@ -47,7 +47,7 @@ public class Cache implements Serializable{
     
     private final TreeHugeMap<TreeKey,DataMap> dataMap;
 
-    private final HugeArrayList<byte[]> dataList;
+    private final HugeArrayList<ByteArrayWrapper> dataList;
     
     private final int segmentSize;
     
@@ -168,7 +168,7 @@ public class Cache implements Serializable{
                     );
 
             this.dataList =
-                    new HugeArrayList<byte[]>(
+                    new HugeArrayList<ByteArrayWrapper>(
                     "dataList",
                     (int)bytesOnMemory,
                     swapSegmentsFactor,
@@ -444,10 +444,10 @@ public class Cache implements Serializable{
                 synchronized(this.dataList){
                     if(segment == null){
                             segment = this.dataList.size();
-                            this.dataList.add(writeBuf);
+                            this.dataList.add(new ByteArrayWrapper(writeBuf));
                     }
                     else
-                        this.dataList.set(segment, writeBuf);
+                        this.dataList.set(segment, new ByteArrayWrapper(writeBuf));
                 }
 
                 segments.add(segment);
@@ -463,10 +463,10 @@ public class Cache implements Serializable{
             synchronized(this.dataList){
                 if(segment == null){
                     segment = this.dataList.size();
-                    this.dataList.add(tmp);
+                    this.dataList.add(new ByteArrayWrapper(tmp));
                 }
                 else
-                    this.dataList.set(segment, tmp);
+                    this.dataList.set(segment, new ByteArrayWrapper(tmp));
             }
 
             segments.add(segment);
