@@ -31,7 +31,7 @@ public class CacheInputStream extends InputStream{
 
     private DataMap map;
     
-    private List<byte[]> dataList;
+    private List<ByteArrayWrapper> dataList;
     
     private int currentSegmentIndex;
     
@@ -39,7 +39,7 @@ public class CacheInputStream extends InputStream{
     
     private Cache cache;
     
-    public CacheInputStream(Cache cache, DataMap map, List<byte[]> dataList){
+    public CacheInputStream(Cache cache, DataMap map, List<ByteArrayWrapper> dataList){
         this.map = map;
         this.dataList = dataList;
         this.currentDataindex = 0;
@@ -69,7 +69,8 @@ public class CacheInputStream extends InputStream{
         if(this.currentSegmentIndex >= segments.length)
             return -1;
         
-        byte[] origin  = this.dataList.get(segments[this.currentSegmentIndex]);
+        ByteArrayWrapper dataWrapper = this.dataList.get(segments[this.currentSegmentIndex]);
+        byte[] origin  = dataWrapper.toByteArray();
         
         int read = 0;
         
@@ -87,10 +88,17 @@ public class CacheInputStream extends InputStream{
                 destPos += lenRead;
                 this.currentDataindex = 0;
                 this.currentSegmentIndex++;
+                
+                if(this.currentSegmentIndex < segments.length){
+                	dataWrapper = this.dataList.get(segments[this.currentSegmentIndex]);
+                	origin = dataWrapper == null? null : dataWrapper.toByteArray();
+                }
+                /*
                 origin = 
                     this.currentSegmentIndex < segments.length? 
                         this.dataList.get(segments[this.currentSegmentIndex]) :
                         null;
+                        */
             }
             else{
                 int lenRead = length;
@@ -108,13 +116,22 @@ public class CacheInputStream extends InputStream{
     }
     
     public void transfer(OutputStream out) throws IOException{
+
+        int[] segments = this.map.getSegments();
+
+        for(int i=0;i<segments.length;i++){
+        	ByteArrayWrapper dataWrapper = this.dataList.get(segments[i]);
+        	out.write(dataWrapper.toByteArray());
+        }
     	
+    	/*
         int[] segments = this.map.getSegments();
 
         for(int i=0;i<segments.length;i++){
             byte[] origin  = this.dataList.get(segments[i]);
         	out.write(origin);
         }
+        */
     }
     
     public long getSize(){
