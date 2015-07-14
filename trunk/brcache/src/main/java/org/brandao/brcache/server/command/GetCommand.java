@@ -45,7 +45,7 @@ public class GetCommand extends AbstractCommand{
                     OutputStream out = null;
                     try{
                         out = writer.getStream();
-                        in.transfer(out);
+                        in.writeTo(out);
                     }
                     finally{
                         if(out != null){

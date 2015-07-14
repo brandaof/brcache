@@ -139,7 +139,7 @@ class TextBufferReader {
         if(len == 0)
             return;
         
-        if(this.result.position() + len > this.result.limit()){
+        if(this.result.position() + len > this.result.capacity()){
         	ByteBuffer newByteBuffer = ByteBuffer.allocateDirect(this.result.position() + len);
         	this.result.flip();
         	newByteBuffer.put(this.result);

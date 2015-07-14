@@ -61,7 +61,7 @@ public class PutCommand extends AbstractCommand{
                     stream.close();
             }
             
-            reader.getMessage();
+            //reader.getMessage();
             StringBuilder end = reader.getMessage();
             
             if(!TerminalConstants.BOUNDARY_MESSAGE.equals(end.toString()))

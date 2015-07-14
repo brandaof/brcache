@@ -25,13 +25,13 @@ import java.util.Arrays;
  *
  * @author Brandao
  */
-abstract class AbstractTextInputStreamReader extends InputStream{
+public abstract class AbstractTextInputStreamReader extends InputStream{
 
     private static final byte[] CRLF = TerminalConstants.CRLF;
 	
-    private TextBufferReader buffer;
+    protected TextBufferReader buffer;
     
-    private byte[] byteBuffer;
+    protected byte[] byteBuffer;
     
     private int offsetBuf;
     
@@ -77,7 +77,7 @@ abstract class AbstractTextInputStreamReader extends InputStream{
             if(maxRead == 0){
                 byte[] line = this.readData(this.buffer);
                 if(line == null){
-                    this.closed = true;
+                	this.close();
                     return offset - initOffset;
                 }
                 
