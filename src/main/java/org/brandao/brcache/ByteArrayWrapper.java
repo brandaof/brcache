@@ -14,8 +14,8 @@ public class ByteArrayWrapper
 	
 	public ByteArrayWrapper(byte[] data){
 		this.buffer = ByteBuffer.allocateDirect(data.length);
-		this.buffer.put(data);
-		this.buffer.flip();
+		this.buffer.put(data, 0, data.length);
+		this.buffer.limit(data.length);
 	}
 	
 	public synchronized byte[] toByteArray(){
@@ -29,17 +29,15 @@ public class ByteArrayWrapper
         byte[] data = new byte[this.buffer.limit()];
 		this.buffer.position(0);
         this.buffer.get(data, 0, data.length);
-    	out.writeInt(data.length);
-    	out.write(data, 0, data.length);
+        this.buffer.clear();
+        out.writeObject(data);
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-    	int length = in.readInt();
-    	byte[] data = new byte[length];
-    	in.read(data, 0, data.length);
+    	byte[] data = (byte[]) in.readObject();
 		this.buffer = ByteBuffer.allocateDirect(data.length);
-		this.buffer.put(data);
-		this.buffer.flip();
+		this.buffer.put(data, 0, data.length);
+		this.buffer.limit(data.length);
     }
 	
 }

@@ -36,6 +36,16 @@ import org.brandao.brcache.server.command.StatsCommand;
  */
 public class Terminal {
     
+	private static final Command PUT    = new PutCommand();
+
+	private static final Command GET    = new GetCommand();
+
+	private static final Command REMOVE = new RemoveCommand();
+
+	private static final Command STATS  = new StatsCommand();
+	
+	private static final Command EXIT   = new ExitCommand();
+	
     private Cache cache;
     
     private Socket socket;
@@ -52,8 +62,6 @@ public class Terminal {
     
     private int writeBufferSize;
     
-    private Map<String, Command> commands;
-    
     public Terminal(Configuration config){
         this.run = false;
         this.config = config;
@@ -63,28 +71,6 @@ public class Terminal {
             StreamFactory streamFactory,
             int readBufferSize, int writeBufferSize) throws IOException{
         try{
-        	this.commands = new LinkedHashMap<String, Command>();
-        	
-        	Command cmd = new PutCommand();
-        	cmd.setTerminal(this);
-        	this.commands.put("PUT", cmd);
-        	
-        	cmd = new GetCommand();
-        	cmd.setTerminal(this);
-        	this.commands.put("GET", cmd);
-        	
-        	cmd = new RemoveCommand();
-        	cmd.setTerminal(this);
-        	this.commands.put("REMOVE", cmd);
-        	
-        	cmd = new StatsCommand();
-        	cmd.setTerminal(this);
-        	this.commands.put("STATS", cmd);
-        	
-        	cmd = new ExitCommand();
-        	cmd.setTerminal(this);
-        	this.commands.put("EXIT", new ExitCommand());
-        	
             this.socket = socket;
             this.cache  = cache;
             this.readBufferSize  = readBufferSize;
@@ -131,12 +117,22 @@ public class Terminal {
                 			String.format(TerminalConstants.UNKNOW_COMMAND, "empty"));
                 }
                 
-                Command cmd = this.commands.get(command[0]);
-                
-                if(cmd == null)
+            	if("GET".equals(command[0]))
+            		GET.execute(cache, reader, writer, command);
+            	else
+            	if("PUT".equals(command[0]))
+            		PUT.execute(cache, reader, writer, command);
+            	else
+            	if("REMOVE".equals(command[0]))
+            		REMOVE.execute(cache, reader, writer, command);
+            	else
+            	if("STATS".equals(command[0]))
+            		STATS.execute(cache, reader, writer, command);
+            	else
+            	if("EXIT".equals(command[0]))
+            		EXIT.execute(cache, reader, writer, command);
+            	else
                 	throw new UnknowCommandException(String.format(TerminalConstants.UNKNOW_COMMAND, command[0]));
-                
-                cmd.execute(cache, reader, writer, command);
             }
             catch (UnknowCommandException ex) {
                 this.writer.sendMessage(String.format(TerminalConstants.UNKNOW_COMMAND, ex.getMessage()));

@@ -115,23 +115,14 @@ public class CacheInputStream extends InputStream{
         return read;
     }
     
-    public void transfer(OutputStream out) throws IOException{
-
+    public void writeTo(OutputStream out) throws IOException{
         int[] segments = this.map.getSegments();
-
+        
         for(int i=0;i<segments.length;i++){
         	ByteArrayWrapper dataWrapper = this.dataList.get(segments[i]);
         	out.write(dataWrapper.toByteArray());
         }
-    	
-    	/*
-        int[] segments = this.map.getSegments();
-
-        for(int i=0;i<segments.length;i++){
-            byte[] origin  = this.dataList.get(segments[i]);
-        	out.write(origin);
-        }
-        */
+        
     }
     
     public long getSize(){

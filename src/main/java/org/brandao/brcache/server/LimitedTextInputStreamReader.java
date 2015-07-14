@@ -23,7 +23,7 @@ import java.io.IOException;
  *
  * @author Brandao
  */
-class LimitedTextInputStreamReader 
+public class LimitedTextInputStreamReader 
 	extends AbstractTextInputStreamReader{
 
 	private int size;
@@ -34,6 +34,19 @@ class LimitedTextInputStreamReader
     	super(buffer, offset);
     	this.size = size;
     	this.read = 0;
+    }
+    
+    public byte[] read(int len) throws IOException{
+    	
+    	if(this.byteBuffer != null)
+    		throw new IllegalStateException();
+    	
+    	byte[] result = this.buffer.readLineInBytes(len);
+    	
+    	if(result != null)
+    		this.read += result.length;
+    	
+    	return result;
     }
     
 	@Override

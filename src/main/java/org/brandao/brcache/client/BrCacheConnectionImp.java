@@ -17,15 +17,18 @@
 
 package org.brandao.brcache.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 import org.brandao.brcache.server.DefaultStreamFactory;
+import org.brandao.brcache.server.LimitedTextInputStreamReader;
 import org.brandao.brcache.server.ReadDataException;
 import org.brandao.brcache.server.StreamFactory;
 import org.brandao.brcache.server.TerminalReader;
@@ -179,13 +182,17 @@ public class BrCacheConnectionImp implements BrCacheConnection{
 
             int size = Integer.parseInt(resultParams[2]);
             
-            if(size == 0)
-            	return null;
             
-            ObjectInputStream stream = null;
+            LimitedTextInputStreamReader in = null;
             try{
-                stream = new ObjectInputStream(this.reader.getStream(size));
-                return stream.readObject();
+            	if(size != 0){
+	            	in = (LimitedTextInputStreamReader) this.reader.getStream(size);
+	            	byte[] buffer = in.read(size);
+	                ObjectInputStream stream = new ObjectInputStream(new ByteArrayInputStream(buffer));
+	                return stream.readObject();
+            	}
+            	else
+            		return null;
             }
             catch(EOFException ex){
                 return null;
@@ -197,9 +204,9 @@ public class BrCacheConnectionImp implements BrCacheConnection{
                 throw new RecoverException("create instance fail: " + key, ex);
             }
             finally{
-                if(stream != null){
+                if(in != null){
                     try{
-                        stream.close();
+                        in.close();
                     }
                     catch(Exception e){}
                 }
