@@ -54,7 +54,7 @@ public class TextTerminalReader implements TerminalReader{
         return offset;
     }
 
-	public StringBuilder getMessage() throws ReadDataException {
+	public String getMessage() throws ReadDataException {
 		try{
 			return this.buffer.readLine();
 		}

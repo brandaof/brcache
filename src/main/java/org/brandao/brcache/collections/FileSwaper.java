@@ -50,6 +50,7 @@ public class FileSwaper<T> implements Swapper<T> {
     private volatile transient boolean hasCreatePath;
     
     private long segmentSize;
+
     
     public FileSwaper(){
         throw new UnsupportedOperationException("not implemented yet");

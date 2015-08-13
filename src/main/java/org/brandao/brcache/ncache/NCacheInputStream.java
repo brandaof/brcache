@@ -15,33 +15,37 @@
  * limitations under the License.
  */
 
-package org.brandao.brcache;
+package org.brandao.brcache.ncache;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
+
+import org.brandao.brcache.CacheInputStream;
+import org.brandao.brcache.DataMap;
+import org.brandao.brcache.ncache.NCache;
 
 /**
  * Representa o fluxo de bytes de um item de um cache.
  * 
  * @author Brandao.
  */
-public class CacheInputStream extends InputStream{
+public class NCacheInputStream extends CacheInputStream{
 
     private DataMap map;
     
-    private List<ByteArrayWrapper> dataList;
+    private MemoryManager memoryManager;
     
     private int currentSegmentIndex;
     
     private int currentDataindex;
     
-    private Cache cache;
+    private NCache cache;
     
-    public CacheInputStream(Cache cache, DataMap map, List<ByteArrayWrapper> dataList){
+    public NCacheInputStream(NCache cache, DataMap map, MemoryManager memoryManager){
+    	super(cache, map, null);
         this.map = map;
-        this.dataList = dataList;
+        this.memoryManager = memoryManager;
         this.currentDataindex = 0;
         this.currentSegmentIndex = 0;
         this.cache = cache;
@@ -49,28 +53,37 @@ public class CacheInputStream extends InputStream{
     
     @Override
     public int read(byte[] bytes, int i, int i1) throws IOException {
-        return transfer(bytes, i, i1 );
+    	try{
+    		return transfer(bytes, i, i1 );
+    	}
+    	catch(InterruptedException e){
+    		throw new IOException(e);
+    	}
     }
     
     @Override
     public int read() throws IOException {
-        byte[] b = new byte[1];
-        int l = transfer(b, 0, 1);
-        
-        if(l == -1)
-            return -1;
-        else
-            return b[0];
+    	try{
+	        byte[] b = new byte[1];
+	        int l = transfer(b, 0, 1);
+	        
+	        if(l == -1)
+	            return -1;
+	        else
+	            return b[0];
+    	}
+    	catch(InterruptedException e){
+    		throw new IOException(e);
+    	}
     }
     
-    private int transfer(byte[] dest, int destPos, int length ){
+    private int transfer(byte[] dest, int destPos, int length ) throws InterruptedException{
         int[] segments = this.map.getSegments();
         
         if(this.currentSegmentIndex >= segments.length)
             return -1;
         
-        ByteArrayWrapper dataWrapper = this.dataList.get(segments[this.currentSegmentIndex]);
-        byte[] origin  = dataWrapper.toByteArray();
+        byte[] origin  = this.memoryManager.read(segments[this.currentSegmentIndex]);
         
         int read = 0;
         
@@ -89,16 +102,10 @@ public class CacheInputStream extends InputStream{
                 this.currentDataindex = 0;
                 this.currentSegmentIndex++;
                 
-                if(this.currentSegmentIndex < segments.length){
-                	dataWrapper = this.dataList.get(segments[this.currentSegmentIndex]);
-                	origin = dataWrapper == null? null : dataWrapper.toByteArray();
-                }
-                /*
                 origin = 
                     this.currentSegmentIndex < segments.length? 
-                        this.dataList.get(segments[this.currentSegmentIndex]) :
+                    		this.memoryManager.read(segments[this.currentSegmentIndex]) :
                         null;
-                        */
             }
             else{
                 int lenRead = length;
@@ -116,12 +123,16 @@ public class CacheInputStream extends InputStream{
     }
     
     public void writeTo(OutputStream out) throws IOException{
-        int[] segments = this.map.getSegments();
-        
-        for(int i=0;i<segments.length;i++){
-        	ByteArrayWrapper dataWrapper = this.dataList.get(segments[i]);
-        	dataWrapper.writeTo(out);
-        }
+    	try{
+	        int[] segments = this.map.getSegments();
+	        for(int i=0;i<segments.length;i++){
+	        	byte[] data = this.memoryManager.read(segments[i]);
+	        	out.write(data, 0, data.length);
+	        }
+    	}
+    	catch(Throwable e){
+    		throw new IOException(e);
+    	}
         
     }
     

@@ -23,7 +23,7 @@ import java.io.Serializable;
  * 
  * @author Brandao
  */
-class DataMap implements Serializable{
+public class DataMap implements Serializable{
     
     private long maxLiveTime;
     
