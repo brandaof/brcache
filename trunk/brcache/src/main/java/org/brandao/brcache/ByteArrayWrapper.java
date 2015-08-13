@@ -3,8 +3,11 @@ package org.brandao.brcache;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 
 @SuppressWarnings("serial")
 public class ByteArrayWrapper 
@@ -16,6 +19,12 @@ public class ByteArrayWrapper
 		this.buffer = ByteBuffer.allocateDirect(data.length);
 		this.buffer.put(data, 0, data.length);
 		this.buffer.limit(data.length);
+	}
+
+	public synchronized void writeTo(OutputStream out) throws IOException{
+		this.buffer.position(0);
+		WritableByteChannel c = Channels.newChannel(out);
+		c.write(this.buffer);
 	}
 	
 	public synchronized byte[] toByteArray(){

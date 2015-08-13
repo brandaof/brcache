@@ -19,8 +19,6 @@ package org.brandao.brcache.server;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.brandao.brcache.Cache;
 import org.brandao.brcache.StorageException;
@@ -109,13 +107,8 @@ public class Terminal {
     public void execute() throws WriteDataException, ReadDataException, StorageException{
         while(this.run){
             try{
-                StringBuilder message = reader.getMessage();
-                String[] command = message.toString().split(" ");
-                
-                if(command.length < 1){
-                	throw new UnknowCommandException(
-                			String.format(TerminalConstants.UNKNOW_COMMAND, "empty"));
-                }
+                String message = reader.getMessage();
+                String[] command = message.split(" ");
                 
             	if("GET".equals(command[0]))
             		GET.execute(cache, reader, writer, command);
@@ -134,8 +127,8 @@ public class Terminal {
             	else
                 	throw new UnknowCommandException(String.format(TerminalConstants.UNKNOW_COMMAND, command[0]));
             }
-            catch (UnknowCommandException ex) {
-                this.writer.sendMessage(String.format(TerminalConstants.UNKNOW_COMMAND, ex.getMessage()));
+            catch (IndexOutOfBoundsException ex) {
+                this.writer.sendMessage(String.format(TerminalConstants.UNKNOW_COMMAND, "empty"));
                 this.writer.flush();
             }
             catch (ReadDataException ex) {

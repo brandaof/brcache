@@ -62,9 +62,9 @@ public class PutCommand extends AbstractCommand{
             }
             
             //reader.getMessage();
-            StringBuilder end = reader.getMessage();
+            String end = reader.getMessage();
             
-            if(!TerminalConstants.BOUNDARY_MESSAGE.equals(end.toString()))
+            if(!TerminalConstants.BOUNDARY_MESSAGE.equals(end))
                 throw new ParameterException(TerminalConstants.READ_ENTRY_FAIL);
             	
             writer.sendMessage(TerminalConstants.SUCCESS);

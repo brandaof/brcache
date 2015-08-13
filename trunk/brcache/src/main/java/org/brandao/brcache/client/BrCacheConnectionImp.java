@@ -149,12 +149,10 @@ public class BrCacheConnectionImp implements BrCacheConnection{
             }
 
 
-            StringBuilder result = this.reader.getMessage();
+            String result = this.reader.getMessage();
 
-            String resultSTR = result.toString();
-
-            if(!resultSTR.equals(SUCCESS))
-                throw new StorageException(resultSTR);
+            if(!result.equals(SUCCESS))
+                throw new StorageException(result);
         }
         catch(StorageException e){
             throw e;
@@ -174,8 +172,8 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         	this.writer.sendMessage(cmd);
         	this.writer.flush();
         	
-            StringBuilder result = this.reader.getMessage();
-            String[] resultParams = result.toString().split(" ");
+            String result = this.reader.getMessage();
+            String[] resultParams = result.split(" ");
             
             if(resultParams.length != 4 || !VALUE_RESULT.equals(resultParams[0]))
                 throw new RecoverException(result.toString());
@@ -211,9 +209,9 @@ public class BrCacheConnectionImp implements BrCacheConnection{
                     catch(Exception e){}
                 }
                 
-                StringBuilder end = this.reader.getMessage();
+                String end = this.reader.getMessage();
                 
-                if(!BOUNDARY.equals(end.toString()))
+                if(!BOUNDARY.equals(end))
                     throw new RecoverException("read entry fail");
             }
         }
@@ -237,11 +235,10 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         	this.writer.sendMessage(cmd);
         	this.writer.flush();
 
-            StringBuilder response = this.reader.getMessage();
-            String responseSTR = response.toString();
+            String response = this.reader.getMessage();
             
-            if(!SUCCESS.equals(responseSTR))
-                throw new RecoverException(responseSTR);
+            if(!SUCCESS.equals(response))
+                throw new RecoverException(response);
 
             return true;
         }

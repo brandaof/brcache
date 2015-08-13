@@ -174,11 +174,19 @@ public class BrCacheConnectionTest  extends TestCase{
         
         BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 1044, 2, 10);
 
-        for(int i=0;i<10000;i++){
+		StringBuilder buildData = new StringBuilder();
+		
+		for(int i=0;i<16000;i++){
+			buildData.append("X");
+		}
+		
+		String valueToStorage = buildData.toString();
+        
+        for(int i=0;i<100000;i++){
             BrCacheConnection con = null;
             try{
                 con = pool.getConnection();
-                con.put(String.valueOf(i),0,i);
+                con.put(String.valueOf(i),0,valueToStorage + i);
                 if(i % 100 == 0)
                     System.out.println("added: " + i);
             }
@@ -190,14 +198,14 @@ public class BrCacheConnectionTest  extends TestCase{
             }
         }
 
-        for(int i=0;i<10000;i++){
+        for(int i=0;i<100000;i++){
             BrCacheConnection con = null;
             try{
                 if(i % 100 == 0)
                     System.out.println("test: " + i);
                 con = pool.getConnection();
                 int value = (Integer) con.get(String.valueOf(i));
-                Assert.assertEquals(i, value);
+                Assert.assertEquals(i + valueToStorage, value);
             }
             catch(Exception e){
                 e.printStackTrace();

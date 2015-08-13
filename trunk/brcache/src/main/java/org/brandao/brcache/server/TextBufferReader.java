@@ -52,9 +52,9 @@ class TextBufferReader {
         this.result   = ByteBuffer.allocateDirect(capacity);
     }
 
-    public StringBuilder readLine() throws IOException{
+    public String readLine() throws IOException{
         byte[] data = readLineInBytes();
-        return data == null? null : new StringBuilder(new String(data));
+        return data == null? null : new String(data);
     }
 
     public byte[] readLineInBytes() throws IOException{

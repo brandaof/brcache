@@ -9,6 +9,7 @@ import java.util.Random;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.brandao.brcache.collections.Collections;
+import org.brandao.brcache.ncache.NCache;
 
 /**
  *
@@ -46,7 +47,7 @@ public class CacheTest extends TestCase{
     public void test() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
         Collections.setPath("/mnt/brcache");
-        final Cache cache = new Cache();
+        final Cache cache = new NCache();
 
         Thread read =
             new Thread(){
@@ -86,7 +87,7 @@ public class CacheTest extends TestCase{
         
         read.start();
         
-        for(int i=0;i<10;i++){
+        for(int i=0;i<100;i++){
             Thread th;
             if(i % 2 == 0){
                 th = new Thread(){
@@ -244,7 +245,7 @@ public class CacheTest extends TestCase{
     
     public void test3() throws StorageException, IOException, ClassNotFoundException, RecoverException{
         Collections.setPath("/mnt/brcache");
-        Cache cache = new Cache();
+        Cache cache = new NCache();
         String expected1 = "TESTE";
         String expected2 = "TESTE2";
         cache.putObject("TT", 0, expected1);
@@ -256,11 +257,17 @@ public class CacheTest extends TestCase{
     
     public void test4() throws StorageException, IOException, ClassNotFoundException, RecoverException{
         Collections.setPath("/mnt/brcache");
-        Cache cache = new Cache();
-        for(int i=0;i<1000000;i++)
+        Cache cache = new NCache();
+        for(int i=0;i<10000;i++){
+        	if(i % 1000 == 0)
+        		System.out.println(i);
         	cache.putObject("TESTE:"+i, 0, i + text);
+        }
         
-        for(int i=0;i<1000000;i++){
+        
+        for(int i=0;i<10000;i++){
+        	if(i % 1000 == 0)
+        		System.out.println(i);
 	        String value = (String) cache.getObject("TESTE:" + i);
 	        Assert.assertEquals(i + text, value);
         }
