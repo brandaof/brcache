@@ -124,8 +124,10 @@ public class Terminal {
             	else
             	if("EXIT".equals(command[0]))
             		EXIT.execute(this, cache, reader, writer, command);
-            	else
-                	throw new UnknowCommandException(String.format(TerminalConstants.UNKNOW_COMMAND, command[0]));
+                else{
+                    this.writer.sendMessage(String.format(TerminalConstants.UNKNOW_COMMAND, command[0]));
+                    this.writer.flush();
+                }
             }
             catch (IndexOutOfBoundsException ex) {
                 this.writer.sendMessage(String.format(TerminalConstants.UNKNOW_COMMAND, "empty"));
