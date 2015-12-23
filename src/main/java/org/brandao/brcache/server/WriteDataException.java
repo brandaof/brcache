@@ -17,13 +17,15 @@
 
 package org.brandao.brcache.server;
 
+import java.io.IOException;
+
 /**
  * Lançada caso ocorra algum falha ao tentar enviar os dados 
  * em uma solicitação.
  * 
  * @author Brandao
  */
-public class WriteDataException extends Exception{
+public class WriteDataException extends IOException{
     
     public WriteDataException() {
         super();

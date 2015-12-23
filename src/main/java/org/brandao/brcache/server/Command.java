@@ -25,9 +25,7 @@ import org.brandao.brcache.Cache;
  */
 public interface Command {
     
-	void setTerminal(Terminal terminal);
-	
-    void execute(Cache cache, TerminalReader reader, 
+    void execute(Terminal terminal, Cache cache, TerminalReader reader, 
     		TerminalWriter writer, String[] parameters) 
             throws ReadDataException, WriteDataException, ParameterException;
     

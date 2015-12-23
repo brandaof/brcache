@@ -7,6 +7,7 @@ import org.brandao.brcache.Cache;
 import org.brandao.brcache.StorageException;
 import org.brandao.brcache.server.ParameterException;
 import org.brandao.brcache.server.ReadDataException;
+import org.brandao.brcache.server.Terminal;
 import org.brandao.brcache.server.TerminalConstants;
 import org.brandao.brcache.server.TerminalReader;
 import org.brandao.brcache.server.TerminalWriter;
@@ -23,7 +24,7 @@ import org.brandao.brcache.server.WriteDataException;
  */
 public class PutCommand extends AbstractCommand{
 
-	public void execute(Cache cache, TerminalReader reader, TerminalWriter writer,
+	public void execute(Terminal terminal, Cache cache, TerminalReader reader, TerminalWriter writer,
 			String[] parameters) throws ReadDataException, WriteDataException,
 			ParameterException {
 		
@@ -61,7 +62,6 @@ public class PutCommand extends AbstractCommand{
                     stream.close();
             }
             
-            //reader.getMessage();
             String end = reader.getMessage();
             
             if(!TerminalConstants.BOUNDARY_MESSAGE.equals(end))
