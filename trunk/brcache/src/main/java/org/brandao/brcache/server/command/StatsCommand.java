@@ -5,6 +5,7 @@ import java.util.Properties;
 import org.brandao.brcache.Cache;
 import org.brandao.brcache.server.ParameterException;
 import org.brandao.brcache.server.ReadDataException;
+import org.brandao.brcache.server.Terminal;
 import org.brandao.brcache.server.TerminalConstants;
 import org.brandao.brcache.server.TerminalReader;
 import org.brandao.brcache.server.TerminalWriter;
@@ -13,12 +14,12 @@ import org.brandao.brcache.server.WriteDataException;
 public class StatsCommand 
 	extends AbstractCommand{
 
-	public void execute(Cache cache, TerminalReader reader,
+	public void execute(Terminal terminal, Cache cache, TerminalReader reader,
 			TerminalWriter writer, String[] parameters)
 			throws ReadDataException, WriteDataException, ParameterException {
 		
 		StringBuilder result = new StringBuilder();
-		Properties config = this.terminal.getConfiguration();
+		Properties config = terminal.getConfiguration();
 		
         for(String prop: config.stringPropertyNames()){
             result

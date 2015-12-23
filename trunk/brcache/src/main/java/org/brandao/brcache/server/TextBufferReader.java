@@ -91,8 +91,9 @@ class TextBufferReader {
                 }
                 
                 int len = stream.read(this.buffer, this.limit, this.buffer.length - limit);
+                
                 if(len == -1)
-                    throw new IOException();
+                    throw new IOException("premature end of data");
                 
                 this.limit += len;
             }

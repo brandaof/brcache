@@ -17,13 +17,15 @@
 
 package org.brandao.brcache.server;
 
+import java.io.IOException;
+
 /**
  * Lançada caso ocorra algum falha ao tentar ler os dados 
  * de uma solicitação.
  * 
  * @author Brandao
  */
-public class ReadDataException extends Exception{
+public class ReadDataException extends IOException{
     
     public ReadDataException() {
         super();

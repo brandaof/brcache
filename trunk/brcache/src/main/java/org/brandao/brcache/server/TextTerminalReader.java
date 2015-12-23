@@ -43,11 +43,11 @@ public class TextTerminalReader implements TerminalReader{
     }
     
     public InputStream getStream() {
-        return new TextInputStreamReader(buffer, this.offset);
+        return new TextInputStreamReader(this.buffer, this.offset);
     }
 
     public InputStream getStream(int size) {
-        return new LimitedTextInputStreamReader(buffer, this.offset, size);
+        return new LimitedTextInputStreamReader(this.buffer, this.offset, size);
     }
     
     public int getOffset() {

@@ -111,19 +111,19 @@ public class Terminal {
                 String[] command = message.split(" ");
                 
             	if("GET".equals(command[0]))
-            		GET.execute(cache, reader, writer, command);
+            		GET.execute(this, cache, reader, writer, command);
             	else
             	if("PUT".equals(command[0]))
-            		PUT.execute(cache, reader, writer, command);
+            		PUT.execute(this, cache, reader, writer, command);
             	else
             	if("REMOVE".equals(command[0]))
-            		REMOVE.execute(cache, reader, writer, command);
+            		REMOVE.execute(this, cache, reader, writer, command);
             	else
             	if("STATS".equals(command[0]))
-            		STATS.execute(cache, reader, writer, command);
+            		STATS.execute(this, cache, reader, writer, command);
             	else
             	if("EXIT".equals(command[0]))
-            		EXIT.execute(cache, reader, writer, command);
+            		EXIT.execute(this, cache, reader, writer, command);
             	else
                 	throw new UnknowCommandException(String.format(TerminalConstants.UNKNOW_COMMAND, command[0]));
             }
@@ -132,10 +132,18 @@ public class Terminal {
                 this.writer.flush();
             }
             catch (ReadDataException ex) {
-                throw ex;
+            	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
+        			throw ex;
+            	
+                this.writer.sendMessage(ex.getMessage());
+                this.writer.flush();
             }
             catch (WriteDataException ex) {
-                throw ex;
+            	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
+        			throw ex;
+            	
+                this.writer.sendMessage(ex.getMessage());
+                this.writer.flush();
             }
             catch (ParameterException ex) {
                 this.writer.sendMessage(ex.getMessage());
