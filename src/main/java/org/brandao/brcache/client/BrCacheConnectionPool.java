@@ -54,17 +54,17 @@ public class BrCacheConnectionPool {
      * @param minInstances Conexões que serão iniciadas na criação da instância.
      * @param maxInstances Quantidade máxima de conexões que serão criadas.
      * @throws IOException Lançada se ocorrer alguma falha ao tentar iniciar as conexões.
+     * @throws InterruptedException 
      */
     public BrCacheConnectionPool(String host, int port, int minInstances, 
             int maxInstances) 
-            throws IOException{
+            throws IOException, InterruptedException{
 
         this(host, port, minInstances, maxInstances, new DefaultStreamFactory());
     }
     
     public BrCacheConnectionPool(String host, int port, int minInstances, 
-            int maxInstances, StreamFactory streamFactory) 
-            throws IOException{
+            int maxInstances, StreamFactory streamFactory) throws IOException {
 
         if(minInstances < 0)
             throw new IllegalArgumentException("minInstances");
@@ -86,6 +86,7 @@ public class BrCacheConnectionPool {
         for(int i=0;i<this.minInstances;i++){
             BrCacheConnection con = createConnection(host, port, streamFactory);
             this.instances.add(con);
+            this.createdInstances++;
         }
         
     }
@@ -109,21 +110,23 @@ public class BrCacheConnectionPool {
      * @throws IOException Lançada se ocorrer uma falha ao tentar 
      * criar uma conexão.
      */
-    public synchronized BrCacheConnection getConnection() 
+    public BrCacheConnection getConnection() 
             throws InterruptedException, IOException {
         
         BrCacheConnection con = this.instances.poll();
         
         if(con != null)
             return con;
-        else
-        if(this.createdInstances < this.maxInstances){
-            con = createConnection(host, port, this.streamFactory);
-            this.createdInstances++;
-            return con;
-        }
-        else
+        else{
+        	synchronized(this){
+		        if(this.createdInstances < this.maxInstances){
+		            con = createConnection(host, port, this.streamFactory);
+		            this.createdInstances++;
+		            return con;
+		        }
+        	}
             return this.instances.take();
+        }
         
     }
 
@@ -136,22 +139,25 @@ public class BrCacheConnectionPool {
      * @throws IOException Lançada se ocorrer uma falha ao tentar 
      * criar uma conexão.
      */
-    public synchronized BrCacheConnection tryGetConnection(long l, TimeUnit tu) 
+    public BrCacheConnection tryGetConnection(long l, TimeUnit tu) 
             throws InterruptedException, IOException {
         
         BrCacheConnection con = this.instances.poll();
         
         if(con != null)
             return con;
-        else
-        if(this.createdInstances < this.maxInstances){
-            con = createConnection(host, port, this.streamFactory);
-            con.connect();
-            this.createdInstances++;
-            return con;
+        else{
+        	synchronized(this){
+		        if(this.createdInstances < this.maxInstances){
+		            con = createConnection(host, port, this.streamFactory);
+		            con.connect();
+		            this.createdInstances++;
+		            return con;
+		        }
+		        else
+		            return this.instances.poll(l, tu);
+        	}
         }
-        else
-            return this.instances.poll(l, tu);
         
     }
     
@@ -159,13 +165,15 @@ public class BrCacheConnectionPool {
      * Libera o uso da conexão.
      * @param con Conexão.
      */
-    synchronized void release(BrCacheConnection con){
-        try{
-            this.instances.put(con);
-        }
-        catch(Exception e){
-            this.createdInstances--;
-        }
+    void release(BrCacheConnection con){
+    	synchronized(this){
+	        try{
+	            this.instances.put(con);
+	        }
+	        catch(Exception e){
+	            this.createdInstances--;
+	        }
+    	}
     }
 
     /**
@@ -173,8 +181,10 @@ public class BrCacheConnectionPool {
      * @param con Conexão.
      */
     synchronized void shutdown(BrCacheConnection con){
-        this.createdInstances--;
-        this.instances.remove(con);
+    	synchronized(this){
+	        this.createdInstances--;
+	        this.instances.remove(con);
+    	}
     }
 
     /**

@@ -19,6 +19,7 @@ package org.brandao.brcache.client;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 /**
  *
@@ -27,6 +28,10 @@ import java.lang.reflect.Method;
 class BrConnectionInvocationHandler implements InvocationHandler{
 
     private static final String CLOSE_METHOD = "close";
+
+    private static final String EQUALS_METHOD = "equals";
+
+    private static final String HASHCODE_METHOD = "hashCode";
     
     private BrCacheConnectionPool pool;
     
@@ -39,7 +44,17 @@ class BrConnectionInvocationHandler implements InvocationHandler{
     
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         
-        if(!method.getName().equals(CLOSE_METHOD))
+    	String name = method.getName();
+        if(name.equals(EQUALS_METHOD)){
+        	Object x = args[0];
+        	x = x instanceof Proxy? Proxy.getInvocationHandler(x) : x;
+            return this.equals(x);
+        }
+        if(name.equals(HASHCODE_METHOD)){
+            return this.hashCode();
+        }
+        else
+        if(!name.equals(CLOSE_METHOD))
             return method.invoke(connection, args);
         else
             return null;

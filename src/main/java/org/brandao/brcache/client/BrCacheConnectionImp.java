@@ -106,72 +106,90 @@ public class BrCacheConnectionImp implements BrCacheConnection{
     
     public synchronized void put(String key, long time, Object value) 
             throws StorageException{
+
+    	String cmd = 
+    			PUT_COMMAND + SEPARATOR_COMMAND +
+    			key + SEPARATOR_COMMAND +
+    			time + SEPARATOR_COMMAND;
+
+    	byte[] data = null;
+    	
+        ObjectOutputStream out     = null;
+    	ByteArrayOutputStream bout = null;
+    	
+        try{
+        	bout = new ByteArrayOutputStream();
+            out = new ObjectOutputStream(bout);
+            out.writeObject(value);
+            out.flush();
+            
+            data     = bout.toByteArray();
+            int size = data.length;
+            
+            cmd += size;
+        }
+        catch(IOException ex){
+            throw new StorageException("serializable data fail: " + key);
+        }
+        finally{
+            try{
+                if(bout != null)
+                	bout.close();
+                
+                if(out != null)
+                	out.close();
+            }
+            catch(Exception ex){
+            }
+        }
+
+        try{
+            this.writer.sendMessage(cmd);
+            this.writer.getStream().write(data);
+            this.writer.sendCRLF();
+            this.writer.sendMessage(BOUNDARY);
+            this.writer.flush();
+        }
+        catch(WriteDataException ex){
+        	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
+                throw new StorageException("send data fail: " + key, ex);
+        	else
+        		throw new StorageException("send data fail: " + key);
+        }
+        catch(IOException e){
+            throw new StorageException("send data fail: " + key, e);
+        }
+        
         
         try{
-        	String cmd = 
-        			PUT_COMMAND + SEPARATOR_COMMAND +
-        			key + SEPARATOR_COMMAND +
-        			time + SEPARATOR_COMMAND;
-
-            ObjectOutputStream out     = null;
-        	ByteArrayOutputStream bout = null;
-            try{
-            	bout = new ByteArrayOutputStream();
-                out = new ObjectOutputStream(bout);
-                out.writeObject(value);
-                out.flush();
-                
-                byte[] stream = bout.toByteArray();
-                int size      = stream.length;
-                
-                cmd += size;
-                this.writer.sendMessage(cmd);
-                this.writer.getStream().write(stream);
-                this.writer.sendCRLF();
-                this.writer.sendMessage(BOUNDARY);
-            }
-            catch(IOException ex){
-                this.writer.sendCRLF();
-                this.writer.sendMessage(ERROR);
-                throw new StorageException("send entry fail: " + key, ex);
-            }
-            finally{
-                try{
-                    if(bout != null)
-                    	bout.close();
-                    
-                    if(out != null)
-                    	out.close();
-                }
-                catch(Exception ex){
-                }
-                this.writer.flush();
-            }
-
-
             String result = this.reader.getMessage();
 
             if(!result.equals(SUCCESS))
                 throw new StorageException(result);
         }
-        catch(StorageException e){
-            throw e;
-        } catch (ReadDataException e) {
-            throw new StorageException(e);
-        } catch (WriteDataException e) {
-            throw new StorageException(e);
-        }
+        catch (ReadDataException ex) {
+        	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
+                throw new StorageException("read data fail: " + key, ex);
+        	else
+        		throw new StorageException("read data fail: " + key);
+		}
+        
     }
     
     public synchronized Object get(String key) throws RecoverException{
-        try{
-        	String cmd =
-        			GET_COMMAND + SEPARATOR_COMMAND +
-        			key;
-
+    	String cmd =
+    			GET_COMMAND + SEPARATOR_COMMAND +
+    			key;
+    	
+    	try{
         	this.writer.sendMessage(cmd);
         	this.writer.flush();
-        	
+    	}
+    	catch(WriteDataException e){
+            throw new RecoverException("send data fail: " + key, e.getCause());
+    	}
+    	
+    	try{
             String result = this.reader.getMessage();
             String[] resultParams = result.split(" ");
             
@@ -179,27 +197,18 @@ public class BrCacheConnectionImp implements BrCacheConnection{
                 throw new RecoverException(result.toString());
 
             int size = Integer.parseInt(resultParams[2]);
-            
-            
+    		
             LimitedTextInputStreamReader in = null;
+            
             try{
-            	if(size != 0){
+	        	if(size != 0){
 	            	in = (LimitedTextInputStreamReader) this.reader.getStream(size);
 	            	byte[] buffer = in.read(size);
 	                ObjectInputStream stream = new ObjectInputStream(new ByteArrayInputStream(buffer));
 	                return stream.readObject();
-            	}
-            	else
-            		return null;
-            }
-            catch(EOFException ex){
-                return null;
-            }
-            catch(IOException ex){
-                throw new RecoverException("read entry fail: " + key, ex);
-            }
-            catch(ClassNotFoundException ex){
-                throw new RecoverException("create instance fail: " + key, ex);
+	        	}
+	        	else
+	        		return null;
             }
             finally{
                 if(in != null){
@@ -214,27 +223,44 @@ public class BrCacheConnectionImp implements BrCacheConnection{
                 if(!BOUNDARY.equals(end))
                     throw new RecoverException("read entry fail");
             }
+            
+    	}
+        catch (ReadDataException ex) {
+        	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
+                throw new RecoverException("read data fail: " + key, ex);
+        	else
+        		throw new RecoverException("read data fail: " + key);
+		}
+        catch (IOException ex) {
+        	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
+                throw new RecoverException("read data fail: " + key, ex);
+        	else
+        		throw new RecoverException("read data fail: " + key);
+		}
+        catch(ClassNotFoundException ex){
+            throw new RecoverException("create instance fail: " + key, ex);
         }
-        catch (ReadDataException e) {
-            throw new RecoverException(e);
-        }
-        catch(RecoverException e){
-            throw e;
-        } catch (WriteDataException e) {
-            throw new RecoverException(e);
-        }
+
     }
 
     public synchronized boolean remove(String key) throws RecoverException{
-        
-        try{
-        	String cmd = 
-        			REMOVE_COMMAND + SEPARATOR_COMMAND +
-        			key;
 
+    	String cmd = 
+    			REMOVE_COMMAND + SEPARATOR_COMMAND +
+    			key;
+
+    	try{
         	this.writer.sendMessage(cmd);
         	this.writer.flush();
-
+    	}
+    	catch(WriteDataException ex){
+        	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
+                throw new RecoverException("read data fail: " + key, ex);
+        	else
+        		throw new RecoverException("read data fail: " + key);
+    	}
+    	
+        try{
             String response = this.reader.getMessage();
             
             if(!SUCCESS.equals(response))
@@ -242,12 +268,11 @@ public class BrCacheConnectionImp implements BrCacheConnection{
 
             return true;
         }
-        catch(RecoverException e){
-            throw e;
-        } catch (ReadDataException e) {
-            throw new RecoverException(e);
-        } catch (WriteDataException e) {
-            throw new RecoverException(e);
+        catch (ReadDataException ex) {
+        	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
+                throw new RecoverException("read data fail: " + key, ex);
+        	else
+        		throw new RecoverException("read data fail: " + key);
         }
     }
     

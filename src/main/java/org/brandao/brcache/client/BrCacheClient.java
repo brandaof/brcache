@@ -23,13 +23,13 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.net.ConnectException;
+
 import org.brandao.brcache.CacheException;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 import org.brandao.brcache.server.DefaultStreamFactory;
-import org.brandao.brcache.server.ReadDataException;
 import org.brandao.brcache.server.StreamFactory;
-import org.brandao.brcache.server.WriteDataException;
 
 /**
  * Cliente para um servidor BrCache.
@@ -208,46 +208,41 @@ public class BrCacheClient implements BrCacheConnection{
     private Object tryExecuteAction(Method method, Object[] args) throws Throwable{
         int countTry = 0;
         Throwable x = null;
+        
         while(countTry < 360){
             countTry++;
             
             BrCacheConnection connection = null;
+            boolean release = false;
             try{
                 connection = this.pool.getConnection();
                 Object result = method.invoke(connection, args);
-                this.pool.release(connection);
+                release = true;
+                //this.pool.release(connection);
                 return result;
             }
             catch(Throwable e){
-                if(x == null)
-                    x = e;
-                Throwable i = e;
-                while(i != null){
-                    
-                    if(i instanceof InvocationTargetException)
-                        i = ((InvocationTargetException)i).getTargetException();
-                    else
-                    if(i instanceof UndeclaredThrowableException) 
-                        i = ((UndeclaredThrowableException)i).getUndeclaredThrowable();
-                    else                        
-                    if(i instanceof ReadDataException || i instanceof WriteDataException || i instanceof IOException){
-                        try{
-                            if(connection != null)
-                                this.pool.shutdown(connection);
-                        }
-                        catch(Throwable ex){}
-                        break;
-                    }
-                    else
-                        i = i.getCause();
+                
+            	Throwable i = e;
+                
+            	while(i instanceof InvocationTargetException || i instanceof UndeclaredThrowableException){
+            		if(i instanceof InvocationTargetException)
+            			i = ((InvocationTargetException)i).getTargetException();
+            		else
+            		if(i instanceof UndeclaredThrowableException)
+            			i = ((UndeclaredThrowableException)i).getUndeclaredThrowable();
                 }
                 
-                if(i == null){
-                    if(connection != null)
-                        this.pool.release(connection);
-                    throw e;
-                }
+                x = i;
                 
+            	if(e instanceof ConnectException || i.getCause() instanceof IOException){
+            		release = false;
+            	}
+                else{
+                	release = true;
+                    throw i;
+                }
+            	
                 try{
                     Thread.sleep(1000);
                 }
@@ -255,8 +250,24 @@ public class BrCacheClient implements BrCacheConnection{
                 }
                 
             }
+            finally{
+            	try{
+	            	if(connection != null){
+		            	if(release){
+		            		this.pool.release(connection);
+		            	}
+		            	else{
+		                    this.pool.shutdown(connection);
+		            	}
+	            	}
+            	}
+            	catch(Throwable ex){
+            	}
+            }
             
         }
-        throw new CacheException(x);
+        
+        throw x;
     }    
+    
 }
