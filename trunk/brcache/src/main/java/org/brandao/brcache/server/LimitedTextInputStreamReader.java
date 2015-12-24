@@ -17,6 +17,7 @@
 
 package org.brandao.brcache.server;
 
+import java.io.EOFException;
 import java.io.IOException;
 
 /**
@@ -81,7 +82,7 @@ public class LimitedTextInputStreamReader
         line = buffer.readLineInBytes();
         
         if(line == null || line.length != 0)
-        	throw new IOException("premature end of data");
+        	throw new EOFException("premature end of data");
         
         return true;
 	}

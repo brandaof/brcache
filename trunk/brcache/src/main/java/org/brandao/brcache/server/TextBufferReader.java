@@ -17,6 +17,7 @@
 
 package org.brandao.brcache.server;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -93,7 +94,7 @@ class TextBufferReader {
                 int len = stream.read(this.buffer, this.limit, this.buffer.length - limit);
                 
                 if(len == -1)
-                    throw new IOException("premature end of data");
+                    throw new EOFException("premature end of data");
                 
                 this.limit += len;
             }

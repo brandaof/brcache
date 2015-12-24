@@ -17,6 +17,7 @@
 
 package org.brandao.brcache.server;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -134,14 +135,14 @@ public class Terminal {
                 this.writer.flush();
             }
             catch (ReadDataException ex) {
-            	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
+            	if(ex.getCause() instanceof EOFException && !"premature end of data".equals(ex.getCause().getMessage()))
         			throw ex;
             	
                 this.writer.sendMessage(ex.getMessage());
                 this.writer.flush();
             }
             catch (WriteDataException ex) {
-            	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
+            	if(ex.getCause() instanceof EOFException && !"premature end of data".equals(ex.getCause().getMessage()))
         			throw ex;
             	
                 this.writer.sendMessage(ex.getMessage());
