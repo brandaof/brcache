@@ -20,7 +20,7 @@ package org.brandao.brcache.server;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 /**
  *
@@ -40,7 +40,7 @@ class TextBufferReader {
 
     private boolean hasLineFeed;
     
-    private ByteBuffer result;
+    private byte[] result;
     
     private int offsetResult;
     
@@ -50,7 +50,7 @@ class TextBufferReader {
         this.buffer   = new byte[capacity];
         this.capacity = capacity;
         this.stream   = stream;
-        this.result   = ByteBuffer.allocateDirect(capacity);
+        this.result   = null;
     }
 
     public String readLine() throws IOException{
@@ -66,7 +66,7 @@ class TextBufferReader {
     	
     	int remainingToMaxRead = maxRead;
     	
-        this.result.clear();//this.result = new byte[0];
+        this.result = new byte[0];
         this.offsetResult = 0;
         
         int start = this.offset;
@@ -105,30 +105,21 @@ class TextBufferReader {
                 this.offset = 1;
                 this.limit  = 1;
                 this.buffer[0] = this.buffer[this.buffer.length - 1];
-                this.result.flip();
-                byte[] r = new byte[this.result.limit()];
-                this.result.get(r);
-                return r;
+                return this.result;
             }
             else
             if(maxRead != -1 && remainingToMaxRead == 1){
                 this.updateResult(this.buffer, start, this.offset - start + 1);
                 this.hasLineFeed = false;
                 this.offset++;
-                this.result.flip();
-                byte[] r = new byte[this.result.limit()];
-                this.result.get(r);
-                return r;
+                return this.result;
             }
             else
             if(maxRead == -1 && this.offset > 0 && this.buffer[this.offset-1] == '\r' && this.buffer[this.offset] == '\n'){
                 this.updateResult(this.buffer, start, this.offset - start - 1);
                 this.hasLineFeed = true;
                 this.offset++;
-                this.result.flip();
-                byte[] r = new byte[this.result.limit()];
-                this.result.get(r);
-                return r;
+                return this.result;
             }
             else{
                 this.offset++;
@@ -137,21 +128,6 @@ class TextBufferReader {
         }
     }
     
-    private void updateResult(byte[] data, int offset, int len){
-        if(len == 0)
-            return;
-        
-        if(this.result.position() + len > this.result.capacity()){
-        	ByteBuffer newByteBuffer = ByteBuffer.allocateDirect(this.result.position() + len);
-        	this.result.flip();
-        	newByteBuffer.put(this.result);
-        	this.result = newByteBuffer;
-        }
-        
-        this.result.put(data, offset, len);
-    }
-
-    /*
     private void updateResult(byte[] data, int offset, int len){
         
         if(len == 0)
@@ -166,7 +142,6 @@ class TextBufferReader {
         this.offsetResult += len;
         
     }
-    */
     
     public void clear(){
         this.offset = 0;
