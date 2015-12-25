@@ -226,7 +226,7 @@ public class BrCacheConnectionTest  extends TestCase{
 		StringBuilder buildData = new StringBuilder();
 		
 		for(int i=0;i<16000;i++){
-			buildData.append("X");
+			buildData.append(Integer.toString(i, Character.MAX_RADIX));
 		}
 		
 		String valueToStorage = buildData.toString();
