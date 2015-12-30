@@ -13,6 +13,21 @@ import java.nio.channels.WritableByteChannel;
 public class ByteArrayWrapper 
 	implements Serializable{
 
+	private byte[] buffer;
+	
+	public ByteArrayWrapper(byte[] data){
+		this.buffer = data;
+	}
+
+	public synchronized void writeTo(OutputStream out) throws IOException{
+		out.write(this.buffer, 0, buffer.length);
+	}
+	
+	public synchronized byte[] toByteArray(){
+		return this.buffer;
+	}
+	
+	/*
 	private transient ByteBuffer buffer;
 	
 	public ByteArrayWrapper(byte[] data){
@@ -48,5 +63,6 @@ public class ByteArrayWrapper
 		this.buffer.put(data, 0, data.length);
 		this.buffer.limit(data.length);
     }
+*/
 	
 }
