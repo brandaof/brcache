@@ -71,10 +71,6 @@ public class Cache implements Serializable{
 
     private String dataPath;
     
-    private Map<String, LockRecord> recordLock;
-    
-    private long countInterator;
-    
     /**
      * Cria um novo cache.
      * 
@@ -150,8 +146,6 @@ public class Cache implements Serializable{
         
         this.dataPath               = dataPath;
         this.freeSegments           = new LinkedBlockingQueue<Integer>();
-        this.recordLock             = new HashMap<String, LockRecord>();
-        this.countInterator         = 0;
         this.segmentSize            = maxSlabSize;
         this.writeBufferLength      = writeBufferSize;
         this.maxBytesToStorageEntry = maxSizeEntry;
@@ -289,39 +283,6 @@ public class Cache implements Serializable{
      */
     
     public void put(String key, long maxAliveTime, InputStream inputData) throws StorageException{
-        LockRecord lock;
-        long lockHash;
-        
-        synchronized(this){
-            lock     = this.recordLock.get(key);
-            lockHash = this.countInterator++;
-            
-            if(lock == null){
-                lock          = new LockRecord();
-                lock.lock     = new Object();
-                lock.lockHash = lockHash;
-                this.recordLock.put(key, lock);
-            }
-            else
-                lock.lockHash = lockHash;
-        }
-        
-        try{
-            synchronized(lock.lock){
-                this.put0(key, maxAliveTime, inputData);
-            }
-        }
-        finally{
-            synchronized(this){
-                lock = this.recordLock.get(key);
-                if(lock != null && lockHash == lock.lockHash){
-                    this.recordLock.remove(key);
-                }
-            }
-        }
-    }
-    
-    public void put0(String key, long maxAliveTime, InputStream inputData) throws StorageException{
         
         if(key.length() > this.maxLengthKey)
             throw new StorageException("key is very large");
@@ -356,33 +317,28 @@ public class Cache implements Serializable{
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar recuperar o
      * item do cache.
      */
-    
     public InputStream get(String key) throws RecoverException{
-        LockRecord lock;
-        
-        synchronized(this){
-            lock = this.recordLock.get(key);
-        }
-        
-        if(lock != null){
-            synchronized(lock.lock){
-                return this.get0(key);
-            }
-        }
-        else{
-            return this.get0(key);
-        }
-    }
-    
-    protected InputStream get0(String key) throws RecoverException{
         
         try{
             countRead++;
 
             DataMap map = this.dataMap.get(new StringTreeKey(key));
-
-            if(map != null)
-                return new CacheInputStream(this, map, this.dataList);
+            if(map != null){
+                int[] segmentIds = map.getSegments();
+                ByteArrayWrapper[] segments = new ByteArrayWrapper[segmentIds.length];
+                
+                for(int i=0;i<segmentIds.length;i++){
+                	ByteArrayWrapper dataWrapper = this.dataList.get(segmentIds[i]);
+                	
+                	if(dataWrapper == null)
+                		throw new RecoverException("corrupted data");
+                	
+                	segments[i] = dataWrapper;
+                }
+                
+                return new CacheInputStream(this, map, segments);
+                //return new CacheInputStream(this, map, this.dataList);
+            }
             else
                 return null;
         }
@@ -400,39 +356,6 @@ public class Cache implements Serializable{
      * item do cache.
      */
     public boolean remove(String key) throws RecoverException{
-        LockRecord lock;
-        long lockHash;
-        
-        synchronized(this){
-            lock     = this.recordLock.get(key);
-            lockHash = this.countInterator++;
-            
-            if(lock == null){
-                lock          = new LockRecord();
-                lock.lock     = new Object();
-                lock.lockHash = lockHash;
-                this.recordLock.put(key, lock);
-            }
-            else
-                lock.lockHash = lockHash;
-        }
-        
-        try{
-            synchronized(lock.lock){
-                return this.remove0(key);
-            }
-        }
-        finally{
-            synchronized(this){
-                lock = this.recordLock.get(key);
-                if(lock != null && lockHash == lock.lockHash){
-                    this.recordLock.remove(key);
-                }
-            }
-        }    }
-    
-    
-    protected boolean remove0(String key) throws RecoverException{
         
         try{
             DataMap data = this.dataMap.get(new StringTreeKey(key));

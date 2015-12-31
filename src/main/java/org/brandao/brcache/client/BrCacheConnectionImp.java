@@ -48,13 +48,13 @@ public class BrCacheConnectionImp implements BrCacheConnection{
     
     public static final String BOUNDARY                  = "END";
     
-    public static final String PUT_COMMAND               = "PUT";
+    public static final String PUT_COMMAND               = "put";
 
     public static final String ERROR                     = "ERROR";
     
-    public static final String GET_COMMAND               = "GET";
+    public static final String GET_COMMAND               = "get";
     
-    public static final String REMOVE_COMMAND            = "REMOVE";
+    public static final String REMOVE_COMMAND            = "remove";
 
     public static final String VALUE_RESULT              = "VALUE";
     

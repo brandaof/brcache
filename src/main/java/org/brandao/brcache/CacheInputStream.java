@@ -32,6 +32,8 @@ public class CacheInputStream extends InputStream{
     private DataMap map;
     
     private List<ByteArrayWrapper> dataList;
+
+    private ByteArrayWrapper[] arrayDataList;
     
     private int currentSegmentIndex;
     
@@ -41,7 +43,17 @@ public class CacheInputStream extends InputStream{
     
     public CacheInputStream(Cache cache, DataMap map, List<ByteArrayWrapper> dataList){
         this.map = map;
+        this.arrayDataList = null;
         this.dataList = dataList;
+        this.currentDataindex = 0;
+        this.currentSegmentIndex = 0;
+        this.cache = cache;
+    }
+
+    public CacheInputStream(Cache cache, DataMap map, ByteArrayWrapper[] dataList){
+        this.map = map;
+        this.arrayDataList = dataList;
+        this.dataList = null;
         this.currentDataindex = 0;
         this.currentSegmentIndex = 0;
         this.cache = cache;
@@ -116,12 +128,19 @@ public class CacheInputStream extends InputStream{
     }
     
     public void writeTo(OutputStream out) throws IOException{
-        int[] segments = this.map.getSegments();
-        
-        for(int i=0;i<segments.length;i++){
-        	ByteArrayWrapper dataWrapper = this.dataList.get(segments[i]);
-        	dataWrapper.writeTo(out);
-        }
+    	if(this.arrayDataList == null){
+	        int[] segments = this.map.getSegments();
+	        
+	        for(int i=0;i<segments.length;i++){
+	        	ByteArrayWrapper dataWrapper = this.dataList.get(segments[i]);
+	        	dataWrapper.writeTo(out);
+	        }
+    	}
+    	else{
+	        for(ByteArrayWrapper dataWrapper: this.arrayDataList){
+	        	dataWrapper.writeTo(out);
+	        }
+    	}
         
     }
     
