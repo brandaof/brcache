@@ -20,7 +20,9 @@ package org.brandao.brcache.ncache;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
+import org.brandao.brcache.ByteArrayWrapper;
 import org.brandao.brcache.CacheInputStream;
 import org.brandao.brcache.DataMap;
 import org.brandao.brcache.ncache.NCache;
@@ -43,7 +45,7 @@ public class NCacheInputStream extends CacheInputStream{
     private NCache cache;
     
     public NCacheInputStream(NCache cache, DataMap map, MemoryManager memoryManager){
-    	super(cache, map, null);
+    	super(cache, map, (List<ByteArrayWrapper>)null);
         this.map = map;
         this.memoryManager = memoryManager;
         this.currentDataindex = 0;

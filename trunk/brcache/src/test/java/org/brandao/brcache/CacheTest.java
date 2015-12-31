@@ -47,7 +47,7 @@ public class CacheTest extends TestCase{
     public void test() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
         Collections.setPath("/mnt/brcache");
-        final Cache cache = new NCache();
+        final Cache cache = new Cache();
 
         Thread read =
             new Thread(){

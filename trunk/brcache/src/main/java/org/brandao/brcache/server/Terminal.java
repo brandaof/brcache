@@ -111,19 +111,19 @@ public class Terminal {
                 String message = reader.getMessage();
                 String[] command = message.split(" ");
                 
-            	if("GET".equals(command[0]))
+            	if("get".equals(command[0]))
             		GET.execute(this, cache, reader, writer, command);
             	else
-            	if("PUT".equals(command[0]))
+            	if("put".equals(command[0]))
             		PUT.execute(this, cache, reader, writer, command);
             	else
-            	if("REMOVE".equals(command[0]))
+            	if("remove".equals(command[0]))
             		REMOVE.execute(this, cache, reader, writer, command);
             	else
-            	if("STATS".equals(command[0]))
+            	if("stats".equals(command[0]))
             		STATS.execute(this, cache, reader, writer, command);
             	else
-            	if("EXIT".equals(command[0]))
+            	if("exit".equals(command[0]))
             		EXIT.execute(this, cache, reader, writer, command);
                 else{
                     this.writer.sendMessage(String.format(TerminalConstants.UNKNOW_COMMAND, command[0]));
