@@ -65,10 +65,14 @@ public class Cache implements Serializable{
     
     volatile long countWrite;
     
+    volatile long countRemoved;
+    
     volatile long countReadData;
 
     volatile long countWriteData;
 
+    volatile long countRemovedData;
+    
     private String dataPath;
     
     /**
@@ -287,7 +291,9 @@ public class Cache implements Serializable{
         if(key.length() > this.maxLengthKey)
             throw new StorageException("key is very large");
         
+        
         TreeKey treeKey = new StringTreeKey(key);
+        DataMap oldMap  = this.dataMap.get(treeKey);
         DataMap map     = new DataMap();
         try{
             map.setMaxLiveTime(maxAliveTime);
@@ -299,14 +305,31 @@ public class Cache implements Serializable{
         	int[] segments = map.getSegments();
         	
             if(segments != null){
-                for(int segment: segments)
+                for(int segment: segments){
+                	ByteArrayWrapper dataWrapper = this.dataList.get(segment);
+                	this.countRemovedData += dataWrapper.toByteArray().length;
                     this.freeSegments.add(segment);
+                }
             }
             throw 
             	e instanceof StorageException? 
             		(StorageException)e : 
             		new StorageException(e);
         }
+        
+    	if(oldMap != null){
+        	int[] segments = oldMap.getSegments();
+        	
+            if(segments != null){
+                for(int segment: segments){
+                	ByteArrayWrapper dataWrapper = this.dataList.get(segment);
+                	this.countRemovedData += dataWrapper.toByteArray().length;
+                    this.freeSegments.add(segment);
+                }
+            }
+            
+            countRemoved++;
+    	}
     }
 
     /**
@@ -368,10 +391,13 @@ public class Cache implements Serializable{
                     int[] segments = data.getSegments();
 
                     for(int segment: segments){
+                    	ByteArrayWrapper dataWrapper = this.dataList.get(segment);
+                    	this.countRemovedData += dataWrapper.toByteArray().length;
                         //this.dataList.set(segment, null);
                         this.freeSegments.put(segment);
                     }
                 }
+                countRemoved++;
                 return true;
             }
             else
@@ -410,11 +436,14 @@ public class Cache implements Serializable{
             map.setSegments(result);
         }
         catch(StorageException e){
+        	this.countRemovedData += writeData;
             for(int segment: segments)
                 this.freeSegments.add(segment);
+            
             throw e;
         }
         catch(IOException e){
+        	this.countRemovedData += writeData;
             for(int segment: segments)
                 this.freeSegments.add(segment);
             throw new StorageException(e);
@@ -502,6 +531,15 @@ public class Cache implements Serializable{
     }
 
     /**
+     * Obtém a quantidade de item removidos.
+     * 
+     * @return Quantidade de item removidos.
+     */
+    public long getCountRemoved() {
+		return countRemoved;
+	}
+
+    /**
      * Obtém a quantidade de bytes recuperados.
      * 
      * @return Quantidade de bytes recuperados.
@@ -519,7 +557,16 @@ public class Cache implements Serializable{
         return countWriteData;
     }
 
-    private static class LockRecord{
+    /**
+     * Obtém a quantidade de bytes removidos.
+     * 
+     * @return Quantidade de bytes removidos.
+     */
+    public long getCountRemovedData() {
+        return countRemovedData;
+    }
+    
+	private static class LockRecord{
     
         public Object lock;
         

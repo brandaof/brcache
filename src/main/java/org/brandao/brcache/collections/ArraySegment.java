@@ -32,8 +32,11 @@ import java.util.Arrays;
 class ArraySegment<K> implements Serializable {
 
     private int id;
+    
     private int size;
+    
     private Object[] data;
+    
     private int segmentSize;
 
     public ArraySegment(int id, int segmentSize) {
@@ -76,8 +79,8 @@ class ArraySegment<K> implements Serializable {
             data = new Object[segmentSize];
         }
 
-        if (index >size)
-            throw new IndexOutOfBoundsException(index + " > " + size);
+        if (index >= size)
+            throw new IndexOutOfBoundsException(index + " >= " + size);
         
         data[index] = value;
         return index;
@@ -98,14 +101,14 @@ class ArraySegment<K> implements Serializable {
         }
 
         data[--size] = null;
-
+        
         return oldValue;
     }
 
     @SuppressWarnings("unchecked")
     public K get(int index) {
         if (index >= size) {
-            throw new IndexOutOfBoundsException(index + " <> " + size);
+            throw new IndexOutOfBoundsException(index + " >= " + size);
         }
 
         return (K) data[index];
@@ -122,8 +125,9 @@ class ArraySegment<K> implements Serializable {
     public void setId(int id) {
         this.id = id;
     }
-
+/*
     private void writeObject(ObjectOutputStream out) throws IOException {
+    	out.writeInt(this.getHashCode());
         out.writeInt(id);
         out.writeInt(size);
         out.writeObject(data);
@@ -131,9 +135,25 @@ class ArraySegment<K> implements Serializable {
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    	int hash = in.readInt();
         id = in.readInt();
         size = in.readInt();
         data = (Object[]) in.readObject();
         segmentSize = in.readInt();
+        
+        if(hash != this.getHashCode())
+        	throw new IOException(hash + " != " + this.getHashCode());
     }
+
+	private int getHashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(data);
+		result = prime * result + id;
+		result = prime * result + segmentSize;
+		result = prime * result + size;
+		return result;
+	}
+*/
+    
 }

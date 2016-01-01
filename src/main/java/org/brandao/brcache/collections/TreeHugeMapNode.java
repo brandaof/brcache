@@ -33,25 +33,34 @@ public class TreeHugeMapNode<T> implements Serializable{
     private int valueIndex;
     
     public TreeHugeMapNode(List<Map<Object,TreeHugeMapNode>> nodes){
+    	
         this.valueIndex = -1;
         Map<Object,TreeHugeMapNode> node = new HashMap<Object,TreeHugeMapNode>();
-        nodes.add(node);
-        this.nodeIndex = nodes.size() - 1;
+        
+        synchronized(nodes){
+	        nodes.add(node);
+	        this.nodeIndex = nodes.size() - 1;
+        }
+        
     }
     
     public TreeHugeMapNode getNextNode(List<Map<Object,TreeHugeMapNode>> nodes, 
             Object key){
+    	
         Map<Object,TreeHugeMapNode> thisNode = nodes.get(nodeIndex);
         return thisNode.get(key);
+        
     }
 
     public void setNextNode(TreeHugeMapNode next, 
             List<Map<Object,TreeHugeMapNode>> nodes, Object key){
-        synchronized(this.nodeIndex){
+    	
+        synchronized(nodes){
             Map<Object,TreeHugeMapNode> thisNode = nodes.get(nodeIndex);
             thisNode.put(key, next);
             nodes.set(nodeIndex, thisNode);
         }
+        
     }
 
     public void updateNextNode(TreeHugeMapNode next, 
@@ -62,15 +71,17 @@ public class TreeHugeMapNode<T> implements Serializable{
     public void setValue(T value, List<T> values){
         
         if( this.valueIndex == -1){
-            this.valueIndex = values.size();
-            values.add(value);
+            synchronized(values){
+	            values.add(value);
+	            this.valueIndex = values.size() - 1;
+            }
         }
         else
             values.set(this.valueIndex, value);
-
     }
     
     public T getValue(List<T> values){
+    	
         if(this.valueIndex == -1)
             return null;
         else
@@ -78,14 +89,18 @@ public class TreeHugeMapNode<T> implements Serializable{
     }
 
     public void overrideValue(T value, List<T> values){
+    	
         if(this.valueIndex == -1)
             throw new IllegalArgumentException();
+        
         values.set(this.valueIndex, value);
     }
     
     public void removeValue(List<T> values){
+    	
         if(this.valueIndex == -1)
             throw new IllegalArgumentException();
+        
         values.remove(this.valueIndex);
     }
 }

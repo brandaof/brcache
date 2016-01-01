@@ -76,9 +76,11 @@ public class GetCommand extends AbstractCommand{
             writer.flush();
         }
         catch(RecoverException e){
+        	e.printStackTrace();
             throw new ReadDataException(TerminalConstants.READ_ENTRY_FAIL);
         }		
         catch(IOException e){
+        	e.printStackTrace();
             throw new ReadDataException(TerminalConstants.READ_ENTRY_FAIL);
         }		
 	}

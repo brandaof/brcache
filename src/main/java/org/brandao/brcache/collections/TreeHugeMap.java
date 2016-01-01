@@ -129,7 +129,7 @@ public class TreeHugeMap<K extends TreeKey,T>
             if(next == null){
                 next = new TreeHugeMapNode(this.nodes);
                 node.setNextNode(next, this.nodes, keys[index]);
-                //needUpdate = true;
+                needUpdate = true;
             }
             
             if(put(keys, ++index, limit, next, value, override))
