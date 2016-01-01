@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.Random;
 import junit.framework.Assert;
 import junit.framework.TestCase;
+
+import org.brandao.brcache.Cache;
 import org.brandao.brcache.CacheException;
 
 /**
@@ -76,6 +78,86 @@ public class BrCacheClientTest extends TestCase{
                                 
                             try{
                                 String val = (String) client.get(key);
+                                if(val != null){
+                                    //System.out.println(val);
+                                    Assert.assertEquals(value, val);
+                                }
+                            }
+                            catch(Throwable e){
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                };
+                
+            }
+            
+            th.start();
+        }
+        
+        Thread.sleep(999999999);
+        
+    }    
+
+    public void test2() 
+            throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException, CacheException{
+        
+        final Cache cache = new Cache();
+        
+        for(int i=0;i<10;i++){
+            Thread th;
+            if(i%2==0){
+                th = new Thread(){
+                    public void run(){
+                        Random r = new Random();
+                        while(true){
+                            try{
+                                int rv = index++;
+                                //int rv = r.nextInt(200000);
+                                String key = String.valueOf(rv)/* + "- INDEX AJBK - "*/;
+                                String value = key;
+                                cache.putObject(key, 0, value );
+                                if(rv % 1000 == 0)
+                                    System.out.println(rv);
+                            }
+                            catch(Exception e){
+                                e.printStackTrace();
+                            }
+                            index++;
+                        }
+                    }
+                };
+            }
+            else
+            /*if(i % 99 == 0){
+                th = new Thread(){
+                    public void run(){
+                        Random r = new Random();
+                        while(true){
+                            int rv = r.nextInt(900000);
+                            String expected = "INDEX-" + String.valueOf(rv);
+                            try{
+                                cache.remove(expected);
+                            }
+                            catch(Throwable e){
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                };
+            }
+            else*/{
+                th = new Thread(){
+                    public void run(){
+                        Random r = new Random();
+                        while(true){
+                            //int rv = r.nextInt(index <= 0? 1000000 : index);
+                            int rv = r.nextInt(index);
+                            String key = String.valueOf(rv)/* + "- INDEX AJBK - "*/;
+                            String value = key;
+                                
+                            try{
+                                String val = (String) cache.getObject(key);
                                 if(val != null){
                                     //System.out.println(val);
                                     Assert.assertEquals(value, val);

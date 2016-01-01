@@ -20,7 +20,6 @@ package org.brandao.brcache.collections;
 import java.io.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Brandao
@@ -28,7 +27,9 @@ import java.util.concurrent.ConcurrentHashMap;
 abstract class AbstractCollectionSegment<I,T> 
     implements CollectionSegment<I>, Serializable{
     
-    private int globalID = 0;
+	private static final long serialVersionUID = 7817500681111470845L;
+
+	private int globalID = 0;
     
     protected Map<Integer, Entry<T>> segments;
     
@@ -155,7 +156,9 @@ abstract class AbstractCollectionSegment<I,T>
 
     protected void addEntry(Integer key, Entry<T> item) {
         
-        synchronized(this.getLock(key)){
+    	Object lock = this.getLock(key);
+    	
+        synchronized(lock){
             if(forceSwap)
                 this.clearLimitLength();
             
@@ -167,8 +170,11 @@ abstract class AbstractCollectionSegment<I,T>
     }
     
     private void swapOnDisk(Integer index, Entry<T> item){
-        
-        synchronized(this.getLock(index)){
+    	
+    	Object lock = this.getLock(index);
+    	
+        synchronized(lock){
+        	
             if(!this.readOnly && item.isNeedUpdate())
                 this.swap.sendItem(index, item);
 
@@ -187,11 +193,13 @@ abstract class AbstractCollectionSegment<I,T>
     }
 
     private Entry<T> swapOnMemory(Integer key){
-        
-        if(key > this.lastSegment)
+
+    	if(key > this.lastSegment)
             return null;
         
-        synchronized(this.getLock(key)){
+    	Object lock = this.getLock(key);
+    	
+        synchronized(lock){
             
             Entry<T> onMemoryEntity = this.segments.get(key);
 
@@ -210,7 +218,6 @@ abstract class AbstractCollectionSegment<I,T>
 
             return entity;
         }
-        
     }
     
     protected Entry<T> getEntry(Integer index) {

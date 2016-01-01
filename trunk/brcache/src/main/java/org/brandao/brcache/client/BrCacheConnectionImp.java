@@ -152,12 +152,12 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         }
         catch(WriteDataException ex){
         	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
-                throw new StorageException("send data fail: " + key, ex);
+                throw new StorageException("send data fail: " + ex.getMessage(), ex);
         	else
-        		throw new StorageException("send data fail: " + key);
+        		throw new StorageException("send data fail: " + ex.getMessage());
         }
         catch(IOException e){
-            throw new StorageException("send data fail: " + key, e);
+            throw new StorageException("send data fail: " + e.getMessage(), e);
         }
         
         
@@ -169,9 +169,9 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         }
         catch (ReadDataException ex) {
         	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
-                throw new StorageException("read data fail: " + key, ex);
+                throw new StorageException("read data fail: " + ex.getMessage(), ex);
         	else
-        		throw new StorageException("read data fail: " + key);
+        		throw new StorageException("read data fail: " + ex.getMessage());
 		}
         
     }
@@ -191,6 +191,10 @@ public class BrCacheConnectionImp implements BrCacheConnection{
     	
     	try{
             String result = this.reader.getMessage();
+            
+            if(!result.startsWith("VALUE"))
+            	throw new ReadDataException(result);
+            
             String[] resultParams = result.split(" ");
             
             if(resultParams.length != 4 || !VALUE_RESULT.equals(resultParams[0]))
@@ -227,18 +231,18 @@ public class BrCacheConnectionImp implements BrCacheConnection{
     	}
         catch (ReadDataException ex) {
         	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
-                throw new RecoverException("read data fail: " + key, ex);
+                throw new RecoverException("read data fail: " + ex.getMessage(), ex);
         	else
-        		throw new RecoverException("read data fail: " + key);
+        		throw new RecoverException("read data fail: " + ex.getMessage());
 		}
         catch (IOException ex) {
         	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
-                throw new RecoverException("read data fail: " + key, ex);
+                throw new RecoverException("read data fail: " + ex.getMessage(), ex);
         	else
-        		throw new RecoverException("read data fail: " + key);
+        		throw new RecoverException("read data fail: " + ex.getMessage());
 		}
         catch(ClassNotFoundException ex){
-            throw new RecoverException("create instance fail: " + key, ex);
+            throw new RecoverException("create instance fail: " + ex.getMessage(), ex);
         }
 
     }
@@ -255,9 +259,9 @@ public class BrCacheConnectionImp implements BrCacheConnection{
     	}
     	catch(WriteDataException ex){
         	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
-                throw new RecoverException("read data fail: " + key, ex);
+                throw new RecoverException("read data fail: " + ex.getMessage(), ex);
         	else
-        		throw new RecoverException("read data fail: " + key);
+        		throw new RecoverException("read data fail: " + ex.getMessage());
     	}
     	
         try{
@@ -270,9 +274,9 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         }
         catch (ReadDataException ex) {
         	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
-                throw new RecoverException("read data fail: " + key, ex);
+                throw new RecoverException("read data fail: " + ex.getMessage(), ex);
         	else
-        		throw new RecoverException("read data fail: " + key);
+        		throw new RecoverException("read data fail: " + ex.getMessage());
         }
     }
     

@@ -47,37 +47,48 @@ class MonitorThread extends Thread{
     
     @Override
     public void run(){
-        long lastEntryRead = 0;
-        long lastEntryWrite = 0;
-        long readEntry = 0;
-        long writeEntry = 0;
+        long lastEntryRead 		= 0;
+        long lastEntryWrite 	= 0;
+        long lastEntryRemoved 	= 0;
+        long readEntry 			= 0;
+        long writeEntry 		= 0;
+        long removedEntry 		= 0;
         
-        long lastRead = 0;
-        long lastWrite = 0;
-        long read = 0;
-        long write = 0;
+        long lastRead 			= 0;
+        long lastWrite 			= 0;
+        long lastRemoved 		= 0;
+        long read 				= 0;
+        long write 				= 0;
+        long removed 			= 0;
         
         while(this.run){
             try{
                 Runtime runtime = Runtime.getRuntime();
                 long memory = runtime.totalMemory() - runtime.freeMemory();
-                this.config.setProperty("write_entry_per_sec", String.valueOf(writeEntry-lastEntryWrite));
-                this.config.setProperty("read_entry_per_sec", String.valueOf(readEntry-lastEntryRead));
-                this.config.setProperty("write_data_per_sec", String.valueOf(write-lastWrite));
-                this.config.setProperty("read_data_per_sec", String.valueOf(read-lastRead));
-                this.config.setProperty("total_memory", String.valueOf(runtime.totalMemory()));
-                this.config.setProperty("used_memory", String.valueOf(memory));
-                this.config.setProperty("used_memory", String.valueOf(memory));
+                this.config.setProperty("write_entry_per_sec",		String.valueOf(writeEntry-lastEntryWrite));
+                this.config.setProperty("read_entry_per_sec", 		String.valueOf(readEntry-lastEntryRead));
+                this.config.setProperty("removed_entry_per_sec", 	String.valueOf(removedEntry-lastEntryRemoved));
+                this.config.setProperty("write_data_per_sec", 		String.valueOf(write-lastWrite));
+                this.config.setProperty("read_data_per_sec", 		String.valueOf(read-lastRead));
+                this.config.setProperty("removed_data_per_sec", 	String.valueOf(removed-lastRemoved));
+                this.config.setProperty("total_memory", 			String.valueOf(runtime.totalMemory()));
+                this.config.setProperty("used_memory", 				String.valueOf(memory));
                 
-                lastEntryRead = cache.getCountRead();
-                lastEntryWrite = cache.getCountWrite();
-                lastRead = cache.getCountReadData();
-                lastWrite = cache.getCountWriteData();
+                lastEntryRead 		= cache.getCountRead();
+                lastEntryWrite 		= cache.getCountWrite();
+                lastEntryRemoved 	= cache.getCountRemoved();
+                lastRead 			= cache.getCountReadData();
+                lastWrite 			= cache.getCountWriteData();
+                lastRemoved 		= cache.getCountRemovedData();
+                
                 Thread.sleep(1000);
-                readEntry = cache.getCountRead();
-                writeEntry = cache.getCountWrite();
-                read = cache.getCountReadData();
-                write = cache.getCountWriteData();
+                
+                readEntry 			= cache.getCountRead();
+                writeEntry 			= cache.getCountWrite();
+                removedEntry 		= cache.getCountRemoved();
+                read 				= cache.getCountReadData();
+                write 				= cache.getCountWriteData();
+                removed 			= cache.getCountRemovedData();
             }
             catch(Exception e){
                 e.printStackTrace();

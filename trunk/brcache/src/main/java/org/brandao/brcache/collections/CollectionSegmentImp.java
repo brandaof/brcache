@@ -42,13 +42,16 @@ class CollectionSegmentImp<I>
     
     public I getEntity(Integer segment, Integer index) {
         
+    	Object lock = this.getLock(segment);
+    	
         Entry<ArraySegment<I>> entry = this.getEntry(segment);
+        
         if (entry == null)
             return null;
         else{
-            synchronized(this.getLock(segment)){
-                entry = this.reload(entry);
-                return entry.getItem().get(index);
+            synchronized(lock){
+	            entry = this.reload(entry);
+	            return entry.getItem().get(index);
             }
         }
         
@@ -59,27 +62,30 @@ class CollectionSegmentImp<I>
         if(this.readOnly)
             throw new IllegalStateException();
         
-        Entry<ArraySegment<I>> entry = super.getEntry(segment);
-        ArraySegment<I> seg;
-
-        if(entry == null){
-
-            if(index != null)
-                throw new IllegalStateException("index");
-
-            seg = new ArraySegment<I>(segment, (int) getFragmentSize());
-            entry = new Entry<ArraySegment<I>>(segment, seg);
-            int idx = seg.add(value);
-            addEntry(segment, entry);
-            return idx;
-        } 
-        else{
-            synchronized(this.getLock(segment)){
+    	Object lock = this.getLock(segment);
+    	
+        synchronized(lock){
+        	
+	        Entry<ArraySegment<I>> entry = super.getEntry(segment);
+	        ArraySegment<I> seg;
+		
+	        if(entry == null){
+	
+	            if(index != null)
+	                throw new IllegalStateException("index");
+	
+	            seg = new ArraySegment<I>(segment, (int) getFragmentSize());
+	            entry = new Entry<ArraySegment<I>>(segment, seg);
+	            int idx = seg.add(value);
+	        	addEntry(segment, entry);
+	            return idx;
+	        } 
+	        else{
                 entry = this.reload(entry);
                 seg  = entry.getItem();
                 entry.setNeedUpdate(true);
                 return index != null? seg.set(index, value) : seg.add(value);
-            }
+	        }
         }
         
     }

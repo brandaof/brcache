@@ -33,7 +33,7 @@ public class HugeArrayList<T>
     
     public static final float DEFAULT_FRAGMENT_FACTOR_ELEMENT = 0.03F;
 
-    private int size;
+    private volatile int size;
     
     private CollectionSegmentImp<T> elements;
     
@@ -118,28 +118,34 @@ public class HugeArrayList<T>
     }
 
     public T get(int index) {
-        if(index>size)
-            throw new IndexOutOfBoundsException(index + " > " + size);
+    	
+    	int localSize = size;
+    	
+        if(index >= localSize)
+            throw new IndexOutOfBoundsException(index + " >= " + localSize);
 
         int segmentId = (int)(index/this.elements.getFragmentSize());
-        int idx     = (int)(index%this.elements.getFragmentSize());
+        int idx       = (int)(index%this.elements.getFragmentSize());
 
         return this.elements.getEntity(segmentId, idx);
     }
     
-    public boolean add(T e) {
-        int group = (int) (size / elements.getFragmentSize());
-        elements.putEntity(group, null, e);
+    public synchronized boolean add(T e) {
+    	
+        int segmentId = (int)(size/this.elements.getFragmentSize());
+        elements.putEntity(segmentId, null, e);
         size++;
         return true;
     }
 
     public T set(int index, T element) {
-        if(index>size)
+    	
+        if(index >= size)
             throw new IndexOutOfBoundsException(index + " > " + size);
         
         int segmentId = (int)(index/this.elements.getFragmentSize());
-        int idx     = (int)(index%this.elements.getFragmentSize());
+        int idx       = (int)(index%this.elements.getFragmentSize());
+        
         T old = this.elements.getEntity(segmentId, idx);
         this.elements.putEntity(segmentId, idx, element);
         return old;
