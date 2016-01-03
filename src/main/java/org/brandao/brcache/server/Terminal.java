@@ -131,10 +131,12 @@ public class Terminal {
                 }
             }
             catch (IndexOutOfBoundsException ex) {
+            	ex.printStackTrace();
                 this.writer.sendMessage(String.format(TerminalConstants.UNKNOW_COMMAND, "empty"));
                 this.writer.flush();
             }
             catch (ReadDataException ex) {
+            	ex.printStackTrace();
             	if(ex.getCause() instanceof EOFException && !"premature end of data".equals(ex.getCause().getMessage()))
         			throw ex;
             	
@@ -142,6 +144,7 @@ public class Terminal {
                 this.writer.flush();
             }
             catch (WriteDataException ex) {
+            	ex.printStackTrace();
             	if(ex.getCause() instanceof EOFException && !"premature end of data".equals(ex.getCause().getMessage()))
         			throw ex;
             	
@@ -149,10 +152,12 @@ public class Terminal {
                 this.writer.flush();
             }
             catch (ParameterException ex) {
+            	ex.printStackTrace();
                 this.writer.sendMessage(ex.getMessage());
                 this.writer.flush();
             }
             catch(Throwable ex){
+            	ex.printStackTrace();
                 throw new StorageException(ex);
             }
         }

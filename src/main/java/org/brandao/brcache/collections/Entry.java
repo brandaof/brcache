@@ -26,7 +26,9 @@ import java.io.Serializable;
  */
 public class Entry<T> implements Serializable {
 
-    private Integer index;
+	private static final long serialVersionUID = -9181909539502614706L;
+
+	private Integer index;
     
     private T item;
     
@@ -36,6 +38,12 @@ public class Entry<T> implements Serializable {
     
     private boolean needUpdate;
 
+    public Entry() {
+        this.index 		= null;
+        this.item 		= null;
+        this.needUpdate = false;
+    }
+    
     /**
      * Cria uma nova instância.
      * 
