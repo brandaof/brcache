@@ -32,6 +32,10 @@ public class Entry<T> implements Serializable {
     
     private T item;
     
+    private Entry<T> next;
+
+    private Entry<T> before;
+    
     private boolean needReload;
     
     private NodeEntry node;
@@ -148,6 +152,38 @@ public class Entry<T> implements Serializable {
      */
     public void setNeedUpdate(boolean needUpdate) {
         this.needUpdate = needUpdate;
+    }
+
+    /**
+     * Obtém o próximo item.
+     * @return Item.
+     */
+    public Entry<T> getNext() {
+        return next;
+    }
+
+    /**
+     * Define o próximo item.
+     * @param next Item
+     */
+    public void setNext(Entry<T> next) {
+        this.next = next;
+    }
+
+    /**
+     * Obtém o item anterior.
+     * @return Item.
+     */
+    public Entry<T> getBefore() {
+        return before;
+    }
+
+    /**
+     * Define o item anterior.
+     * @param before Item.
+     */
+    public void setBefore(Entry<T> before) {
+        this.before = before;
     }
 
 }

@@ -53,11 +53,11 @@ abstract class AbstractCollectionSegment<I,T>
     
     private Swapper<T> swap;
 
-    private Object[] locks;
+    //private Object[] locks;
     
     private boolean forceSwap;
     
-    private NodeEntry firstItem;
+    private Entry<T> firstItem;
 
     public AbstractCollectionSegment(
             String id, int maxCapacity, double clearFactor,
@@ -75,12 +75,12 @@ abstract class AbstractCollectionSegment<I,T>
         this.readOnly            = false;
         this.lastSegment         = -1;
         this.swap                = swap;//new DefaultSwaper<T>(this.id, this.pathName);
-        this.locks               = new Object[quantityLock];
+        //this.locks               = new Object[quantityLock];
         this.forceSwap           = false;
         this.swap.setId(this.id);
 
-        for(int i=0;i<locks.length;i++)
-            locks[i] = new Integer(i);
+        //for(int i=0;i<locks.length;i++)
+        //    locks[i] = new Integer(i);
         
         Thread[] clearThread = new Thread[quantitySwaperThread];
         
@@ -337,31 +337,27 @@ abstract class AbstractCollectionSegment<I,T>
     
     private synchronized void addListedItemOnMemory(Entry<T> item){
         
-        NodeEntry currentItem = new NodeEntry(item);
-        item.setNode(currentItem);
-        
         if(firstItem == null){
-            firstItem = currentItem;
+            firstItem = item;
             firstItem.setNext(firstItem);
             firstItem.setBefore(firstItem);
         }
         else{
-        	NodeEntry lastItem = firstItem.getBefore();
+        	Entry<T> lastItem = firstItem.getBefore();
         	
-        	currentItem.setNext(this.firstItem);
-        	currentItem.setBefore(lastItem);
+        	item.setNext(this.firstItem);
+        	item.setBefore(lastItem);
         	
-        	this.firstItem.setBefore(currentItem);
-        	lastItem.setNext(currentItem);
+        	this.firstItem.setBefore(item);
+        	lastItem.setNext(item);
         }
     }
 
     private synchronized void removeItemListedOnMemory(Entry<T> item){
-    	NodeEntry currentItem = item.getNode();
-    	NodeEntry before      = currentItem.getBefore();
-    	NodeEntry next        = currentItem.getNext();
+    	Entry<T> before      = item.getBefore();
+    	Entry<T> next        = item.getNext();
     	
-        if(firstItem == currentItem){
+        if(firstItem == item){
         	this.firstItem = next;
         	before.setNext(next);
         	next.setBefore(before);
@@ -373,27 +369,26 @@ abstract class AbstractCollectionSegment<I,T>
     }
 
     private synchronized void realocItemListedOnMemory(Entry<T> item){
-    	NodeEntry currentItem = item.getNode();
-    	NodeEntry next        = currentItem.getNext();
+    	Entry<T> next = item.getNext();
     	
-        if(firstItem == currentItem){
+        if(firstItem == item){
         	this.firstItem = next;
-        	NodeEntry lastItem = firstItem.getBefore();
+        	Entry<T> lastItem = firstItem.getBefore();
         	
-        	currentItem.setNext(this.firstItem);
-        	currentItem.setBefore(lastItem);
+        	item.setNext(this.firstItem);
+        	item.setBefore(lastItem);
         	
-        	this.firstItem.setBefore(currentItem);
-        	lastItem.setNext(currentItem);
+        	this.firstItem.setBefore(item);
+        	lastItem.setNext(item);
         }
         else{
-        	NodeEntry lastItem = firstItem.getBefore();
+        	Entry<T> lastItem = firstItem.getBefore();
         	
-        	currentItem.setNext(this.firstItem);
-        	currentItem.setBefore(lastItem);
+        	item.setNext(this.firstItem);
+        	item.setBefore(lastItem);
         	
-        	this.firstItem.setBefore(currentItem);
-        	lastItem.setNext(currentItem);
+        	this.firstItem.setBefore(item);
+        	lastItem.setNext(item);
         }
     }
     
@@ -402,9 +397,9 @@ abstract class AbstractCollectionSegment<I,T>
         if(this.firstItem == null)
             return null;
         
-        Entry<T> item = this.firstItem.getIndex();
-        this.removeItemListedOnMemory(item);
-        return item;
+        Entry<T> firstItem = this.firstItem;
+        this.removeItemListedOnMemory(this.firstItem);
+        return firstItem;
     }
     
 }
