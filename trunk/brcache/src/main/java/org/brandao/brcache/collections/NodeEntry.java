@@ -26,32 +26,35 @@ import java.io.Serializable;
  */
 public class NodeEntry implements Serializable{
 
-    private Integer index;
+    private Entry index;
 
     private NodeEntry next;
 
+    private NodeEntry before;
+    
     /**
      * Cria uma nova instância.
      * 
      * @param value Índice do item.
      */
-    public NodeEntry(Integer value){
-        this.index = value;
-        this.next  = null;
+    public NodeEntry(Entry value){
+        this.index  = value;
+        this.next   = null;
+        this.before = null;
     }
 
     /**
      * Obtém o índice do item.
      * @return Índice.
      */
-    public Integer getIndex() {
+    public Entry getIndex() {
         return index;
     }
     /**
      * Define o índice do item.
      * @param value Índice.
      */
-    public void setIndex(Integer value) {
+    public void setIndex(Entry value) {
         this.index = value;
     }
 
@@ -70,5 +73,21 @@ public class NodeEntry implements Serializable{
     public void setNext(NodeEntry next) {
         this.next = next;
     }
+
+    /**
+     * Obtém o item anterior.
+     * @return Item.
+     */
+	public NodeEntry getBefore() {
+		return before;
+	}
+
+	/**
+	 * Define o item anterior.
+	 * @param before Item.
+	 */
+	public void setBefore(NodeEntry before) {
+		this.before = before;
+	}
 
 }

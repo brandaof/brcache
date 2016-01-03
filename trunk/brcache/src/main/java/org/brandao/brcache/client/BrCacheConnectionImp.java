@@ -129,6 +129,7 @@ public class BrCacheConnectionImp implements BrCacheConnection{
             cmd += size;
         }
         catch(IOException ex){
+        	ex.printStackTrace();
             throw new StorageException("serializable data fail: " + key);
         }
         finally{

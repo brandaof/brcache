@@ -167,7 +167,7 @@ public class BrCacheServer {
     
     private void loadConfiguration(Configuration config){
 
-        long portNumber            = config.getLong("port","1044");
+        long portNumber            = config.getLong("port","8084");
         long max_connections       = config.getLong("max_connections","1024");
         long timeout_connection    = config.getLong("timeout_connection","0");
         boolean reuse_address      = config.getBoolean("reuse_address", "false");

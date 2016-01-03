@@ -200,7 +200,7 @@ public class Cache implements Serializable{
         0.3,
         536870912L,  //512mb
         1048576L,    //1mb
-        0.6,
+        0.3,
         16*1024,
         8012,
         1048576,     //1mb
@@ -208,7 +208,7 @@ public class Cache implements Serializable{
         "/mnt/brcache",
         SwaperStrategy.FILE_TREE,
         0.1,
-        1);
+        4);
     }
     
     /**

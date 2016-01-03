@@ -26,11 +26,18 @@ import java.io.InputStream;
  */
 public class MultiCoreCache 
     extends Cache{
-    
+
+    private static final long KB = 1024;
+
+    private static final long MB = 1024*1024;
+
+    private static final long GB = 1024*1024*1024;
+
+    private static final long TB = 1024*1024*1024*1024;
+	
     private Cache[] cores;
     
     public MultiCoreCache(
-        int cores,
         long nodesSize,
         long nodesSwapSize,
         double nodesSwapFactor,
@@ -49,17 +56,34 @@ public class MultiCoreCache
         double lockFactor,
         int quantitySwaperThread){
         
-        this.cores = new Cache[cores];
+    	long cores;
+    	
+    	if(dataSize < 512L*MB)
+    		cores = 1;
+    	else
+    	if(dataSize < 1L*GB)
+    		cores = 2;
+    	else
+    	if(dataSize < 3L*GB)
+    		cores = 4;
+    	else
+    		cores = 10;
+    	
+        nodesSize = (long)(nodesSize / cores);
+        indexSize = (long)(indexSize / cores);
+        dataSize  = (long)(dataSize / cores);
+        
+        this.cores = new Cache[(int)cores];
         
         for(int i=0;i<cores;i++){
             this.cores[i] = new Cache(
-                nodesSize/cores,
+                nodesSize,
                 nodesSwapSize,
                 nodesSwapFactor,
-                indexSize/cores,
+                indexSize,
                 indexSwapSize,
                 indexSwapFactor,
-                dataSize/cores,
+                dataSize,
                 dataSwapSize,
                 dataSwapFactor,
                 maxSlabSize,
@@ -79,7 +103,6 @@ public class MultiCoreCache
      */
     public MultiCoreCache(){
         this(
-        1,
         29360128L,   //28kb
         16384L,      //16kb
         0.3,
@@ -100,23 +123,23 @@ public class MultiCoreCache
     }
     
     public void putObject(String key, long maxAliveTime, Object item) throws StorageException{
-        this.cores[key.hashCode() % this.cores.length].putObject(key, maxAliveTime, item);
+        this.cores[Math.abs(key.hashCode()) % this.cores.length].putObject(key, maxAliveTime, item);
     }
 
     public Object getObject(String key) throws RecoverException{
-        return this.cores[key.hashCode() % this.cores.length].getObject(key);
+        return this.cores[Math.abs(key.hashCode()) % this.cores.length].getObject(key);
     }
 
     public void put(String key, long maxAliveTime, InputStream inputData) throws StorageException{
-        this.cores[key.hashCode() % this.cores.length].put(key, maxAliveTime, inputData);
+        this.cores[Math.abs(key.hashCode()) % this.cores.length].put(key, maxAliveTime, inputData);
     }
     
     public InputStream get(String key) throws RecoverException{
-        return this.cores[key.hashCode() % this.cores.length].get(key);
+        return this.cores[Math.abs(key.hashCode()) % this.cores.length].get(key);
     }
     
     public boolean remove(String key) throws RecoverException{
-        return this.cores[key.hashCode() % this.cores.length].remove(key);
+        return this.cores[Math.abs(key.hashCode()) % this.cores.length].remove(key);
     }    
     
     public long getCountRead(){
@@ -135,6 +158,14 @@ public class MultiCoreCache
         return value;
     }
 
+    public long getCountRemoved() {
+        long value = 0;
+        for (Cache core : this.cores) {
+            value += core.getCountRemoved();
+        }
+        return value;
+    }
+    
     public long getCountReadData() {
         long value = 0;
         for (Cache core : this.cores) {
@@ -147,6 +178,14 @@ public class MultiCoreCache
         long value = 0;
         for (Cache core : this.cores) {
             value += core.getCountWriteData();
+        }
+        return value;
+    }
+    
+    public long getCountRemovedData() {
+        long value = 0;
+        for (Cache core : this.cores) {
+            value += core.getCountRemovedData();
         }
         return value;
     }

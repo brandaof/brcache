@@ -26,8 +26,10 @@ import java.io.Serializable;
 class CollectionSegmentImp<I> 
     extends AbstractCollectionSegment<I,ArraySegment<I>> 
     implements Serializable{
-    
-    public CollectionSegmentImp(
+
+	private static final long serialVersionUID = 239844470898102007L;
+
+	public CollectionSegmentImp(
             String id, 
             int maxCapacity, 
             double clearFactor,
