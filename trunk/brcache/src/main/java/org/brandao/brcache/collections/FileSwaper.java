@@ -149,7 +149,7 @@ public class FileSwaper<T> implements DiskSwapper<T> {
         this.indexFile.createNewFile();
 
         File datFile = new File(this.path, this.id + ".dat");
-        this.dataFile = new DataBlockEntityFile(datFile, 6*1024);
+        this.dataFile = new DataBlockEntityFile(datFile, 2*1024);
         this.dataFile.createNewFile();
         
         this.hasCreatePath = true;

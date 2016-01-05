@@ -52,8 +52,8 @@ class CollectionSegmentImp<I>
             return null;
         else{
             synchronized(lock){
-	            entry = this.reload(entry);
-	            return entry.getItem().get(index);
+                entry = this.reload(entry);
+                return entry.getItem().get(index);
             }
         }
         
