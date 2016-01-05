@@ -125,7 +125,8 @@ class ArraySegment<K> implements Serializable {
     public void setId(int id) {
         this.id = id;
     }
-/*
+
+    /*
     private void writeObject(ObjectOutputStream out) throws IOException {
     	out.writeInt(this.getHashCode());
         out.writeInt(id);

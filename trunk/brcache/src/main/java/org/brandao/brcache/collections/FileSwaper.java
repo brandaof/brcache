@@ -18,14 +18,19 @@
 package org.brandao.brcache.collections;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.RandomAccessFile;
-import java.util.Arrays;
+
+import org.brandao.brcache.collections.fileswapper.DataBlock;
+import org.brandao.brcache.collections.fileswapper.DataBlockEntityFile;
+import org.brandao.brcache.collections.fileswapper.DataBlockInputStream;
+import org.brandao.brcache.collections.fileswapper.DataBlockOutputStream;
+import org.brandao.brcache.collections.fileswapper.DataChain;
+import org.brandao.brcache.collections.fileswapper.SimpleIndex;
+import org.brandao.brcache.collections.fileswapper.SimpleIndexEntityFile;
 
 /**
  * As entidades são enviadas para o disco e armazenadas 
@@ -33,7 +38,7 @@ import java.util.Arrays;
  * 
  * @author Brandao
  */
-public class FileSwaper<T> implements Swapper<T> {
+public class FileSwaper<T> implements DiskSwapper<T> {
     
     public static final String SEGMENT_SIZE = "brcache.swapper.segment_size";
     
@@ -45,15 +50,16 @@ public class FileSwaper<T> implements Swapper<T> {
     
     private transient File path;
     
-    private transient RandomAccessFile dataFile;
+    private SimpleIndex index;
+    
+    private SimpleIndexEntityFile indexFile;
+
+    private DataBlockEntityFile dataFile;
     
     private volatile transient boolean hasCreatePath;
     
-    private long segmentSize;
-
-    
     public FileSwaper(){
-        throw new UnsupportedOperationException("not implemented yet");
+        this.index = new SimpleIndex();
     }
     
     public synchronized void sendItem(Integer index, Entry<T> item) {
@@ -61,23 +67,14 @@ public class FileSwaper<T> implements Swapper<T> {
             if (!hasCreatePath)
                 createPath();
 
-            long pos = index*this.segmentSize;
-            this.dataFile.seek(pos);
             ObjectOutputStream oOut = null;
+            DataBlockOutputStream bout = null;
             try {
-                ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                bout = new DataBlockOutputStream(this.dataFile.getBlockSize());
                 
                 oOut = new ObjectOutputStream(bout);
                 oOut.writeObject(item.getItem());
                 oOut.flush();
-                
-                byte[] data = bout.toByteArray();
-                if(data.length > this.segmentSize)
-                    throw new IllegalStateException(data.length + " > " + this.segmentSize);
-                else
-                    data = Arrays.copyOf(data, (int)this.segmentSize);
-                
-                this.dataFile.write(data);
             }
             finally {
                 if (oOut != null) {
@@ -85,33 +82,44 @@ public class FileSwaper<T> implements Swapper<T> {
                     oOut.close();
                 }
             }
-        } catch (Exception e) {
+            
+            String idx = Integer.toString(index, Character.MAX_RADIX);
+            long reference = this.index.get(idx, this.indexFile);
+            	
+        	if(reference == -1){
+        		reference = DataChain.save(bout.getBlocks(), this.dataFile);
+        		this.index.registry(idx, reference, this.indexFile);
+        	}
+        	else{
+        		reference = DataChain.update(reference, bout.getBlocks(), this.dataFile);
+        		this.index.registry(idx, reference, this.indexFile);
+        	}
+        	this.dataFile.flush();
+        	this.indexFile.flush();
+        	//System.out.println(index);
+        } 
+        catch (Throwable e) {
             throw new IllegalStateException(e);
         }
     }
 
     @SuppressWarnings({"unchecked"})
     public synchronized Entry<T> getItem(Integer index) {
-        long actual;
-        long pos;
-        long length;
-        
+    	
         try {
             if (!hasCreatePath)
                 createPath();
-            
-            actual = this.dataFile.getFilePointer();
-            pos = index*this.segmentSize;
-            length = this.dataFile.length();
-            this.dataFile.seek(pos);
+
+            String idx = Integer.toString(index, Character.MAX_RADIX);
+            long reference = this.index.get(idx, this.indexFile);
+
+            if(reference == -1)
+            	throw new IllegalStateException(String.valueOf(index));
             
             ObjectInputStream iIn = null;
             try {
-                byte[] data = new byte[(int)this.segmentSize];
-                this.dataFile.readFully(data);
-                
-                ByteArrayInputStream bin = new ByteArrayInputStream(data);
-                iIn = new ObjectInputStream(bin);
+                iIn = new ObjectInputStream(new DataBlockInputStream(reference, this.dataFile));
+            	            	
                 T item = (T) iIn.readObject();
 
                 Entry<T> entry = new Entry<T>(index, false, item);
@@ -122,7 +130,7 @@ public class FileSwaper<T> implements Swapper<T> {
                 if(iIn != null)
                     iIn.close();
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new IllegalStateException(e);
         }
     }
@@ -140,18 +148,25 @@ public class FileSwaper<T> implements Swapper<T> {
         if (!path.exists())
             path.mkdirs();
 
-        File fileDto = new File(this.path, this.id + "-data.swp");
-        fileDto.createNewFile();
+        File indexFile = new File(this.path, this.id + ".idx");
+        this.indexFile = new SimpleIndexEntityFile(indexFile);
+        this.indexFile.createNewFile();
+
+        File datFile = new File(this.path, this.id + ".dat");
+        this.dataFile = new DataBlockEntityFile(datFile, 6*1024);
+        this.dataFile.createNewFile();
         
-        this.dataFile = new RandomAccessFile(fileDto, "rw");
-        this.dataFile.seek(0);
         this.hasCreatePath = true;
     }
     
-    public void setPath(String value) {
+    public void setRootPath(String value) {
         this.pathName = value;
     }
 
+    public String getRootPath(){
+    	return this.pathName;
+    }
+    
     public void setId(String value) {
         this.id = value;
     }
