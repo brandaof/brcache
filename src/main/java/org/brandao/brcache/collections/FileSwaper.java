@@ -17,14 +17,12 @@
 
 package org.brandao.brcache.collections;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import org.brandao.brcache.collections.fileswapper.DataBlock;
 import org.brandao.brcache.collections.fileswapper.DataBlockEntityFile;
 import org.brandao.brcache.collections.fileswapper.DataBlockInputStream;
 import org.brandao.brcache.collections.fileswapper.DataBlockOutputStream;
@@ -141,15 +139,13 @@ public class FileSwaper<T> implements DiskSwapper<T> {
             return;
         }
 
-        File root = this.pathName == null? Collections.getPath() : new File(this.pathName);
+        this.path = this.pathName == null? Collections.getPath() : new File(this.pathName);
 
-        path = new File(root, id);
+        if (!this.path.exists())
+            this.path.mkdirs();
 
-        if (!path.exists())
-            path.mkdirs();
-
-        File indexFile = new File(this.path, this.id + ".idx");
-        this.indexFile = new SimpleIndexEntityFile(indexFile);
+        File idxFile = new File(this.path, this.id + ".idx");
+        this.indexFile = new SimpleIndexEntityFile(idxFile);
         this.indexFile.createNewFile();
 
         File datFile = new File(this.path, this.id + ".dat");
@@ -172,8 +168,7 @@ public class FileSwaper<T> implements DiskSwapper<T> {
     }
 
     public void clear() {
-        File root = this.pathName == null? Collections.getPath() : new File(this.pathName);
-        File rootPath = new File(root, id);
+        File rootPath = this.pathName == null? Collections.getPath() : new File(this.pathName);
         if(rootPath.exists())
             Collections.deleteDir(rootPath);
     }

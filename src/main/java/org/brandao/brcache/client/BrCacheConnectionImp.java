@@ -152,13 +152,15 @@ public class BrCacheConnectionImp implements BrCacheConnection{
             this.writer.flush();
         }
         catch(WriteDataException ex){
+            ex.printStackTrace();
         	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
                 throw new StorageException("send data fail: " + ex.getMessage(), ex);
         	else
         		throw new StorageException("send data fail: " + ex.getMessage());
         }
-        catch(IOException e){
-            throw new StorageException("send data fail: " + e.getMessage(), e);
+        catch(IOException ex){
+            ex.printStackTrace();
+            throw new StorageException("send data fail: " + ex.getMessage(), ex);
         }
         
         
@@ -169,6 +171,7 @@ public class BrCacheConnectionImp implements BrCacheConnection{
                 throw new StorageException(result);
         }
         catch (ReadDataException ex) {
+            ex.printStackTrace();
         	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
                 throw new StorageException("read data fail: " + ex.getMessage(), ex);
         	else
@@ -186,8 +189,9 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         	this.writer.sendMessage(cmd);
         	this.writer.flush();
     	}
-    	catch(WriteDataException e){
-            throw new RecoverException("send data fail: " + key, e.getCause());
+    	catch(WriteDataException ex){
+            ex.printStackTrace();
+            throw new RecoverException("send data fail: " + key, ex.getCause());
     	}
     	
     	try{
@@ -231,18 +235,21 @@ public class BrCacheConnectionImp implements BrCacheConnection{
             
     	}
         catch (ReadDataException ex) {
+            ex.printStackTrace();
         	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
                 throw new RecoverException("read data fail: " + ex.getMessage(), ex);
         	else
         		throw new RecoverException("read data fail: " + ex.getMessage());
 		}
         catch (IOException ex) {
+            ex.printStackTrace();
         	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
                 throw new RecoverException("read data fail: " + ex.getMessage(), ex);
         	else
         		throw new RecoverException("read data fail: " + ex.getMessage());
 		}
         catch(ClassNotFoundException ex){
+            ex.printStackTrace();
             throw new RecoverException("create instance fail: " + ex.getMessage(), ex);
         }
 
@@ -259,6 +266,7 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         	this.writer.flush();
     	}
     	catch(WriteDataException ex){
+            ex.printStackTrace();
         	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
                 throw new RecoverException("read data fail: " + ex.getMessage(), ex);
         	else
@@ -274,6 +282,7 @@ public class BrCacheConnectionImp implements BrCacheConnection{
             return true;
         }
         catch (ReadDataException ex) {
+            ex.printStackTrace();
         	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
                 throw new RecoverException("read data fail: " + ex.getMessage(), ex);
         	else

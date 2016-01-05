@@ -59,7 +59,7 @@ class TextOutputStream extends OutputStream{
         if(closed)
             throw new IOException(TerminalConstants.STREAM_CLOSED);
         
-        //this.buffer.flush();
+        this.buffer.flush();
     }
     
     @Override
