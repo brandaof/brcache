@@ -17,6 +17,7 @@
 
 package org.brandao.brcache;
 
+import org.brandao.brcache.collections.FileSwaper;
 import org.brandao.brcache.collections.HugeArrayList;
 import org.brandao.brcache.collections.StringTreeKey;
 import org.brandao.brcache.collections.TreeHugeMap;
@@ -218,7 +219,7 @@ public class Cache implements Serializable{
      * @return Estratégia.
      */
     protected Swapper getSwaper(SwaperStrategy strategy){
-        Swapper swapper = new TreeFileSwaper();
+        Swapper swapper = new FileSwaper();
         
         if(swapper instanceof DiskSwapper)
             ((DiskSwapper)swapper).setRootPath(this.dataPath);

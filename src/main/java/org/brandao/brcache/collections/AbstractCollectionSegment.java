@@ -118,14 +118,12 @@ abstract class AbstractCollectionSegment<I,T>
     protected void clearLimit() {
         double limit = maxSegmentCapacity - (maxSegmentCapacity * clearFactor);
         if (maxSegmentCapacity > 0 && segments.size() > limit) {
-            System.out.println("start clear");
             while(segments.size() > limit){
                 Entry<T> index = this.getAndRemoveFirstListedItemOnMemory();
                 if(index != null){
                     this.swapOnDisk(index.getIndex(), index);
                 }
             }
-            System.out.println("end clear");
         }
     }
     
