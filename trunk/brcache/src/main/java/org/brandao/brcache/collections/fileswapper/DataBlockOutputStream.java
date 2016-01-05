@@ -51,7 +51,7 @@ public class DataBlockOutputStream
     }
 	
 	public void write(int b) throws IOException {
-        this.write(new byte[]{(byte)b}, 0, 1);
+        this.write(new byte[]{(byte)(b & 0xff)}, 0, 1);
     }
 
     public void flush() throws IOException{

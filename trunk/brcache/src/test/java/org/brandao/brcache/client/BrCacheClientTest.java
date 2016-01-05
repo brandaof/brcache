@@ -21,7 +21,7 @@ public class BrCacheClientTest extends TestCase{
     public void test() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException, CacheException{
         
-        final BrCacheClient client = new BrCacheClient("192.168.0.100", 9090, 200, 1000);
+        final BrCacheClient client = new BrCacheClient("localhost", 8084, 10, 100);
         client.connect();
         
         for(int i=0;i<100;i++){

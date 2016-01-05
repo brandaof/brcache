@@ -40,10 +40,10 @@ public abstract class AbstractTextInputStreamReader extends InputStream{
     private boolean hasLineFeed;
     
     public AbstractTextInputStreamReader(TextBufferReader buffer, int offset){
-        this.buffer = buffer;
-        this.byteBuffer = null;
-        this.offsetBuf = offset;
-        this.closed = false;
+        this.buffer      = buffer;
+        this.byteBuffer  = null;
+        this.offsetBuf   = offset;
+        this.closed      = false;
         this.hasLineFeed = false;
     }
     
@@ -55,7 +55,7 @@ public abstract class AbstractTextInputStreamReader extends InputStream{
         if(result == -1)
             return -1;
         else
-            return buf[0];
+            return buf[0] & 0xff;
         
     }
     
@@ -104,7 +104,7 @@ public abstract class AbstractTextInputStreamReader extends InputStream{
                         maxRead);
                 
                 this.offsetBuf += maxRead;
-                offset += maxRead;
+                offset         += maxRead;
             }
             else{
                 System.arraycopy(
@@ -115,7 +115,7 @@ public abstract class AbstractTextInputStreamReader extends InputStream{
                     maxWrite);
                 
                 this.offsetBuf += maxWrite;
-                offset += maxWrite;
+                offset         += maxWrite;
             }            
         }
         

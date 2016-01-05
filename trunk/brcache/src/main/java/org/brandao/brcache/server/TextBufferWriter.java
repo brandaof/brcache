@@ -42,11 +42,10 @@ class TextBufferWriter {
         if(capacity < 1)
             throw new IllegalArgumentException("capacity");
         
-        this.offset = 0;
-        //this.buffer = ByteBuffer.allocateDirect(capacity);
-        this.buffer = new byte[capacity];
+        this.offset   = 0;
+        this.buffer   = new byte[capacity];
         this.capacity = capacity;
-        this.out = out;
+        this.out      = out;
     }
 
     public void write(byte[] buffer) throws IOException{
@@ -54,32 +53,15 @@ class TextBufferWriter {
     }
 
     public void write(int i) throws IOException{
-        this.write(new byte[]{(byte)i}, 0, 1);
+        this.write(new byte[]{(byte)(i & 0xff)}, 0, 1);
     }
     
     public void write(byte[] buffer, int offset, int len) throws IOException{
     	
-    	/*
         int limitOffset  = offset + len;
         
-        while(offset < limitOffset){
-            int maxRead  = limitOffset - offset;
-            int maxWrite = this.buffer.remaining();
-            
-            if(maxRead > maxWrite){
-                this.buffer.put(buffer, offset, maxWrite);
-                offset += maxWrite;
-                this.flush();
-            }
-            else{
-            	this.buffer.put(buffer, offset, maxRead);
-                offset       += maxRead;
-            }
-        } 
-        */
-    	
-    	
-        int limitOffset  = offset + len;
+        if(this.offset == this.capacity)
+        	this.flush();
         
         while(offset < limitOffset){
             int maxRead  = limitOffset - offset;
@@ -87,37 +69,32 @@ class TextBufferWriter {
             
             if(maxRead > maxWrite){
                 System.arraycopy(buffer, offset, this.buffer, this.offset, maxWrite);
-                offset += maxWrite;
+                offset      += maxWrite;
                 this.offset += maxWrite;
                 this.flush();
             }
             else{
                 System.arraycopy(buffer, offset, this.buffer, this.offset, maxRead);
                 offset       += maxRead;
-                this.offset += maxRead;
+                this.offset  += maxRead;
             }
         }
         
     }
 
     public void flush() throws IOException{
-    	/*
-        this.buffer.flip();
-        byte[] tmp = new byte[this.buffer.limit()];
-        this.buffer.get(tmp);
-        this.out.write(tmp, 0, tmp.length);
-        this.out.flush();
-    	this.buffer.clear();
-    	*/
-    	
-        this.out.write(this.buffer, 0, this.offset);
-        this.out.flush();
-        this.offset = 0;
-        
+    	if(this.offset > 0){
+	        this.out.write(this.buffer, 0, this.offset);
+	        this.out.flush();
+	        this.offset = 0;
+    	}
     }
 
+    public void close() throws IOException{
+    	this.flush();
+    }
+    
     public void clear(){
-    	//this.buffer.clear();
         this.offset = 0;
     }
 

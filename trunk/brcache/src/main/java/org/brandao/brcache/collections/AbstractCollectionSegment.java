@@ -356,9 +356,13 @@ abstract class AbstractCollectionSegment<I,T>
     	Entry<T> next        = item.getNext();
     	
         if(firstItem == item){
-        	this.firstItem = next;
-        	before.setNext(next);
-        	next.setBefore(before);
+        	if(firstItem == next)
+        		this.firstItem = null;
+        	else{
+	        	this.firstItem = next;
+	        	before.setNext(next);
+	        	next.setBefore(before);
+        	}
         }
         else{
         	before.setNext(next);
