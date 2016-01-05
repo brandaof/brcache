@@ -172,7 +172,7 @@ public class BrCacheConnectionTest  extends TestCase{
     public void test4() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
-        BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 1044, 2, 10);
+        BrCacheConnectionPool pool = new BrCacheConnectionPool("localhost", 8084, 2, 10);
 
 		StringBuilder buildData = new StringBuilder();
 		
