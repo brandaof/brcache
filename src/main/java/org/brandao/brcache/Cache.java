@@ -323,8 +323,9 @@ public class Cache implements Serializable{
         	
             if(segments != null){
                 for(int segment: segments){
-                	ByteArrayWrapper dataWrapper = this.dataList.get(segment);
-                	this.countRemovedData += dataWrapper.toByteArray().length;
+                    ByteArrayWrapper dataWrapper = this.dataList.get(segment);
+                    this.dataList.set(segment, null);
+                    this.countRemovedData += dataWrapper.toByteArray().length;
                     this.freeSegments.add(segment);
                 }
             }
@@ -394,7 +395,7 @@ public class Cache implements Serializable{
                     for(int segment: segments){
                     	ByteArrayWrapper dataWrapper = this.dataList.get(segment);
                     	this.countRemovedData += dataWrapper.toByteArray().length;
-                        //this.dataList.set(segment, null);
+                        this.dataList.set(segment, null);
                         this.freeSegments.put(segment);
                     }
                 }
