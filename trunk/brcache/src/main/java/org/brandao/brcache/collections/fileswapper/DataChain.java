@@ -7,6 +7,8 @@ import java.util.List;
 public class DataChain {
 
 	private static final List<Long> EMPTY_LIST = new ArrayList<Long>();
+        
+        private static final byte[] EMPTY_DATA = new byte[0];
 	
 	public static Long save(List<DataBlock> list, DataBlockEntityFile handler) throws IOException{
 		return update(null, list, handler);
@@ -32,7 +34,7 @@ public class DataChain {
 		for(int i=arr.length-1;i>=0;i--){
 			DataBlock entity = arr[i];
 			
-			Long id = freeList.isEmpty()? null : freeList.remove(freeList.size()-1);
+			Long id = freeList.isEmpty()? null : freeList.remove(0);
 			entity.setNextBlock(lastId == null? -1 : lastId);
 			
 			if(id != null){
@@ -43,10 +45,10 @@ public class DataChain {
 			}
 			else{
 				if(free != null){
-					handler.seek(free.getId());
 					entity.setId(free.getId());
+					handler.seek(entity.getId());
 					handler.write(entity);
-					lastId = free.getId();
+					lastId = entity.getId();
 					
 					if(free.getNextBlock() != -1){
 						handler.seek(free.getNextBlock());
@@ -54,8 +56,7 @@ public class DataChain {
 					}
 					else{
 						handler.seek(0);
-						free.setNextBlock(-1);
-						handler.write(entity);
+						handler.write(free);
 						free = null;
 					}
 				}
@@ -72,7 +73,8 @@ public class DataChain {
 		if(free != null){
 			handler.seek(0);
 			free.setNextBlock(free.getId());
-			free.setId(-1);
+                        free.setData(EMPTY_DATA);
+                        free.setId(-1);
 			handler.write(free);
 		}
 		
@@ -88,13 +90,18 @@ public class DataChain {
 	}
 
 	public static void remove(DataBlockEntityFile handler, List<Long> freeList) throws IOException{
+            
+            if(freeList.isEmpty()){
+                return;
+            }
+            
 		handler.seek(0);
 		DataBlock firstBlock = handler.read();
-		
 		long lastBlockId = firstBlock.getNextBlock();
+                
 		for(Long id: freeList){
 			DataBlock freeBlock = new DataBlock();
-			freeBlock.setData(new byte[0]);
+			freeBlock.setData(EMPTY_DATA);
 			freeBlock.setId(id);
 			freeBlock.setNextBlock(lastBlockId);
 			
