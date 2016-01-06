@@ -138,7 +138,7 @@ public class HugeArrayList<T>
         return true;
     }
 
-    public T set(int index, T element) {
+    public synchronized T set(int index, T element) {
     	
         if(index >= size)
             throw new IndexOutOfBoundsException(index + " > " + size);

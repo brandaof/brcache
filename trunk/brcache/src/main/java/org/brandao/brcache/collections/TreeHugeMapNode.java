@@ -30,7 +30,7 @@ public class TreeHugeMapNode<T> implements Serializable{
     
     private final Integer nodeIndex;
     
-    private int valueIndex;
+    private volatile int valueIndex;
     
     public TreeHugeMapNode(List<Map<Object,TreeHugeMapNode>> nodes){
     	
@@ -70,14 +70,14 @@ public class TreeHugeMapNode<T> implements Serializable{
     
     public void setValue(T value, List<T> values){
         
-        if( this.valueIndex == -1){
-            synchronized(values){
-	            values.add(value);
-	            this.valueIndex = values.size() - 1;
+        synchronized(values){
+            if( this.valueIndex == -1){
+                values.add(value);
+                this.valueIndex = values.size() - 1;
             }
+            else
+                values.set(this.valueIndex, value);
         }
-        else
-            values.set(this.valueIndex, value);
     }
     
     public T getValue(List<T> values){
@@ -90,17 +90,21 @@ public class TreeHugeMapNode<T> implements Serializable{
 
     public void overrideValue(T value, List<T> values){
     	
-        if(this.valueIndex == -1)
-            throw new IllegalArgumentException();
-        
-        values.set(this.valueIndex, value);
+        synchronized(values){
+            if(this.valueIndex == -1)
+                throw new IllegalArgumentException();
+
+            values.set(this.valueIndex, value);
+        }
     }
     
     public void removeValue(List<T> values){
     	
-        if(this.valueIndex == -1)
-            throw new IllegalArgumentException();
-        
-        values.remove(this.valueIndex);
+        synchronized(values){
+            if(this.valueIndex == -1)
+                throw new IllegalArgumentException();
+
+            values.remove(this.valueIndex);
+        }
     }
 }
