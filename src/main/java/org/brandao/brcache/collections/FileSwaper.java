@@ -38,17 +38,13 @@ import org.brandao.brcache.collections.fileswapper.SimpleIndexEntityFile;
  */
 public class FileSwaper<T> implements DiskSwapper<T> {
     
-    public static final String SEGMENT_SIZE = "brcache.swapper.segment_size";
-    
-    public static final String PATH = "brcache.swapper.path";
-    
     private String id;
     
     private String pathName;
     
     private transient File path;
     
-    private SimpleIndex index;
+    private final SimpleIndex index;
     
     private SimpleIndexEntityFile indexFile;
 
@@ -62,9 +58,6 @@ public class FileSwaper<T> implements DiskSwapper<T> {
     
     public synchronized void sendItem(Integer index, Entry<T> item) {
         try {
-            if (!hasCreatePath)
-                createPath();
-
             ObjectOutputStream oOut = null;
             DataBlockOutputStream bout = null;
             try {
@@ -84,17 +77,16 @@ public class FileSwaper<T> implements DiskSwapper<T> {
             String idx = Integer.toString(index, Character.MAX_RADIX);
             long reference = this.index.get(idx, this.indexFile);
             	
-        	if(reference == -1){
-        		reference = DataChain.save(bout.getBlocks(), this.dataFile);
-        		this.index.registry(idx, reference, this.indexFile);
-        	}
-        	else{
-        		reference = DataChain.update(reference, bout.getBlocks(), this.dataFile);
-        		this.index.registry(idx, reference, this.indexFile);
-        	}
-        	this.dataFile.flush();
-        	this.indexFile.flush();
-        	//System.out.println(index);
+            if(reference == -1){
+                reference = DataChain.save(bout.getBlocks(), this.dataFile);
+                this.index.registry(idx, reference, this.indexFile);
+            }
+            else{
+                reference = DataChain.update(reference, bout.getBlocks(), this.dataFile);
+                this.index.registry(idx, reference, this.indexFile);
+            }
+            this.dataFile.flush();
+            this.indexFile.flush();
         } 
         catch (Throwable e) {
             throw new IllegalStateException(e);
@@ -103,10 +95,7 @@ public class FileSwaper<T> implements DiskSwapper<T> {
 
     @SuppressWarnings({"unchecked"})
     public synchronized Entry<T> getItem(Integer index) {
-    	
         try {
-            if (!hasCreatePath)
-                createPath();
 
             String idx = Integer.toString(index, Character.MAX_RADIX);
             long reference = this.index.get(idx, this.indexFile);
@@ -117,7 +106,6 @@ public class FileSwaper<T> implements DiskSwapper<T> {
             ObjectInputStream iIn = null;
             try {
                 iIn = new ObjectInputStream(new DataBlockInputStream(reference, this.dataFile));
-            	            	
                 T item = (T) iIn.readObject();
 
                 Entry<T> entry = new Entry<T>(index, false, item);
@@ -156,7 +144,13 @@ public class FileSwaper<T> implements DiskSwapper<T> {
     }
     
     public void setRootPath(String value) {
-        this.pathName = value;
+        try{
+            this.pathName = value;
+            this.createPath();
+        }
+        catch(Throwable e){
+            throw new IllegalArgumentException(value);
+        }
     }
 
     public String getRootPath(){
