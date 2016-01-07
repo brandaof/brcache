@@ -31,15 +31,12 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.CRC32;
 import org.brandao.brcache.collections.Collections;
 import org.brandao.brcache.collections.DiskSwapper;
-import org.brandao.brcache.collections.TreeFileSwaper;
 import org.brandao.brcache.collections.Swapper;
 
 /**
@@ -62,6 +59,8 @@ public class Cache implements Serializable{
     private final int maxBytesToStorageEntry;
     
     private final int maxLengthKey;
+    
+    private volatile long modCount;
     
     volatile long countRead;
     
@@ -150,6 +149,7 @@ public class Cache implements Serializable{
         double bytesPerSegment        = dataSwapSize/maxSlabSize;
         double swapSegmentsFactor     = dataSwapFactor;
         
+        this.modCount               = 0;
         this.dataPath               = dataPath;
         this.freeSegments           = new LinkedBlockingQueue<Integer>();
         this.segmentSize            = maxSlabSize;
@@ -221,7 +221,6 @@ public class Cache implements Serializable{
      */
     protected Swapper getSwaper(SwaperStrategy strategy){
         Swapper swapper = new FileSwaper();
-        
         if(swapper instanceof DiskSwapper)
             ((DiskSwapper)swapper).setRootPath(this.dataPath);
         
@@ -272,6 +271,12 @@ public class Cache implements Serializable{
             else
                 return null;
         }
+        catch(RecoverException e){
+            e.printStackTrace();
+            if("corrupted data".equals(e.getMessage()))
+                return null;
+            throw new RecoverException(e);
+        }
         catch(Throwable e){
             throw new RecoverException(e);
         }
@@ -287,10 +292,6 @@ public class Cache implements Serializable{
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
      * item no cache.
      */
-    
-    //get MERGE_HOTEL:HOTELBEDS-128250-PROD
-    //VALUE MERGE_HOTEL:HOTELBEDS-128250-PROD 13305 0
-    
     public void put(String key, long maxAliveTime, InputStream inputData) throws StorageException{
         
         if(key.length() > this.maxLengthKey)
@@ -301,18 +302,19 @@ public class Cache implements Serializable{
         DataMap oldMap  = this.dataMap.get(treeKey);
         DataMap map     = new DataMap();
         try{
+            map.setId(this.modCount++);
             map.setMaxLiveTime(maxAliveTime);
-            this.putData(map, key, inputData);
+            this.putData(map, inputData);
             this.dataMap.put(treeKey, map);
             this.countWrite++;
         }
         catch(Throwable e){
-        	int[] segments = map.getSegments();
+            int[] segments = map.getSegments();
         	
             if(segments != null){
                 for(int segment: segments){
-                	ByteArrayWrapper dataWrapper = this.dataList.get(segment);
-                	this.countRemovedData += dataWrapper.toByteArray().length;
+                    ByteArrayWrapper dataWrapper = this.dataList.get(segment);
+                    this.countRemovedData += dataWrapper.toByteArray().length;
                     this.freeSegments.add(segment);
                 }
             }
@@ -323,7 +325,7 @@ public class Cache implements Serializable{
         }
         
     	if(oldMap != null){
-        	int[] segments = oldMap.getSegments();
+            int[] segments = oldMap.getSegments();
         	
             if(segments != null){
                 for(int segment: segments){
@@ -358,20 +360,20 @@ public class Cache implements Serializable{
                 CRC32 crc = new CRC32();
                 
                 for(int i=0;i<segmentIds.length;i++){
-                	ByteArrayWrapper dataWrapper = this.dataList.get(segmentIds[i]);
-                	
-                	if(dataWrapper == null)
-                		throw new RecoverException("corrupted data");
-                	
-                        if(!(key + i).equals(dataWrapper.getId()))
-                            throw new RecoverException("invalid key: " + key + "-" + i + " size: " + map.getLength() + " segs: " + Arrays.toString(map.getSegments()));
-                        
-                	segments[i] = dataWrapper;
-                        crc.update(dataWrapper.toByteArray());
+                    ByteArrayWrapper dataWrapper = this.dataList.get(segmentIds[i]);
+
+                    if(dataWrapper == null)
+                        throw new RecoverException("corrupted data");
+
+                    if(dataWrapper.getId() != map.getId() || dataWrapper.getSegment() != i)
+                        throw new RecoverException("corrupted data");
+
+                    segments[i] = dataWrapper;
+                    crc.update(dataWrapper.toByteArray());
                 }
                 
                 if(crc.getValue() != map.getCrc())
-                    throw new RecoverException("bad crc: " + key + "size: " + map.getLength() + " segs: " + Arrays.toString(map.getSegments()));
+                        throw new RecoverException("corrupted data");
                 
                 return new CacheInputStream(this, map, segments);
                 //return new CacheInputStream(this, map, this.dataList);
@@ -403,7 +405,6 @@ public class Cache implements Serializable{
 
                 synchronized(this.dataList){
                     int[] segments = data.getSegments();
-
                     for(int segment: segments){
                     	ByteArrayWrapper dataWrapper = this.dataList.get(segment);
                     	this.countRemovedData += dataWrapper.toByteArray().length;
@@ -411,6 +412,7 @@ public class Cache implements Serializable{
                         this.freeSegments.put(segment);
                     }
                 }
+                
                 countRemoved++;
                 return true;
             }
@@ -423,7 +425,7 @@ public class Cache implements Serializable{
         
     }
     
-    private void putData(DataMap map, String key, InputStream inputData) throws StorageException{
+    private void putData(DataMap map, InputStream inputData) throws StorageException{
         
         int writeData = 0;
         List<Integer> segments = new ArrayList<Integer>(5);
@@ -432,9 +434,11 @@ public class Cache implements Serializable{
             CRC32 crc = new CRC32();
             
             byte[] buffer = new byte[this.segmentSize];
+            int index     = 0;
             int read;
-            int index = 0;
+            
             while((read = inputData.read(buffer)) != -1){
+                
                byte[] data = Arrays.copyOf(buffer, read);
                crc.update(data, 0, read);
                writeData += read;
@@ -446,10 +450,10 @@ public class Cache implements Serializable{
                     Integer segment = this.freeSegments.poll();
                     if(segment == null){
                         segment = this.dataList.size();
-                        this.dataList.add(new ByteArrayWrapper(key + (index++),data));
+                        this.dataList.add(new ByteArrayWrapper(map.getId(), index, data));
                     }
                     else
-                        this.dataList.set(segment, new ByteArrayWrapper(key + (index++), data));
+                        this.dataList.set(segment, new ByteArrayWrapper(map.getId(), index, data));
                     segments.add(segment);
                 }
                
@@ -468,137 +472,18 @@ public class Cache implements Serializable{
             map.setCrc(crc.getValue());
         }
         catch(StorageException e){
-        	this.countRemovedData += writeData;
+            this.countRemovedData += writeData;
             for(int segment: segments)
                 this.freeSegments.add(segment);
             
             throw e;
         }
         catch(IOException e){
-        	this.countRemovedData += writeData;
+            this.countRemovedData += writeData;
             for(int segment: segments)
                 this.freeSegments.add(segment);
             throw new StorageException(e);
         }        
-        /*
-        int writeData = 0;
-        List<Integer> segments = new ArrayList<Integer>(5);
-        
-        try{
-            CRC32 crc = new CRC32();
-            
-            byte[] buffer = new byte[this.writeBufferLength];
-            int read;
-
-            while((read = inputData.read(buffer)) != -1){
-               crc.update(buffer, 0, read);
-               this.writeOnCache(buffer, 0, read, segments);
-               writeData += read;
-               
-               if(writeData > this.maxBytesToStorageEntry)
-                   throw new StorageException("data is very large");
-            }
-            
-            Integer[] segs = segments.toArray(new Integer[0]);
-            int[] result = new int[segs.length];
-
-            for(int i=0;i<segs.length;i++)
-                result[i] = segs[i];
-            
-            map.setLength(writeData);
-            map.setSegments(result);
-            map.setCrc(crc.getValue());
-        }
-        catch(StorageException e){
-        	this.countRemovedData += writeData;
-            for(int segment: segments)
-                this.freeSegments.add(segment);
-            
-            throw e;
-        }
-        catch(IOException e){
-        	this.countRemovedData += writeData;
-            for(int segment: segments)
-                this.freeSegments.add(segment);
-            throw new StorageException(e);
-        }
-        */
-    }
-
-    private void writeOnCache(byte[] readBuf, int off, int len, List<Integer> segments){
-        
-        readBuf = Arrays.copyOf(readBuf, len);
-        Integer segment = this.freeSegments.poll();
-        synchronized(this.dataList){
-            if(segment == null){
-                segment = this.dataList.size();
-                this.dataList.add(new ByteArrayWrapper(null,readBuf));
-            }
-            else
-                this.dataList.set(segment, new ByteArrayWrapper(null,readBuf));
-        }
-        segments.add(segment);
-        
-        /*
-        byte[] writeBuf = new byte[this.segmentSize];
-        int writeOff    = 0;
-        int readOff     = off;
-        int limitRead   = off + len;
-        int limitWrite  = writeBuf.length;
-        int maxRead     = 0;
-        int maxWrite;
-        
-        while(readOff < limitRead){
-            
-            maxWrite = limitWrite - writeOff;
-            maxRead  = limitRead - readOff;
-            
-            if(maxWrite > maxRead){
-                System.arraycopy(readBuf, readOff, writeBuf, writeOff, maxRead);
-                readOff             += maxRead;
-                writeOff            += maxRead;
-                this.countWriteData += maxRead;
-            }
-            else{
-                System.arraycopy(readBuf, readOff, writeBuf, writeOff, maxWrite);
-                readOff             += maxWrite;
-                writeOff            += maxWrite;
-                this.countWriteData += maxWrite;
-                
-                Integer segment = this.freeSegments.poll();
-                synchronized(this.dataList){
-                    if(segment == null){
-                        segment = this.dataList.size();
-                        this.dataList.add(new ByteArrayWrapper(writeBuf));
-                    }
-                    else
-                        this.dataList.set(segment, new ByteArrayWrapper(writeBuf));
-                }
-
-                segments.add(segment);
-
-                writeBuf   = new byte[this.segmentSize];
-                writeOff   = 0;
-                limitWrite = writeBuf.length;
-            }
-            
-        }
-        
-        if(writeOff > 0){
-            Integer segment = this.freeSegments.poll();
-            byte[] tmp = Arrays.copyOf(writeBuf, writeOff);
-            synchronized(this.dataList){
-                if(segment == null){
-                    segment = this.dataList.size();
-                    this.dataList.add(new ByteArrayWrapper(tmp));
-                }
-                else
-                    this.dataList.set(segment, new ByteArrayWrapper(tmp));
-            }
-
-            segments.add(segment);
-        }
-        */
     }
     
     /**
@@ -655,11 +540,4 @@ public class Cache implements Serializable{
         return countRemovedData;
     }
     
-	private static class LockRecord{
-    
-        public Object lock;
-        
-        public long lockHash;
-        
-    }
 }

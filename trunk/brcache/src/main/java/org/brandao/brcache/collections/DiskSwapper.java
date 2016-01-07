@@ -19,13 +19,21 @@
 package org.brandao.brcache.collections;
 
 /**
- *
- * @author Cliente
+ * Envia e recebe entidade do disco.
+ * @author Brandao
  */
 public interface DiskSwapper<T> extends Swapper<T>{
     
+    /**
+     * Define a pasta onde os dados serão persistidos.
+     * @param path Pasta.
+     */
     void setRootPath(String path);
     
+    /**
+     * Obtém a pasta onde os dados serão persistidos.
+     * @return Pasta.
+     */
     String getRootPath();
     
 }
