@@ -31,6 +31,8 @@ public class DataMap implements Serializable{
 
     private long length;
     
+    private long crc;
+    
     public long getMaxLiveTime() {
         return maxLiveTime;
     }
@@ -53,6 +55,14 @@ public class DataMap implements Serializable{
 
     public void setLength(long length) {
         this.length = length;
+    }
+
+    public long getCrc() {
+        return crc;
+    }
+
+    public void setCrc(long crc) {
+        this.crc = crc;
     }
 
 }

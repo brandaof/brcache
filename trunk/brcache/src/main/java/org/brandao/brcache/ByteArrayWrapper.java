@@ -11,8 +11,11 @@ public class ByteArrayWrapper
 
 	private byte[] buffer;
 	
-	public ByteArrayWrapper(byte[] data){
+        private String id;
+        
+	public ByteArrayWrapper(String id, byte[] data){
 		this.buffer = data;
+                this.id = id;
 	}
 
 	public synchronized void writeTo(OutputStream out) throws IOException{
@@ -44,5 +47,9 @@ public class ByteArrayWrapper
 			return false;
 		return true;
 	}
+
+    public String getId() {
+        return id;
+    }
 	
 }

@@ -19,11 +19,12 @@ package org.brandao.brcache.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Arrays;
+import java.util.zip.CRC32;
 
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
@@ -113,20 +114,16 @@ public class BrCacheConnectionImp implements BrCacheConnection{
     			time + SEPARATOR_COMMAND;
 
     	byte[] data = null;
+    	byte[] crc  = null;
     	
         ObjectOutputStream out     = null;
     	ByteArrayOutputStream bout = null;
     	
         try{
-        	bout = new ByteArrayOutputStream();
+            bout = new ByteArrayOutputStream();
             out = new ObjectOutputStream(bout);
             out.writeObject(value);
             out.flush();
-            
-            data     = bout.toByteArray();
-            int size = data.length;
-            
-            cmd += size;
         }
         catch(IOException ex){
         	ex.printStackTrace();
@@ -134,19 +131,25 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         }
         finally{
             try{
-                if(bout != null)
-                	bout.close();
-                
-                if(out != null)
-                	out.close();
+                if(out != null){
+                    out.close();
+                    if(bout != null){
+                        data = bout.toByteArray();
+                        crc  = this.getCRC32(data, 0, data.length);
+                        int size = data.length + 8;
+                        cmd += size;
+                    }
+                }
             }
             catch(Exception ex){
+                ex.printStackTrace();
             }
         }
 
         try{
             this.writer.sendMessage(cmd);
-            this.writer.getStream().write(data);
+            this.writer.getStream().write(data, 0, data.length);
+            this.writer.getStream().write(crc, 0, crc.length);
             this.writer.sendCRLF();
             this.writer.sendMessage(BOUNDARY);
             this.writer.flush();
@@ -210,14 +213,23 @@ public class BrCacheConnectionImp implements BrCacheConnection{
             LimitedTextInputStreamReader in = null;
             
             try{
-	        	if(size != 0){
-	            	in = (LimitedTextInputStreamReader) this.reader.getStream(size);
-	            	byte[] buffer = in.read(size);
-	                ObjectInputStream stream = new ObjectInputStream(new ByteArrayInputStream(buffer));
-	                return stream.readObject();
-	        	}
-	        	else
-	        		return null;
+                if(size != 0){
+                    in = (LimitedTextInputStreamReader) this.reader.getStream(size);
+                    byte[] buffer = in.read(size);
+                    byte[] crc = new byte[8];
+                    byte[] expectedCRC = this.getCRC32(buffer, 0, buffer.length - 8);
+                    System.arraycopy(buffer, buffer.length - 8, crc, 0, 8);
+                    
+                    if(!Arrays.equals(crc, expectedCRC))
+                        throw new ReadDataException("bad CRC");
+                    
+                    ObjectInputStream stream = 
+                            new ObjectInputStream(
+                                    new ByteArrayInputStream(buffer, 0, buffer.length - 8));
+                    return stream.readObject();
+                }
+                else
+                    return null;
             }
             finally{
                 if(in != null){
@@ -237,16 +249,16 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         catch (ReadDataException ex) {
             ex.printStackTrace();
         	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
-                throw new RecoverException("read data fail: " + ex.getMessage(), ex);
+                throw new RecoverException("read entry " + key + " fail: " + ex.getMessage(), ex);
         	else
-        		throw new RecoverException("read data fail: " + ex.getMessage());
+        		throw new RecoverException("read entry " + key + " fail: " + ex.getMessage());
 		}
         catch (IOException ex) {
             ex.printStackTrace();
         	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
                 throw new RecoverException("read data fail: " + ex.getMessage(), ex);
         	else
-        		throw new RecoverException("read data fail: " + ex.getMessage());
+        		throw new RecoverException("read entry " + key + " fail: " + ex.getMessage());
 		}
         catch(ClassNotFoundException ex){
             ex.printStackTrace();
@@ -268,9 +280,9 @@ public class BrCacheConnectionImp implements BrCacheConnection{
     	catch(WriteDataException ex){
             ex.printStackTrace();
         	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
-                throw new RecoverException("read data fail: " + ex.getMessage(), ex);
+                throw new RecoverException("remove entry " + key + " fail: " + ex.getMessage(), ex);
         	else
-        		throw new RecoverException("read data fail: " + ex.getMessage());
+        		throw new RecoverException("remove entry " + key + " fail: " + ex.getMessage());
     	}
     	
         try{
@@ -284,9 +296,9 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         catch (ReadDataException ex) {
             ex.printStackTrace();
         	if(ex.getCause() instanceof IOException && !"premature end of data".equals(ex.getCause().getMessage()))
-                throw new RecoverException("read data fail: " + ex.getMessage(), ex);
+                throw new RecoverException("remove entry " + key + " fail: " + ex.getMessage(), ex);
         	else
-        		throw new RecoverException("read data fail: " + ex.getMessage());
+        		throw new RecoverException("remove entry " + key + " fail: " + ex.getMessage());
         }
     }
     
@@ -306,4 +318,20 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         return streamFactory;
     }
     
+    private byte[] getCRC32(byte[] data, int off, int len){
+        CRC32 crc32 = new CRC32();
+        crc32.update(data, off, len);
+        long crcValue = crc32.getValue();
+        byte[] crc = new byte[8];
+
+        crc[0] = (byte)(crcValue & 0xffL); 
+        crc[1] = (byte)(crcValue >> 8  & 0xffL); 
+        crc[2] = (byte)(crcValue >> 16 & 0xffL); 
+        crc[3] = (byte)(crcValue >> 24 & 0xffL);
+        crc[4] = (byte)(crcValue >> 32 & 0xffL); 
+        crc[5] = (byte)(crcValue >> 40 & 0xffL); 
+        crc[6] = (byte)(crcValue >> 48 & 0xffL); 
+        crc[7] = (byte)(crcValue >> 56 & 0xffL);
+        return crc;
+    }
 }
