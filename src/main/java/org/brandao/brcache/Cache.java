@@ -323,10 +323,14 @@ public class Cache implements Serializable{
         	
             if(segments != null){
                 for(int segment: segments){
-                    ByteArrayWrapper dataWrapper = this.dataList.get(segment);
-                    this.dataList.set(segment, null);
-                    this.countRemovedData += dataWrapper.toByteArray().length;
-                    this.freeSegments.add(segment);
+                    synchronized(this.dataList){
+                        ByteArrayWrapper dataWrapper = this.dataList.get(segment);
+                        if(dataWrapper != null && dataWrapper.getId() == oldMap.getId()){
+                            this.dataList.set(segment, null);
+                            this.countRemovedData += dataWrapper.toByteArray().length;
+                            this.freeSegments.add(segment);
+                        }
+                    }
                 }
             }
             
