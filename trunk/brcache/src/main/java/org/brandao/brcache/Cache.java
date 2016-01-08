@@ -409,9 +409,9 @@ public class Cache implements Serializable{
 
                     int[] segments = data.getSegments();
                     for(int segment: segments){
-                    	ByteArrayWrapper dataWrapper = this.dataList.get(segment);
-                        if(dataWrapper != null && dataWrapper.getId() == data.getId()){
-                            synchronized(this.dataList){
+                        synchronized(this.dataList){
+                            ByteArrayWrapper dataWrapper = this.dataList.get(segment);
+                            if(dataWrapper != null && dataWrapper.getId() == data.getId()){
                                 this.countRemovedData += dataWrapper.toByteArray().length;
                                 this.dataList.set(segment, null);
                                 this.freeSegments.put(segment);
