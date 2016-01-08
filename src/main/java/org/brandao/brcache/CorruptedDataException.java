@@ -18,7 +18,7 @@
 package org.brandao.brcache;
 
 /**
- * Exceção lançada quando ocorre uma falha ao tentar recuperar um item em um cache.
+ * Exceção lançada quando os dados de uma entrada estão inconsistentes.
  * 
  * @author Brandao.
  */
