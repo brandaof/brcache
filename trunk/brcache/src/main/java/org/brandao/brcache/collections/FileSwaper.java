@@ -144,13 +144,7 @@ public class FileSwaper<T> implements DiskSwapper<T> {
     }
     
     public void setRootPath(String value) {
-        try{
-            this.pathName = value;
-            this.createPath();
-        }
-        catch(Throwable e){
-            throw new IllegalArgumentException(value);
-        }
+        this.pathName = value;
     }
 
     public String getRootPath(){
@@ -158,7 +152,13 @@ public class FileSwaper<T> implements DiskSwapper<T> {
     }
     
     public void setId(String value) {
-        this.id = value;
+        try{
+            this.id = value;
+            this.createPath();
+        }
+        catch(Throwable e){
+            throw new IllegalArgumentException(value);
+        }
     }
 
     public void clear() {

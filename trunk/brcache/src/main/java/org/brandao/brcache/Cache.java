@@ -271,12 +271,6 @@ public class Cache implements Serializable{
             else
                 return null;
         }
-        catch(RecoverException e){
-            e.printStackTrace();
-            if("corrupted data".equals(e.getMessage()))
-                return null;
-            throw new RecoverException(e);
-        }
         catch(Throwable e){
             throw new RecoverException(e);
         }
@@ -354,6 +348,7 @@ public class Cache implements Serializable{
             countRead++;
 
             DataMap map = this.dataMap.get(new StringTreeKey(key));
+            
             if(map != null){
                 int[] segmentIds = map.getSegments();
                 ByteArrayWrapper[] segments = new ByteArrayWrapper[segmentIds.length];
@@ -362,24 +357,33 @@ public class Cache implements Serializable{
                 for(int i=0;i<segmentIds.length;i++){
                     ByteArrayWrapper dataWrapper = this.dataList.get(segmentIds[i]);
 
+                    /*
+                        Se dataWrapper for igual a null ou sua id for diferente da
+                        id do DataMap, significa que essa entrada foi ou está sendo
+                        removida.
+                    */
                     if(dataWrapper == null)
-                        throw new RecoverException("corrupted data");
+                        throw new CorruptedDataException("corrupted data");
 
                     if(dataWrapper.getId() != map.getId() || dataWrapper.getSegment() != i)
-                        throw new RecoverException("corrupted data");
+                        throw new CorruptedDataException("invalid segment: " + dataWrapper.getId() + ":" + map.getId() + " " + dataWrapper.getSegment() + ":" + i);
 
                     segments[i] = dataWrapper;
                     crc.update(dataWrapper.toByteArray());
                 }
                 
                 if(crc.getValue() != map.getCrc())
-                        throw new RecoverException("corrupted data");
+                        throw new CorruptedDataException("bad crc: " + map.getCrc() + ":" + crc.getValue());
                 
                 return new CacheInputStream(this, map, segments);
                 //return new CacheInputStream(this, map, this.dataList);
             }
             else
                 return null;
+        }
+        catch(CorruptedDataException e){
+            e.printStackTrace();
+            return null;
         }
         catch(Throwable e){
             throw new RecoverException(e);
@@ -452,10 +456,10 @@ public class Cache implements Serializable{
                     Integer segment = this.freeSegments.poll();
                     if(segment == null){
                         segment = this.dataList.size();
-                        this.dataList.add(new ByteArrayWrapper(map.getId(), index, data));
+                        this.dataList.add(new ByteArrayWrapper(map.getId(), index++, data));
                     }
                     else
-                        this.dataList.set(segment, new ByteArrayWrapper(map.getId(), index, data));
+                        this.dataList.set(segment, new ByteArrayWrapper(map.getId(), index++, data));
                     segments.add(segment);
                 }
                

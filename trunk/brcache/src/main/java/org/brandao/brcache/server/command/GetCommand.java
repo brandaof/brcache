@@ -42,7 +42,7 @@ public class GetCommand extends AbstractCommand{
                 		TerminalConstants.SEPARATOR_COMMAND +
                 		in.getSize() +
                 		" 0";
-                	writer.sendMessage(responseMessage);
+                    writer.sendMessage(responseMessage);
                     OutputStream out = null;
                     try{
                         out = writer.getStream();
@@ -64,7 +64,7 @@ public class GetCommand extends AbstractCommand{
                 		"VALUE " +
         				parameters[1] +
         				" 0 0";
-                	writer.sendMessage(responseMessage);
+                    writer.sendMessage(responseMessage);
                 }
             }
             finally{
