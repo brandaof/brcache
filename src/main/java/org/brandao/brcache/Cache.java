@@ -291,7 +291,6 @@ public class Cache implements Serializable{
         if(key.length() > this.maxLengthKey)
             throw new StorageException("key is very large");
         
-        
         TreeKey treeKey = new StringTreeKey(key);
         DataMap oldMap  = this.dataMap.get(treeKey);
         DataMap map     = new DataMap();
@@ -334,7 +333,7 @@ public class Cache implements Serializable{
                 }
             }
             
-            countRemoved++;
+            this.countRemoved++;
     	}
     }
 
