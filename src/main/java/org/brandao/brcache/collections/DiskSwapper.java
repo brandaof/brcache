@@ -22,7 +22,7 @@ package org.brandao.brcache.collections;
  * Envia e recebe entidade do disco.
  * @author Brandao
  */
-public interface DiskSwapper<T> extends Swapper<T>{
+public interface DiskSwapper extends Swapper{
     
     /**
      * Define a pasta onde os dados serão persistidos.

@@ -29,10 +29,12 @@ import org.brandao.brcache.client.BrCacheClient;
  * 
  * @author Brandao
  */
-public class CacheSwapper<T> 
-    implements Swapper<T>, Serializable{
+public class CacheSwapper 
+    implements Swapper, Serializable{
 
-    private String id;
+	private static final long serialVersionUID = -1342760584177753822L;
+
+	private String id;
     
     private long maxalive;
     
@@ -46,7 +48,7 @@ public class CacheSwapper<T>
         this.id = value;
     }
 
-    public void sendItem(Integer index, Entry<T> item) {
+    public void sendItem(Integer index, Entry<?> item) {
         synchronized(this){
             if(this.maxIndex < index)
                 this.maxIndex = index;
@@ -66,17 +68,17 @@ public class CacheSwapper<T>
         }
     }
 
-    public void sendItem(Integer index, T item, Cache cache) throws StorageException {
+    public void sendItem(Integer index, Object item, Cache cache) throws StorageException {
         cache.putObject(new String(this.id + ":" + index), this.getMaxalive(), item);
     }
 
-    public void sendItem(Integer index, T item, BrCacheClient client) throws StorageException {
+    public void sendItem(Integer index, Object item, BrCacheClient client) throws StorageException {
         client.put(new String(this.id + ":" + index), this.getMaxalive(), item);
     }
     
-    public Entry<T> getItem(Integer index) {
+    public Entry<?> getItem(Integer index) {
         try{
-            T item;
+            Object item;
             if(CacheList.getCache() != null)
                 item = this.getItem(index, CacheList.getCache());
             else
@@ -85,7 +87,7 @@ public class CacheSwapper<T>
             if(item == null)
                 return null;
             
-            Entry<T> entry = new Entry<T>(index, false, item);
+            Entry<?> entry = new Entry<Object>(index, false, item);
             entry.setNeedReload(false);
             return entry;
         }
@@ -94,12 +96,12 @@ public class CacheSwapper<T>
         }
     }
 
-    public T getItem(Integer index, Cache cache) throws RecoverException {
-        return (T) cache.getObject(new String(this.id + ":" + index));
+    public Object getItem(Integer index, Cache cache) throws RecoverException {
+        return cache.getObject(new String(this.id + ":" + index));
     }
 
-    public T getItem(Integer index, BrCacheClient client) throws RecoverException {
-        return (T) client.get(new String(this.id + ":" + index));
+    public Object getItem(Integer index, BrCacheClient client) throws RecoverException {
+        return client.get(new String(this.id + ":" + index));
     }
     
     public long getMaxalive() {

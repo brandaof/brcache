@@ -37,7 +37,9 @@ import org.brandao.brcache.client.BrCacheClient;
 public class CacheList<T> 
     implements List<T>,Serializable {
 
-    private static Cache cache;
+	private static final long serialVersionUID = -617590377196604703L;
+
+	private static Cache cache;
     
     private static BrCacheClient client;
 
@@ -55,7 +57,7 @@ public class CacheList<T>
             double swapFactorElements, 
             double fragmentFactorElements){
         
-        CacheSwapper<ArraySegment<T>> swap = new CacheSwapper<ArraySegment<T>>();
+        CacheSwapper swap = new CacheSwapper();
         
         this.internalList = 
             new HugeArrayList<T>(
@@ -114,7 +116,7 @@ public class CacheList<T>
      * @see List#toArray(T[]) 
      * @return 
      */
-    public <T> T[] toArray(T[] a) {
+    public <K> K[] toArray(K[] a) {
         return this.internalList.toArray(a);
     }
 

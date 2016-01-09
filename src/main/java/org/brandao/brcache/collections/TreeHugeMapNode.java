@@ -28,14 +28,16 @@ import java.util.Map;
  */
 public class TreeHugeMapNode<T> implements Serializable{
     
-    private final Integer nodeIndex;
+	private static final long serialVersionUID = -5212207702622818424L;
+
+	private final Integer nodeIndex;
     
     private volatile int valueIndex;
     
-    public TreeHugeMapNode(List<Map<Object,TreeHugeMapNode>> nodes){
+    public TreeHugeMapNode(List<Map<Object,TreeHugeMapNode<T>>> nodes){
     	
         this.valueIndex = -1;
-        Map<Object,TreeHugeMapNode> node = new HashMap<Object,TreeHugeMapNode>();
+        Map<Object,TreeHugeMapNode<T>> node = new HashMap<Object,TreeHugeMapNode<T>>();
         
         synchronized(nodes){
 	        nodes.add(node);
@@ -44,27 +46,27 @@ public class TreeHugeMapNode<T> implements Serializable{
         
     }
     
-    public TreeHugeMapNode getNextNode(List<Map<Object,TreeHugeMapNode>> nodes, 
+    public TreeHugeMapNode<T> getNextNode(List<Map<Object,TreeHugeMapNode<T>>> nodes, 
             Object key){
     	
-        Map<Object,TreeHugeMapNode> thisNode = nodes.get(nodeIndex);
+        Map<Object,TreeHugeMapNode<T>> thisNode = nodes.get(nodeIndex);
         return thisNode.get(key);
         
     }
 
-    public void setNextNode(TreeHugeMapNode next, 
-            List<Map<Object,TreeHugeMapNode>> nodes, Object key){
+    public void setNextNode(TreeHugeMapNode<T> next, 
+            List<Map<Object,TreeHugeMapNode<T>>> nodes, Object key){
     	
         synchronized(nodes){
-            Map<Object,TreeHugeMapNode> thisNode = nodes.get(nodeIndex);
+            Map<Object,TreeHugeMapNode<T>> thisNode = nodes.get(nodeIndex);
             thisNode.put(key, next);
             nodes.set(nodeIndex, thisNode);
         }
         
     }
 
-    public void updateNextNode(TreeHugeMapNode next, 
-            List<Map<Object,TreeHugeMapNode>> nodes, Object key){
+    public void updateNextNode(TreeHugeMapNode<T> next, 
+            List<Map<Object,TreeHugeMapNode<T>>> nodes, Object key){
         this.setNextNode(next, nodes, key);
     }
     

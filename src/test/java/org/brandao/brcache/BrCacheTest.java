@@ -47,7 +47,7 @@ public class BrCacheTest extends TestCase{
         
         Cache cache = new Cache();
         
-        PutTask o = new PutTask(cache, 100000);
+        PutTask o = new PutTask(cache, 500000);
         o.run();
 
         Thread th = new Thread(new OverrideTask(cache));

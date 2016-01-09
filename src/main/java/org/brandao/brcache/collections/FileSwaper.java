@@ -36,7 +36,7 @@ import org.brandao.brcache.collections.fileswapper.SimpleIndexEntityFile;
  * 
  * @author Brandao
  */
-public class FileSwaper<T> implements DiskSwapper<T> {
+public class FileSwaper implements DiskSwapper {
     
     private String id;
     
@@ -56,7 +56,7 @@ public class FileSwaper<T> implements DiskSwapper<T> {
         this.index = new SimpleIndex();
     }
     
-    public synchronized void sendItem(Integer index, Entry<T> item) {
+    public synchronized void sendItem(Integer index, Entry<?> item) {
         try {
             ObjectOutputStream oOut = null;
             DataBlockOutputStream bout = null;
@@ -93,8 +93,7 @@ public class FileSwaper<T> implements DiskSwapper<T> {
         }
     }
 
-    @SuppressWarnings({"unchecked"})
-    public synchronized Entry<T> getItem(Integer index) {
+    public synchronized Entry<?> getItem(Integer index) {
         try {
 
             String idx = Integer.toString(index, Character.MAX_RADIX);
@@ -106,9 +105,9 @@ public class FileSwaper<T> implements DiskSwapper<T> {
             ObjectInputStream iIn = null;
             try {
                 iIn = new ObjectInputStream(new DataBlockInputStream(reference, this.dataFile));
-                T item = (T) iIn.readObject();
+                Object item = iIn.readObject();
 
-                Entry<T> entry = new Entry<T>(index, false, item);
+                Entry<?> entry = new Entry<Object>(index, false, item);
                 entry.setNeedReload(false);
                 return entry;
             }

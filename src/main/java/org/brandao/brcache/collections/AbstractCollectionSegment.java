@@ -51,7 +51,7 @@ abstract class AbstractCollectionSegment<I,T>
     
     private volatile int lastSegment;
     
-    private Swapper<T> swap;
+    private Swapper swap;
 
     //private Object[] locks;
     
@@ -62,7 +62,7 @@ abstract class AbstractCollectionSegment<I,T>
     public AbstractCollectionSegment(
             String id, int maxCapacity, double clearFactor,
             double fragmentFactor,
-            Swapper<T> swap,
+            Swapper swap,
             int quantityLock,
             int quantitySwaperThread) {
         
@@ -211,7 +211,8 @@ abstract class AbstractCollectionSegment<I,T>
         
     }
 
-    private Entry<T> swapOnMemory(Integer key){
+    @SuppressWarnings("unchecked")
+	private Entry<T> swapOnMemory(Integer key){
 
     	if(key > this.lastSegment)
             return null;
@@ -228,7 +229,7 @@ abstract class AbstractCollectionSegment<I,T>
             if(forceSwap)
                 this.clearLimitLength();
             
-            Entry<T> entity = this.swap.getItem(key);
+            Entry<T> entity = (Entry<T>)this.swap.getItem(key);
 
             if(entity != null){
                 segments.put(key, entity);
