@@ -26,7 +26,7 @@ import org.brandao.brcache.server.DefaultStreamFactory;
 import org.brandao.brcache.server.StreamFactory;
 
 /**
- * Representa um pool de conexões.
+ * Controla as conexões com o servidor.
  * 
  * @author Brandao
  */
@@ -118,13 +118,13 @@ public class BrCacheConnectionPool {
         if(con != null)
             return con;
         else{
-        	synchronized(this){
-		        if(this.createdInstances < this.maxInstances){
-		            con = createConnection(host, port, this.streamFactory);
-		            this.createdInstances++;
-		            return con;
-		        }
-        	}
+            synchronized(this){
+                if(this.createdInstances < this.maxInstances){
+                    con = createConnection(host, port, this.streamFactory);
+                    this.createdInstances++;
+                    return con;
+                }
+            }
             return this.instances.take();
         }
         
@@ -147,16 +147,16 @@ public class BrCacheConnectionPool {
         if(con != null)
             return con;
         else{
-        	synchronized(this){
-		        if(this.createdInstances < this.maxInstances){
-		            con = createConnection(host, port, this.streamFactory);
-		            con.connect();
-		            this.createdInstances++;
-		            return con;
-		        }
-		        else
-		            return this.instances.poll(l, tu);
-        	}
+            synchronized(this){
+                if(this.createdInstances < this.maxInstances){
+                    con = createConnection(host, port, this.streamFactory);
+                    con.connect();
+                    this.createdInstances++;
+                    return con;
+                }
+                else
+                    return this.instances.poll(l, tu);
+            }
         }
         
     }
@@ -170,7 +170,7 @@ public class BrCacheConnectionPool {
 	        try{
 	            this.instances.put(con);
 	        }
-	        catch(Exception e){
+	        catch(Throwable e){
 	            this.createdInstances--;
 	        }
     	}
