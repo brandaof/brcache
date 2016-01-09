@@ -9,7 +9,6 @@ import java.util.Random;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.brandao.brcache.collections.Collections;
-import org.brandao.brcache.ncache.NCache;
 
 /**
  *
@@ -242,36 +241,5 @@ public class CacheTest extends TestCase{
         Thread.sleep(999999999);
         
     }    
-    
-    public void test3() throws StorageException, IOException, ClassNotFoundException, RecoverException{
-        Collections.setPath("/mnt/brcache");
-        Cache cache = new NCache();
-        String expected1 = "TESTE";
-        String expected2 = "TESTE2";
-        cache.putObject("TT", 0, expected1);
-        Assert.assertEquals(expected1, cache.getObject("TT"));
-        cache.putObject("TT", 0, expected2);
-        Assert.assertEquals(expected2, cache.getObject("TT"));
-        
-    }
-    
-    public void test4() throws StorageException, IOException, ClassNotFoundException, RecoverException{
-        Collections.setPath("/mnt/brcache");
-        Cache cache = new NCache();
-        for(int i=0;i<10000;i++){
-        	if(i % 1000 == 0)
-        		System.out.println(i);
-        	cache.putObject("TESTE:"+i, 0, i + text);
-        }
-        
-        
-        for(int i=0;i<10000;i++){
-        	if(i % 1000 == 0)
-        		System.out.println(i);
-	        String value = (String) cache.getObject("TESTE:" + i);
-	        Assert.assertEquals(i + text, value);
-        }
-        
-    }
-    
+
 }
