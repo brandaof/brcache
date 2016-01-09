@@ -46,9 +46,9 @@ import org.brandao.brcache.collections.Swapper;
  */
 public class Cache implements Serializable{
     
-	private static final long serialVersionUID = 8023029671447700902L;
+    private static final long serialVersionUID = 8023029671447700902L;
 
-	private final TreeHugeMap<TreeKey,DataMap> dataMap;
+    private final TreeHugeMap<TreeKey,DataMap> dataMap;
 
     private final HugeArrayList<ByteArrayWrapper> dataList;
     
@@ -107,7 +107,6 @@ public class Cache implements Serializable{
         long dataSwapSize,
         double dataSwapFactor,
         int maxSlabSize,
-        int writeBufferSize,
         int maxSizeEntry,
         int maxSizeKey,
         String dataPath,
@@ -202,7 +201,6 @@ public class Cache implements Serializable{
         1048576L,    //1mb
         0.3,
         16*1024,
-        8012,
         1048576,     //1mb
         128,
         "/mnt/brcache",
