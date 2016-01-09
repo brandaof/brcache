@@ -29,9 +29,9 @@ import java.util.Set;
 public class TreeHugeMap<K extends TreeKey,T> 
     implements Map<K,T>, Serializable{
 
-	private static final long serialVersionUID 					= 4577949145861315961L;
+    private static final long serialVersionUID                          = 4577949145861315961L;
 
-	public static final int DEFAULT_MAX_CAPACITY_NODE 			= 2000;
+    public static final int DEFAULT_MAX_CAPACITY_NODE 			= 2000;
     
     public static final float DEFAULT_CLEAR_FACTOR_NODE 		= 0.25F;
     
@@ -41,7 +41,7 @@ public class TreeHugeMap<K extends TreeKey,T>
     
     public static final float DEFAULT_CLEAR_FACTOR_ELEMENT 		= 0.25F;
     
-    public static final float DEFAULT_FRAGMENT_FACTOR_ELEMENT 	= 0.03F;
+    public static final float DEFAULT_FRAGMENT_FACTOR_ELEMENT           = 0.03F;
     
     private HugeArrayList<T> values;
     private HugeArrayList<Map<Object,TreeHugeMapNode<T>>> nodes;
