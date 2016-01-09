@@ -23,10 +23,8 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.brandao.brcache.Cache;
-import org.brandao.brcache.MultiCoreCache;
 import org.brandao.brcache.SwaperStrategy;
 import org.brandao.brcache.collections.Collections;
-import org.brandao.brcache.ncache.NCache;
 
 /**
  * Representa o servidor do cache.
