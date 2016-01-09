@@ -33,7 +33,7 @@ public class OverrideTask implements Runnable{
                 int rv = r.nextInt(PutTask.index);
                 
                 try{
-                    String key = String.valueOf(rv);
+                    String key = String.valueOf(rv) + PutTask.suffixKey;
                     String value = key + PutTask.text;
                     
                     String val = (String) client.getObject(key);

@@ -23,7 +23,7 @@ package org.brandao.brcache.collections;
  * 
  * @author Brandao
  */
-public interface Swapper<T> {
+public interface Swapper {
     
     /**
      * Define a identificação do agrupamento de entidades.
@@ -36,14 +36,14 @@ public interface Swapper<T> {
      * @param index Índice da entidade.
      * @param item Item.
      */
-    void sendItem(Integer index, Entry<T> item);
+    void sendItem(Integer index, Entry<?> item);
 
     /**
      * Recupera uma entidade do agrupamento.
      * @param index Índice
      * @return item.
      */
-    Entry<T> getItem(Integer index);
+    Entry<?> getItem(Integer index);
     
     /**
      * Remove todas as entidade do agrupamento.

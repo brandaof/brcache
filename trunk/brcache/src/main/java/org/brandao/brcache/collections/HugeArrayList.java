@@ -27,7 +27,9 @@ import java.util.*;
 public class HugeArrayList<T> 
     implements HugeList<T>,Serializable{
 
-    public static final int DEFAULT_MAX_CAPACITY_ELEMENT = 1000;
+	private static final long serialVersionUID = 2177932987390402265L;
+
+	public static final int DEFAULT_MAX_CAPACITY_ELEMENT = 1000;
     
     public static final float DEFAULT_CLEAR_FACTOR_ELEMENT = 0.25F;
     
@@ -55,14 +57,14 @@ public class HugeArrayList<T>
             int maxCapacityElements,
             double clearFactorElements, 
             double fragmentFactorElements,
-            Swapper<ArraySegment<T>> swap,
+            Swapper swap,
             int quantityLock,
             int quantityClearThread) {
         
         this.size = 0;
         this.enableFinalize = false;
         id = id == null? Collections.getNextId() : id;
-        swap = swap == null? new TreeFileSwaper<ArraySegment<T>>() : swap;
+        swap = swap == null? new TreeFileSwaper() : swap;
         
         this.elements = 
                 new CollectionSegmentImp<T>(
@@ -108,11 +110,12 @@ public class HugeArrayList<T>
         return toArray(new Object[]{});
     }
 
-    public <T> T[] toArray(T[] a) {
-        T[] result = Arrays.copyOf(a, size);
-
+    @SuppressWarnings("unchecked")
+	public <K> K[] toArray(K[] a) {
+        K[] result = Arrays.copyOf(a, size);
+        
         for(int i=0;i<size;i++)
-            result[i] = (T)get(i);
+            result[i] = (K)get(i);
 
         return result;
     }

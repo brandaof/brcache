@@ -32,7 +32,7 @@ import java.io.OutputStream;
  * 
  * @author Brandao
  */
-public class TreeFileSwaper<T> implements DiskSwapper<T> {
+public class TreeFileSwaper implements DiskSwapper {
     
     public static final String PATH = "brcache.swapper.path";
     
@@ -48,7 +48,7 @@ public class TreeFileSwaper<T> implements DiskSwapper<T> {
         this.pathName = Collections.getConfiguration().getProperty(PATH);
     }
     
-    public void sendItem(Integer index, Entry<T> item) {
+    public void sendItem(Integer index, Entry<?> item) {
         try {
             if (!hasCreatePath)
                 createPath();
@@ -85,8 +85,7 @@ public class TreeFileSwaper<T> implements DiskSwapper<T> {
         }
     }
 
-    @SuppressWarnings({"unchecked"})
-    public Entry<T> getItem(Integer index) {
+    public Entry<?> getItem(Integer index) {
         try {
             if (!hasCreatePath)
                 createPath();
@@ -103,9 +102,9 @@ public class TreeFileSwaper<T> implements DiskSwapper<T> {
             try {
                 in = new FileInputStream(swp);
                 iIn = new ObjectInputStream(in);
-                T item = (T) iIn.readObject();
+                Object item = iIn.readObject();
 
-                Entry<T> entry = new Entry<T>(index, false, item);
+                Entry<?> entry = new Entry<Object>(index, false, item);
                 entry.setNeedReload(false);
                 return entry;
             }

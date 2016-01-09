@@ -29,20 +29,22 @@ import java.util.Set;
 public class TreeHugeMap<K extends TreeKey,T> 
     implements Map<K,T>, Serializable{
 
-    public static final int DEFAULT_MAX_CAPACITY_NODE = 2000;
+	private static final long serialVersionUID 					= 4577949145861315961L;
+
+	public static final int DEFAULT_MAX_CAPACITY_NODE 			= 2000;
     
-    public static final float DEFAULT_CLEAR_FACTOR_NODE = 0.25F;
+    public static final float DEFAULT_CLEAR_FACTOR_NODE 		= 0.25F;
     
-    public static final float DEFAULT_FRAGMENT_FACTOR_NODE = 0.03F;
+    public static final float DEFAULT_FRAGMENT_FACTOR_NODE 		= 0.03F;
     
-    public static final int DEFAULT_MAX_CAPACITY_ELEMENT = 1000;
+    public static final int DEFAULT_MAX_CAPACITY_ELEMENT 		= 1000;
     
-    public static final float DEFAULT_CLEAR_FACTOR_ELEMENT = 0.25F;
+    public static final float DEFAULT_CLEAR_FACTOR_ELEMENT 		= 0.25F;
     
-    public static final float DEFAULT_FRAGMENT_FACTOR_ELEMENT = 0.03F;
+    public static final float DEFAULT_FRAGMENT_FACTOR_ELEMENT 	= 0.03F;
     
     private HugeArrayList<T> values;
-    private HugeArrayList<Map<Object,TreeHugeMapNode>> nodes;
+    private HugeArrayList<Map<Object,TreeHugeMapNode<T>>> nodes;
     private TreeHugeMapNode<T> rootNode;
     
     /**
@@ -87,18 +89,18 @@ public class TreeHugeMap<K extends TreeKey,T>
             int maxCapacityNodes,
             double clearFactorNodes, 
             double fragmentFactorNodes,
-            Swapper<ArraySegment<T>> swapNodes,
+            Swapper swapNodes,
             int quantityLockNodes,
             int quantitySwaperThreadNodes,            
             int maxCapacityElements,
             double clearFactorElements, 
             double fragmentFactorElements,
-            Swapper<ArraySegment<T>> swapElements,
+            Swapper swapElements,
             int quantityLockElements,
             int quantitySwaperThreadElements){
         
         this.values = 
-            new HugeArrayList(
+            new HugeArrayList<T>(
                 id == null? null : id + "Values", 
                 maxCapacityElements, 
                 clearFactorElements, 
@@ -108,7 +110,7 @@ public class TreeHugeMap<K extends TreeKey,T>
                 quantitySwaperThreadElements);
         
         this.nodes = 
-            new HugeArrayList(
+            new HugeArrayList<Map<Object,TreeHugeMapNode<T>>>(
                 id == null? null : id + "Nodes", 
                 maxCapacityNodes, 
                 clearFactorNodes, 
@@ -125,9 +127,9 @@ public class TreeHugeMap<K extends TreeKey,T>
         boolean needUpdate = false;
         
         if(index<limit){
-            TreeHugeMapNode next = node.getNextNode(this.nodes, keys[index]);
+            TreeHugeMapNode<T> next = node.getNextNode(this.nodes, keys[index]);
             if(next == null){
-                next = new TreeHugeMapNode(this.nodes);
+                next = new TreeHugeMapNode<T>(this.nodes);
                 node.setNextNode(next, this.nodes, keys[index]);
                 needUpdate = true;
             }
@@ -146,7 +148,7 @@ public class TreeHugeMap<K extends TreeKey,T>
     private T get(Object[] keys, int index, int limit, TreeHugeMapNode<T> node){
         
         if(index<limit){
-            TreeHugeMapNode next = node.getNextNode(this.nodes, keys[index]);
+            TreeHugeMapNode<T> next = node.getNextNode(this.nodes, keys[index]);
             if(next == null)
                 return null;
             else
@@ -160,7 +162,7 @@ public class TreeHugeMap<K extends TreeKey,T>
     private T remove(Object[] keys, int index, int limit, TreeHugeMapNode<T> node){
         
         if(index<limit){
-            TreeHugeMapNode next = node.getNextNode(this.nodes, keys[index]);
+            TreeHugeMapNode<T> next = node.getNextNode(this.nodes, keys[index]);
             if(next == null)
                 return null;
             else

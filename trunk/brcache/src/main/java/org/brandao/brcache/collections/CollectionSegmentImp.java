@@ -34,7 +34,7 @@ class CollectionSegmentImp<I>
             int maxCapacity, 
             double clearFactor,
             double fragmentFactor,
-            Swapper<ArraySegment<I>> swap,
+            Swapper swap,
             int quantityLock,
             int quantitySwaperThread){
         super(id, maxCapacity, 

@@ -46,15 +46,15 @@ import org.brandao.brcache.collections.Swapper;
  */
 public class Cache implements Serializable{
     
-    private final TreeHugeMap<TreeKey,DataMap> dataMap;
+	private static final long serialVersionUID = 8023029671447700902L;
+
+	private final TreeHugeMap<TreeKey,DataMap> dataMap;
 
     private final HugeArrayList<ByteArrayWrapper> dataList;
     
     private final int segmentSize;
     
     private final BlockingQueue<Integer> freeSegments;
-
-    private final int writeBufferLength;
 
     private final int maxBytesToStorageEntry;
     
@@ -89,7 +89,6 @@ public class Cache implements Serializable{
      * @param dataSwapSize Tamanho do bloco de swap dos itens.
      * @param dataSwapFactor Fator de swap dos itens.
      * @param maxSlabSize Tamanho do agrupamento dos dados do itens em bytes.
-     * @param writeBufferSize Tamanho do buffer de escrita no cache.
      * @param maxSizeEntry Tamanho máximo em bytes que um item pode ter para ser armazenado no cache.
      * @param maxSizeKey Tamanho máximo em bytes que uma chave pode ter.
      * @param dataPath Pasta onde os dados do cache serão armazenados no processo de swap.
@@ -153,7 +152,6 @@ public class Cache implements Serializable{
         this.dataPath               = dataPath;
         this.freeSegments           = new LinkedBlockingQueue<Integer>();
         this.segmentSize            = maxSlabSize;
-        this.writeBufferLength      = writeBufferSize;
         this.maxBytesToStorageEntry = maxSizeEntry;
         this.maxLengthKey           = maxSizeKey;
         
