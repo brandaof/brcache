@@ -227,7 +227,6 @@ public class BrCacheServer {
             data_swap_size,
             data_swap_factor,
             (int)max_slab_size,
-            (int)write_buffer_size,
             (int)max_size_entry,
             (int)max_size_key,
             data_path,
