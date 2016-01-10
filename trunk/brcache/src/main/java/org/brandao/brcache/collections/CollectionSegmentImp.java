@@ -42,7 +42,7 @@ class CollectionSegmentImp<I>
                 quantityLock, quantitySwaperThread);
     }
     
-    public I getEntity(Integer segment, Integer index) {
+    public I getEntity(long segment, int index) {
         
     	Object lock = this.getLock(segment);
     	
@@ -59,7 +59,7 @@ class CollectionSegmentImp<I>
         
     }
 
-    public int putEntity(Integer segment, Integer index, I value) {
+    public int putEntity(long segment, int index, I value) {
         
         if(this.readOnly)
             throw new IllegalStateException();
@@ -73,7 +73,7 @@ class CollectionSegmentImp<I>
 		
 	        if(entry == null){
 	
-	            if(index != null)
+	            if(index != -1)
 	                throw new IllegalStateException("index");
 	
 	            seg = new ArraySegment<I>(segment, (int) getFragmentSize());
@@ -86,13 +86,13 @@ class CollectionSegmentImp<I>
                 entry = this.reload(entry);
                 seg  = entry.getItem();
                 entry.setNeedUpdate(true);
-                return index != null? seg.set(index, value) : seg.add(value);
+                return index != -1? seg.set(index, value) : seg.add(value);
 	        }
         }
         
     }
 
-    public I removeEntity(Integer segment, Integer index){
+    public I removeEntity(long segment, int index){
         throw new UnsupportedOperationException();
     }
 

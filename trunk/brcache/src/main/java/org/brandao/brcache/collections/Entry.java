@@ -28,7 +28,7 @@ public class Entry<T> implements Serializable {
 
 	private static final long serialVersionUID = -9181909539502614706L;
 
-	private Integer index;
+	private long index;
     
     private T item;
     
@@ -43,7 +43,7 @@ public class Entry<T> implements Serializable {
     private boolean needUpdate;
 
     public Entry() {
-        this.index 		= null;
+        this.index 		= -1;
         this.item 		= null;
         this.needUpdate = false;
     }
@@ -56,7 +56,7 @@ public class Entry<T> implements Serializable {
      * que a entidade sofreu alteração.
      * @param item Entidade.
      */
-    public Entry(Integer index, boolean update, T item) {
+    public Entry(long index, boolean update, T item) {
         this.index = index;
         this.item = item;
         this.needUpdate = update;
@@ -68,7 +68,7 @@ public class Entry<T> implements Serializable {
      * @param index ìndice da entidade.
      * @param item Entidade.
      */
-    public Entry(Integer index, T item) {
+    public Entry(long index, T item) {
         this.index = index;
         this.item = item;
         this.needUpdate = true;
@@ -78,7 +78,7 @@ public class Entry<T> implements Serializable {
      * Obtém o índice da entidade.
      * @return Índice.
      */
-    public Integer getIndex() {
+    public long getIndex() {
         return index;
     }
 
@@ -86,7 +86,7 @@ public class Entry<T> implements Serializable {
      * Define o índice da entidade.
      * @param index Índice.
      */
-    public void setIndex(Integer index) {
+    public void setIndex(long index) {
         this.index = index;
     }
 

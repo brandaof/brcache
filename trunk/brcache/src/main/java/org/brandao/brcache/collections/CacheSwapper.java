@@ -38,7 +38,7 @@ public class CacheSwapper
     
     private long maxalive;
     
-    private Integer maxIndex;
+    private long maxIndex;
     
     public CacheSwapper(){
         this.maxIndex = -1;
@@ -48,7 +48,7 @@ public class CacheSwapper
         this.id = value;
     }
 
-    public void sendItem(Integer index, Entry<?> item) {
+    public void sendItem(long index, Entry<?> item) {
         synchronized(this){
             if(this.maxIndex < index)
                 this.maxIndex = index;
@@ -68,15 +68,15 @@ public class CacheSwapper
         }
     }
 
-    public void sendItem(Integer index, Object item, Cache cache) throws StorageException {
+    public void sendItem(long index, Object item, Cache cache) throws StorageException {
         cache.putObject(new String(this.id + ":" + index), this.getMaxalive(), item);
     }
 
-    public void sendItem(Integer index, Object item, BrCacheClient client) throws StorageException {
+    public void sendItem(long index, Object item, BrCacheClient client) throws StorageException {
         client.put(new String(this.id + ":" + index), this.getMaxalive(), item);
     }
     
-    public Entry<?> getItem(Integer index) {
+    public Entry<?> getItem(long index) {
         try{
             Object item;
             if(CacheList.getCache() != null)
@@ -96,11 +96,11 @@ public class CacheSwapper
         }
     }
 
-    public Object getItem(Integer index, Cache cache) throws RecoverException {
+    public Object getItem(long index, Cache cache) throws RecoverException {
         return cache.getObject(new String(this.id + ":" + index));
     }
 
-    public Object getItem(Integer index, BrCacheClient client) throws RecoverException {
+    public Object getItem(long index, BrCacheClient client) throws RecoverException {
         return client.get(new String(this.id + ":" + index));
     }
     

@@ -17,9 +17,6 @@
 
 package org.brandao.brcache.collections;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -28,10 +25,12 @@ import java.util.Arrays;
  * @author Brandao.
  * 
  */
-@SuppressWarnings("serial")
-class ArraySegment<K> implements Serializable {
+class ArraySegment<K> 
+	implements Serializable {
 
-    private int id;
+	private static final long serialVersionUID = -6110258049047837285L;
+
+	private long id;
     
     private int size;
     
@@ -39,7 +38,7 @@ class ArraySegment<K> implements Serializable {
     
     private int segmentSize;
 
-    public ArraySegment(int id, int segmentSize) {
+    public ArraySegment(long id, int segmentSize) {
         this.segmentSize = segmentSize;
         this.id = id;
     }
@@ -118,11 +117,11 @@ class ArraySegment<K> implements Serializable {
         return data;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

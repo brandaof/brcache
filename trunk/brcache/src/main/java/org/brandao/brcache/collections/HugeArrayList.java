@@ -136,7 +136,7 @@ public class HugeArrayList<T>
     public synchronized boolean add(T e) {
     	
         int segmentId = (int)(size/this.elements.getFragmentSize());
-        elements.putEntity(segmentId, null, e);
+        elements.putEntity(segmentId, -1, e);
         size++;
         return true;
     }

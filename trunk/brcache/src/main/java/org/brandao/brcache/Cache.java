@@ -20,8 +20,6 @@ package org.brandao.brcache;
 import org.brandao.brcache.collections.FileSwaper;
 import org.brandao.brcache.collections.HugeArrayList;
 import org.brandao.brcache.collections.StringTreeKey;
-import org.brandao.brcache.collections.TreeHugeMap;
-import org.brandao.brcache.collections.TreeKey;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,6 +35,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.CRC32;
 import org.brandao.brcache.collections.Collections;
 import org.brandao.brcache.collections.DiskSwapper;
+import org.brandao.brcache.collections.StringTreeMap;
 import org.brandao.brcache.collections.Swapper;
 
 /**
@@ -48,7 +47,9 @@ public class Cache implements Serializable{
     
     private static final long serialVersionUID = 8023029671447700902L;
 
-    private final TreeHugeMap<TreeKey,DataMap> dataMap;
+    private static final int NodeBinarySize = 528;
+    
+    private final StringTreeMap<DataMap> dataMap;
 
     private final HugeArrayList<ByteArrayWrapper> dataList;
     
@@ -135,8 +136,8 @@ public class Cache implements Serializable{
         if(quantitySwaperThread < 1)
             throw new RuntimeException("quantitySwaperThread < 1");
             
-        double nodesOnMemory          = nodesSize/8.0;
-        double nodesPerSegment        = nodesSwapSize/8.0;
+        double nodesOnMemory          = nodesSize/528.0;
+        double nodesPerSegment        = nodesSwapSize/528.0;
         double swapSegmentNodesFactor = nodesSwapFactor;
         
         double indexOnMemory          = indexSize/40.0;
@@ -156,7 +157,7 @@ public class Cache implements Serializable{
         
         synchronized(Collections.class){
             this.dataMap =
-                    new TreeHugeMap<TreeKey, DataMap>(
+                    new StringTreeMap<DataMap>(
                     "dataMap",
                     (int)nodesOnMemory,
                     swapSegmentNodesFactor,
@@ -287,14 +288,15 @@ public class Cache implements Serializable{
         if(key.length() > this.maxLengthKey)
             throw new StorageException("key is very large");
         
-        TreeKey treeKey = new StringTreeKey(key);
-        DataMap oldMap  = this.dataMap.get(treeKey);
+        //TreeKey treeKey = new StringTreeKey(key);
+        //DataMap oldMap  = this.dataMap.get(key);
+        DataMap oldMap  = null;
         DataMap map     = new DataMap();
         try{
             map.setId(this.modCount++);
             map.setMaxLiveTime(maxAliveTime);
             this.putData(map, inputData);
-            this.dataMap.put(treeKey, map);
+            oldMap = this.dataMap.put(key, map);
             this.countWrite++;
         }
         catch(Throwable e){
@@ -346,7 +348,8 @@ public class Cache implements Serializable{
         try{
             countRead++;
 
-            DataMap map = this.dataMap.get(new StringTreeKey(key));
+            //DataMap map = this.dataMap.get(new StringTreeKey(key));
+            DataMap map = this.dataMap.get(key);
             
             if(map != null){
                 int[] segmentIds = map.getSegments();
@@ -404,7 +407,8 @@ public class Cache implements Serializable{
 
             if(data != null){
 
-                this.dataMap.put(new StringTreeKey(key), null);
+                //this.dataMap.put(new StringTreeKey(key), null);
+                this.dataMap.put(key, null);                
 
                     int[] segments = data.getSegments();
                     for(int segment: segments){

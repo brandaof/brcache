@@ -15,26 +15,12 @@
  * limitations under the License.
  */
 
-package org.brandao.brcache.collections;
+package org.brandao.brcache.collections.treehugemap;
 
 /**
  *
  * @author Brandao
  */
-interface CollectionSegment<T> {
-    
-    T getEntity(long segment, int index);
-
-    int putEntity(long segment, int index, T value);
-
-    T removeEntity(long segment, int index);
-    
-    double getFragmentSize();
-    
-    void flush();
-    
-    void setReadOnly(boolean value);
-    
-    boolean isReadOnly();
+public interface TreeMapKey {
     
 }

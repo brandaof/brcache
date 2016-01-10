@@ -56,7 +56,7 @@ public class FileSwaper implements DiskSwapper {
         this.index = new SimpleIndex();
     }
     
-    public synchronized void sendItem(Integer index, Entry<?> item) {
+    public synchronized void sendItem(long index, Entry<?> item) {
         try {
             ObjectOutputStream oOut = null;
             DataBlockOutputStream bout = null;
@@ -74,7 +74,7 @@ public class FileSwaper implements DiskSwapper {
                 }
             }
             
-            String idx = Integer.toString(index, Character.MAX_RADIX);
+            String idx = Long.toString(index, Character.MAX_RADIX);
             long reference = this.index.get(idx, this.indexFile);
             	
             if(reference == -1){
@@ -93,10 +93,10 @@ public class FileSwaper implements DiskSwapper {
         }
     }
 
-    public synchronized Entry<?> getItem(Integer index) {
+    public synchronized Entry<?> getItem(long index) {
         try {
 
-            String idx = Integer.toString(index, Character.MAX_RADIX);
+            String idx = Long.toString(index, Character.MAX_RADIX);
             long reference = this.index.get(idx, this.indexFile);
 
             if(reference == -1)

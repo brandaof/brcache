@@ -31,7 +31,7 @@ abstract class AbstractCollectionSegment<I,T>
 
 	private int globalID = 0;
     
-    protected Map<Integer, Entry<T>> segments;
+    protected Map<Long, Entry<T>> segments;
     
     private transient File path;
     
@@ -49,7 +49,7 @@ abstract class AbstractCollectionSegment<I,T>
     
     protected boolean readOnly;
     
-    private volatile int lastSegment;
+    private volatile long lastSegment;
     
     private Swapper swap;
 
@@ -71,7 +71,7 @@ abstract class AbstractCollectionSegment<I,T>
         this.maxCapacity         = maxCapacity;
         this.clearFactor         = clearFactor;
         this.maxSegmentCapacity  = (int)(maxCapacity/fragmentSize);
-        this.segments            = new LinkedHashMap<Integer, Entry<T>>();//new ConcurrentHashMap<Integer, Entry<T>>();
+        this.segments            = new LinkedHashMap<Long, Entry<T>>();//new ConcurrentHashMap<Integer, Entry<T>>();
         this.readOnly            = false;
         this.lastSegment         = -1;
         this.swap                = swap;//new DefaultSwaper<T>(this.id, this.pathName);
@@ -110,7 +110,7 @@ abstract class AbstractCollectionSegment<I,T>
         return globalID++;
     }
     
-    protected Object getLock(int segment){
+    protected Object getLock(long segment){
         //return this.locks[segment % this.locks.length];
     	return this;
     }
@@ -159,7 +159,7 @@ abstract class AbstractCollectionSegment<I,T>
             return entity;
     }
 
-    protected void addEntry(Integer key, Entry<T> item) {
+    protected void addEntry(long key, Entry<T> item) {
         
     	Object lock = this.getLock(key);
     	
@@ -212,7 +212,7 @@ abstract class AbstractCollectionSegment<I,T>
     }
 
     @SuppressWarnings("unchecked")
-	private Entry<T> swapOnMemory(Integer key){
+	private Entry<T> swapOnMemory(long key){
 
     	if(key > this.lastSegment)
             return null;
@@ -240,7 +240,7 @@ abstract class AbstractCollectionSegment<I,T>
         }
     }
     
-    protected Entry<T> getEntry(Integer index) {
+    protected Entry<T> getEntry(long index) {
         
         Entry<T> e = segments.get(index);
         
@@ -258,7 +258,7 @@ abstract class AbstractCollectionSegment<I,T>
         
     }
 
-    public Map<Integer, Entry<T>> getSegments() {
+    public Map<Long, Entry<T>> getSegments() {
         return segments;
     }
 
