@@ -4,25 +4,25 @@ import java.util.List;
 
 public class CharNode<T> implements TreeNode<T>{
 
-    private static final long serialVersionUID = 3595347631812335263L;
+	private static final long serialVersionUID 	= 480902938041176366L;
 
-    public static int MIN_CHARGROUP    = 0x5b;
+	public static int MIN_CHARGROUP    			= 0x5b;
 
-    public static int MAX_CHARGROUP    = 0x7d;
+    public static int MAX_CHARGROUP    			= 0x7d;
 
-    public static int LEN_CHARGROUP    = MAX_CHARGROUP - MIN_CHARGROUP;
+    public static int LEN_CHARGROUP    			= MAX_CHARGROUP - MIN_CHARGROUP;
 
-    public static int MIN_NUMBERGROUP  = 0x21;
+    public static int MIN_NUMBERGROUP  			= 0x21;
 
-    public static int MAX_NUMBERGROUP  = 0x3f;
+    public static int MAX_NUMBERGROUP  			= 0x3f;
 
-    public static int LEN_NUMBERGROUP  = MAX_NUMBERGROUP - MIN_NUMBERGROUP;
+    public static int LEN_NUMBERGROUP  			= MAX_NUMBERGROUP - MIN_NUMBERGROUP;
 
-    public static int LEN_NODES        = LEN_NUMBERGROUP + LEN_CHARGROUP; 
+    public static int LEN_NODES        			= LEN_NUMBERGROUP + LEN_CHARGROUP; 
 
-    public static int DATA_SIZE        = LEN_NODES*8 + 18; 
+    public static int DATA_SIZE        			= LEN_NODES*8 + 18; 
 
-    public static final long MAX_NODES = Long.MAX_VALUE / DATA_SIZE;
+    public static final long MAX_NODES 			= Long.MAX_VALUE / DATA_SIZE;
 
     private long id;
 
@@ -111,12 +111,7 @@ public class CharNode<T> implements TreeNode<T>{
 
     public void removeValue(List<T> values) {
         if(this.valueId != -1){
-            synchronized(values){
-                if(this.valueId != -1){
-                    values.set((int)this.valueId, null);
-                    this.valueId = -1;
-                }
-            }
+            values.set((int)this.valueId, null);
         }
     }
 
