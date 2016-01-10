@@ -36,14 +36,14 @@ public interface Swapper {
      * @param index Índice da entidade.
      * @param item Item.
      */
-    void sendItem(Integer index, Entry<?> item);
+    void sendItem(long index, Entry<?> item);
 
     /**
      * Recupera uma entidade do agrupamento.
      * @param index Índice
      * @return item.
      */
-    Entry<?> getItem(Integer index);
+    Entry<?> getItem(long index);
     
     /**
      * Remove todas as entidade do agrupamento.

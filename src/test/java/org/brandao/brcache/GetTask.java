@@ -31,7 +31,7 @@ public class GetTask implements Runnable{
                 }
                 
                 int rv = r.nextInt(PutTask.index-5);
-                String key = String.valueOf(rv);
+                String key = String.valueOf(rv) + PutTask.suffixKey;
                 String value = key + PutTask.text;
                 try{
                     String val = (String) client.getObject(key);

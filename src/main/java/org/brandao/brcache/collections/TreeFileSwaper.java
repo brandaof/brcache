@@ -48,7 +48,7 @@ public class TreeFileSwaper implements DiskSwapper {
         this.pathName = Collections.getConfiguration().getProperty(PATH);
     }
     
-    public void sendItem(Integer index, Entry<?> item) {
+    public void sendItem(long index, Entry<?> item) {
         try {
             if (!hasCreatePath)
                 createPath();
@@ -85,7 +85,7 @@ public class TreeFileSwaper implements DiskSwapper {
         }
     }
 
-    public Entry<?> getItem(Integer index) {
+    public Entry<?> getItem(long index) {
         try {
             if (!hasCreatePath)
                 createPath();

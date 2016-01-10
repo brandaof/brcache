@@ -15,26 +15,24 @@
  * limitations under the License.
  */
 
-package org.brandao.brcache.collections;
+package org.brandao.brcache.collections.treehugemap;
+
+import java.util.List;
 
 /**
  *
  * @author Brandao
  */
-interface CollectionSegment<T> {
-    
-    T getEntity(long segment, int index);
+public interface TreeNodes<T> {
 
-    int putEntity(long segment, int index, T value);
+    void init(List<TreeNode<T>> nodes);
+    
+    TreeMapKey getKey(Object key);
+    
+    boolean isEquals(TreeMapKey key, TreeNode<T> node);
+    
+    TreeNode<T> getNext(List<TreeNode<T>> nodes, TreeMapKey key, TreeNode<T> node, boolean read);
 
-    T removeEntity(long segment, int index);
-    
-    double getFragmentSize();
-    
-    void flush();
-    
-    void setReadOnly(boolean value);
-    
-    boolean isReadOnly();
+    TreeNode<T> getFirst(List<TreeNode<T>> nodes);
     
 }
