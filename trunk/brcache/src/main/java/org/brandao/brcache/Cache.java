@@ -47,7 +47,11 @@ public class Cache implements Serializable{
     
     private static final long serialVersionUID = 8023029671447700902L;
 
-    private static final int NodeBinarySize = 528;
+    private static final int ENTRY_BINARY_SIZE = 48;
+    
+    private static final int NODE_BINARY_SIZE = 528 + ENTRY_BINARY_SIZE;
+
+    private static final int INDEX_BINARY_SIZE = 40 + ENTRY_BINARY_SIZE;
     
     private final StringTreeMap<DataMap> dataMap;
 
@@ -136,17 +140,17 @@ public class Cache implements Serializable{
         if(quantitySwaperThread < 1)
             throw new RuntimeException("quantitySwaperThread < 1");
             
-        double nodesOnMemory          = nodesSize/528.0;
-        double nodesPerSegment        = nodesSwapSize/528.0;
-        double swapSegmentNodesFactor = nodesSwapFactor;
-        
-        double indexOnMemory          = indexSize/40.0;
-        double indexPerSegment        = indexSwapSize/40.0;
-        double swapSegmentIndexFactor = indexSwapFactor;
-        
         double bytesOnMemory          = dataSize/maxSlabSize;
         double bytesPerSegment        = dataSwapSize/maxSlabSize;
         double swapSegmentsFactor     = dataSwapFactor;
+
+        double nodesOnMemory          = nodesSize/NODE_BINARY_SIZE;
+        double nodesPerSegment        = nodesSwapSize/NODE_BINARY_SIZE;
+        double swapSegmentNodesFactor = nodesSwapFactor;
+        
+        double indexOnMemory          = indexSize/(INDEX_BINARY_SIZE + (maxSizeEntry/maxSlabSize)*4);
+        double indexPerSegment        = indexSwapSize/(INDEX_BINARY_SIZE + (maxSizeEntry/maxSlabSize)*4);
+        double swapSegmentIndexFactor = indexSwapFactor;
         
         this.modCount               = 0;
         this.dataPath               = dataPath;

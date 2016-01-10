@@ -25,7 +25,9 @@ import java.io.Serializable;
  */
 public class DataMap implements Serializable{
     
-    private long id;
+	private static final long serialVersionUID = 3011721226561387998L;
+
+	private long id;
     
     private long maxLiveTime;
     

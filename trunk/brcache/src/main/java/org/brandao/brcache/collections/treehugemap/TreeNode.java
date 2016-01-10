@@ -17,13 +17,14 @@
 
 package org.brandao.brcache.collections.treehugemap;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  *
  * @author Brandao
  */
-public interface TreeNode<T> {
+public interface TreeNode<T> extends Serializable{
     
     long getId();
     
