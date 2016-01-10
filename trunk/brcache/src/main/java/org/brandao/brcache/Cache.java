@@ -19,7 +19,7 @@ package org.brandao.brcache;
 
 import org.brandao.brcache.collections.FileSwaper;
 import org.brandao.brcache.collections.HugeArrayList;
-import org.brandao.brcache.collections.StringTreeKey;
+//import org.brandao.brcache.collections.StringTreeKey;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -120,25 +120,25 @@ public class Cache implements Serializable{
         int quantitySwaperThread){
         
         if(nodesSwapSize > nodesSize)
-            throw new RuntimeException("nodesSwap_size > nodesSize");
+            throw new IllegalArgumentException("nodesSwap_size > nodesSize");
 
         if(indexSwapSize > indexSwapSize)
-            throw new RuntimeException("indexSwapSize > indexSwapSize");
+            throw new IllegalArgumentException("indexSwapSize > indexSwapSize");
 
         if(maxSlabSize > dataSwapSize)
-            throw new RuntimeException("maxSlabSize > dataSwapSize");
+            throw new IllegalArgumentException("maxSlabSize > dataSwapSize");
 
         if(dataSwapSize/maxSlabSize < 1.0)
-            throw new RuntimeException("dataSwapSize must be greater than " + maxSlabSize);
+            throw new IllegalArgumentException("dataSwapSize must be greater than " + maxSlabSize);
 
         if(dataSwapSize > dataSize)
-            throw new RuntimeException("dataSwapSize > dataSize");
+            throw new IllegalArgumentException("dataSwapSize > dataSize");
 
         if(lockFactor < 0)
-            throw new RuntimeException("quantityLock < 0.0");
+            throw new IllegalArgumentException("quantityLock < 0.0");
         
         if(quantitySwaperThread < 1)
-            throw new RuntimeException("quantitySwaperThread < 1");
+            throw new IllegalArgumentException("quantitySwaperThread < 1");
             
         double bytesOnMemory          = dataSize/maxSlabSize;
         double bytesPerSegment        = dataSwapSize/maxSlabSize;
@@ -151,6 +151,15 @@ public class Cache implements Serializable{
         double indexOnMemory          = indexSize/(INDEX_BINARY_SIZE + (maxSizeEntry/maxSlabSize)*4);
         double indexPerSegment        = indexSwapSize/(INDEX_BINARY_SIZE + (maxSizeEntry/maxSlabSize)*4);
         double swapSegmentIndexFactor = indexSwapFactor;
+        
+        if(indexPerSegment < 1)
+        	throw new IllegalArgumentException("maxSlabSize is very little to maxSizeEntry");
+
+        if(nodesPerSegment < 1)
+        	throw new IllegalArgumentException("nodesPerSegment is very little");
+
+        if(bytesPerSegment < 1)
+        	throw new IllegalArgumentException("nodesPerSegment is very little");
         
         this.modCount               = 0;
         this.dataPath               = dataPath;
@@ -407,7 +416,8 @@ public class Cache implements Serializable{
     public boolean remove(String key) throws RecoverException{
         
         try{
-            DataMap data = this.dataMap.get(new StringTreeKey(key));
+            //DataMap data = this.dataMap.get(new StringTreeKey(key));
+        	DataMap data = this.dataMap.get(key);
 
             if(data != null){
 

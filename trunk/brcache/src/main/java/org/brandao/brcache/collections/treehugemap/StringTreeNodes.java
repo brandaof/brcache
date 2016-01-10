@@ -30,7 +30,7 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
     	strKey = strKey.toLowerCase();
         StringTreeMapKey k = new StringTreeMapKey();
         k.index = strKey.toCharArray();
-        k.limit = k.index.length - 1;
+        k.limit = k.index.length;
         k.pos   = 0;
         return k;
     }
