@@ -41,7 +41,7 @@ public class CharNode<T> implements TreeNode<T>{
 
     public void setNext(List<TreeNode<T>> nodes, Object key, TreeNode<T> node){
     	char c = (Character)key;
-        int index = c & 0xff;
+        int index = c/* & 0xff*/;
 
         if(index < MIN_CHARGROUP && index < MIN_NUMBERGROUP)
                 throw new IllegalArgumentException("invalid char: " + key);
@@ -60,7 +60,7 @@ public class CharNode<T> implements TreeNode<T>{
 
     public TreeNode<T> getNext(List<TreeNode<T>> nodes, Object key) {
     	char c = (Character)key;
-        int index = c & 0xff;
+        int index = c/* & 0xff*/;
 
         if(index < MIN_CHARGROUP && index < MIN_NUMBERGROUP)
                 throw new IllegalArgumentException("invalid char: " + key);
@@ -110,15 +110,16 @@ public class CharNode<T> implements TreeNode<T>{
     }
 
     public void removeValue(List<T> values) {
-        if(this.valueId != -1){
-            values.set((int)this.valueId, null);
-        }
+    	synchronized(values){
+	        if(this.valueId != -1){
+	            values.set((int)this.valueId, null);
+	        }
+    	}
     }
 
     public T getValue(List<T> values) {
-        if(this.valueId != -1){
+        if(this.valueId != -1)
             return values.get((int)this.valueId);
-        }
         else
             return null;
     }
