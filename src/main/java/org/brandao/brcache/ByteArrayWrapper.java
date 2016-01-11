@@ -29,15 +29,15 @@ public class ByteArrayWrapper
         return this.buffer;
     }
 
-    public long getId() {
-        return id;
-    }
+	public long getId() {
+		return id;
+	}
 
-    public int getSegment() {
-        return segment;
-    }
-    
-    @Override
+	public int getSegment() {
+		return segment;
+	}
+
+	@Override
     public int hashCode() {
             final int prime = 31;
             int result = 1;
