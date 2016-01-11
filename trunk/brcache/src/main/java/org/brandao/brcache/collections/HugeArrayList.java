@@ -127,15 +127,15 @@ public class HugeArrayList<T>
         if(index >= localSize)
             throw new IndexOutOfBoundsException(index + " >= " + localSize);
 
-        int segmentId = (int)(index/this.elements.getFragmentSize());
-        int idx       = (int)(index%this.elements.getFragmentSize());
+        long segmentId = (long)(index/this.elements.getFragmentSize());
+        int idx        = (int)(index%this.elements.getFragmentSize());
 
         return this.elements.getEntity(segmentId, idx);
     }
     
     public synchronized boolean add(T e) {
     	
-        int segmentId = (int)(size/this.elements.getFragmentSize());
+        long segmentId = (long)(size/this.elements.getFragmentSize());
         elements.putEntity(segmentId, -1, e);
         size++;
         return true;
