@@ -13,19 +13,22 @@ public class ByteArrayWrapper
 
     private int segment;
     
-    private byte[] buffer;
+    private int length;
     
-    public ByteArrayWrapper(long id, int segment, byte[] data){
+    private RegionMemory buffer;
+    
+    public ByteArrayWrapper(long id, int segment, RegionMemory data, int length){
         this.id      = id;
         this.segment = segment;
         this.buffer  = data;
+        this.length  = length;
     }
 
     public void writeTo(OutputStream out) throws IOException{
-        out.write(this.buffer, 0, buffer.length);
+    	this.buffer.write(out, 0, length);
     }
 
-    public byte[] toByteArray(){
+    public RegionMemory toByteArray(){
         return this.buffer;
     }
 
@@ -37,11 +40,15 @@ public class ByteArrayWrapper
 		return segment;
 	}
 
+	public int getLength() {
+		return length;
+	}
+
 	@Override
     public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + Arrays.hashCode(buffer);
+            result = prime * result + Arrays.hashCode(buffer.getSegments());
             return result;
     }
 
@@ -54,7 +61,7 @@ public class ByteArrayWrapper
             if (getClass() != obj.getClass())
                     return false;
             ByteArrayWrapper other = (ByteArrayWrapper) obj;
-            if (!Arrays.equals(buffer, other.buffer))
+            if (!Arrays.equals(buffer.getSegments(), other.buffer.getSegments()))
                     return false;
             return true;
     }
