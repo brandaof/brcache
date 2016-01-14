@@ -318,7 +318,7 @@ public class Cache implements Serializable{
             if(segments != null){
                 for(int segment: segments){
                     ByteArrayWrapper dataWrapper = this.dataList.get(segment);
-                    this.countRemovedData += dataWrapper.toByteArray().length;
+                    this.countRemovedData += dataWrapper.toByteArray().length();
                     this.freeSegments.add(segment);
                 }
             }
@@ -337,7 +337,7 @@ public class Cache implements Serializable{
                         ByteArrayWrapper dataWrapper = this.dataList.get(segment);
                         if(dataWrapper != null && dataWrapper.getId() == oldMap.getId()){
                             this.dataList.set(segment, null);
-                            this.countRemovedData += dataWrapper.toByteArray().length;
+                            this.countRemovedData += dataWrapper.toByteArray().length();
                             this.freeSegments.add(segment);
                         }
                     }
@@ -367,7 +367,7 @@ public class Cache implements Serializable{
             if(map != null){
                 int[] segmentIds = map.getSegments();
                 ByteArrayWrapper[] segments = new ByteArrayWrapper[segmentIds.length];
-                CRC32 crc = new CRC32();
+                //CRC32 crc = new CRC32();
                 
                 for(int i=0;i<segmentIds.length;i++){
                     ByteArrayWrapper dataWrapper = this.dataList.get(segmentIds[i]);
@@ -384,11 +384,11 @@ public class Cache implements Serializable{
                         throw new CorruptedDataException("invalid segment: " + dataWrapper.getId() + ":" + map.getId() + " " + dataWrapper.getSegment() + ":" + i);
 
                     segments[i] = dataWrapper;
-                    crc.update(dataWrapper.toByteArray());
+                    //crc.update(dataWrapper.toByteArray());
                 }
                 
-                if(crc.getValue() != map.getCrc())
-                        throw new CorruptedDataException("bad crc: " + map.getCrc() + ":" + crc.getValue());
+                //if(crc.getValue() != map.getCrc())
+                //        throw new CorruptedDataException("bad crc: " + map.getCrc() + ":" + crc.getValue());
                 
                 return new CacheInputStream(this, map, segments);
                 //return new CacheInputStream(this, map, this.dataList);
@@ -429,7 +429,7 @@ public class Cache implements Serializable{
                         synchronized(this.dataList){
                             ByteArrayWrapper dataWrapper = this.dataList.get(segment);
                             if(dataWrapper != null && dataWrapper.getId() == data.getId()){
-                                this.countRemovedData += dataWrapper.toByteArray().length;
+                                this.countRemovedData += dataWrapper.toByteArray().length();
                                 this.dataList.set(segment, null);
                                 this.freeSegments.put(segment);
                             }
@@ -452,18 +452,19 @@ public class Cache implements Serializable{
         
         int writeData = 0;
         List<Integer> segments = new ArrayList<Integer>(5);
-        
+        RegionMemory buffer = null;
         try{
-            CRC32 crc = new CRC32();
+            //CRC32 crc = new CRC32();
             
-            byte[] buffer = new byte[this.segmentSize];
-            int index     = 0;
+            int index = 0;
+            buffer    = Memory.alloc(this.segmentSize);
             int read;
             
-            while((read = inputData.read(buffer)) != -1){
-                
-               byte[] data = Arrays.copyOf(buffer, read);
-               crc.update(data, 0, read);
+            while((read = buffer.read(inputData, 0, buffer.length())) != -1){
+
+            	RegionMemory data = Memory.alloc(read);
+            	data.write(0, buffer, 0, read);
+               //crc.update(data, 0, read);
                writeData += read;
                
                if(writeData > this.maxBytesToStorageEntry)
@@ -473,10 +474,10 @@ public class Cache implements Serializable{
                     Integer segment = this.freeSegments.poll();
                     if(segment == null){
                         segment = this.dataList.size();
-                        this.dataList.add(new ByteArrayWrapper(map.getId(), index++, data));
+                        this.dataList.add(new ByteArrayWrapper(map.getId(), index++, data, read));
                     }
                     else
-                        this.dataList.set(segment, new ByteArrayWrapper(map.getId(), index++, data));
+                        this.dataList.set(segment, new ByteArrayWrapper(map.getId(), index++, data, read));
                     segments.add(segment);
                 }
                
@@ -492,7 +493,7 @@ public class Cache implements Serializable{
             
             map.setLength(writeData);
             map.setSegments(result);
-            map.setCrc(crc.getValue());
+            //map.setCrc(crc.getValue());
         }
         catch(StorageException e){
             this.countRemovedData += writeData;
@@ -506,7 +507,12 @@ public class Cache implements Serializable{
             for(int segment: segments)
                 this.freeSegments.add(segment);
             throw new StorageException(e);
-        }        
+        }
+        finally{
+        	if(buffer != null){
+        		Memory.release(buffer);
+        	}
+        }
     }
     
     /**

@@ -114,7 +114,7 @@ public class BrCacheConnectionImp implements BrCacheConnection{
     			time + SEPARATOR_COMMAND;
 
     	byte[] data = null;
-    	byte[] crc  = null;
+    	//byte[] crc  = null;
     	
         ObjectOutputStream out     = null;
     	ByteArrayOutputStream bout = null;
@@ -135,9 +135,9 @@ public class BrCacheConnectionImp implements BrCacheConnection{
                     out.close();
                     if(bout != null){
                         data = bout.toByteArray();
-                        crc  = this.getCRC32(data, 0, data.length);
-                        int size = data.length + 8;
-                        cmd += size;
+                        //crc  = this.getCRC32(data, 0, data.length);
+                        //int size = data.length + 8;
+                        cmd += data.length;
                     }
                 }
             }
@@ -149,7 +149,7 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         try{
             this.writer.sendMessage(cmd);
             this.writer.getStream().write(data, 0, data.length);
-            this.writer.getStream().write(crc, 0, crc.length);
+            //this.writer.getStream().write(crc, 0, crc.length);
             this.writer.sendCRLF();
             this.writer.sendMessage(BOUNDARY);
             this.writer.flush();
@@ -216,16 +216,16 @@ public class BrCacheConnectionImp implements BrCacheConnection{
                 if(size != 0){
                     in = (LimitedTextInputStreamReader) this.reader.getStream(size);
                     byte[] buffer = in.read(size);
-                    byte[] crc = new byte[8];
-                    byte[] expectedCRC = this.getCRC32(buffer, 0, buffer.length - 8);
-                    System.arraycopy(buffer, buffer.length - 8, crc, 0, 8);
+                    //byte[] crc = new byte[8];
+                    //byte[] expectedCRC = this.getCRC32(buffer, 0, buffer.length - 8);
+                    //System.arraycopy(buffer, buffer.length - 8, crc, 0, 8);
                     
-                    if(!Arrays.equals(crc, expectedCRC))
-                        throw new ReadDataException("bad CRC");
+                    //if(!Arrays.equals(crc, expectedCRC))
+                    //    throw new ReadDataException("bad CRC");
                     
                     ObjectInputStream stream = 
                             new ObjectInputStream(
-                                    new ByteArrayInputStream(buffer, 0, buffer.length - 8));
+                                    new ByteArrayInputStream(buffer, 0, buffer.length));
                     return stream.readObject();
                 }
                 else

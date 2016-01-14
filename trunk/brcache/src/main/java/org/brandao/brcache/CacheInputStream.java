@@ -82,17 +82,18 @@ public class CacheInputStream extends InputStream{
             return -1;
         
         ByteArrayWrapper dataWrapper = arrayDataList[this.currentSegmentIndex];
-        byte[] origin  = dataWrapper.toByteArray();
+        RegionMemory origin  = dataWrapper.toByteArray();
         
         int read = 0;
         
         while(length > 0 && origin != null){
             
-            if(length > origin.length - this.currentDataindex){
+            if(length > dataWrapper.getLength() - this.currentDataindex){
                 
-                int lenRead = origin.length - this.currentDataindex;
+                int lenRead = dataWrapper.getLength() - this.currentDataindex;
                 
-                System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
+                origin.write(this.currentDataindex, dest, destPos, lenRead);
+                //System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
                 
                 cache.countReadData += lenRead;
                 length -= lenRead;
@@ -105,16 +106,11 @@ public class CacheInputStream extends InputStream{
                 	dataWrapper = arrayDataList[this.currentSegmentIndex];
                 	origin = dataWrapper == null? null : dataWrapper.toByteArray();
                 }
-                /*
-                origin = 
-                    this.currentSegmentIndex < segments.length? 
-                        this.dataList.get(segments[this.currentSegmentIndex]) :
-                        null;
-                        */
             }
             else{
                 int lenRead = length;
-                System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
+                origin.read(this.currentDataindex, dest, destPos, lenRead);
+                //System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
                 
                 cache.countReadData += lenRead;
                 destPos += lenRead;

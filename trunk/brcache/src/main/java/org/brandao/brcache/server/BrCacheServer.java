@@ -23,6 +23,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.brandao.brcache.Cache;
+import org.brandao.brcache.Memory;
 import org.brandao.brcache.SwaperStrategy;
 import org.brandao.brcache.collections.Collections;
 
@@ -234,6 +235,7 @@ public class BrCacheServer {
             lock_factor,
             swapper_thread);
         
+        Memory.allocOnly((long)(data_size / 2));
         this.monitorThread = new MonitorThread(this.cache, this.config);
         this.monitorThread.start();
     }
