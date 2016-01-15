@@ -5,10 +5,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class Memory {
 
-	private static int segmentSize = 512;
+	private static int segmentSize = 256;
 	
 	private static BlockingQueue<byte[]> segments = new LinkedBlockingQueue<byte[]>();
-	
+
 	public static void allocOnly(long size){
 		int quantity = (int)(size / segmentSize);
 		
@@ -22,23 +22,35 @@ public class Memory {
 	}
 	
 	public static RegionMemory alloc(int size){
-		return allocSegments(size, null);
+		int quantity = (int)(size / segmentSize);
+		
+		if((size % segmentSize) > 0)
+			quantity++;
+		
+		byte[][] allocSegs = new byte[quantity][];
+		
+		for(int i=0;i<quantity;i++){
+			byte[] seg = allocSegment();
+			allocSegs[i] = seg;
+		}
+		
+		return new RegionMemory(allocSegs, (int)segmentSize, size);
 	}
 
-	public static synchronized void alloc(int size, RegionMemory region){
+	public static void alloc(int size, RegionMemory region){
 		if(region.segments != null)
 			throw new IllegalStateException();
 		allocSegments(size, region);
 	}
 	
 	public static void release(RegionMemory region){
-		
 		if(region.segments == null)
 			return;
 		
 		byte[][] allocSegs = region.getSegments();
-		for(int i=0;i<allocSegs.length;i++)
+		for(int i=0;i<allocSegs.length;i++){
 			segments.add(allocSegs[i]);
+		}
 		
 		region.segments = null;
  	}
@@ -56,14 +68,10 @@ public class Memory {
 			allocSegs[i] = seg;
 		}
 		
-		if(region == null)
-			return new RegionMemory(allocSegs, (int)segmentSize, size);
-		else{
-			region.length      = size;
-			region.segments    = allocSegs;
-			region.segmentSize = segmentSize;
-			return region;
-		}
+		region.length      = size;
+		region.segments    = allocSegs;
+		region.segmentSize = segmentSize;
+		return region;
 	}
 	
 	private static byte[] allocSegment(){

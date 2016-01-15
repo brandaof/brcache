@@ -20,6 +20,10 @@ package org.brandao.brcache.server;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringTokenizer;
 
 import org.brandao.brcache.Cache;
 import org.brandao.brcache.StorageException;
@@ -109,21 +113,27 @@ public class Terminal {
         while(this.run){
             try{
                 String message = reader.getMessage();
-                String[] command = message.split(" ");
+                String[] cmd = new String[6];
+                StringTokenizer tokens = new StringTokenizer(message, " ");
+                int cmdIndex = 0;
+                while(tokens.hasMoreTokens()){
+                	cmd[cmdIndex++] = tokens.nextToken();
+                }
+                String[] command = Arrays.copyOf(cmd, cmdIndex);
                 
-            	if("get".equals(command[0]))
+            	if(command[0].charAt(0) == 'g')
             		GET.execute(this, cache, reader, writer, command);
             	else
-            	if("put".equals(command[0]))
+            	if(command[0].charAt(0) == 'p')
             		PUT.execute(this, cache, reader, writer, command);
             	else
-            	if("remove".equals(command[0]))
+            	if(command[0].charAt(0) == 'r')
             		REMOVE.execute(this, cache, reader, writer, command);
             	else
-            	if("stats".equals(command[0]))
+            	if(command[0].charAt(0) == 's')
             		STATS.execute(this, cache, reader, writer, command);
             	else
-            	if("exit".equals(command[0]))
+            	if(command[0].charAt(0) == 'e')
             		EXIT.execute(this, cache, reader, writer, command);
                 else{
                     this.writer.sendMessage(String.format(TerminalConstants.UNKNOW_COMMAND, command[0]));
