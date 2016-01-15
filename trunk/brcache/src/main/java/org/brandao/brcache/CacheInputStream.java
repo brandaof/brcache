@@ -38,8 +38,10 @@ public class CacheInputStream extends InputStream{
     private int currentSegmentIndex;
     
     private int currentDataindex;
-    
+
     private Cache cache;
+    
+    private byte[] bufByte = new byte[1];
     
     public CacheInputStream(Cache cache, DataMap map, List<ByteArrayWrapper> dataList){
         this.map = map;
@@ -66,13 +68,13 @@ public class CacheInputStream extends InputStream{
     
     @Override
     public int read() throws IOException {
-        byte[] b = new byte[1];
-        int l = transfer(b, 0, 1);
+        //byte[] b = new byte[1];
+        int l = transfer(bufByte, 0, 1);
         
         if(l == -1)
             return -1;
         else
-            return b[0];
+            return bufByte[0];
     }
     
     private int transfer(byte[] dest, int destPos, int length ){
@@ -82,94 +84,44 @@ public class CacheInputStream extends InputStream{
             return -1;
         
         ByteArrayWrapper dataWrapper = arrayDataList[this.currentSegmentIndex];
-        RegionMemory origin  = dataWrapper.toByteArray();
+        RegionMemory origin  = dataWrapper.buffer;
         
         int read = 0;
         
         while(length > 0 && origin != null){
             
-            if(length > dataWrapper.getLength() - this.currentDataindex){
+            if(length > dataWrapper.length - this.currentDataindex){
                 
-                int lenRead = dataWrapper.getLength() - this.currentDataindex;
+                int lenRead = dataWrapper.length - this.currentDataindex;
                 
-                origin.write(this.currentDataindex, dest, destPos, lenRead);
-                //System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
+                origin.read(this.currentDataindex, dest, destPos, lenRead);
                 
-                cache.countReadData += lenRead;
-                length -= lenRead;
-                read += lenRead;
-                destPos += lenRead;
-                this.currentDataindex = 0;
+                cache.countReadData 	+= lenRead;
+                length 					-= lenRead;
+                read 					+= lenRead;
+                destPos 				+= lenRead;
+                this.currentDataindex 	= 0;
                 this.currentSegmentIndex++;
                 
                 if(this.currentSegmentIndex < segments.length){
                 	dataWrapper = arrayDataList[this.currentSegmentIndex];
-                	origin = dataWrapper == null? null : dataWrapper.toByteArray();
+                	origin = dataWrapper == null? null : dataWrapper.buffer;
                 }
             }
             else{
                 int lenRead = length;
                 origin.read(this.currentDataindex, dest, destPos, lenRead);
-                //System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
                 
-                cache.countReadData += lenRead;
-                destPos += lenRead;
-                read += lenRead;
-                length -= lenRead;
-                this.currentDataindex += lenRead;
+                cache.countReadData 	+= lenRead;
+                destPos 				+= lenRead;
+                read 					+= lenRead;
+                length 					-= lenRead;
+                this.currentDataindex 	+= lenRead;
             }
         }
         
         return read;
     }
-    
-    /*
-    private int transfer(byte[] dest, int destPos, int length ){
-        int[] segments = this.map.getSegments();
-        
-        if(this.currentSegmentIndex >= segments.length)
-            return -1;
-        
-        ByteArrayWrapper dataWrapper = this.dataList.get(segments[this.currentSegmentIndex]);
-        byte[] origin  = dataWrapper.toByteArray();
-        
-        int read = 0;
-        
-        while(length > 0 && origin != null){
-            
-            if(length > origin.length - this.currentDataindex){
-                
-                int lenRead = origin.length - this.currentDataindex;
-                
-                System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
-                
-                cache.countReadData += lenRead;
-                length -= lenRead;
-                read += lenRead;
-                destPos += lenRead;
-                this.currentDataindex = 0;
-                this.currentSegmentIndex++;
-                
-                if(this.currentSegmentIndex < segments.length){
-                	dataWrapper = this.dataList.get(segments[this.currentSegmentIndex]);
-                	origin = dataWrapper == null? null : dataWrapper.toByteArray();
-                }
-            }
-            else{
-                int lenRead = length;
-                System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
-                
-                cache.countReadData += lenRead;
-                destPos += lenRead;
-                read += lenRead;
-                length -= lenRead;
-                this.currentDataindex += lenRead;
-            }
-        }
-        
-        return read;
-    }
-    */
     
     public void writeTo(OutputStream out) throws IOException{
     	if(this.arrayDataList == null){
@@ -177,12 +129,14 @@ public class CacheInputStream extends InputStream{
 	        
 	        for(int i=0;i<segments.length;i++){
 	        	ByteArrayWrapper dataWrapper = this.dataList.get(segments[i]);
-	        	dataWrapper.writeTo(out);
+	        	dataWrapper.buffer.write(out, 0, dataWrapper.length);
+	        	//dataWrapper.writeTo(out);
 	        }
     	}
     	else{
 	        for(ByteArrayWrapper dataWrapper: this.arrayDataList){
-	        	dataWrapper.writeTo(out);
+	        	//dataWrapper.writeTo(out);
+	        	dataWrapper.buffer.write(out, 0, dataWrapper.length);
 	        }
     	}
         

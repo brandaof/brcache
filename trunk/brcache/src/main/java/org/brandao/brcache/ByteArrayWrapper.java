@@ -1,21 +1,18 @@
 package org.brandao.brcache;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.Arrays;
 
 @SuppressWarnings("serial")
 public class ByteArrayWrapper 
     implements Serializable{
 
-    private long id;
+    public long id;
 
-    private int segment;
+    public int segment;
     
-    private int length;
+    public int length;
     
-    private RegionMemory buffer;
+    public RegionMemory buffer;
     
     public ByteArrayWrapper(long id, int segment, RegionMemory data, int length){
         this.id      = id;
@@ -23,7 +20,7 @@ public class ByteArrayWrapper
         this.buffer  = data;
         this.length  = length;
     }
-
+/*
     public void writeTo(OutputStream out) throws IOException{
     	this.buffer.write(out, 0, length);
     }
@@ -65,5 +62,5 @@ public class ByteArrayWrapper
                     return false;
             return true;
     }
-
+*/
 }
