@@ -48,7 +48,6 @@ public class HugeArrayList<T>
             DEFAULT_CLEAR_FACTOR_ELEMENT, 
             DEFAULT_FRAGMENT_FACTOR_ELEMENT,
             null,
-            10,
             1);
     }
 
@@ -58,7 +57,6 @@ public class HugeArrayList<T>
             double clearFactorElements, 
             double fragmentFactorElements,
             Swapper swap,
-            int quantityLock,
             int quantityClearThread) {
         
         this.size = 0;
@@ -73,7 +71,6 @@ public class HugeArrayList<T>
                 clearFactorElements, 
                 fragmentFactorElements,
                 swap,
-                quantityLock,
                 quantityClearThread);
     }
     
