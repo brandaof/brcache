@@ -110,16 +110,21 @@ public class Terminal {
     }
     
     public void execute() throws WriteDataException, ReadDataException, StorageException{
+    	int index;
+    	int start;
+    	int end;
+        String[] command = new String[6];
         while(this.run){
             try{
                 String message = reader.getMessage();
-                String[] cmd = new String[6];
-                StringTokenizer tokens = new StringTokenizer(message, " ");
-                int cmdIndex = 0;
-                while(tokens.hasMoreTokens()){
-                	cmd[cmdIndex++] = tokens.nextToken();
+                index = 0;
+                start = 0;
+                while((end = message.indexOf(' ', start)) != -1){
+                	String part = message.substring(start, end);
+                	command[index++] = part;
+                	start = end + 1;
                 }
-                String[] command = Arrays.copyOf(cmd, cmdIndex);
+                command[index] = message.substring(start, message.length());
                 
             	if(command[0].charAt(0) == 'g')
             		GET.execute(this, cache, reader, writer, command);

@@ -220,7 +220,7 @@ public class Cache implements Serializable{
         "/mnt/brcache",
         SwaperStrategy.FILE_TREE,
         0.1,
-        4);
+        16);
     }
     
     /**

@@ -32,8 +32,8 @@ public class PutCommand extends AbstractCommand{
         int size;
         
         try{
-            if(parameters == null || parameters.length < 4)
-                throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
+            //if(parameters == null || parameters.length < 4)
+            //    throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
             
             try{
                 time = Integer.parseInt(parameters[2]);

@@ -24,8 +24,8 @@ public class RemoveCommand extends AbstractCommand{
                     TerminalWriter writer, String[] parameters)
                     throws ReadDataException, WriteDataException, ParameterException {
 
-    if(parameters == null || parameters.length < 2)
-        throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
+    //if(parameters == null || parameters.length < 2)
+    //    throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
 
     try {
         cache.remove(parameters[1]);

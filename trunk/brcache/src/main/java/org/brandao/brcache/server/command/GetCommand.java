@@ -29,8 +29,8 @@ public class GetCommand extends AbstractCommand{
 			throws ReadDataException, WriteDataException, ParameterException {
 
         try{
-            if(parameters == null || parameters.length < 2)
-                throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
+            //if(parameters == null || parameters.length < 2)
+            //    throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
 
             CacheInputStream in = null;
             try{

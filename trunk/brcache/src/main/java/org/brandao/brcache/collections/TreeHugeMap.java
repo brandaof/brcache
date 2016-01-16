@@ -29,7 +29,7 @@ import java.util.Set;
 public class TreeHugeMap<K extends TreeKey,T> 
     implements Map<K,T>, Serializable{
 
-    private static final long serialVersionUID                          = 4577949145861315961L;
+    private static final long serialVersionUID					= 4577949145861315961L;
 
     public static final int DEFAULT_MAX_CAPACITY_NODE 			= 2000;
     
