@@ -18,14 +18,19 @@
 package org.brandao.brcache.collections;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author Brandao
  */
 abstract class AbstractCollectionSegment<I,T> 
-    implements CollectionSegment<I>, Serializable{
+    implements CollectionSegment<I>, 
+    CollectionSegmentSwapper<T>, Runnable, Serializable{
     
 	private static final long serialVersionUID = 7817500681111470845L;
 
@@ -53,12 +58,12 @@ abstract class AbstractCollectionSegment<I,T>
     
     private Swapper swap;
 
-    //private Object[] locks;
-    
     private boolean forceSwap;
     
     private volatile Entry<T> firstItem;
 
+    private BlockingQueue<Entry<T>> swapCandidates;
+    
     public AbstractCollectionSegment(
             String id, int maxCapacity, double clearFactor,
             double fragmentFactor,
@@ -71,38 +76,36 @@ abstract class AbstractCollectionSegment<I,T>
         this.maxCapacity         = maxCapacity;
         this.clearFactor         = clearFactor;
         this.maxSegmentCapacity  = (int)(maxCapacity/fragmentSize);
-        this.segments            = new LinkedHashMap<Long, Entry<T>>();//new ConcurrentHashMap<Integer, Entry<T>>();
+        this.segments            = new LinkedHashMap<Long, Entry<T>>();
+        this.swapCandidates      = new LinkedBlockingQueue<Entry<T>>();
         this.readOnly            = false;
         this.lastSegment         = -1;
-        this.swap                = swap;//new DefaultSwaper<T>(this.id, this.pathName);
-        //this.locks               = new Object[quantityLock];
+        this.swap                = swap;
         this.forceSwap           = false;
         this.swap.setId(this.id);
 
-        //for(int i=0;i<locks.length;i++)
-        //    locks[i] = new Integer(i);
+        Thread[] swapperThreads = new Thread[quantitySwaperThread];
         
-        Thread[] clearThread = new Thread[quantitySwaperThread];
+        for(int i=0;i<swapperThreads.length;i++){
+        	SwapperThread<T> swapperThread = new SwapperThread<T>(swapCandidates, this);
+        	swapperThreads[i] = new Thread(swapperThread);
+        	swapperThreads[i].start();
+        }
         
-        for(int i=0;i<clearThread.length;i++){
-            clearThread[i] =
-                new Thread(){
-                  
-                    public void run(){
-                        while(true){
-                            try{
-                                clearLimit();
-                                Thread.sleep(1000);
-                            }
-                            catch(Exception e){
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                    
-                };
-            
-            clearThread[i].start();
+        Thread clearThread = new Thread(this);
+        clearThread.start();
+    }
+    
+    public void run(){
+        while(true){
+            try{
+                Thread.sleep(1000);
+                if(this.swapCandidates.isEmpty())
+                	clearLimit();
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
         }
     }
     
@@ -115,7 +118,27 @@ abstract class AbstractCollectionSegment<I,T>
     	return this;
     }
 
-    protected void clearLimit() {
+    protected synchronized void clearLimit() {
+    	double i = maxSegmentCapacity * clearFactor;
+        double limit = maxSegmentCapacity - i;
+        
+        if (maxSegmentCapacity > 0 && segments.size() > limit) {
+        	int count = 0;
+        	Entry<T> item = this.firstItem;
+            do{
+                if(item != null){
+                	this.swapCandidates.add(item);
+                	item = item.getNext();
+                }
+                count++;
+            }
+            while(count < i && item != null && item != this.firstItem);
+        }
+        
+    }
+    
+    /*
+    protected synchronized void clearLimit() {
         double limit = maxSegmentCapacity - (maxSegmentCapacity * clearFactor);
         if (maxSegmentCapacity > 0 && segments.size() > limit) {
             while(segments.size() > limit){
@@ -125,7 +148,7 @@ abstract class AbstractCollectionSegment<I,T>
             }
         }
     }
-    
+    */
     
     protected void clearLimitLength() {
         if (maxSegmentCapacity > 0 && segments.size() > maxSegmentCapacity) {
@@ -191,7 +214,7 @@ abstract class AbstractCollectionSegment<I,T>
         return e;
     }
     
-    private void swapOnDisk(Entry<T> item){
+    public void swapOnDisk(Entry<T> item){
     	
     	Object lock = this.getLock(item.getIndex());
     	
@@ -212,7 +235,7 @@ abstract class AbstractCollectionSegment<I,T>
     }
 
     @SuppressWarnings("unchecked")
-	private Entry<T> swapOnMemory(long key){
+	public Entry<T> swapOnMemory(long key){
 
     	if(key > this.lastSegment)
             return null;

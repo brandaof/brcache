@@ -200,13 +200,23 @@ public class BrCacheConnectionImp implements BrCacheConnection{
     	try{
             String result = this.reader.getMessage();
             
-            if(!result.startsWith("VALUE"))
-            	throw new ReadDataException(result);
-            
-            String[] resultParams = result.split(" ");
-            
-            if(resultParams.length != 4 || !VALUE_RESULT.equals(resultParams[0]))
+            if(!result.startsWith(VALUE_RESULT))
                 throw new RecoverException(result.toString());
+            
+            //String[] resultParams = result.split(" ");
+            String[] resultParams = new String[4];
+            int index = 0;
+            int start = 0;
+            int end;
+            while((end = result.indexOf(' ', start)) != -1){
+            	String part = result.substring(start, end);
+            	resultParams[index++] = part;
+            	start = end + 1;
+            }
+            resultParams[index] = result.substring(start, result.length());
+
+            //if(resultParams.length != 4 || !VALUE_RESULT.equals(resultParams[0]))
+            //    throw new RecoverException(result.toString());
 
             int size = Integer.parseInt(resultParams[2]);
     		
@@ -215,7 +225,7 @@ public class BrCacheConnectionImp implements BrCacheConnection{
             try{
                 if(size != 0){
                     in = (LimitedTextInputStreamReader) this.reader.getStream(size);
-                    byte[] buffer = in.read(size);
+                    //byte[] buffer = in.read(size);
                     //byte[] crc = new byte[8];
                     //byte[] expectedCRC = this.getCRC32(buffer, 0, buffer.length - 8);
                     //System.arraycopy(buffer, buffer.length - 8, crc, 0, 8);
@@ -223,9 +233,10 @@ public class BrCacheConnectionImp implements BrCacheConnection{
                     //if(!Arrays.equals(crc, expectedCRC))
                     //    throw new ReadDataException("bad CRC");
                     
-                    ObjectInputStream stream = 
-                            new ObjectInputStream(
-                                    new ByteArrayInputStream(buffer, 0, buffer.length));
+                    //ObjectInputStream stream = 
+                    //        new ObjectInputStream(
+                    //                new ByteArrayInputStream(buffer, 0, buffer.length));
+                    ObjectInputStream stream = new ObjectInputStream(in);
                     return stream.readObject();
                 }
                 else
@@ -239,9 +250,9 @@ public class BrCacheConnectionImp implements BrCacheConnection{
                     catch(Exception e){}
                 }
                 
-                String end = this.reader.getMessage();
+                String boundary = this.reader.getMessage();
                 
-                if(!BOUNDARY.equals(end))
+                if(!BOUNDARY.equals(boundary))
                     throw new RecoverException("read entry fail");
             }
             
