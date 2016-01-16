@@ -20,10 +20,6 @@ package org.brandao.brcache.server;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringTokenizer;
 
 import org.brandao.brcache.Cache;
 import org.brandao.brcache.StorageException;

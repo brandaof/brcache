@@ -17,6 +17,7 @@
 
 package org.brandao.brcache;
 
+import org.brandao.brcache.HugeListCalculator.HugeListInfo;
 import org.brandao.brcache.collections.FileSwaper;
 import org.brandao.brcache.collections.HugeArrayList;
 //import org.brandao.brcache.collections.StringTreeKey;
@@ -84,124 +85,6 @@ public class Cache implements Serializable{
     /**
      * Cria um novo cache.
      * 
-     * @param nodesSize Quantidade de bytes usados para armazenar os nós na memória.
-     * @param nodesSwapSize Tamanho do bloco de swap dos nós.
-     * @param nodesSwapFactor Fator de swap dos nós.
-     * @param indexSize Quantidade de bytes usados para armazenar os índices dos itens na memória.
-     * @param indexSwapSize Tamanho do bloco de swap dos índices.
-     * @param indexSwapFactor Fator de swap dos índices.
-     * @param dataSize Quantidade de bytes usados para armazenar os itens na memória.
-     * @param dataSwapSize Tamanho do bloco de swap dos itens.
-     * @param dataSwapFactor Fator de swap dos itens.
-     * @param maxSlabSize Tamanho do agrupamento dos dados do itens em bytes.
-     * @param maxSizeEntry Tamanho máximo em bytes que um item pode ter para ser armazenado no cache.
-     * @param maxSizeKey Tamanho máximo em bytes que uma chave pode ter.
-     * @param dataPath Pasta onde os dados do cache serão armazenados no processo de swap.
-     * @param swaperType Estratégia de swap.
-     * @param lockFactor Fator de lock. Determina quantos locks serão usados para bloquear os segmentos.
-     * @param quantitySwaperThread Quantidade de threads que irão fazer o swap.
-     */
-    public Cache(
-        long nodesSize,
-        long nodesSwapSize,
-        double nodesSwapFactor,
-        long indexSize,
-        long indexSwapSize,
-        double indexSwapFactor,
-        long dataSize,
-        long dataSwapSize,
-        double dataSwapFactor,
-        int maxSlabSize,
-        int maxSizeEntry,
-        int maxSizeKey,
-        String dataPath,
-        SwaperStrategy swaperType,
-        double lockFactor,
-        int quantitySwaperThread){
-        
-        if(nodesSwapSize > nodesSize)
-            throw new IllegalArgumentException("nodesSwap_size > nodesSize");
-
-        if(indexSwapSize > indexSwapSize)
-            throw new IllegalArgumentException("indexSwapSize > indexSwapSize");
-
-        if(maxSlabSize > dataSwapSize)
-            throw new IllegalArgumentException("maxSlabSize > dataSwapSize");
-
-        if(dataSwapSize/maxSlabSize < 1.0)
-            throw new IllegalArgumentException("dataSwapSize must be greater than " + maxSlabSize);
-
-        if(dataSwapSize > dataSize)
-            throw new IllegalArgumentException("dataSwapSize > dataSize");
-
-        if(lockFactor < 0)
-            throw new IllegalArgumentException("quantityLock < 0.0");
-        
-        if(quantitySwaperThread < 1)
-            throw new IllegalArgumentException("quantitySwaperThread < 1");
-            
-        double bytesOnMemory          = dataSize/maxSlabSize;
-        double bytesPerSegment        = dataSwapSize/maxSlabSize;
-        double swapSegmentsFactor     = dataSwapFactor;
-
-        double nodesOnMemory          = nodesSize/NODE_BINARY_SIZE;
-        double nodesPerSegment        = nodesSwapSize/NODE_BINARY_SIZE;
-        double swapSegmentNodesFactor = nodesSwapFactor;
-        
-        double indexOnMemory          = indexSize/(INDEX_BINARY_SIZE + (maxSizeEntry/maxSlabSize)*4);
-        double indexPerSegment        = indexSwapSize/(INDEX_BINARY_SIZE + (maxSizeEntry/maxSlabSize)*4);
-        double swapSegmentIndexFactor = indexSwapFactor;
-        
-        if(indexPerSegment < 1)
-        	throw new IllegalArgumentException("maxSlabSize is very little to maxSizeEntry");
-
-        if(nodesPerSegment < 1)
-        	throw new IllegalArgumentException("nodesPerSegment is very little");
-
-        if(bytesPerSegment < 1)
-        	throw new IllegalArgumentException("nodesPerSegment is very little");
-        
-        this.modCount               = 0;
-        this.dataPath               = dataPath;
-        this.freeSegments           = new LinkedBlockingQueue<Integer>();
-        this.segmentSize            = maxSlabSize;
-        this.maxBytesToStorageEntry = maxSizeEntry;
-        this.maxLengthKey           = maxSizeKey;
-        
-        synchronized(Collections.class){
-            this.dataMap =
-                    new StringTreeMap<DataMap>(
-                    "dataMap",
-                    (int)nodesOnMemory,
-                    swapSegmentNodesFactor,
-                    nodesPerSegment/nodesOnMemory,
-                    this.getSwaper(swaperType),
-                    (int)((nodesOnMemory/nodesPerSegment)*lockFactor) + 1,
-                    quantitySwaperThread,
-                    (int)indexOnMemory,
-                    swapSegmentIndexFactor,
-                    indexPerSegment/indexOnMemory,
-                    this.getSwaper(swaperType),
-                    (int)((indexOnMemory/indexPerSegment)*lockFactor) + 1,
-                    quantitySwaperThread
-                    );
-
-            this.dataList =
-                    new HugeArrayList<ByteArrayWrapper>(
-                    "dataList",
-                    (int)bytesOnMemory,
-                    swapSegmentsFactor,
-                    bytesPerSegment/bytesOnMemory,
-                    this.getSwaper(swaperType),
-                    (int)((bytesOnMemory/bytesPerSegment)*lockFactor) + 1,
-                    quantitySwaperThread
-                    );
-        }   
-    }
-    
-    /**
-     * Cria um novo cache.
-     * 
      */
     public Cache(){
         this(
@@ -221,6 +104,107 @@ public class Cache implements Serializable{
         SwaperStrategy.FILE_TREE,
         0.1,
         16);
+    }
+    
+    /**
+     * Cria um novo cache.
+     * 
+     * @param nodeBufferSize Tamanho do buffer onde os nós ficarão armazenados. 
+     * @param nodeSlabSize 
+     * @param nodeSwapFactor
+     * @param indexBufferSize
+     * @param indexSlabSize
+     * @param indexSwapFactor
+     * @param dataBufferSize
+     * @param dataSlabSize
+     * @param blockSize
+     * @param dataSwapFactor
+     * @param maxSizeEntry
+     * @param maxSizeKey
+     * @param dataPath
+     * @param swaperType
+     * @param quantitySwaperThread
+     */
+    public Cache(
+    		long nodeBufferSize,
+    		long nodeSlabSize,
+    		double nodeSwapFactor,
+    		
+    		long indexBufferSize,
+    		long indexSlabSize,
+    		double indexSwapFactor,
+    		
+    		long dataBufferSize,
+    		long dataSlabSize,
+    		long blockSize,
+    		double dataSwapFactor,
+    		
+    		int maxSizeEntry,
+    		int maxSizeKey,
+            String dataPath,
+            SwaperStrategy swaperType,
+            int quantitySwaperThread
+    		){
+
+        synchronized(Collections.class){
+	    	try{
+		    	HugeListInfo dataInfo = 
+		    			HugeListCalculator
+		    				.calculate(dataBufferSize, dataSlabSize, blockSize, dataSwapFactor);
+		        this.dataList =
+		                new HugeArrayList<ByteArrayWrapper>(
+		                "data",
+		                dataInfo.getMaxCapacityElements(),
+		                dataInfo.getClearFactorElements(),
+		                dataInfo.getFragmentFactorElements(),
+		                this.getSwaper(swaperType),
+		                quantitySwaperThread
+		                );
+	    	}
+	    	catch(IllegalArgumentException e){
+	    		throw new IllegalArgumentException("fail create buffer", e);
+	    	}
+	    	
+	    	try{
+		    	HugeListInfo nodeInfo = 
+		    			HugeListCalculator
+		    				.calculate(
+		    						nodeBufferSize, nodeSlabSize, 
+		    						NODE_BINARY_SIZE, nodeSwapFactor);
+
+		    	HugeListInfo indexInfo = 
+		    			HugeListCalculator
+		    				.calculate(indexBufferSize, indexSlabSize, 
+		    						INDEX_BINARY_SIZE + (maxSizeEntry/blockSize)*4, indexSwapFactor);
+		    	
+	            this.dataMap =
+	                    new StringTreeMap<DataMap>(
+	                    "dataMap",
+	                    nodeInfo.getMaxCapacityElements(),
+	                    nodeInfo.getClearFactorElements(),
+	                    nodeInfo.getFragmentFactorElements(),
+	                    this.getSwaper(swaperType),
+	                    quantitySwaperThread,
+	                    indexInfo.getMaxCapacityElements(),
+	                    indexInfo.getClearFactorElements(),
+	                    indexInfo.getFragmentFactorElements(),
+	                    this.getSwaper(swaperType),
+	                    quantitySwaperThread
+	                    );
+	    	}
+	    	catch(IllegalArgumentException e){
+	    		throw new IllegalArgumentException("fail create buffer", e);
+	    	}
+	    	
+        }
+    	
+    	
+        this.modCount               = 0;
+        this.dataPath               = dataPath;
+        this.freeSegments           = new LinkedBlockingQueue<Integer>();
+        this.segmentSize            = (int)blockSize;
+        this.maxBytesToStorageEntry = maxSizeEntry;
+        this.maxLengthKey           = maxSizeKey;
     }
     
     /**

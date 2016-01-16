@@ -35,11 +35,10 @@ class CollectionSegmentImp<I>
             double clearFactor,
             double fragmentFactor,
             Swapper swap,
-            int quantityLock,
             int quantitySwaperThread){
         super(id, maxCapacity, 
                 clearFactor, fragmentFactor, swap, 
-                quantityLock, quantitySwaperThread);
+                quantitySwaperThread);
     }
     
     public I getEntity(long segment, int index) {

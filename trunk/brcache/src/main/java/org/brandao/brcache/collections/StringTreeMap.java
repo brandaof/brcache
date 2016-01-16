@@ -23,27 +23,26 @@ import org.brandao.brcache.collections.treehugemap.StringTreeNodes;
  *
  * @author Brandao
  */
-public class StringTreeMap<T> 
-    extends TreeMap<String, T> {
+public class StringTreeMap<T> extends TreeMap<String, T> {
     
-    public StringTreeMap(
+	private static final long serialVersionUID = 4262873183379962091L;
+
+	public StringTreeMap(
             String id, 
             int maxCapacityNodes,
             double clearFactorNodes, 
             double fragmentFactorNodes,
             Swapper swapNodes,
-            int quantityLockNodes,
-            int quantitySwaperThreadNodes,            
+            int quantitySwaperThreadNodes,
             int maxCapacityElements,
             double clearFactorElements, 
             double fragmentFactorElements,
             Swapper swapElements,
-            int quantityLockElements,
             int quantitySwaperThreadElements){
         super(id, maxCapacityNodes, clearFactorNodes, fragmentFactorNodes, 
-                swapNodes, quantityLockNodes, quantitySwaperThreadNodes, 
+                swapNodes, quantitySwaperThreadNodes, 
                 maxCapacityElements, clearFactorElements, fragmentFactorElements, 
-                swapElements, quantityLockElements, quantitySwaperThreadElements, 
+                swapElements, quantitySwaperThreadElements, 
                 new StringTreeNodes<T>());
     }    
 }

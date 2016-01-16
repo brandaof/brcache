@@ -18,9 +18,7 @@
 package org.brandao.brcache.collections;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -68,7 +66,6 @@ abstract class AbstractCollectionSegment<I,T>
             String id, int maxCapacity, double clearFactor,
             double fragmentFactor,
             Swapper swap,
-            int quantityLock,
             int quantitySwaperThread) {
         
         this.id                  = id;

@@ -64,12 +64,10 @@ public class TreeMap<K,T>
             DEFAULT_FRAGMENT_FACTOR_NODE,
             null,
             1,
-            1,
             DEFAULT_MAX_CAPACITY_ELEMENT, 
             DEFAULT_CLEAR_FACTOR_ELEMENT, 
             DEFAULT_FRAGMENT_FACTOR_ELEMENT,
             null,
-            1,
             1,
             null);
     }
@@ -96,13 +94,11 @@ public class TreeMap<K,T>
             double clearFactorNodes, 
             double fragmentFactorNodes,
             Swapper swapNodes,
-            int quantityLockNodes,
             int quantitySwaperThreadNodes,            
             int maxCapacityElements,
             double clearFactorElements, 
             double fragmentFactorElements,
             Swapper swapElements,
-            int quantityLockElements,
             int quantitySwaperThreadElements,
             TreeNodes<T> treeNodes){
         
@@ -113,7 +109,6 @@ public class TreeMap<K,T>
                 clearFactorElements, 
                 fragmentFactorElements,
                 swapElements,
-                quantityLockElements,
                 quantitySwaperThreadElements);
         
         this.nodes = 
@@ -123,7 +118,6 @@ public class TreeMap<K,T>
                 clearFactorNodes, 
                 fragmentFactorNodes,
                 swapNodes,
-                quantityLockNodes,
                 quantitySwaperThreadNodes);
 
         this.treeNodes = treeNodes;
