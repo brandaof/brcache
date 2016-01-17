@@ -137,10 +137,6 @@ public class Cache implements Serializable{
 		    	HugeListInfo dataInfo = 
 		    			HugeListCalculator
 		    				.calculate(dataBufferSize, dataSlabSize, blockSize, dataSwapFactor);
-                System.out.println("data: " + dataInfo.getMaxCapacityElements());
-                System.out.println("data: " + dataInfo.getClearFactorElements());
-        		System.out.println("data: " + dataInfo.getFragmentFactorElements());
-		    	
 		        this.dataList =
 		                new HugeArrayList<ByteArrayWrapper>(
 		                "data",
@@ -172,14 +168,6 @@ public class Cache implements Serializable{
 		    				.calculate(indexBufferSize, indexSlabSize, 
 		    						INDEX_BINARY_SIZE + 4, indexSwapFactor);
 		    	
-                System.out.println("nodeInfo: " + nodeInfo.getMaxCapacityElements());
-                System.out.println("nodeInfo: " + nodeInfo.getClearFactorElements());
-        		System.out.println("nodeInfo: " + nodeInfo.getFragmentFactorElements());
-
-                System.out.println("indexInfo: " + indexInfo.getMaxCapacityElements());
-                System.out.println("indexInfo: " + indexInfo.getClearFactorElements());
-        		System.out.println("indexInfo: " + indexInfo.getFragmentFactorElements());
-        		
 	            this.dataMap =
 	                    new StringTreeMap<DataMap>(
 	                    "dataMap",

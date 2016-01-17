@@ -18,7 +18,7 @@
 package org.brandao.brcache.collections;
 
 import java.io.*;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -73,12 +73,12 @@ abstract class AbstractCollectionSegment<I,T>
         this.maxCapacity         = maxCapacity;
         this.clearFactor         = clearFactor;
         this.maxSegmentCapacity  = (int)(maxCapacity/fragmentSize);
-        this.segments            = new LinkedHashMap<Long, Entry<T>>();
+        this.segments            = new HashMap<Long, Entry<T>>(maxCapacity);
         this.swapCandidates      = new LinkedBlockingQueue<Entry<T>>();
         this.readOnly            = false;
         this.lastSegment         = -1;
         this.swap                = swap;
-        this.forceSwap           = false;
+        this.forceSwap           = true;
         this.swap.setId(this.id);
 
         Thread[] swapperThreads = new Thread[quantitySwaperThread];
@@ -179,6 +179,12 @@ abstract class AbstractCollectionSegment<I,T>
     }
 
     protected void addEntry(long key, Entry<T> item) {
+        this.registry(item);
+        this.lastSegment = key;
+    }
+
+    /*
+    protected void addEntry(long key, Entry<T> item) {
         
     	Object lock = this.getLock(key);
     	
@@ -188,7 +194,7 @@ abstract class AbstractCollectionSegment<I,T>
         }
         
     }
-    
+    */
     private void registry(Entry<T> item){
         
         if(forceSwap)
@@ -263,6 +269,19 @@ abstract class AbstractCollectionSegment<I,T>
         
         Entry<T> e = segments.get(index);
         
+        if(e == null)
+            return swapOnMemory(index);
+        else{
+        	realocItemListedOnMemory(e);
+        	return e;
+        }
+    }
+
+    /*
+    protected Entry<T> getEntry(long index) {
+        
+        Entry<T> e = segments.get(index);
+        
     	Object lock = this.getLock(index);
     	
         synchronized(lock){
@@ -276,7 +295,8 @@ abstract class AbstractCollectionSegment<I,T>
         }
         
     }
-
+    */
+    
     public Map<Long, Entry<T>> getSegments() {
         return segments;
     }
