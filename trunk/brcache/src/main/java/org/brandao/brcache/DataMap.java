@@ -33,6 +33,8 @@ public class DataMap implements Serializable{
     
     private int[] segments;
 
+    private int firstSegment;
+    
     private long length;
     
     private long crc;
@@ -76,5 +78,13 @@ public class DataMap implements Serializable{
     public void setId(long id) {
         this.id = id;
     }
+
+	public int getFirstSegment() {
+		return firstSegment;
+	}
+
+	public void setFirstSegment(int firstSegment) {
+		this.firstSegment = firstSegment;
+	}
 
 }

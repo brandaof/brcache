@@ -31,9 +31,9 @@ public class CacheInputStream extends InputStream{
 
     private DataMap map;
     
-    private List<ByteArrayWrapper> dataList;
+    private List<Block> dataList;
 
-    private ByteArrayWrapper[] arrayDataList;
+    private Block[] arrayDataList;
     
     private int currentSegmentIndex;
     
@@ -43,7 +43,7 @@ public class CacheInputStream extends InputStream{
     
     private byte[] bufByte = new byte[1];
     
-    public CacheInputStream(Cache cache, DataMap map, List<ByteArrayWrapper> dataList){
+    public CacheInputStream(Cache cache, DataMap map, List<Block> dataList){
         this.map = map;
         this.arrayDataList = null;
         this.dataList = dataList;
@@ -52,7 +52,7 @@ public class CacheInputStream extends InputStream{
         this.cache = cache;
     }
 
-    public CacheInputStream(Cache cache, DataMap map, ByteArrayWrapper[] dataList){
+    public CacheInputStream(Cache cache, DataMap map, Block[] dataList){
         this.map = map;
         this.arrayDataList = dataList;
         this.dataList = null;
@@ -78,21 +78,20 @@ public class CacheInputStream extends InputStream{
     }
     
     private int transfer(byte[] dest, int destPos, int length ){
-        int[] segments = this.map.getSegments();
         
-        if(this.currentSegmentIndex >= segments.length)
+        if(this.currentSegmentIndex >= arrayDataList.length)
             return -1;
         
-        ByteArrayWrapper dataWrapper = arrayDataList[this.currentSegmentIndex];
-        RegionMemory origin  = dataWrapper.buffer;
+        Block block = arrayDataList[this.currentSegmentIndex];
+        RegionMemory origin  = block.buffer;
         
         int read = 0;
         
         while(length > 0 && origin != null){
             
-            if(length > dataWrapper.length - this.currentDataindex){
+            if(length > block.length - this.currentDataindex){
                 
-                int lenRead = dataWrapper.length - this.currentDataindex;
+                int lenRead = block.length - this.currentDataindex;
                 
                 origin.read(this.currentDataindex, dest, destPos, lenRead);
                 
@@ -103,9 +102,9 @@ public class CacheInputStream extends InputStream{
                 this.currentDataindex 	= 0;
                 this.currentSegmentIndex++;
                 
-                if(this.currentSegmentIndex < segments.length){
-                	dataWrapper = arrayDataList[this.currentSegmentIndex];
-                	origin = dataWrapper == null? null : dataWrapper.buffer;
+                if(this.currentSegmentIndex < arrayDataList.length){
+                	block = arrayDataList[this.currentSegmentIndex];
+                	origin = block == null? null : block.buffer;
                 }
             }
             else{
@@ -128,13 +127,13 @@ public class CacheInputStream extends InputStream{
 	        int[] segments = this.map.getSegments();
 	        
 	        for(int i=0;i<segments.length;i++){
-	        	ByteArrayWrapper dataWrapper = this.dataList.get(segments[i]);
+	        	Block dataWrapper = this.dataList.get(segments[i]);
 	        	dataWrapper.buffer.write(out, 0, dataWrapper.length);
 	        	//dataWrapper.writeTo(out);
 	        }
     	}
     	else{
-	        for(ByteArrayWrapper dataWrapper: this.arrayDataList){
+	        for(Block dataWrapper: this.arrayDataList){
 	        	//dataWrapper.writeTo(out);
 	        	dataWrapper.buffer.write(out, 0, dataWrapper.length);
 	        }
