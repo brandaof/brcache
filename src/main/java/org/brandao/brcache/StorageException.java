@@ -25,7 +25,9 @@ package org.brandao.brcache;
  */
 public class StorageException extends CacheException{
     
-    public StorageException() {
+	private static final long serialVersionUID = 2848276802048022365L;
+
+	public StorageException() {
         super();
     }
 

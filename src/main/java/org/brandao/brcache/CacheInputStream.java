@@ -20,7 +20,6 @@ package org.brandao.brcache;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 
 /**
  * Representa o fluxo de bytes de um item de um cache.
@@ -31,8 +30,6 @@ public class CacheInputStream extends InputStream{
 
     private DataMap map;
     
-    private List<Block> dataList;
-
     private Block[] arrayDataList;
     
     private int currentSegmentIndex;
@@ -43,19 +40,9 @@ public class CacheInputStream extends InputStream{
     
     private byte[] bufByte = new byte[1];
     
-    public CacheInputStream(Cache cache, DataMap map, List<Block> dataList){
-        this.map = map;
-        this.arrayDataList = null;
-        this.dataList = dataList;
-        this.currentDataindex = 0;
-        this.currentSegmentIndex = 0;
-        this.cache = cache;
-    }
-
     public CacheInputStream(Cache cache, DataMap map, Block[] dataList){
         this.map = map;
         this.arrayDataList = dataList;
-        this.dataList = null;
         this.currentDataindex = 0;
         this.currentSegmentIndex = 0;
         this.cache = cache;
@@ -123,22 +110,9 @@ public class CacheInputStream extends InputStream{
     }
     
     public void writeTo(OutputStream out) throws IOException{
-    	if(this.arrayDataList == null){
-	        int[] segments = this.map.getSegments();
-	        
-	        for(int i=0;i<segments.length;i++){
-	        	Block dataWrapper = this.dataList.get(segments[i]);
-	        	dataWrapper.buffer.write(out, 0, dataWrapper.length);
-	        	//dataWrapper.writeTo(out);
-	        }
-    	}
-    	else{
-	        for(Block dataWrapper: this.arrayDataList){
-	        	//dataWrapper.writeTo(out);
-	        	dataWrapper.buffer.write(out, 0, dataWrapper.length);
-	        }
-    	}
-        
+        for(Block block: this.arrayDataList){
+        	block.buffer.write(out, 0, block.length);
+        }
     }
     
     public long getSize(){

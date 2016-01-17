@@ -25,19 +25,17 @@ import java.io.Serializable;
  */
 public class DataMap implements Serializable{
     
-	private static final long serialVersionUID = 3011721226561387998L;
+	private static final long serialVersionUID = -2531845084336308095L;
 
 	private long id;
     
     private long maxLiveTime;
     
-    private int[] segments;
-
+    private short flag;
+    
     private int firstSegment;
     
     private long length;
-    
-    private long crc;
     
     public long getMaxLiveTime() {
         return maxLiveTime;
@@ -47,28 +45,12 @@ public class DataMap implements Serializable{
         this.maxLiveTime = maxLiveTime;
     }
 
-    public int[] getSegments() {
-        return segments;
-    }
-
-    public void setSegments(int[] segments) {
-        this.segments = segments;
-    }
-
     public long getLength() {
         return length;
     }
 
     public void setLength(long length) {
         this.length = length;
-    }
-
-    public long getCrc() {
-        return crc;
-    }
-
-    public void setCrc(long crc) {
-        this.crc = crc;
     }
 
     public long getId() {
@@ -85,6 +67,14 @@ public class DataMap implements Serializable{
 
 	public void setFirstSegment(int firstSegment) {
 		this.firstSegment = firstSegment;
+	}
+
+	public short getFlag() {
+		return flag;
+	}
+
+	public void setFlag(short flag) {
+		this.flag = flag;
 	}
 
 }

@@ -24,7 +24,9 @@ package org.brandao.brcache;
  */
 public class RecoverException extends CacheException{
     
-    public RecoverException() {
+	private static final long serialVersionUID = 6036119455970253747L;
+
+	public RecoverException() {
         super();
     }
 

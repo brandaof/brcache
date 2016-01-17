@@ -24,7 +24,9 @@ package org.brandao.brcache;
  */
 public class CorruptedDataException extends RecoverException{
     
-    public CorruptedDataException() {
+	private static final long serialVersionUID = 938650810100616907L;
+
+	public CorruptedDataException() {
         super();
     }
 
