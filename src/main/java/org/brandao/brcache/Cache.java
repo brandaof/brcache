@@ -53,7 +53,7 @@ public class Cache implements Serializable{
     
     private final StringTreeMap<DataMap> dataMap;
 
-    private final HugeArrayList<ByteArrayWrapper> dataList;
+    private final HugeArrayList<Block> dataList;
     
     private final int segmentSize;
     
@@ -138,7 +138,7 @@ public class Cache implements Serializable{
 		    			HugeListCalculator
 		    				.calculate(dataBufferSize, dataSlabSize, blockSize, dataSwapFactor);
 		        this.dataList =
-		                new HugeArrayList<ByteArrayWrapper>(
+		                new HugeArrayList<Block>(
 		                "data",
 		                dataInfo.getMaxCapacityElements(),
 		                dataInfo.getClearFactorElements(),
@@ -292,7 +292,7 @@ public class Cache implements Serializable{
         	
             if(segments != null){
                 for(int segment: segments){
-                    ByteArrayWrapper dataWrapper = this.dataList.get(segment);
+                    Block dataWrapper = this.dataList.get(segment);
                     this.countRemovedData += dataWrapper.buffer.length();
                     this.freeSegments.add(segment);
                 }
@@ -309,9 +309,9 @@ public class Cache implements Serializable{
             if(segments != null){
                 for(int segment: segments){
                     synchronized(this.dataList){
-                        ByteArrayWrapper dataWrapper = this.dataList.get(segment);
+                        Block dataWrapper = this.dataList.get(segment);
                         if(dataWrapper != null && dataWrapper.id == oldMap.getId()){
-                            this.dataList.set(segment, null);
+                            //this.dataList.set(segment, null);
                             this.countRemovedData += dataWrapper.buffer.length();
                             this.freeSegments.add(segment);
                         }
@@ -340,32 +340,29 @@ public class Cache implements Serializable{
             DataMap map = this.dataMap.get(key);
             
             if(map != null){
-                int[] segmentIds = map.getSegments();
-                ByteArrayWrapper[] segments = new ByteArrayWrapper[segmentIds.length];
+                List<Block> segments = new ArrayList<Block>(10);
                 //CRC32 crc = new CRC32();
-                
-                for(int i=0;i<segmentIds.length;i++){
-                    ByteArrayWrapper dataWrapper = this.dataList.get(segmentIds[i]);
+                Block current = this.dataList.get(map.getFirstSegment());
+                int i=0;
+                while(current != null){
 
                     /*
-                        Se dataWrapper for igual a null ou sua id for diferente da
-                        id do DataMap, significa que essa entrada foi ou está sendo
-                        removida.
+                    Se id for diferente da
+                    id do DataMap, significa que essa entrada foi ou está sendo
+                    removida.
                     */
-                    if(dataWrapper == null)
-                        throw new CorruptedDataException("corrupted data");
-
-                    if(dataWrapper.id != map.getId() || dataWrapper.segment != i)
-                        throw new CorruptedDataException("invalid segment: " + dataWrapper.id + ":" + map.getId() + " " + dataWrapper.segment + ":" + i);
-
-                    segments[i] = dataWrapper;
-                    //crc.update(dataWrapper.buffer.segments[0]);
+					if(current.id != map.getId() || current.segment != i)
+					    throw new CorruptedDataException("invalid segment: " + current.id + ":" + map.getId() + " " + current.segment + ":" + i);
+                    
+                    segments.add(current);
+                	current = current.nextBlock < 0? null : this.dataList.get(current.nextBlock);
+                	i++;
                 }
                 
                 //if(crc.getValue() != map.getCrc())
                 //    throw new CorruptedDataException("bad crc: " + map.getCrc() + ":" + crc.getValue());
                 
-                return new CacheInputStream(this, map, segments);
+                return new CacheInputStream(this, map, segments.toArray(new Block[]{}));
                 //return new CacheInputStream(this, map, this.dataList);
             }
             else
@@ -402,10 +399,10 @@ public class Cache implements Serializable{
                     int[] segments = data.getSegments();
                     for(int segment: segments){
                         synchronized(this.dataList){
-                            ByteArrayWrapper dataWrapper = this.dataList.get(segment);
+                            Block dataWrapper = this.dataList.get(segment);
                             if(dataWrapper != null && dataWrapper.id == data.getId()){
                                 this.countRemovedData += dataWrapper.buffer.length();
-                                this.dataList.set(segment, null);
+                                //this.dataList.set(segment, null);
                                 this.freeSegments.put(segment);
                             }
                         }
@@ -434,6 +431,8 @@ public class Cache implements Serializable{
             int index = 0;
             buffer    = Memory.alloc(this.segmentSize);
             int read;
+            Block lastBlock = null;
+            int lastSegment = -1;
             
             while((read = buffer.read(inputData, 0, buffer.length())) != -1){
 
@@ -446,28 +445,42 @@ public class Cache implements Serializable{
                    throw new StorageException("data is very large");
                
                 synchronized(this.dataList){
+                	Block block = new Block(map.getId(), index++, data, read);
                     Integer segment = this.freeSegments.poll();
                     if(segment == null){
                         segment = this.dataList.size();
-                        this.dataList.add(new ByteArrayWrapper(map.getId(), index++, data, read));
+                        this.dataList.add(block);
                     }
                     else
-                        this.dataList.set(segment, new ByteArrayWrapper(map.getId(), index++, data, read));
+                        this.dataList.set(segment, block);
+                    
                     segments.add(segment);
+                    
+                    if(lastBlock != null){
+                    	lastBlock.nextBlock = segment;
+                    	this.dataList.set(lastSegment, lastBlock);
+                    }
+                    else
+                    	map.setFirstSegment(segment);
+                    
+                	lastBlock   = block;
+                    lastSegment = segment;
                 }
                
             }
             
             this.countWriteData += writeData;
             
+            /*
             Integer[] segs = segments.toArray(new Integer[0]);
             int[] result = new int[segs.length];
 
             for(int i=0;i<segs.length;i++)
                 result[i] = segs[i];
-            
+            */
             map.setLength(writeData);
-            map.setSegments(result);
+            //map.setSegments(result);
+            
             //map.setCrc(crc.getValue());
         }
         catch(StorageException e){

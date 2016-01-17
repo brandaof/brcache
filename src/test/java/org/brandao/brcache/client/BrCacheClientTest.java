@@ -36,7 +36,7 @@ public class BrCacheClientTest extends TestCase{
         
         server.start();
         
-        final BrCacheClient client = new BrCacheClient("localhost", 8084, 10, 20);
+        final BrCacheClient client = new BrCacheClient("localhost", 9090, 10, 20);
         client.connect();
 
         String text = "";

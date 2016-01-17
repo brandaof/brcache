@@ -3,12 +3,30 @@ package org.brandao.brcache;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * Gerencia a memória usada no cache.
+ * 
+ * @author Brandao
+ *
+ */
 public class Memory {
 
+	/**
+	 * Blocos de dados.
+	 */
 	private static int segmentSize = 64;
 	
+	/**
+	 * Blocos alocados e livres.
+	 */
 	private static BlockingQueue<byte[]> segments = new LinkedBlockingQueue<byte[]>();
 
+	/**
+	 * Aloca uma quantidade específica de memória.
+	 * 
+	 * @param size Quantidade.
+	 * @return Região da memória.
+	 */
 	public static RegionMemory alloc(int size){
 		int quantity = (int)(size / segmentSize);
 		
@@ -25,12 +43,24 @@ public class Memory {
 		return new RegionMemory(allocSegs, (int)segmentSize, size);
 	}
 
+	/**
+	 * Aloca uma quantidade específica de memória.
+	 * 
+	 * @param size Quantidade.
+	 * @return Região da memória.
+	 */
 	public static void alloc(int size, RegionMemory region){
 		if(region.segments != null)
 			throw new IllegalStateException();
 		allocSegments(size, region);
 	}
 	
+	/**
+	 * Libera uma região da memória.
+	 * 
+	 * @param size Quantidade.
+	 * @return Região da memória.
+	 */
 	public static void release(RegionMemory region){
 		if(region.segments == null)
 			return;
