@@ -97,8 +97,7 @@ abstract class AbstractCollectionSegment<I,T>
         while(true){
             try{
                 Thread.sleep(1000);
-                if(this.swapCandidates.isEmpty())
-                	clearLimit();
+            	clearLimit();
             }
             catch(Exception e){
                 e.printStackTrace();

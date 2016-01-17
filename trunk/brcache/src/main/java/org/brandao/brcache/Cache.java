@@ -20,7 +20,6 @@ package org.brandao.brcache;
 import org.brandao.brcache.HugeListCalculator.HugeListInfo;
 import org.brandao.brcache.collections.FileSwaper;
 import org.brandao.brcache.collections.HugeArrayList;
-//import org.brandao.brcache.collections.StringTreeKey;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,11 +28,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.zip.CRC32;
 import org.brandao.brcache.collections.Collections;
 import org.brandao.brcache.collections.DiskSwapper;
 import org.brandao.brcache.collections.StringTreeMap;
@@ -62,7 +59,7 @@ public class Cache implements Serializable{
     
     private final BlockingQueue<Integer> freeSegments;
 
-    private final int maxBytesToStorageEntry;
+    private final long maxBytesToStorageEntry;
     
     private final int maxLengthKey;
     
@@ -88,42 +85,30 @@ public class Cache implements Serializable{
      */
     public Cache(){
         this(
-        29360128L,   //28kb
-        16384L,      //16kb
-        0.3,
-        29360128L,   //28kb
-        16384L,      // 16kb
-        0.3,
-        536870912L,  //512mb
-        1048576L,    //1mb
-        0.3,
-        16*1024,
-        1048576,     //1mb
-        128,
-        "/mnt/brcache",
-        SwaperStrategy.FILE_TREE,
-        0.1,
-        16);
+    		16*1024L, 1024, 0.5, 
+    		16*1024L, 1024, 0.5, 
+    		512*1024*1024L, 64*1024, 1*1024, 0.5, 
+    		1*1024*1024L, 100, "/mnt/brcache", SwaperStrategy.FILE, 4);
     }
     
     /**
      * Cria um novo cache.
      * 
-     * @param nodeBufferSize Tamanho do buffer onde os nós ficarão armazenados. 
-     * @param nodeSlabSize 
-     * @param nodeSwapFactor
-     * @param indexBufferSize
-     * @param indexSlabSize
-     * @param indexSwapFactor
-     * @param dataBufferSize
-     * @param dataSlabSize
-     * @param blockSize
-     * @param dataSwapFactor
-     * @param maxSizeEntry
-     * @param maxSizeKey
-     * @param dataPath
-     * @param swaperType
-     * @param quantitySwaperThread
+     * @param nodeBufferSize Tamanho do buffer, em bytes, onde os nós ficarão armazenados. 
+     * @param nodeSlabSize Tamanho da laje, em bytes, do buffer de nós.
+     * @param nodeSwapFactor Fator de permuta dos nós.
+     * @param indexBufferSize Tamanho do buffer, em bytes, onde os índices ficarão armazenados.
+     * @param indexSlabSize Tamanho da laje, em bytes, do buffer de índices.
+     * @param indexSwapFactor Fator de permuta dos índices.
+     * @param dataBufferSize Tamanho do buffer, em bytes, onde os dados ficarão armazenados. 
+     * @param dataSlabSize Tamanho da laje, em bytes, do buffer de dados.
+     * @param blockSize Tamanho do bloco, em bytes.
+     * @param dataSwapFactor Fator de permuta dos dados.
+     * @param maxSizeEntry Tamanho máximo de uma entrada no cache.
+     * @param maxSizeKey Tamanho máximo de uma chave.
+     * @param dataPath Pasta onde os dados do cache serão persistidos.
+     * @param swaperType Estratégia de armazenamento dos dados em disco.
+     * @param quantitySwaperThread Quantidade de processos usados para fazer a permuta.
      */
     public Cache(
     		long nodeBufferSize,
@@ -139,7 +124,7 @@ public class Cache implements Serializable{
     		long blockSize,
     		double dataSwapFactor,
     		
-    		int maxSizeEntry,
+    		long maxSizeEntry,
     		int maxSizeKey,
             String dataPath,
             SwaperStrategy swaperType,
@@ -147,10 +132,15 @@ public class Cache implements Serializable{
     		){
 
         synchronized(Collections.class){
+        	Collections.setPath(dataPath);
 	    	try{
 		    	HugeListInfo dataInfo = 
 		    			HugeListCalculator
 		    				.calculate(dataBufferSize, dataSlabSize, blockSize, dataSwapFactor);
+                System.out.println("data: " + dataInfo.getMaxCapacityElements());
+                System.out.println("data: " + dataInfo.getClearFactorElements());
+        		System.out.println("data: " + dataInfo.getFragmentFactorElements());
+		    	
 		        this.dataList =
 		                new HugeArrayList<ByteArrayWrapper>(
 		                "data",
@@ -172,11 +162,24 @@ public class Cache implements Serializable{
 		    						nodeBufferSize, nodeSlabSize, 
 		    						NODE_BINARY_SIZE, nodeSwapFactor);
 
-		    	HugeListInfo indexInfo = 
+		    	/*HugeListInfo indexInfo = 
 		    			HugeListCalculator
 		    				.calculate(indexBufferSize, indexSlabSize, 
 		    						INDEX_BINARY_SIZE + (maxSizeEntry/blockSize)*4, indexSwapFactor);
+*/
+		    	HugeListInfo indexInfo = 
+		    			HugeListCalculator
+		    				.calculate(indexBufferSize, indexSlabSize, 
+		    						INDEX_BINARY_SIZE + 4, indexSwapFactor);
 		    	
+                System.out.println("nodeInfo: " + nodeInfo.getMaxCapacityElements());
+                System.out.println("nodeInfo: " + nodeInfo.getClearFactorElements());
+        		System.out.println("nodeInfo: " + nodeInfo.getFragmentFactorElements());
+
+                System.out.println("indexInfo: " + indexInfo.getMaxCapacityElements());
+                System.out.println("indexInfo: " + indexInfo.getClearFactorElements());
+        		System.out.println("indexInfo: " + indexInfo.getFragmentFactorElements());
+        		
 	            this.dataMap =
 	                    new StringTreeMap<DataMap>(
 	                    "dataMap",
