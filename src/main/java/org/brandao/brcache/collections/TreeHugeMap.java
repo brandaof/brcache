@@ -59,12 +59,10 @@ public class TreeHugeMap<K extends TreeKey,T>
             DEFAULT_FRAGMENT_FACTOR_NODE,
             null,
             1,
-            1,
             DEFAULT_MAX_CAPACITY_ELEMENT, 
             DEFAULT_CLEAR_FACTOR_ELEMENT, 
             DEFAULT_FRAGMENT_FACTOR_ELEMENT,
             null,
-            1,
             1);
     }
 
@@ -90,13 +88,11 @@ public class TreeHugeMap<K extends TreeKey,T>
             double clearFactorNodes, 
             double fragmentFactorNodes,
             Swapper swapNodes,
-            int quantityLockNodes,
             int quantitySwaperThreadNodes,            
             int maxCapacityElements,
             double clearFactorElements, 
             double fragmentFactorElements,
             Swapper swapElements,
-            int quantityLockElements,
             int quantitySwaperThreadElements){
         
         this.values = 
@@ -106,7 +102,6 @@ public class TreeHugeMap<K extends TreeKey,T>
                 clearFactorElements, 
                 fragmentFactorElements,
                 swapElements,
-                quantityLockElements,
                 quantitySwaperThreadElements);
         
         this.nodes = 
@@ -116,7 +111,6 @@ public class TreeHugeMap<K extends TreeKey,T>
                 clearFactorNodes, 
                 fragmentFactorNodes,
                 swapNodes,
-                quantityLockNodes,
                 quantitySwaperThreadNodes);
 
     }

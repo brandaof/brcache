@@ -66,7 +66,6 @@ public class CacheList<T>
                 swapFactorElements, 
                 fragmentFactorElements, 
                 swap, 
-                1, 
                 0);
         
         this.internalList.setForceSwap(true);
