@@ -17,13 +17,11 @@
 
 package org.brandao.brcache.client;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.zip.CRC32;
 
 import org.brandao.brcache.RecoverException;
@@ -329,7 +327,9 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         return streamFactory;
     }
     
-    private byte[] getCRC32(byte[] data, int off, int len){
+    @SuppressWarnings("unused")
+    @Deprecated
+	private byte[] getCRC32(byte[] data, int off, int len){
         CRC32 crc32 = new CRC32();
         crc32.update(data, off, len);
         long crcValue = crc32.getValue();

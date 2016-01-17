@@ -276,8 +276,6 @@ public class Cache implements Serializable{
         if(key.length() > this.maxLengthKey)
             throw new StorageException("key is very large");
         
-        //TreeKey treeKey = new StringTreeKey(key);
-        //DataMap oldMap  = this.dataMap.get(key);
         DataMap oldMap  = null;
         DataMap map     = new DataMap();
         try{
@@ -288,15 +286,7 @@ public class Cache implements Serializable{
             this.countWrite++;
         }
         catch(Throwable e){
-            int[] segments = map.getSegments();
-        	
-            if(segments != null){
-                for(int segment: segments){
-                    Block dataWrapper = this.dataList.get(segment);
-                    this.countRemovedData += dataWrapper.buffer.length();
-                    this.freeSegments.add(segment);
-                }
-            }
+    		this.releaseSegments(map);
             throw 
             	e instanceof StorageException? 
             		(StorageException)e : 
@@ -304,21 +294,7 @@ public class Cache implements Serializable{
         }
         
     	if(oldMap != null){
-            int[] segments = oldMap.getSegments();
-        	
-            if(segments != null){
-                for(int segment: segments){
-                    synchronized(this.dataList){
-                        Block dataWrapper = this.dataList.get(segment);
-                        if(dataWrapper != null && dataWrapper.id == oldMap.getId()){
-                            //this.dataList.set(segment, null);
-                            this.countRemovedData += dataWrapper.buffer.length();
-                            this.freeSegments.add(segment);
-                        }
-                    }
-                }
-            }
-            
+    		this.releaseSegments(oldMap);
             this.countRemoved++;
     	}
     }
@@ -388,26 +364,11 @@ public class Cache implements Serializable{
     public boolean remove(String key) throws RecoverException{
         
         try{
-            //DataMap data = this.dataMap.get(new StringTreeKey(key));
         	DataMap data = this.dataMap.get(key);
 
             if(data != null){
-
-                //this.dataMap.put(new StringTreeKey(key), null);
-                this.dataMap.put(key, null);                
-
-                    int[] segments = data.getSegments();
-                    for(int segment: segments){
-                        synchronized(this.dataList){
-                            Block dataWrapper = this.dataList.get(segment);
-                            if(dataWrapper != null && dataWrapper.id == data.getId()){
-                                this.countRemovedData += dataWrapper.buffer.length();
-                                //this.dataList.set(segment, null);
-                                this.freeSegments.put(segment);
-                            }
-                        }
-                }
-                
+            	this.dataMap.put(key, null);                
+            	this.releaseSegments(data);
                 countRemoved++;
                 return true;
             }
@@ -423,11 +384,8 @@ public class Cache implements Serializable{
     private void putData(DataMap map, InputStream inputData) throws StorageException{
         
         int writeData = 0;
-        List<Integer> segments = new ArrayList<Integer>(5);
         RegionMemory buffer = null;
         try{
-            //CRC32 crc = new CRC32();
-            
             int index = 0;
             buffer    = Memory.alloc(this.segmentSize);
             int read;
@@ -438,11 +396,10 @@ public class Cache implements Serializable{
 
             	RegionMemory data = Memory.alloc(read);
             	data.write(0, buffer, 0, read);
-               //crc.update(data.segments[0], 0, read);
-               writeData += read;
-               
-               if(writeData > this.maxBytesToStorageEntry)
-                   throw new StorageException("data is very large");
+            	writeData += read;
+            	
+        		if(writeData > this.maxBytesToStorageEntry)
+        			throw new StorageException("data is very large");
                
                 synchronized(this.dataList){
                 	Block block = new Block(map.getId(), index++, data, read);
@@ -453,8 +410,6 @@ public class Cache implements Serializable{
                     }
                     else
                         this.dataList.set(segment, block);
-                    
-                    segments.add(segment);
                     
                     if(lastBlock != null){
                     	lastBlock.nextBlock = segment;
@@ -471,29 +426,16 @@ public class Cache implements Serializable{
             
             this.countWriteData += writeData;
             
-            /*
-            Integer[] segs = segments.toArray(new Integer[0]);
-            int[] result = new int[segs.length];
-
-            for(int i=0;i<segs.length;i++)
-                result[i] = segs[i];
-            */
             map.setLength(writeData);
-            //map.setSegments(result);
-            
-            //map.setCrc(crc.getValue());
         }
         catch(StorageException e){
             this.countRemovedData += writeData;
-            for(int segment: segments)
-                this.freeSegments.add(segment);
-            
+            this.releaseSegments(map);
             throw e;
         }
         catch(IOException e){
             this.countRemovedData += writeData;
-            for(int segment: segments)
-                this.freeSegments.add(segment);
+            this.releaseSegments(map);
             throw new StorageException(e);
         }
         finally{
@@ -501,6 +443,30 @@ public class Cache implements Serializable{
         		Memory.release(buffer);
         	}
         }
+    }
+    
+    private void releaseSegments(DataMap map){
+    	int segmentId = map.getFirstSegment();
+    	
+    	if(segmentId == -1)
+    		return;
+    	
+    	synchronized(this.dataList){
+	        Block current = this.dataList.get(segmentId);
+	        
+	        int i=0;
+	        while(current != null){
+				if(current.id == map.getId() || current.segment == i){
+					this.freeSegments.add(segmentId);
+				}
+	            
+				segmentId = current.nextBlock;
+	        	current = segmentId < 0? null : this.dataList.get(segmentId);
+	        	i++;
+	        }
+    	}
+    	
+    	map.setFirstSegment(-1);
     }
     
     /**

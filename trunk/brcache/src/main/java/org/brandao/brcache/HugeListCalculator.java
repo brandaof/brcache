@@ -32,7 +32,8 @@ public class HugeListCalculator {
     	//Fator de laje. Usado para definir o fator de fragmentação da lista.
     	double slabFactor     = blocksPerSlab/blocksLength;
     	//Quantidade de lajes na memória.
-    	double slabs          = blocksLength/blocksPerSlab;
+    	//double slabs          = blocksLength/blocksPerSlab;
+    	
     	//Tamanho do buffer usado para fazer a permuta.
     	double swapBufferSize = dataBufferSize*dataSwapFactor;
     	//Quantidade de blocos que sofrerão permuta.
