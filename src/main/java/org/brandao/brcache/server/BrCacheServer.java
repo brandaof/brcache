@@ -220,7 +220,6 @@ public class BrCacheServer {
             SwaperStrategy.valueOf(swapper.toUpperCase()),
             swapper_thread);
         
-        Memory.allocOnly((long)(data_buffer_size/ 2));
         this.monitorThread = new MonitorThread(this.cache, this.config);
         this.monitorThread.start();
     }

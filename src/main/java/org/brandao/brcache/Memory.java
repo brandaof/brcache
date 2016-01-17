@@ -5,22 +5,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class Memory {
 
-	private static int segmentSize = 256;
+	private static int segmentSize = 64;
 	
 	private static BlockingQueue<byte[]> segments = new LinkedBlockingQueue<byte[]>();
 
-	public static void allocOnly(long size){
-		int quantity = (int)(size / segmentSize);
-		
-		if((size % segmentSize) > 0)
-			quantity++;
-		
-		for(int i=0;i<quantity;i++){
-			byte[] seg = new byte[segmentSize];
-			segments.add(seg);
-		}
-	}
-	
 	public static RegionMemory alloc(int size){
 		int quantity = (int)(size / segmentSize);
 		
