@@ -57,7 +57,6 @@ class TextBufferWriter {
     }
     
     public void write(byte[] buffer, int offset, int len) throws IOException{
-    	
         int limitOffset  = offset + len;
         
         if(this.offset == this.capacity)
@@ -79,9 +78,12 @@ class TextBufferWriter {
                 this.offset  += maxRead;
             }
         }
-        
     }
 
+    public OutputStream getDirectOutputStream(){
+    	return this.out;
+    }
+    
     public void flush() throws IOException{
     	if(this.offset > 0){
 	        this.out.write(this.buffer, 0, this.offset);

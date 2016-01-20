@@ -71,5 +71,9 @@ public class TextTerminalWriter implements TerminalWriter{
     public OutputStream getStream() {
         return new TextOutputStream(this.buffer);
     }
+
+	public OutputStream getDirectStream() {
+		return this.buffer.getDirectOutputStream();
+	}
     
 }
