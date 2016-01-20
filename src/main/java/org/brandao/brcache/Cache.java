@@ -27,8 +27,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import org.brandao.brcache.collections.Collections;
@@ -312,12 +310,10 @@ public class Cache implements Serializable{
         try{
             countRead++;
 
-            //DataMap map = this.dataMap.get(new StringTreeKey(key));
             DataMap map = this.dataMap.get(key);
             
             if(map != null){
-                List<Block> segments = new ArrayList<Block>(10);
-                //CRC32 crc = new CRC32();
+                Block[] segments = new Block[map.getSegments()];
                 Block current = this.dataList.get(map.getFirstSegment());
                 int i=0;
                 while(current != null){
@@ -330,16 +326,12 @@ public class Cache implements Serializable{
 					if(current.id != map.getId() || current.segment != i)
 					    throw new CorruptedDataException("invalid segment: " + current.id + ":" + map.getId() + " " + current.segment + ":" + i);
                     
-                    segments.add(current);
+                    segments[i] = current;
                 	current = current.nextBlock < 0? null : this.dataList.get(current.nextBlock);
                 	i++;
                 }
                 
-                //if(crc.getValue() != map.getCrc())
-                //    throw new CorruptedDataException("bad crc: " + map.getCrc() + ":" + crc.getValue());
-                
-                return new CacheInputStream(this, map, segments.toArray(new Block[]{}));
-                //return new CacheInputStream(this, map, this.dataList);
+                return new CacheInputStream(this, map, segments);
             }
             else
                 return null;
@@ -395,7 +387,15 @@ public class Cache implements Serializable{
             while((read = buffer.read(inputData, 0, buffer.length())) != -1){
 
             	RegionMemory data = Memory.alloc(read);
-            	data.write(0, buffer, 0, read);
+            	if(read < this.segmentSize){
+            		data = Memory.alloc(read);
+                	data.write(0, buffer, 0, read);
+            	}
+            	else
+            		data = buffer;
+            	
+            	buffer = Memory.alloc(this.segmentSize);
+            	
             	writeData += read;
             	
         		if(writeData > this.maxBytesToStorageEntry)
@@ -427,6 +427,7 @@ public class Cache implements Serializable{
             this.countWriteData += writeData;
             
             map.setLength(writeData);
+            map.setSegments(index);
         }
         catch(StorageException e){
             this.countRemovedData += writeData;
@@ -438,11 +439,11 @@ public class Cache implements Serializable{
             this.releaseSegments(map);
             throw new StorageException(e);
         }
-        finally{
+        /*finally{
         	if(buffer != null){
         		Memory.release(buffer);
         	}
-        }
+        }*/
     }
     
     private void releaseSegments(DataMap map){

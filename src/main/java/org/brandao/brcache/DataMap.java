@@ -35,6 +35,8 @@ public class DataMap implements Serializable{
     
     private int firstSegment;
     
+    private int segments;
+    
     private long length;
     
     public long getMaxLiveTime() {
@@ -75,6 +77,14 @@ public class DataMap implements Serializable{
 
 	public void setFlag(short flag) {
 		this.flag = flag;
+	}
+
+	public int getSegments() {
+		return segments;
+	}
+
+	public void setSegments(int segments) {
+		this.segments = segments;
 	}
 
 }
