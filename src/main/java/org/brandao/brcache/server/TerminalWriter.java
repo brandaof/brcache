@@ -32,5 +32,7 @@ public interface TerminalWriter {
     void flush() throws WriteDataException;
     
     OutputStream getStream();
+
+    OutputStream getDirectStream();
     
 }

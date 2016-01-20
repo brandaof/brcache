@@ -43,7 +43,7 @@ public class Main {
             server.start();
         }
         catch(Throwable e){
-            System.out.println("error on startup: " + e.getMessage());
+            e.printStackTrace();
             System.exit(2);
         }
     }

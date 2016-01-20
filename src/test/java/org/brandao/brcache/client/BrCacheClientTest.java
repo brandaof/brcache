@@ -3,6 +3,8 @@ package org.brandao.brcache.client;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.brandao.brcache.CacheException;
@@ -16,6 +18,9 @@ public class BrCacheClientTest extends TestCase{
     
     public void test() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException, CacheException{
+        
+    	Main s = new Main();
+        s.main(new String[0]);
         
         Thread server = new Thread(){
             
@@ -36,11 +41,13 @@ public class BrCacheClientTest extends TestCase{
         client.connect();
 
         String text = "";
-        for(int i=0;i<32000;i++){
+        for(int i=0;i<64000;i++){
             text += "A";
             client.put("AA", 0, text);
-            client.get("AA");
+            String r = (String)client.get("AA");
+            Assert.assertEquals(text,r);
         }
+        
     }        
     
     public void testInsertOnMemory() 
