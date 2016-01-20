@@ -2,6 +2,7 @@
 package org.brandao.brcache.client;
 
 import java.util.Random;
+
 import junit.framework.Assert;
 
 /**
@@ -43,6 +44,8 @@ public class OverrideTask implements Runnable{
                     
                     val = (String) client.get(key);
                     Assert.assertEquals(value, val);
+                    
+                    client.put(key, 0, key + PutTask.text);
                     
                 }
                 catch(Throwable e){

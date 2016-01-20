@@ -1,12 +1,8 @@
 
 package org.brandao.brcache.client;
 
-import java.awt.EventQueue;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Date;
-import java.util.Random;
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.brandao.brcache.CacheException;
@@ -64,7 +60,7 @@ public class BrCacheClientTest extends TestCase{
         };
         
         server.start();
-        final BrCacheClient client = new BrCacheClient("localhost", 8084, 10, 20);
+        final BrCacheClient client = new BrCacheClient("localhost", 9090, 10, 20);
         client.connect();
 
         Thread th = new Thread(new PutTask(client, 100));
@@ -95,7 +91,7 @@ public class BrCacheClientTest extends TestCase{
         
         server.start();
         
-        final BrCacheClient client = new BrCacheClient("localhost", 8084, 1, 1);
+        final BrCacheClient client = new BrCacheClient("localhost", 9090, 1, 1);
         client.connect();
 
         PutTask o = new PutTask(client, 100);
@@ -126,7 +122,7 @@ public class BrCacheClientTest extends TestCase{
         
         server.start();
         
-        final BrCacheClient client = new BrCacheClient("localhost", 8084, 10, 20);
+        final BrCacheClient client = new BrCacheClient("localhost", 9090, 10, 20);
         client.connect();
 
         for(int i=0;i<10;i++){
