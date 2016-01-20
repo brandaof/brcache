@@ -112,8 +112,6 @@ public class BrCacheConnectionImp implements BrCacheConnection{
     			time + SEPARATOR_COMMAND;
 
     	byte[] data = null;
-    	//byte[] crc  = null;
-    	
         ObjectOutputStream out     = null;
     	ByteArrayOutputStream bout = null;
     	
@@ -133,8 +131,6 @@ public class BrCacheConnectionImp implements BrCacheConnection{
                     out.close();
                     if(bout != null){
                         data = bout.toByteArray();
-                        //crc  = this.getCRC32(data, 0, data.length);
-                        //int size = data.length + 8;
                         cmd += data.length;
                     }
                 }
@@ -147,7 +143,6 @@ public class BrCacheConnectionImp implements BrCacheConnection{
         try{
             this.writer.sendMessage(cmd);
             this.writer.getStream().write(data, 0, data.length);
-            //this.writer.getStream().write(crc, 0, crc.length);
             this.writer.sendCRLF();
             this.writer.sendMessage(BOUNDARY);
             this.writer.flush();
@@ -201,7 +196,6 @@ public class BrCacheConnectionImp implements BrCacheConnection{
             if(!result.startsWith(VALUE_RESULT))
                 throw new RecoverException(result.toString());
             
-            //String[] resultParams = result.split(" ");
             String[] resultParams = new String[4];
             int index = 0;
             int start = 0;
@@ -213,9 +207,6 @@ public class BrCacheConnectionImp implements BrCacheConnection{
             }
             resultParams[index] = result.substring(start, result.length());
 
-            //if(resultParams.length != 4 || !VALUE_RESULT.equals(resultParams[0]))
-            //    throw new RecoverException(result.toString());
-
             int size = Integer.parseInt(resultParams[2]);
     		
             LimitedTextInputStreamReader in = null;
@@ -223,17 +214,6 @@ public class BrCacheConnectionImp implements BrCacheConnection{
             try{
                 if(size != 0){
                     in = (LimitedTextInputStreamReader) this.reader.getStream(size);
-                    //byte[] buffer = in.read(size);
-                    //byte[] crc = new byte[8];
-                    //byte[] expectedCRC = this.getCRC32(buffer, 0, buffer.length - 8);
-                    //System.arraycopy(buffer, buffer.length - 8, crc, 0, 8);
-                    
-                    //if(!Arrays.equals(crc, expectedCRC))
-                    //    throw new ReadDataException("bad CRC");
-                    
-                    //ObjectInputStream stream = 
-                    //        new ObjectInputStream(
-                    //                new ByteArrayInputStream(buffer, 0, buffer.length));
                     ObjectInputStream stream = new ObjectInputStream(in);
                     return stream.readObject();
                 }
