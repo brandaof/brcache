@@ -19,9 +19,6 @@ public class BrCacheClientTest extends TestCase{
     public void test() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException, CacheException{
         
-    	Main s = new Main();
-        s.main(new String[0]);
-        
         Thread server = new Thread(){
             
             public void run(){
