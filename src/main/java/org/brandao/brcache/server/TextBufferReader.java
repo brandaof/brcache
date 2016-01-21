@@ -116,7 +116,7 @@ class TextBufferReader {
     
     public byte[] readLineInBytes(int totalRead) throws IOException{
     	
-        this.result = new byte[0];
+        this.result = new byte[totalRead];
         this.offsetResult = 0;
         
         int remainingToMaxRead = totalRead;
@@ -145,81 +145,15 @@ class TextBufferReader {
             else
             	read = remainingToMaxRead;
             
-        	this.updateResult(this.buffer, this.offset, read);
+            System.arraycopy(this.buffer, this.offset, this.result, this.offsetResult, read);
+            this.offsetResult += read;
+        	//this.updateResult(this.buffer, this.offset, read);
             this.offset += read;
             remainingToMaxRead -= read;
         }
         
         return this.result;
     }
-
-    /*
-    public byte[] readLineInBytes(int maxRead) throws IOException{
-    	
-    	int remainingToMaxRead = maxRead;
-    	
-        this.result = new ByteArrayOutputStream(1024);
-        this.offsetResult = 0;
-        
-        int start = this.offset;
-        
-        while(true){
-
-            if(this.offset == this.limit){
-                
-                if(this.limit == this.capacity){
-                    
-                    if(start < this.limit){
-                        this.updateResult(this.buffer, start, this.offset - start - 1);
-                        this.buffer[0] = this.buffer[this.buffer.length - 1];
-                        this.offset = 1;
-                        this.limit  = 1;
-                    }
-                    else{
-                        this.offset = 0;
-                        this.limit  = 0;
-                    }
-                    
-                    start  = 0;
-                }
-                
-                int len = stream.read(this.buffer, this.limit, this.buffer.length - limit);
-                
-                if(len == -1)
-                    throw new EOFException("premature end of data");
-                
-                this.limit += len;
-            }
-            
-            if(this.offset == this.buffer.length){
-                this.updateResult(this.buffer, start, this.offset - start - 1);
-                this.hasLineFeed = false;
-                this.offset = 1;
-                this.limit  = 1;
-                this.buffer[0] = this.buffer[this.buffer.length - 1];
-                return this.result.toByteArray();
-            }
-            else
-            if(maxRead != -1 && remainingToMaxRead == 1){
-                this.updateResult(this.buffer, start, this.offset - start + 1);
-                this.hasLineFeed = false;
-                this.offset++;
-                return this.result.toByteArray();
-            }
-            else
-            if(maxRead == -1 && this.offset > 0 && this.buffer[this.offset-1] == '\r' && this.buffer[this.offset] == '\n'){
-                this.updateResult(this.buffer, start, this.offset - start - 1);
-                this.hasLineFeed = true;
-                this.offset++;
-                return this.result.toByteArray();
-            }
-            else{
-                this.offset++;
-                remainingToMaxRead--;
-            }
-        }
-    }    
-    */
     
     private void updateResult(byte[] data, int offset, int len){
         
