@@ -170,15 +170,15 @@ public class BrCacheServer {
         long max_connections       = config.getLong("max_connections","1024");
         long timeout_connection    = config.getLong("timeout_connection","0");
         boolean reuse_address      = config.getBoolean("reuse_address", "false");
-        long nodes_buffer_size     = config.getLong("nodes_buffer_size","1m");
-        long nodes_slab_size       = config.getLong("nodes_slab_size","16k");
+        long nodes_buffer_size     = config.getLong("nodes_buffer_size","16m");
+        long nodes_page_size       = config.getLong("nodes_page_size","16k");
         double nodes_swap_factor   = config.getDouble("nodes_swap_factor","0.3");
         long index_buffer_size     = config.getLong("index_buffer_size","2m");
-        long index_slab_size       = config.getLong("index_slab_size","16k");
+        long index_page_size       = config.getLong("index_page_size","16k");
         double index_swap_factor   = config.getDouble("index_swap_factor","0.3");
         long data_buffer_size      = config.getLong("data_buffer_size","64m");
-        long data_block_size        = config.getLong("data_block_size","16k");
-        long data_slab_size        = config.getLong("data_slab_size","128k");
+        long data_block_size        = config.getLong("data_block_size","512b");
+        long data_page_size        = config.getLong("data_page_size","16k");
         double data_swap_factor    = config.getDouble("data_swap_factor","0.3");
         String data_path           = config.getString("data_path","/var/brcache");
         long write_buffer_size     = config.getLong("write_buffer_size","16k");
@@ -203,15 +203,15 @@ public class BrCacheServer {
         
         this.cache = new Cache(
             nodes_buffer_size,
-            nodes_slab_size,
+            nodes_page_size,
             nodes_swap_factor,
             
             index_buffer_size,
-            index_slab_size,
+            index_page_size,
             index_swap_factor,
             
             data_buffer_size,
-            data_slab_size,
+            data_page_size,
             data_block_size,
             data_swap_factor,
             (int)max_size_entry,

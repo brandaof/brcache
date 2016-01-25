@@ -36,17 +36,17 @@ public class PutCommand extends AbstractCommand{
             //    throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
             
             try{
-                time = Integer.parseInt(parameters[2]);
+                time = Integer.parseInt(parameters[3]);
             }
             catch(NumberFormatException e){
                 throw new ParameterException(TerminalConstants.INVALID_TIME);
             }
 
             try{
-                size = Integer.parseInt(parameters[3]);
+                size = Integer.parseInt(parameters[4]);
             }
             catch(NumberFormatException e){
-                throw new ParameterException(TerminalConstants.INVALID_TIME);
+                throw new ParameterException(TerminalConstants.INVALID_SIZE);
             }
             
             InputStream stream = null;

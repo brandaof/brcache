@@ -20,7 +20,7 @@ public class CharNode<T> implements TreeNode<T>{
 
     public static int LEN_NODES        			= LEN_NUMBERGROUP + LEN_CHARGROUP; 
 
-    public static int DATA_SIZE        			= LEN_NODES*8 + 18; 
+    public static int DATA_SIZE        			= LEN_NODES*8 + 16; 
 
     public static final long MAX_NODES 			= Long.MAX_VALUE / DATA_SIZE;
 
