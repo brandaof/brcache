@@ -39,7 +39,9 @@ public class TerminalConstants {
     
     public static final String INVALID_NUMBER_OF_PARAMETERS = "INVALID NUMBER OF PARAMETERS";
     
-    public static final String INVALID_TIME = "INVALID TYPE";
+    public static final String INVALID_TIME = "INVALID EXPTIME";
+
+    public static final String INVALID_SIZE = "INVALID SIZE";
     
     public static final String SUCCESS = "OK";
 

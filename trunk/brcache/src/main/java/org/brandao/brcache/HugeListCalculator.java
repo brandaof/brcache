@@ -3,35 +3,35 @@ package org.brandao.brcache;
 public class HugeListCalculator {
 
 	public static HugeListInfo calculate(
-			long dataBufferSize, long dataSlabSize, 
+			long dataBufferSize, long dataPageSize, 
 			long blockSize, double dataSwapFactor){
 		
     	if(dataBufferSize <= 0)
     		throw new IllegalArgumentException("buffer size <= 0");
 
-    	if(dataSlabSize <= 0)
+    	if(dataPageSize <= 0)
     		throw new IllegalArgumentException("slab size <= 0");
 
     	if(blockSize <= 0)
     		throw new IllegalArgumentException("block size <= 0");
 
-    	if(dataSlabSize > dataBufferSize)
+    	if(dataPageSize > dataBufferSize)
     		throw new IllegalArgumentException("slab size > buffer size");
 
-    	if(blockSize > dataSlabSize)
+    	if(blockSize > dataPageSize)
     		throw new IllegalArgumentException("block size > slab size");
     	
     	//Quantidade de blocos na memória.
     	double blocksLength   = dataBufferSize/blockSize;
     	blocksLength          = dataBufferSize%blockSize > 0? blocksLength + 1 : blocksLength;
     	
-    	//Quantidade de blocos em uma laje
-    	double blocksPerSlab  = dataSlabSize/blockSize;
-    	blocksPerSlab         = dataSlabSize%blockSize > 0? blocksPerSlab + 1 : blocksPerSlab;
+    	//Quantidade de blocos em uma página
+    	double blocksPerSlab  = dataPageSize/blockSize;
+    	blocksPerSlab         = dataPageSize%blockSize > 0? blocksPerSlab + 1 : blocksPerSlab;
     	
-    	//Fator de laje. Usado para definir o fator de fragmentação da lista.
+    	//Fator de páginas. Usado para definir o fator de fragmentação da lista.
     	double slabFactor     = blocksPerSlab/blocksLength;
-    	//Quantidade de lajes na memória.
+    	//Quantidade de páginas na memória.
     	//double slabs          = blocksLength/blocksPerSlab;
     	
     	//Tamanho do buffer usado para fazer a permuta.

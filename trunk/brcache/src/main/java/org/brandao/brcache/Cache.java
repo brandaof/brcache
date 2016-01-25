@@ -33,6 +33,7 @@ import org.brandao.brcache.collections.Collections;
 import org.brandao.brcache.collections.DiskSwapper;
 import org.brandao.brcache.collections.StringTreeMap;
 import org.brandao.brcache.collections.Swapper;
+import org.brandao.brcache.collections.treehugemap.CharNode;
 
 /**
  * Representa um cache.
@@ -45,9 +46,9 @@ public class Cache implements Serializable{
 
     private static final int ENTRY_BINARY_SIZE = 48;
     
-    private static final int NODE_BINARY_SIZE = 528 + ENTRY_BINARY_SIZE;
+    private static final int NODE_BINARY_SIZE = /*528*/ CharNode.DATA_SIZE + ENTRY_BINARY_SIZE;
 
-    private static final int INDEX_BINARY_SIZE = 40 + ENTRY_BINARY_SIZE;
+    private static final int INDEX_BINARY_SIZE = 34 + ENTRY_BINARY_SIZE;
     
     private final StringTreeMap<DataMap> dataMap;
 
@@ -83,23 +84,23 @@ public class Cache implements Serializable{
      */
     public Cache(){
         this(
-    		16*1024L, 1024, 0.5, 
-    		16*1024L, 1024, 0.5, 
-    		512*1024*1024L, 64*1024, 1*1024, 0.5, 
-    		1*1024*1024L, 100, "/mnt/brcache", SwaperStrategy.FILE, 4);
+    		3L*1024L*1024L, 1024, 0.5, 
+    		1L*1024L*1024L, 1024, 0.5, 
+    		10L*1024L*1024L, 64*1024, 1*1024, 0.5, 
+    		1*1024*1024L, 100, "/mnt/brcache", SwaperStrategy.FILE, 1);
     }
     
     /**
      * Cria um novo cache.
      * 
      * @param nodeBufferSize Tamanho do buffer, em bytes, onde os nós ficarão armazenados. 
-     * @param nodeSlabSize Tamanho da laje, em bytes, do buffer de nós.
+     * @param nodePageSize Tamanho da página, em bytes, do buffer de nós.
      * @param nodeSwapFactor Fator de permuta dos nós.
      * @param indexBufferSize Tamanho do buffer, em bytes, onde os índices ficarão armazenados.
-     * @param indexSlabSize Tamanho da laje, em bytes, do buffer de índices.
+     * @param indexPageSize Tamanho da página, em bytes, do buffer de índices.
      * @param indexSwapFactor Fator de permuta dos índices.
      * @param dataBufferSize Tamanho do buffer, em bytes, onde os dados ficarão armazenados. 
-     * @param dataSlabSize Tamanho da laje, em bytes, do buffer de dados.
+     * @param dataPageSize Tamanho da página, em bytes, do buffer de dados.
      * @param blockSize Tamanho do bloco, em bytes.
      * @param dataSwapFactor Fator de permuta dos dados.
      * @param maxSizeEntry Tamanho máximo de uma entrada no cache.
@@ -110,15 +111,15 @@ public class Cache implements Serializable{
      */
     public Cache(
     		long nodeBufferSize,
-    		long nodeSlabSize,
+    		long nodePageSize,
     		double nodeSwapFactor,
     		
     		long indexBufferSize,
-    		long indexSlabSize,
+    		long indexPageSize,
     		double indexSwapFactor,
     		
     		long dataBufferSize,
-    		long dataSlabSize,
+    		long dataPageSize,
     		long blockSize,
     		double dataSwapFactor,
     		
@@ -134,7 +135,7 @@ public class Cache implements Serializable{
 	    	try{
 		    	HugeListInfo dataInfo = 
 		    			HugeListCalculator
-		    				.calculate(dataBufferSize, dataSlabSize, blockSize, dataSwapFactor);
+		    				.calculate(dataBufferSize, dataPageSize, blockSize, dataSwapFactor);
 		        this.dataList =
 		                new HugeArrayList<Block>(
 		                "data",
@@ -153,18 +154,13 @@ public class Cache implements Serializable{
 		    	HugeListInfo nodeInfo = 
 		    			HugeListCalculator
 		    				.calculate(
-		    						nodeBufferSize, nodeSlabSize, 
+		    						nodeBufferSize, nodePageSize, 
 		    						NODE_BINARY_SIZE, nodeSwapFactor);
 
-		    	/*HugeListInfo indexInfo = 
-		    			HugeListCalculator
-		    				.calculate(indexBufferSize, indexSlabSize, 
-		    						INDEX_BINARY_SIZE + (maxSizeEntry/blockSize)*4, indexSwapFactor);
-*/
 		    	HugeListInfo indexInfo = 
 		    			HugeListCalculator
-		    				.calculate(indexBufferSize, indexSlabSize, 
-		    						INDEX_BINARY_SIZE + 4, indexSwapFactor);
+		    				.calculate(indexBufferSize, indexPageSize, 
+		    						INDEX_BINARY_SIZE, indexSwapFactor);
 		    	
 	            this.dataMap =
 	                    new StringTreeMap<DataMap>(
@@ -245,8 +241,9 @@ public class Cache implements Serializable{
      * objeto do cache.
      */
     public Object getObject(String key) throws RecoverException{
+    	InputStream in = null;
         try{
-            InputStream in = this.get(key);
+            in = this.get(key);
             if(in != null){
                 ObjectInputStream oin = new ObjectInputStream(in);
                 return oin.readObject();
@@ -256,6 +253,14 @@ public class Cache implements Serializable{
         }
         catch(Throwable e){
             throw new RecoverException(e);
+        }
+        finally{
+        	try{
+        		if(in != null)
+        			in.close();
+        	}
+        	catch(Throwable e){
+        	}
         }
         
     }
@@ -471,27 +476,27 @@ public class Cache implements Serializable{
     }
     
     /**
-     * Obtém a quantidade de item recuperados.
+     * Obtém a quantidade de itens recuperados.
      * 
-     * @return Quantidade de item recuperados.
+     * @return Quantidade de itens recuperados.
      */
     public long getCountRead(){
         return this.countRead;
     }
 
     /**
-     * Obtém a quantidade de item armazenados.
+     * Obtém a quantidade de itens armazenados.
      * 
-     * @return Quantidade de item armazenados.
+     * @return Quantidade de itens armazenados.
      */
     public long getCountWrite(){
         return this.countWrite;
     }
 
     /**
-     * Obtém a quantidade de item removidos.
+     * Obtém a quantidade de itens removidos.
      * 
-     * @return Quantidade de item removidos.
+     * @return Quantidade de itens removidos.
      */
     public long getCountRemoved() {
 		return countRemoved;

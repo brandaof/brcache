@@ -109,6 +109,7 @@ public class BrCacheConnectionImp implements BrCacheConnection{
     	String cmd = 
     			PUT_COMMAND + SEPARATOR_COMMAND +
     			key + SEPARATOR_COMMAND +
+    			"0" + SEPARATOR_COMMAND +
     			time + SEPARATOR_COMMAND;
 
     	byte[] data = null;
