@@ -19,9 +19,6 @@ public class BrCacheClientTest extends TestCase{
     public void test() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException, CacheException{
         
-        Main server = new Main();
-        server.main(new String[0]);
-        /*
         Thread server = new Thread(){
             
             public void run(){
@@ -47,7 +44,6 @@ public class BrCacheClientTest extends TestCase{
             String r = (String)client.get("AA");
             Assert.assertEquals(text,r);
         }
-        */
     }        
     
     public void testInsertOnMemory() 
