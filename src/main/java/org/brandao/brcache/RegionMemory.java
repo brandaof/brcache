@@ -383,33 +383,12 @@ public class RegionMemory implements Serializable{
 		stream.writeInt(this.length);
 		this.write(stream, 0, this.length);
 		Memory.release(this);
-		/*
-		stream.writeInt(this.length);
-		stream.writeInt(this.segmentSize);
-		stream.writeInt(this.segments.length);
-		for(int i=0;i<this.segments.length;i++){
-			byte[] segment = this.segments[i];
-			stream.write(segment, 0, segment.length);
-		}
-		Memory.release(this);
-		*/
     }
 
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
     	int length = stream.readInt();
 		Memory.alloc(length, this);
 		this.read(stream, 0, length);
-    	/*
-    	int length = stream.readInt();
-    	int segmentSize = stream.readInt();
-		int len = stream.readInt();
-		Memory.alloc(length, this);
-		int off = 0;
-		for(int i=0;i<len;i++){
-			this.read(stream, off, segmentSize);
-			off += segmentSize;
-		}
-		*/
     }
 	
     protected void finalize() throws Throwable{
