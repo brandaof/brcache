@@ -156,7 +156,7 @@ public class FileSwaper implements DiskSwapper {
             this.createPath();
         }
         catch(Throwable e){
-            throw new IllegalArgumentException(value);
+            throw new IllegalArgumentException(value, e);
         }
     }
 

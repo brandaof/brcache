@@ -14,10 +14,6 @@ public class DataBlockEntityFile
 
 	public static final byte EOF_FILE   		= 26;
 
-	public static final int BINARY_BLOCK_SIZE 	= 8192;
-
-	public static final int RECORD_LENGTH 		= BINARY_BLOCK_SIZE + 13;
-	
 	public static final byte REMOVED_STATUS     = 0x0d;
 
 	public static final byte USED_STATUS        = 0x1f;

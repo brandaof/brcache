@@ -18,7 +18,13 @@ public class CharNode<T> implements TreeNode<T>{
 
     public static int LEN_NUMBERGROUP  			= MAX_NUMBERGROUP - MIN_NUMBERGROUP;
 
-    public static int LEN_NODES        			= LEN_NUMBERGROUP + LEN_CHARGROUP; 
+	public static int MIN_CHAR2GROUP    		= 0xe0;
+
+	public static int MAX_CHAR2GROUP    		= 0xff;
+	
+	public static int LEN_CHAR2GROUP    		= MAX_CHAR2GROUP - MIN_CHAR2GROUP;
+    
+	public static int LEN_NODES        			= LEN_NUMBERGROUP + LEN_CHARGROUP + LEN_CHAR2GROUP; 
 
     public static int DATA_SIZE        			= LEN_NODES*8 + 16; 
 
@@ -43,17 +49,20 @@ public class CharNode<T> implements TreeNode<T>{
     	char c = (Character)key;
         int index = c/* & 0xff*/;
 
-        if(index < MIN_CHARGROUP && index < MIN_NUMBERGROUP)
-                throw new IllegalArgumentException("invalid char: " + key);
+		if(index < MIN_CHARGROUP && index < MIN_NUMBERGROUP && index < MIN_CHAR2GROUP)
+			throw new IllegalArgumentException("invalid char: " + id);
+		
+		if(index > MAX_CHARGROUP && index > MAX_NUMBERGROUP &&  index > MAX_CHAR2GROUP)
+			throw new IllegalArgumentException("invalid char: " + id);
 
-        if(index > MAX_CHARGROUP && index > MAX_NUMBERGROUP)
-                throw new IllegalArgumentException("invalid char: " + key);
-
-        if(index <= MAX_NUMBERGROUP)
-                index = MAX_NUMBERGROUP - index;
-        else
-                index = LEN_NUMBERGROUP + MAX_CHARGROUP - index;
-
+		if(index <= MAX_NUMBERGROUP)
+			index = index - MIN_NUMBERGROUP;
+		else
+		if(index <= MAX_CHARGROUP)
+			index = LEN_NUMBERGROUP + (index - MIN_CHARGROUP);
+		else
+			index = LEN_NUMBERGROUP + LEN_CHARGROUP + (index - MIN_CHAR2GROUP);
+		
         this.nextNodes[index] = node.getId();
         nodes.set((int)this.id, this);
     }
@@ -62,18 +71,21 @@ public class CharNode<T> implements TreeNode<T>{
     	char c = (Character)key;
         int index = c/* & 0xff*/;
 
-        if(index < MIN_CHARGROUP && index < MIN_NUMBERGROUP)
-                throw new IllegalArgumentException("invalid char: " + key);
+		if(index < MIN_CHARGROUP && index < MIN_NUMBERGROUP && index < MIN_CHAR2GROUP)
+			throw new IllegalArgumentException("invalid char: " + id);
+		
+		if(index > MAX_CHARGROUP && index > MAX_NUMBERGROUP &&  index > MAX_CHAR2GROUP)
+			throw new IllegalArgumentException("invalid char: " + id);
 
-        if(index > MAX_CHARGROUP && index > MAX_NUMBERGROUP)
-                throw new IllegalArgumentException("invalid char: " + key);
-
-        if(index <= MAX_NUMBERGROUP)
-                index = MAX_NUMBERGROUP - index;
-        else
-                index = LEN_NUMBERGROUP + MAX_CHARGROUP - index;
-
-        long nexNode = this.nextNodes[index];
+		if(index <= MAX_NUMBERGROUP)
+			index = index - MIN_NUMBERGROUP;
+		else
+		if(index <= MAX_CHARGROUP)
+			index = LEN_NUMBERGROUP + (index - MIN_CHARGROUP);
+		else
+			index = LEN_NUMBERGROUP + LEN_CHARGROUP + (index - MIN_CHAR2GROUP);
+		
+		long nexNode = this.nextNodes[index];
 
         if(nexNode != -1){
             return nodes.get((int)nexNode);
