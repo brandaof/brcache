@@ -19,7 +19,13 @@ public class IndexKey implements Serializable{
 	
 	public static int LEN_NUMBERGROUP  = MAX_NUMBERGROUP - MIN_NUMBERGROUP;
 	
-	public static int LEN_NODES        = LEN_NUMBERGROUP + LEN_CHARGROUP; 
+	public static int MIN_CHAR2GROUP    = 0xe0;
+
+	public static int MAX_CHAR2GROUP    = 0xff;
+	
+	public static int LEN_CHAR2GROUP    = MAX_CHAR2GROUP - MIN_CHAR2GROUP;
+	
+	public static int LEN_NODES        = LEN_NUMBERGROUP + LEN_CHARGROUP + LEN_CHAR2GROUP; 
 
 	public static int DATA_SIZE        = LEN_NODES*8 + 18; 
 	
@@ -44,36 +50,42 @@ public class IndexKey implements Serializable{
 	}
 	
 	public void setNextNode(char id, IndexKey node){
-		int index = (byte)id;
+		int index = id & 0xff;
 		
-		if(index < MIN_CHARGROUP && index < MIN_NUMBERGROUP)
+		if(index < MIN_CHARGROUP && index < MIN_NUMBERGROUP && index < MIN_CHAR2GROUP)
 			throw new IllegalArgumentException("invalid char: " + id);
 		
-		if(index > MAX_CHARGROUP && index > MAX_NUMBERGROUP)
+		if(index > MAX_CHARGROUP && index > MAX_NUMBERGROUP &&  index > MAX_CHAR2GROUP)
 			throw new IllegalArgumentException("invalid char: " + id);
-		
+
 		if(index <= MAX_NUMBERGROUP)
-			index = MAX_NUMBERGROUP - index;
+			index = index - MIN_NUMBERGROUP;
 		else
-			index = LEN_NUMBERGROUP + MAX_CHARGROUP - index;
+		if(index <= MAX_CHARGROUP)
+			index = LEN_NUMBERGROUP + (index - MIN_CHARGROUP);
+		else
+			index = LEN_NUMBERGROUP + LEN_CHARGROUP + (index - MIN_CHAR2GROUP);
 		
 		this.nextNodes[index] = node.id;
 		this.needUpdate       = true;
 	}
 	
 	public IndexKey getNextNode(char id, SimpleIndexEntityFile session) throws IOException{
-		int index = (byte)id;
+		int index = id & 0xff;
 		
-		if(index < MIN_CHARGROUP && index < MIN_NUMBERGROUP)
+		if(index < MIN_CHARGROUP && index < MIN_NUMBERGROUP && index < MIN_CHAR2GROUP)
 			throw new IllegalArgumentException("invalid char: " + id);
 		
-		if(index > MAX_CHARGROUP && index > MAX_NUMBERGROUP)
+		if(index > MAX_CHARGROUP && index > MAX_NUMBERGROUP &&  index > MAX_CHAR2GROUP)
 			throw new IllegalArgumentException("invalid char: " + id);
-		
+
 		if(index <= MAX_NUMBERGROUP)
-			index = MAX_NUMBERGROUP - index;
+			index = index - MIN_NUMBERGROUP;
 		else
-			index = LEN_NUMBERGROUP + MAX_CHARGROUP - index;
+		if(index <= MAX_CHARGROUP)
+			index = LEN_NUMBERGROUP + (index - MIN_CHARGROUP);
+		else
+			index = LEN_NUMBERGROUP + LEN_CHARGROUP + (index - MIN_CHAR2GROUP);
 		
 		long nexNode = this.nextNodes[index];
 		

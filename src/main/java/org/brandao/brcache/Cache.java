@@ -132,8 +132,12 @@ public class Cache implements Serializable{
 
         synchronized(Collections.class){
         	Collections.setPath(dataPath);
+	    	HugeListInfo nodeInfo;
+	    	HugeListInfo indexInfo;
+	    	HugeListInfo dataInfo; 
+        	
 	    	try{
-		    	HugeListInfo dataInfo = 
+		    	dataInfo = 
 		    			HugeListCalculator
 		    				.calculate(dataBufferSize, dataPageSize, blockSize, dataSwapFactor);
 		        this.dataList =
@@ -147,21 +151,32 @@ public class Cache implements Serializable{
 		                );
 	    	}
 	    	catch(IllegalArgumentException e){
-	    		throw new IllegalArgumentException("fail create buffer", e);
+	    		throw new IllegalArgumentException("fail create data buffer", e);
 	    	}
+
 	    	
 	    	try{
-		    	HugeListInfo nodeInfo = 
+		    	nodeInfo = 
 		    			HugeListCalculator
 		    				.calculate(
 		    						nodeBufferSize, nodePageSize, 
 		    						NODE_BINARY_SIZE, nodeSwapFactor);
-
-		    	HugeListInfo indexInfo = 
+	    	}
+	    	catch(IllegalArgumentException e){
+	    		throw new IllegalArgumentException("fail create nodes buffer", e);
+	    	}
+	    	
+	    	try{
+		    	indexInfo = 
 		    			HugeListCalculator
 		    				.calculate(indexBufferSize, indexPageSize, 
 		    						INDEX_BINARY_SIZE, indexSwapFactor);
+	    	}
+	    	catch(IllegalArgumentException e){
+	    		throw new IllegalArgumentException("fail create index buffer", e);
+	    	}
 		    	
+	    	try{
 	            this.dataMap =
 	                    new StringTreeMap<DataMap>(
 	                    "dataMap",
@@ -178,7 +193,7 @@ public class Cache implements Serializable{
 	                    );
 	    	}
 	    	catch(IllegalArgumentException e){
-	    		throw new IllegalArgumentException("fail create buffer", e);
+	    		throw new IllegalArgumentException("fail data map", e);
 	    	}
 	    	
         }
@@ -295,11 +310,12 @@ public class Cache implements Serializable{
             		(StorageException)e : 
             		new StorageException(e);
         }
-        
-    	if(oldMap != null){
-    		this.releaseSegments(oldMap);
-            this.countRemoved++;
-    	}
+        finally{
+	    	if(oldMap != null){
+	    		this.releaseSegments(oldMap);
+	            this.countRemoved++;
+	    	}
+        }
     }
 
     /**
@@ -462,7 +478,7 @@ public class Cache implements Serializable{
 	        
 	        int i=0;
 	        while(current != null){
-				if(current.id == map.getId() || current.segment == i){
+				if(current.id == map.getId() && current.segment == i){
 					this.freeSegments.add(segmentId);
 				}
 	            
