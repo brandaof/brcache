@@ -195,37 +195,6 @@ public class CacheTransactionHandlerImp
 			throw new TransactionException(e);
 		}
 	}
-
-	protected void commit(TransactionInfo transactionInfo) throws IOException {
-		Map<Long,Object> values = tx.getCache();
-		List<Long> inserted     = tx.getInserted();
-		List<Long> updated      = tx.getUpdated();
-		//System.out.println(entityFile.getName() + ": insert " + inserted.size());
-		//System.out.println(entityFile.getName() + ": update " + updated.size());
-		
-		if(!inserted.isEmpty()){
-			List<Object> batchInsert = new ArrayList<Object>();
-			Collections.sort(inserted);
-			
-			for(long offset: inserted){
-				Object value = values.get(offset);
-				batchInsert.add(value);
-			}
-			
-			entityFile.seek(inserted.get(0));
-			entityFile.batchWrite(batchInsert);
-		}
-		
-		if(!updated.isEmpty()){
-			for(long offset: updated){
-				Object value = values.get(offset);
-				entityFile.seek(offset);
-				entityFile.write(value);
-			}
-		}
-		
-		entityFile.setLength(tx.getCurrentLength());
-	}
 	
 	public void putObject(CacheTransactionManager manager, Cache cache,
 			String key, long maxAliveTime, Object item)

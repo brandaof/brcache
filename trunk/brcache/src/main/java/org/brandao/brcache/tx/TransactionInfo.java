@@ -22,22 +22,24 @@ public class TransactionInfo {
 
 	private Set<String> managed;
 	
-	private Map<String, byte[]> entities;
+	private Map<String, EntryCache> entities;
 	
-	private Map<String, byte[]> saved;
+	private Map<String, EntryCache> saved;
 	
 	public TransactionInfo(UUID id){
 		this.id       = id;
 		this.inserted = new HashSet<String>();
 		this.managed  = new HashSet<String>();
-		this.entities = new HashMap<String, byte[]>();
+		this.entities = new HashMap<String, EntryCache>();
 	}
 	
-    public void putObject(String key, long maxAliveTime, Object item) throws StorageException, TransactionException{
+    public void putObject(String key, long maxAliveTime, 
+    		Object item) throws StorageException, TransactionException{
     	throw new UnsupportedOperationException();
     }
 
-    public Object getObject(String key, boolean forUpdate, long time) throws RecoverException, TransactionException{
+    public Object getObject(String key, boolean forUpdate, 
+    		long time) throws RecoverException, TransactionException{
     	throw new UnsupportedOperationException();
     }
 
@@ -52,7 +54,7 @@ public class TransactionInfo {
     		
 			this.managed.add(key);
 			this.inserted.add(key);
-			this.entities.put(key, dta);
+			this.entities.put(key, new EntryCache(dta, maxAliveTime));
     	}
     	catch(TransactionException e){
     		throw e;
@@ -81,15 +83,13 @@ public class TransactionInfo {
     		throws RecoverException, IOException, TransactionException{
     	
     	if(this.managed.contains(key)){
-    		return this.entities.get(key);
+    		EntryCache entry = this.entities.get(key);
+    		return entry.getData();
     	}
     	else{
     		byte[] dta = this.getSharedEntity(manager, cache, key, lock, time);
-    		
-    		if(dta != null){
-    			this.managed.add(key);
-    			this.entities.put(key, dta);
-    		}
+			this.managed.add(key);
+			this.entities.put(key, new EntryCache(dta, -1));
     		
     		return dta;
     	}
@@ -99,20 +99,19 @@ public class TransactionInfo {
     		String key, boolean lock, long time) 
     		throws IOException, TransactionException, RecoverException{
     	
-		InputStream in = cache.get(key);
-
-		if(in != null && lock){
-			
+		if(lock){
 			if(time <= 0){
 				manager.lock(this.id, key);
 			}
 			else{
 				manager.tryLock(this.id, key, time);
 			}
-			
+		}
+		
+		InputStream in = cache.get(key);
+		
+		if(in != null){
 			byte[] dta = this.getBytes(in);
-			this.managed.add(key);
-			this.entities.put(key, dta);
 			return dta;
 		}
 		
@@ -136,6 +135,7 @@ public class TransactionInfo {
     	try{
     		manager.lock(this.id, key);
 			this.managed.add(key);
+			this.inserted.add(key);
 			this.entities.put(key, null);
 			return cache.get(key) != null;
     	}
@@ -153,7 +153,7 @@ public class TransactionInfo {
 		for(String key: this.inserted){
 			InputStream in = cache.get(key);
 			if(in != null){
-				saved.put(key, this.getBytes(in));
+				saved.put(key, new EntryCache(this.getBytes(in), -1));
 			}
 			else{
 				saved.put(key, null);
@@ -165,53 +165,37 @@ public class TransactionInfo {
 	public void rollback(Cache cache) throws StorageException, RecoverException {
 		
 		for(String key: this.saved.keySet()){
-			byte[] entity = saved.get(key);
+			EntryCache entity = saved.get(key);
 			if(entity == null){
 				cache.remove(key);
 			}
 			else{
-				cache.put(key, -1, new ByteArrayInputStream(entity));
+				cache.put(key, entity.getMaxAlive(), new ByteArrayInputStream(entity.getData()));
 			}
 		}
 		
+	}
+	
+	protected void commit(Cache cache) throws RecoverException, StorageException {
+		if(!this.inserted.isEmpty()){
+			for(String key: this.inserted){
+				EntryCache entity = this.entities.get(key);
+				
+				if(entity == null){
+					cache.remove(key);
+				}
+				else{
+					cache.put(key, entity.getMaxAlive(), new ByteArrayInputStream(entity.getData()));
+				}
+			}
+			
+		}
 	}
 	
 	public void clear(){
 		this.entities.clear();
 		this.inserted.clear();
 		this.saved.clear();
-	}
-	
-	public Set<String> getInserted() {
-		return inserted;
-	}
-
-	public void setInserted(Set<String> inserted) {
-		this.inserted = inserted;
-	}
-
-	public Set<String> getManaged() {
-		return managed;
-	}
-
-	public void setManaged(Set<String> managed) {
-		this.managed = managed;
-	}
-
-	public Map<String, byte[]> getEntities() {
-		return entities;
-	}
-
-	public void setEntities(Map<String, byte[]> entities) {
-		this.entities = entities;
-	}
-
-	public Map<String, byte[]> getSaved() {
-		return saved;
-	}
-
-	public void setSaved(Map<String, byte[]> saved) {
-		this.saved = saved;
 	}
 	
 }
