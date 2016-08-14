@@ -2,8 +2,11 @@ package org.brandao.brcache.tx;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,7 +24,13 @@ public class TransactionInfo {
 	
 	private Map<String, byte[]> entities;
 	
-	public TransactionInfo(){
+	private Map<String, byte[]> saved;
+	
+	public TransactionInfo(byte[] id){
+		this.id       = id;
+		this.inserted = new HashSet<String>();
+		this.managed  = new HashSet<String>();
+		this.entities = new HashMap<String, byte[]>();
 	}
 	
     public void putObject(String key, long maxAliveTime, Object item) throws StorageException, TransactionException{
@@ -137,5 +146,66 @@ public class TransactionInfo {
     		throw new TransactionException(e);
     	}
     }
+
+	public void savePoint(Cache cache) throws IOException, RecoverException{
+		saved.clear();
+
+		for(String key: this.inserted){
+			InputStream in = cache.get(key);
+			if(in != null){
+				saved.put(key, this.getBytes(in));
+			}
+			else{
+				saved.put(key, null);
+			}
+		}
+		
+	}
+    
+	public void rollback(Cache cache) throws StorageException, RecoverException {
+		
+		for(String key: this.saved.keySet()){
+			byte[] entity = saved.get(key);
+			if(entity == null){
+				cache.remove(key);
+			}
+			else{
+				cache.put(key, -1, new ByteArrayInputStream(entity));
+			}
+		}
+		
+	}
+	
+	public Set<String> getInserted() {
+		return inserted;
+	}
+
+	public void setInserted(Set<String> inserted) {
+		this.inserted = inserted;
+	}
+
+	public Set<String> getManaged() {
+		return managed;
+	}
+
+	public void setManaged(Set<String> managed) {
+		this.managed = managed;
+	}
+
+	public Map<String, byte[]> getEntities() {
+		return entities;
+	}
+
+	public void setEntities(Map<String, byte[]> entities) {
+		this.entities = entities;
+	}
+
+	public Map<String, byte[]> getSaved() {
+		return saved;
+	}
+
+	public void setSaved(Map<String, byte[]> saved) {
+		this.saved = saved;
+	}
 	
 }
