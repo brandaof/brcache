@@ -2,13 +2,13 @@ package org.brandao.brcache.tx;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.brandao.brcache.Cache;
 import org.brandao.brcache.RecoverException;
@@ -16,7 +16,7 @@ import org.brandao.brcache.StorageException;
 
 public class TransactionInfo {
 
-	private byte[] id;
+	private UUID id;
 	
 	private Set<String> inserted;
 
@@ -26,7 +26,7 @@ public class TransactionInfo {
 	
 	private Map<String, byte[]> saved;
 	
-	public TransactionInfo(byte[] id){
+	public TransactionInfo(UUID id){
 		this.id       = id;
 		this.inserted = new HashSet<String>();
 		this.managed  = new HashSet<String>();
@@ -174,6 +174,12 @@ public class TransactionInfo {
 			}
 		}
 		
+	}
+	
+	public void clear(){
+		this.entities.clear();
+		this.inserted.clear();
+		this.saved.clear();
 	}
 	
 	public Set<String> getInserted() {

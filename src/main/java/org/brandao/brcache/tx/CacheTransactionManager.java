@@ -1,16 +1,18 @@
 package org.brandao.brcache.tx;
 
+import java.util.UUID;
+
 public interface CacheTransactionManager {
 
-	void lock(byte[] transaction, String key) throws TransactionException;
+	void lock(UUID transaction, String key) throws TransactionException;
 
-	void tryLock(byte[] transaction, String key, long time) throws TransactionException;
+	void tryLock(UUID transaction, String key, long time) throws TransactionException;
 
-	void unlock(byte[] transaction, String key) throws TransactionException;
+	void unlock(UUID transaction, String key) throws TransactionException;
 	
-	void commit(byte[] transaction) throws TransactionException;
+	void commit(UUID transaction) throws TransactionException;
 	
-	void rollback(byte[] transaction) throws TransactionException;
+	void rollback(UUID transaction) throws TransactionException;
 	
 	String getTransactionPath();
 	
