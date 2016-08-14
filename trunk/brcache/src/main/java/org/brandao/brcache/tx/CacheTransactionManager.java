@@ -12,4 +12,9 @@ public interface CacheTransactionManager {
 	
 	void rollback(byte[] transaction) throws TransactionException;
 	
+	String getTransactionPath();
+	
+	CacheTransaction begin();
+	
+	void close(CacheTransaction tx) throws TransactionException;
 }
