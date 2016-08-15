@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.brandao.brcache.NonTransactionalCache;
+import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.server.ParameterException;
 import org.brandao.brcache.server.ReadDataException;
 import org.brandao.brcache.server.Terminal;
@@ -19,7 +19,7 @@ import org.brandao.brcache.server.WriteDataException;
 public class StatsCommand 
 	extends AbstractCommand{
 
-	public void execute(Terminal terminal, NonTransactionalCache cache, TerminalReader reader,
+	public void execute(Terminal terminal, StreamCache cache, TerminalReader reader,
 			TerminalWriter writer, String[] parameters)
 			throws ReadDataException, WriteDataException, ParameterException {
 		

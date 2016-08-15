@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.brandao.brcache.NonTransactionalCache;
+import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 
@@ -35,8 +35,8 @@ public class TransactionInfo {
 		this.entities = new HashMap<String, EntryCache>();
 	}
 	
-	public void putObject(CacheTransactionManager manager, NonTransactionalCache cache,
-			String key, long maxAliveTime, Object item)
+	public void putObject(CacheTransactionManager manager, StreamCache cache,
+			String key, long maxAliveTime, Object item, long time)
 			throws StorageException {
 		
 		try{
@@ -44,7 +44,7 @@ public class TransactionInfo {
 	        ObjectOutputStream oout = new ObjectOutputStream(bout);
 	        oout.writeObject(item);
 	        oout.flush();
-	        this.put(manager, cache, key, maxAliveTime, new ByteArrayInputStream(bout.toByteArray()));
+	        this.put(manager, cache, key, maxAliveTime, new ByteArrayInputStream(bout.toByteArray()), time);
 		}
 		catch(StorageException e){
 			throw e;
@@ -54,7 +54,7 @@ public class TransactionInfo {
 		}
 	}
 
-	public Object getObject(CacheTransactionManager manager, NonTransactionalCache cache,
+	public Object getObject(CacheTransactionManager manager, StreamCache cache,
 			String key, boolean forUpdate, long time)
 			throws RecoverException {
     	InputStream in = null;
@@ -83,12 +83,12 @@ public class TransactionInfo {
         }
 	}
 	
-    public void put(CacheTransactionManager manager, NonTransactionalCache cache, 
-    		String key, long maxAliveTime, InputStream inputData) 
+    public void put(CacheTransactionManager manager, StreamCache cache, 
+    		String key, long maxAliveTime, InputStream inputData, long time) 
     		throws StorageException {
     	
     	try{
-			manager.lock(this.id, key);
+			manager.tryLock(this.id, key, time);
 			
 			byte[] dta = inputData == null? null : this.getBytes(inputData);
 			
@@ -101,7 +101,7 @@ public class TransactionInfo {
     	}
     }
 
-    public InputStream get(CacheTransactionManager manager, NonTransactionalCache cache, 
+    public InputStream get(CacheTransactionManager manager, StreamCache cache, 
     		String key, boolean forUpdate, long time) throws RecoverException {
     	
     	try{
@@ -116,10 +116,10 @@ public class TransactionInfo {
     	}
     }
 
-    public boolean remove(CacheTransactionManager manager, NonTransactionalCache cache,
-    		String key) throws RecoverException{       
+    public boolean remove(CacheTransactionManager manager, StreamCache cache,
+    		String key, long time) throws RecoverException{       
     	try{
-    		manager.lock(this.id, key);
+    		manager.tryLock(this.id, key, time);
 			this.managed.add(key);
 			this.inserted.add(key);
 			this.entities.put(key, null);
@@ -133,7 +133,7 @@ public class TransactionInfo {
     	}
     }
     
-    private byte[] getEntity(CacheTransactionManager manager, NonTransactionalCache cache,
+    private byte[] getEntity(CacheTransactionManager manager, StreamCache cache,
     		String key, boolean lock, long time) 
     		throws RecoverException, IOException, TransactionException{
     	
@@ -150,7 +150,7 @@ public class TransactionInfo {
     	}
     }
     
-    private byte[] getSharedEntity(CacheTransactionManager manager, NonTransactionalCache cache,
+    private byte[] getSharedEntity(CacheTransactionManager manager, StreamCache cache,
     		String key, boolean lock, long time) 
     		throws IOException, TransactionException, RecoverException{
     	
@@ -185,7 +185,7 @@ public class TransactionInfo {
     	return bout.toByteArray();
     }
 
-	public void savePoint(NonTransactionalCache cache) throws IOException, RecoverException{
+	public void savePoint(StreamCache cache) throws IOException, RecoverException{
 		saved.clear();
 
 		for(String key: this.inserted){
@@ -200,7 +200,7 @@ public class TransactionInfo {
 		
 	}
     
-	public void rollback(NonTransactionalCache cache) throws StorageException, RecoverException {
+	public void rollback(StreamCache cache) throws StorageException, RecoverException {
 		
 		for(String key: this.saved.keySet()){
 			EntryCache entity = saved.get(key);
@@ -214,7 +214,7 @@ public class TransactionInfo {
 		
 	}
 	
-	protected void commit(NonTransactionalCache cache) throws RecoverException, StorageException {
+	protected void commit(StreamCache cache) throws RecoverException, StorageException {
 		if(!this.inserted.isEmpty()){
 			for(String key: this.inserted){
 				EntryCache entity = this.entities.get(key);

@@ -11,9 +11,9 @@ import junit.framework.Assert;
  */
 public class RemoveTask implements Runnable{
 
-    private NonTransactionalCache client;
+    private StreamCache client;
     
-    public RemoveTask(NonTransactionalCache client){
+    public RemoveTask(StreamCache client){
         this.client = client;
     }
     

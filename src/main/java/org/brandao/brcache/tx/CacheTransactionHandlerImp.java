@@ -9,7 +9,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.UUID;
 
-import org.brandao.brcache.NonTransactionalCache;
+import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 
@@ -28,7 +28,7 @@ public class CacheTransactionHandlerImp
 	
 	private boolean commited;
 	
-	private NonTransactionalCache cache;
+	private StreamCache cache;
 	
 	private CacheTransactionManager transactionManager;
 	
@@ -37,7 +37,7 @@ public class CacheTransactionHandlerImp
 	private String transactionName;
 	
 	private CacheTransactionHandlerImp(UUID id, 
-			CacheTransactionManager transactionManager, NonTransactionalCache cache){
+			CacheTransactionManager transactionManager, StreamCache cache){
 		this.commitInProgress   = false;
 		this.started            = false;
 		this.commited           = false;
@@ -183,33 +183,33 @@ public class CacheTransactionHandlerImp
 		}
 	}
 	
-	public void putObject(CacheTransactionManager manager, NonTransactionalCache cache,
+	public void putObject(CacheTransactionManager manager, StreamCache cache,
 			String key, long maxAliveTime, Object item)
 			throws StorageException {
 		this.transactionInfo.putObject(manager, cache, key, maxAliveTime, item);
 	}
 
-	public Object getObject(CacheTransactionManager manager, NonTransactionalCache cache,
+	public Object getObject(CacheTransactionManager manager, StreamCache cache,
 			String key, boolean forUpdate, long time)
 			throws RecoverException {
 		return this.transactionInfo.getObject(manager, cache, key, forUpdate, time);
 	}
 
-	public void put(CacheTransactionManager manager, NonTransactionalCache cache, String key,
-			long maxAliveTime, InputStream inputData)
+	public void put(CacheTransactionManager manager, StreamCache cache, String key,
+			long maxAliveTime, InputStream inputData, long time)
 			throws StorageException {
-		this.transactionInfo.put(manager, cache, key, maxAliveTime, inputData);
+		this.transactionInfo.put(manager, cache, key, maxAliveTime, inputData, time);
 	}
 
-	public InputStream get(CacheTransactionManager manager, NonTransactionalCache cache,
+	public InputStream get(CacheTransactionManager manager, StreamCache cache,
 			String key, boolean forUpdate, long time)
 			throws RecoverException {
 		return this.transactionInfo.get(manager, cache, key, forUpdate, time);
 	}
 
-	public boolean remove(CacheTransactionManager manager, NonTransactionalCache cache,
-			String key) throws RecoverException {
-		return this.transactionInfo.remove(manager, cache, key);
+	public boolean remove(CacheTransactionManager manager, StreamCache cache,
+			String key, long time) throws RecoverException {
+		return this.transactionInfo.remove(manager, cache, key, time);
 	}
 	
 }

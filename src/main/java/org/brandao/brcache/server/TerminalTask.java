@@ -18,7 +18,7 @@
 package org.brandao.brcache.server;
 
 import java.net.Socket;
-import org.brandao.brcache.NonTransactionalCache;
+import org.brandao.brcache.StreamCache;
 
 /**
  *
@@ -32,7 +32,7 @@ class TerminalTask implements Runnable{
     
     private final Configuration config;
     
-    private NonTransactionalCache cache;
+    private StreamCache cache;
     
     private Socket socket;
     
@@ -42,7 +42,7 @@ class TerminalTask implements Runnable{
     
     private StreamFactory streamFactory;
     
-    public TerminalTask(Terminal terminal, NonTransactionalCache cache, 
+    public TerminalTask(Terminal terminal, StreamCache cache, 
             Socket socket,
             StreamFactory streamFactory,
             int readBufferSize, int writeBufferSize, 

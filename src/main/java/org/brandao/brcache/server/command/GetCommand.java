@@ -3,7 +3,7 @@ package org.brandao.brcache.server.command;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.brandao.brcache.NonTransactionalCache;
+import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.CacheInputStream;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.server.ParameterException;
@@ -24,7 +24,7 @@ import org.brandao.brcache.server.WriteDataException;
  */
 public class GetCommand extends AbstractCommand{
 
-	public void execute(Terminal terminal, NonTransactionalCache cache, TerminalReader reader,
+	public void execute(Terminal terminal, StreamCache cache, TerminalReader reader,
 			TerminalWriter writer, String[] parameters)
 			throws ReadDataException, WriteDataException, ParameterException {
 
