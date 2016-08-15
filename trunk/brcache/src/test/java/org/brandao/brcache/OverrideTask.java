@@ -11,9 +11,9 @@ import junit.framework.Assert;
  */
 public class OverrideTask implements Runnable{
 
-    private NonTransactionalCache client;
+    private StreamCache client;
     
-    public OverrideTask(NonTransactionalCache client){
+    public OverrideTask(StreamCache client){
         this.client = client;
     }
     

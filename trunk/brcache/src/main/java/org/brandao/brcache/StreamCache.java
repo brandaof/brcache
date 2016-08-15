@@ -40,7 +40,8 @@ import org.brandao.brcache.collections.treehugemap.CharNode;
  * 
  * @author Brandao
  */
-public class NonTransactionalCache implements Serializable{
+public class StreamCache 
+	implements Serializable{
     
     private static final long serialVersionUID = 8023029671447700902L;
 
@@ -82,7 +83,7 @@ public class NonTransactionalCache implements Serializable{
      * Cria um novo cache.
      * 
      */
-    public NonTransactionalCache(){
+    public StreamCache(){
         this(
     		3L*1024L*1024L, 1024, 0.5, 
     		1L*1024L*1024L, 1024, 0.5, 
@@ -109,7 +110,7 @@ public class NonTransactionalCache implements Serializable{
      * @param swaperType Estratégia de armazenamento dos dados em disco.
      * @param quantitySwaperThread Quantidade de processos usados para fazer a permuta.
      */
-    public NonTransactionalCache(
+    public StreamCache(
     		long nodeBufferSize,
     		long nodePageSize,
     		double nodeSwapFactor,

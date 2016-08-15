@@ -13,11 +13,11 @@ public class PutTask implements Runnable{
     
     public static final String suffixKey = "KEY-22222";
     
-    private NonTransactionalCache client;
+    private StreamCache client;
     
     private int limit;
     
-    public PutTask(NonTransactionalCache client, int limit){
+    public PutTask(StreamCache client, int limit){
         this.client = client;
         this.limit  = limit;
     }

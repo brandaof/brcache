@@ -37,7 +37,7 @@ public class TransactionalCache
 
 	private static final long TIME_OUT = 5*60*1000;
 	
-	private NonTransactionalCache cache;
+	private StreamCache cache;
 	
 	private CacheTransactionManager transactionManager;
 
@@ -92,7 +92,7 @@ public class TransactionalCache
             CacheTransactionManager transactionManager
     		){
 
-    	this.cache = new NonTransactionalCache(nodeBufferSize, nodePageSize, nodeSwapFactor, 
+    	this.cache = new StreamCache(nodeBufferSize, nodePageSize, nodeSwapFactor, 
     			indexBufferSize, indexPageSize, indexSwapFactor, dataBufferSize, dataPageSize, 
     			blockSize, dataSwapFactor, maxSizeEntry, maxSizeKey, dataPath, swaperType, 
     			quantitySwaperThread);

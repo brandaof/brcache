@@ -22,7 +22,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.brandao.brcache.NonTransactionalCache;
+import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.Memory;
 import org.brandao.brcache.SwaperStrategy;
 import org.brandao.brcache.collections.Collections;
@@ -46,7 +46,7 @@ public class BrCacheServer {
     
     volatile int countConnections;
     
-    private NonTransactionalCache cache;
+    private StreamCache cache;
     
     private int readBufferSize;
     
@@ -89,7 +89,7 @@ public class BrCacheServer {
             int maxConnections, 
             int timeout, 
             boolean reuseAddress,
-            NonTransactionalCache cache){
+            StreamCache cache){
         this.run            = false;
         this.timeout        = timeout;
         this.reuseAddress   = reuseAddress;
@@ -201,7 +201,7 @@ public class BrCacheServer {
         
         Collections.setPath(data_path);
         
-        this.cache = new NonTransactionalCache(
+        this.cache = new StreamCache(
             nodes_buffer_size,
             nodes_page_size,
             nodes_swap_factor,
