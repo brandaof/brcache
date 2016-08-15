@@ -15,7 +15,7 @@ public class BrCacheTest extends TestCase{
     public void testInsertOnMemory() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException, CacheException{
 
-        Cache cache = new Cache();
+        NonTransactionalCache cache = new NonTransactionalCache();
         
         Thread th = new Thread(new PutTask(cache, 100));
         th.start();
@@ -30,7 +30,7 @@ public class BrCacheTest extends TestCase{
     public void testOverrideMemory() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException, CacheException{
         
-        Cache cache = new Cache();
+        NonTransactionalCache cache = new NonTransactionalCache();
         
         PutTask o = new PutTask(cache, 100);
         o.run();
@@ -45,7 +45,7 @@ public class BrCacheTest extends TestCase{
     public void testOverrideSwap() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException, CacheException{
         
-        Cache cache = new Cache();
+        NonTransactionalCache cache = new NonTransactionalCache();
         
         PutTask o = new PutTask(cache, 100000);
         o.run();
@@ -60,7 +60,7 @@ public class BrCacheTest extends TestCase{
     public void testPut() 
             throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException, CacheException{
         
-        Cache cache = new Cache();
+        NonTransactionalCache cache = new NonTransactionalCache();
         
         for(int i=0;i<10;i++){
             Thread th = new Thread(new PutTask(cache,-1));

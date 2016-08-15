@@ -36,11 +36,11 @@ public class CacheInputStream extends InputStream{
     
     private int currentDataindex;
 
-    private Cache cache;
+    private NonTransactionalCache cache;
     
     private byte[] bufByte = new byte[1];
     
-    public CacheInputStream(Cache cache, DataMap map, Block[] dataList){
+    public CacheInputStream(NonTransactionalCache cache, DataMap map, Block[] dataList){
         this.map = map;
         this.arrayDataList = dataList;
         this.currentDataindex = 0;
