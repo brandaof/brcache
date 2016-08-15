@@ -46,7 +46,7 @@ public class CacheTest extends TestCase{
     public void test() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
         Collections.setPath("/mnt/brcache");
-        final Cache cache = new Cache();
+        final NonTransactionalCache cache = new NonTransactionalCache();
 
         Thread read =
             new Thread(){
@@ -162,7 +162,7 @@ public class CacheTest extends TestCase{
     public void test2() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
         Collections.setPath("/mnt/brcache");
-        final Cache cache = new Cache();
+        final NonTransactionalCache cache = new NonTransactionalCache();
 
         Thread read =
             new Thread(){

@@ -7,16 +7,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
-import org.brandao.brcache.Cache;
-import org.brandao.database.EntityFile;
-import org.brandao.database.transaction.TransactionInfo;
+import org.brandao.brcache.NonTransactionalCache;
+import org.brandao.brcache.RecoverException;
+import org.brandao.brcache.StorageException;
 
 public class CacheTransactionHandlerImp 
 	implements CacheTransactionHandler{
@@ -33,7 +28,7 @@ public class CacheTransactionHandlerImp
 	
 	private boolean commited;
 	
-	private Cache cache;
+	private NonTransactionalCache cache;
 	
 	private CacheTransactionManager transactionManager;
 	
@@ -42,7 +37,7 @@ public class CacheTransactionHandlerImp
 	private String transactionName;
 	
 	private CacheTransactionHandlerImp(UUID id, 
-			CacheTransactionManager transactionManager, Cache cache){
+			CacheTransactionManager transactionManager, NonTransactionalCache cache){
 		this.commitInProgress   = false;
 		this.started            = false;
 		this.commited           = false;
@@ -68,13 +63,11 @@ public class CacheTransactionHandlerImp
 	}
 	
 	public boolean isRolledBack() {
-		// TODO Auto-generated method stub
-		return false;
+		return this.rolledBack;
 	}
 
 	public boolean isCommited() {
-		// TODO Auto-generated method stub
-		return false;
+		return this.commited;
 	}
 
 	public void rollback() throws TransactionException {
@@ -109,6 +102,8 @@ public class CacheTransactionHandlerImp
 					return;
 				}
 			}
+			this.rolledBack = true;
+			this.commited   = false;
 		}
 		catch(TransactionException e){
 			throw e;
@@ -174,60 +169,47 @@ public class CacheTransactionHandlerImp
 			throw new TransactionException("transaction not started");
 		
 		try{
+			this.commitInProgress = true;
 			this.transactionInfo.savePoint(this.cache);
-			
 			this.persistTransaction(file, this.transactionInfo);
-			try{
-				for(String entityFileName: entities){
-					EntityFile entityFile = this.manager.getEntityFile(entityFileName);
-					TransactionInfo tx = localTransactionInfo.get(entityFileName);
-					this.commit(tx, entityFile);
-				}
-			}
-			finally{
-				this.unlock(localTransactionInfo);
-			}
-			
-			this.clearTransaction(this.file, localTransactionInfo);
-			this.commited = true;
+			this.transactionInfo.commit(cache);
+			this.clearTransaction(this.transactionInfo);
+			this.commitInProgress = true;
+			this.commited         = true;
+			this.rolledBack       = false;
 		}
 		catch (Throwable e) {
 			throw new TransactionException(e);
 		}
 	}
 	
-	public void putObject(CacheTransactionManager manager, Cache cache,
+	public void putObject(CacheTransactionManager manager, NonTransactionalCache cache,
 			String key, long maxAliveTime, Object item)
-			throws TransactionException {
-		// TODO Auto-generated method stub
-		
+			throws StorageException {
+		this.transactionInfo.putObject(manager, cache, key, maxAliveTime, item);
 	}
 
-	public Object getObject(CacheTransactionManager manager, Cache cache,
+	public Object getObject(CacheTransactionManager manager, NonTransactionalCache cache,
 			String key, boolean forUpdate, long time)
-			throws TransactionException {
-		// TODO Auto-generated method stub
-		return null;
+			throws RecoverException {
+		return this.transactionInfo.getObject(manager, cache, key, forUpdate, time);
 	}
 
-	public void put(CacheTransactionManager manager, Cache cache, String key,
+	public void put(CacheTransactionManager manager, NonTransactionalCache cache, String key,
 			long maxAliveTime, InputStream inputData)
-			throws TransactionException {
-		// TODO Auto-generated method stub
-		
+			throws StorageException {
+		this.transactionInfo.put(manager, cache, key, maxAliveTime, inputData);
 	}
 
-	public InputStream get(CacheTransactionManager manager, Cache cache,
+	public InputStream get(CacheTransactionManager manager, NonTransactionalCache cache,
 			String key, boolean forUpdate, long time)
-			throws TransactionException {
-		// TODO Auto-generated method stub
-		return null;
+			throws RecoverException {
+		return this.transactionInfo.get(manager, cache, key, forUpdate, time);
 	}
 
-	public boolean remove(CacheTransactionManager manager, Cache cache,
-			String key) throws TransactionException {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean remove(CacheTransactionManager manager, NonTransactionalCache cache,
+			String key) throws RecoverException {
+		return this.transactionInfo.remove(manager, cache, key);
 	}
 	
 }

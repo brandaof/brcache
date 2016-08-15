@@ -1,6 +1,6 @@
 package org.brandao.brcache.server.command;
 
-import org.brandao.brcache.Cache;
+import org.brandao.brcache.NonTransactionalCache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.server.ParameterException;
 import org.brandao.brcache.server.ReadDataException;
@@ -20,7 +20,7 @@ import org.brandao.brcache.server.WriteDataException;
  */
 public class RemoveCommand extends AbstractCommand{
 
-    public void execute(Terminal terminal, Cache cache, TerminalReader reader,
+    public void execute(Terminal terminal, NonTransactionalCache cache, TerminalReader reader,
                     TerminalWriter writer, String[] parameters)
                     throws ReadDataException, WriteDataException, ParameterException {
 

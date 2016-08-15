@@ -16,7 +16,9 @@ public interface CacheTransactionManager {
 	
 	String getTransactionPath();
 	
-	CacheTransaction begin();
+	CacheTransactionHandler begin();
 	
-	void close(CacheTransaction tx) throws TransactionException;
+	CacheTransactionHandler getCurrrent();
+	
+	void close(CacheTransactionHandler tx) throws TransactionException;
 }

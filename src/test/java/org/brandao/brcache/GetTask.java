@@ -11,9 +11,9 @@ import junit.framework.Assert;
  */
 public class GetTask implements Runnable{
 
-    private Cache client;
+    private NonTransactionalCache client;
     
-    public GetTask(Cache client){
+    public GetTask(NonTransactionalCache client){
         this.client = client;
     }
     

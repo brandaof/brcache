@@ -17,7 +17,7 @@
 
 package org.brandao.brcache.server;
 
-import org.brandao.brcache.Cache;
+import org.brandao.brcache.NonTransactionalCache;
 
 /**
  *
@@ -29,9 +29,9 @@ class MonitorThread extends Thread{
     
     private Configuration config;
     
-    private Cache cache;
+    private NonTransactionalCache cache;
     
-    public MonitorThread(Cache cache, Configuration config){
+    public MonitorThread(NonTransactionalCache cache, Configuration config){
         this.cache = cache;
         this.config = config;
     }
