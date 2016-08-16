@@ -17,20 +17,17 @@
 
 package org.brandao.brcache;
 
-import org.brandao.brcache.HugeListCalculator.HugeListInfo;
-import org.brandao.brcache.collections.FileSwaper;
-import org.brandao.brcache.collections.HugeArrayList;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import org.brandao.brcache.HugeListCalculator.HugeListInfo;
 import org.brandao.brcache.collections.Collections;
 import org.brandao.brcache.collections.DiskSwapper;
+import org.brandao.brcache.collections.FileSwaper;
+import org.brandao.brcache.collections.HugeArrayList;
 import org.brandao.brcache.collections.StringTreeMap;
 import org.brandao.brcache.collections.Swapper;
 import org.brandao.brcache.collections.treehugemap.CharNode;
@@ -223,65 +220,6 @@ public class StreamCache
     }
     
     /**
-     * Inclui ou sobrescreve um objeto no cache.
-     * 
-     * @param key Identificação do objeto no cache.
-     * @param maxAliveTime Tempo máximo em milesegundos que o objeto ficará no cache.
-     * @param item Objeto a ser incluído no cache.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
-     * objeto no cache.
-     */
-    public void putObject(String key, long maxAliveTime, Object item) throws StorageException{
-        try{
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            ObjectOutputStream oout = new ObjectOutputStream(bout);
-            oout.writeObject(item);
-            oout.flush();
-            this.put(key, maxAliveTime, new ByteArrayInputStream(bout.toByteArray()));
-        }
-        catch(StorageException e){
-            throw e;
-        }
-        catch(Throwable e){
-            throw new StorageException(e);
-        }
-        
-    }
-
-    /**
-     * Recupera um objeto do cache.
-     * 
-     * @param key Identificação do objeto no cache.
-     * @return Objeto ou <code>null</code>.
-     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar recuperar o
-     * objeto do cache.
-     */
-    public Object getObject(String key) throws RecoverException{
-    	InputStream in = null;
-        try{
-            in = this.get(key);
-            if(in != null){
-                ObjectInputStream oin = new ObjectInputStream(in);
-                return oin.readObject();
-            }
-            else
-                return null;
-        }
-        catch(Throwable e){
-            throw new RecoverException(e);
-        }
-        finally{
-        	try{
-        		if(in != null)
-        			in.close();
-        	}
-        	catch(Throwable e){
-        	}
-        }
-        
-    }
-
-    /**
      * Inclui ou sobrescreve um item no cache.
      * 
      * @param key Identificação do item no cache.
@@ -327,7 +265,7 @@ public class StreamCache
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar recuperar o
      * item do cache.
      */
-    public InputStream get(String key) throws RecoverException{
+    public InputStream getStream(String key) throws RecoverException{
         
         try{
             countRead++;
