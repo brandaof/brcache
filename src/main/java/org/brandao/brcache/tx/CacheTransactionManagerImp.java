@@ -126,7 +126,7 @@ public class CacheTransactionManagerImp
 		
 		UUID txId = UUID.randomUUID();
 		txh = new CacheTransactionHandlerImp(txId, this, cache);
-		this.transactionLocks.put(txId, new Transaction(txId, txh, new HashMap<String, Serializable>()));
+		this.transactionLocks.put(txId, new Transaction(txh, new HashMap<String, Serializable>()));
 		this.transactions.set(txh);
 		return txh;
 	}
@@ -136,20 +136,31 @@ public class CacheTransactionManagerImp
 	}
 
 	public void close(CacheTransactionHandler tx) throws TransactionException {
+		UUID txId = (UUID) tx.getId();
+		
+		Transaction txInfo = this.transactionLocks.get(txId);
+		Map<String, Serializable> locks = txInfo.locks;
+		
+		for(String lockName: locks.keySet()){
+			Serializable ref = locks.get(lockName);
+			this.locks.unlock(ref, lockName);
+		}
+		
+		CacheTransactionHandler current = this.transactions.get();
+		this.transactions.remove();
+		if(current != tx)
+			throw new TransactionException("invalid current transaction");
 		
 	}
 
 	private class Transaction{
 		
-		public Serializable id;
-		
 		public CacheTransactionHandler txHandler;
 		
 		public Map<String, Serializable> locks;
 
-		public Transaction(Serializable id, CacheTransactionHandler txHandler,
+		public Transaction(CacheTransactionHandler txHandler,
 				Map<String, Serializable> locks) {
-			this.id = id;
 			this.txHandler = txHandler;
 			this.locks = locks;
 		}

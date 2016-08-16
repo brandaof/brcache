@@ -140,7 +140,7 @@ public class TXCache
 	}
 
 	public CacheTransaction beginTransaction(){
-    	return this.transactionManager.begin();
+    	return this.transactionManager.begin(this.cache);
     }
 
 	/* métodos de armazenamento */
@@ -363,7 +363,7 @@ public class TXCache
     	
     	CacheTransactionHandler tx = 
     			currentTx == null? 
-    					this.transactionManager.begin() : 
+    					this.transactionManager.begin(this.cache) : 
     					currentTx;
     	
     	try{

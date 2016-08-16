@@ -1,6 +1,7 @@
 package org.brandao.brcache.tx;
 
 import java.io.InputStream;
+import java.io.Serializable;
 
 import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.RecoverException;
@@ -9,7 +10,7 @@ import org.brandao.brcache.StorageException;
 public interface CacheTransactionHandler 
 	extends CacheTransaction{
 
-	void begin() throws TransactionException;
+	Serializable getId();
 	
 	/* métodos de armazenamento */
 	
