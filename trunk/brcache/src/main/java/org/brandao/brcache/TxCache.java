@@ -17,12 +17,19 @@
 
 package org.brandao.brcache;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import org.brandao.brcache.tx.CacheTransaction;
 import org.brandao.brcache.tx.CacheTransactionHandler;
 import org.brandao.brcache.tx.CacheTransactionManager;
+import org.brandao.brcache.tx.EntryCache;
 import org.brandao.brcache.tx.TransactionException;
 
 /**
@@ -36,6 +43,8 @@ public class TxCache
 	private static final long serialVersionUID = -5345989492194115454L;
 
 	private static final long TIME_OUT = 5*60*1000;
+	
+	private static final Method replace;
 	
 	private StreamCache cache;
 	
@@ -111,338 +120,161 @@ public class TxCache
 	public CacheTransaction beginTransaction(){
     	return this.transactionManager.begin();
     }
-    
-    /**
-     * Inclui ou sobrescreve um objeto no cache.
-     * 
-     * @param key Identificação do objeto no cache.
-     * @param maxAliveTime Tempo máximo em milesegundos que o objeto ficará no cache.
-     * @param item Objeto a ser incluído no cache.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
-     * objeto no cache.
-     */
-    public void putObject(String key, long maxAliveTime, Object item) throws StorageException{
-    	
-    	CacheTransactionHandler tx = this.transactionManager.getCurrrent();
-    	
-    	if(tx == null){
-    		this.putObjectLocalTX(key, maxAliveTime, item);
-    	}
-    	else{
-    		tx.putObject(this.transactionManager, cache, key, maxAliveTime, item);
-    	}
-    	
-    }
 
-    private void putObjectLocalTX(String key, long maxAliveTime, Object item) throws StorageException{
-    	
-    	CacheTransactionHandler tx = this.transactionManager.begin();
-    	
-    	try{
-    		tx.putObject(this.transactionManager, this.cache, key, maxAliveTime, item);
-			tx.commit();
-    	}
-    	catch(StorageException e){
-    		try{
-    			tx.rollback();
-    		}
-			catch(Throwable x){
-				throw new StorageException("rollback fail: " + x.toString(), e); 
+	/* métodos de armazenamento */
+	
+	public Object replace(CacheTransactionManager manager, StreamCache cache,
+			String key, Object value, long maxAliveTime, long time) throws StorageException {
+		
+		this.executeMethodInTX(method, currentTx, params);
+	}
+	
+	public boolean replace(CacheTransactionManager manager, StreamCache cache,
+			String key, Object oldValue, 
+			Object newValue, long maxAliveTime, long time) throws StorageException {
+		
+		try{
+			Object o = this.get(manager, cache, key, true, time);
+			if(o != null && o.equals(oldValue)){
+				this.put(manager, cache, key, newValue, maxAliveTime, time);
+				return true;
 			}
-    		
-    		throw e;
+			else
+				return false;
+		}
+		catch(Throwable e){
+			throw new StorageException(e);
+		}
+	}
+	
+	public Object putIfAbsent(CacheTransactionManager manager, StreamCache cache,
+			String key, Object value, long maxAliveTime, long time) throws StorageException {
+		
+		try{
+			Object o = this.get(manager, cache, key, true, time);
+			
+			if(o == null){
+				this.put(manager, cache, key, value, maxAliveTime, time);
+			}
+			
+			return o;
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(Throwable e){
+			throw new StorageException(e);
+		}
+	}
+	
+	public void put(CacheTransactionManager manager, StreamCache cache,
+			String key, Object value, long maxAliveTime, long time) throws StorageException {
+		try{
+			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+			ObjectOutputStream oout = new ObjectOutputStream(bout);
+			oout.writeObject(value);
+			oout.flush();
+			this.putStream(
+				manager, cache, key, maxAliveTime, 
+				new ByteArrayInputStream(bout.toByteArray()), time);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(Throwable e){
+			throw new StorageException(e);
+		}
+	}
+	
+    public void putStream(CacheTransactionManager manager, StreamCache cache, 
+    		String key, long maxAliveTime, InputStream inputData, long time) 
+    		throws StorageException {
+
+    	try{
+    		manager.tryLock(this.id, key, time);
+			byte[] dta = 
+				inputData == null? 
+					null : 
+					this.getBytes(inputData);
+			this.managed.add(key);
+			this.inserted.add(key);
+			this.entities.put(key, new EntryCache(dta, maxAliveTime));
     	}
     	catch(Throwable e){
-    		try{
-    			tx.rollback();
-    		}
-			catch(Throwable x){
-				throw new StorageException(
-						"bug: exception not recognized (rollback fail): " + x.toString(), e); 
+    		throw new StorageException(e);
+    	}
+    }
+	
+	/* métodos de coleta*/
+	
+	public Object get(CacheTransactionManager manager, StreamCache cache,
+			String key, boolean forUpdate, long time) throws RecoverException {
+		try{
+			InputStream in = this.getStream(manager, cache, key, forUpdate, time);
+			if(in != null){
+					ObjectInputStream oin = new ObjectInputStream(in);
+					return oin.readObject();
 			}
-    		
-    		throw new StorageException("bug: exception not recognized", e);
-    	}
-    	finally{
-    		try{
-    			this.transactionManager.close(tx);
-    		}
-    		catch(TransactionException e){
-    			throw new StorageException(e);    			
-    		}
-    	}
-    	
-    }
+			else
+				return null;
+		}
+		catch(RecoverException e){
+			throw e;
+		}	
+		catch(Throwable e){
+			throw new RecoverException(e);
+		}	
+	}
     
-    /**
-     * Recupera um objeto do cache.
-     * 
-     * @param key Identificação do objeto no cache.
-     * @return Objeto ou <code>null</code>.
-     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar recuperar o
-     * objeto do cache.
-     */
-    public Object getObject(String key) throws RecoverException{
-    	
-    	CacheTransactionHandler tx = this.transactionManager.getCurrrent();
-    	
-    	if(tx == null){
-    		return this.getObjectLocalTX(key, false);
-    	}
-    	else{
-    		return tx.getObject(this.transactionManager, cache, key, false, this.transactionTimeout);
-    	}
-    	
-    }
-
-    public Object getObject(String key, boolean forUpdate) throws RecoverException{
-    	
-    	CacheTransactionHandler tx = this.transactionManager.getCurrrent();
-    	
-    	if(tx == null){
-    		throw new RecoverException("transaction not stated");
-    	}
-    	else{
-    		return tx.getObject(this.transactionManager, cache, key, false, this.transactionTimeout);
-    	}
-    	
-    }
-    
-    private Object getObjectLocalTX(String key, boolean forUpdate) throws RecoverException{
-    	
-    	CacheTransactionHandler tx = this.transactionManager.begin();
+    public InputStream getStream(CacheTransactionManager manager, StreamCache cache, 
+    		String key, boolean forUpdate, long time) throws RecoverException {
     	
     	try{
-    		Object o = tx.getObject(this.transactionManager, cache, key, forUpdate, this.transactionTimeout);
-			tx.commit();
-			return o;
+			byte[] dta = this.getEntity(manager, cache, key, forUpdate, time);
+			return dta == null? null : new ByteArrayInputStream(dta);
     	}
     	catch(RecoverException e){
-    		try{
-    			tx.rollback();
-    		}
-			catch(Throwable x){
-				throw new RecoverException("rollback fail: " + x.toString(), e); 
-			}
-    		
     		throw e;
     	}
     	catch(Throwable e){
-    		try{
-    			tx.rollback();
-    		}
-			catch(Throwable x){
-				throw new RecoverException(
-						"bug: exception not recognized (rollback fail): " + x.toString(), e); 
-			}
-    		
-    		throw new RecoverException("bug: exception not recognized", e);
+    		throw new RecoverException(e);
     	}
-    	finally{
-    		try{
-    			this.transactionManager.close(tx);
-    		}
-    		catch(TransactionException e){
-    			throw new RecoverException(e);    			
-    		}
-    	}
-    	
-    }
-    
-    /**
-     * Inclui ou sobrescreve um item no cache.
-     * 
-     * @param key Identificação do item no cache.
-     * @param maxAliveTime Tempo máximo em milesegundos que o item ficará no cache.
-     * @param inputData Fluxo de dados que representa o item.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
-     * item no cache.
-     */
-    public void put(String key, long maxAliveTime, InputStream inputData) throws StorageException{
-        
-    	CacheTransactionHandler tx = this.transactionManager.getCurrrent();
-    	
-    	if(tx == null){
-    		this.putLocalTX(key, maxAliveTime, inputData);
-    	}
-    	else{
-    		tx.put(this.transactionManager, cache, key, maxAliveTime, inputData, this.transactionTimeout);
-    	}
-    	
     }
 
-    private void putLocalTX(String key, long maxAliveTime, InputStream inputData) throws StorageException{
-    	CacheTransactionHandler tx = this.transactionManager.begin();
-    	
-    	try{
-    		tx.put(this.transactionManager, cache, key, maxAliveTime, inputData, this.transactionTimeout);
-			tx.commit();
-    	}
-    	catch(StorageException e){
-    		try{
-    			tx.rollback();
-    		}
-			catch(Throwable x){
-				throw new StorageException("rollback fail: " + x.toString(), e); 
-			}
-    		
-    		throw e;
-    	}
-    	catch(Throwable e){
-    		try{
-    			tx.rollback();
-    		}
-			catch(Throwable x){
-				throw new StorageException(
-						"bug: exception not recognized (rollback fail): " + x.toString(), e); 
-			}
-    		
-    		throw new StorageException("bug: exception not recognized", e);
-    	}
-    	finally{
-    		try{
-    			this.transactionManager.close(tx);
-    		}
-    		catch(TransactionException e){
-    			throw new StorageException(e);    			
-    		}
-    	}    	
-    }
+    /* métodos de remoção */
     
-    /**
-     * Recupera um item do cache.
-     * 
-     * @param key Identificação do item no cache.
-     * @return Fluxo de dados que representa o item ou <code>null</code>.
-     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar recuperar o
-     * item do cache.
-     */
-    public InputStream get(String key) throws RecoverException{
-    	
-    	CacheTransactionHandler tx = this.transactionManager.getCurrrent();
-    	
-    	if(tx == null){
-    		return this.getLocalTX(key, false);
-    	}
-    	else{
-    		return tx.get(this.transactionManager, cache, key, false, this.transactionTimeout);
-    	}
-    	
-    }
-
-    public InputStream get(String key, boolean forUpdate) throws RecoverException{
-    	
-    	CacheTransactionHandler tx = this.transactionManager.getCurrrent();
-    	
-    	if(tx == null){
-    		throw new RecoverException("transaction not stated");
-    	}
-    	else{
-    		return tx.get(this.transactionManager, cache, key, false, this.transactionTimeout);
-    	}
-    	
-    }
-    
-    private InputStream getLocalTX(String key, boolean forUpdate) throws RecoverException{
-    	
-    	CacheTransactionHandler tx = this.transactionManager.begin();
-    	
+	public boolean remove(CacheTransactionManager manager, StreamCache cache,
+			String key, Object value, long time) throws StorageException {
+		
+		try{
+			Object o = this.get(manager, cache, key, true, time);
+			if(o != null && o.equals(value)){
+				return this.remove(manager, cache, key, time);
+			}
+			else
+				return false;
+		}
+		catch(Throwable e){
+			throw new StorageException(e);
+		}
+	}
+	
+    public boolean remove(CacheTransactionManager manager, StreamCache cache,
+    		String key, long time) throws RecoverException{       
     	try{
-    		InputStream o = tx.get(this.transactionManager, cache, key, forUpdate, this.transactionTimeout);
-			tx.commit();
-			return o;
+    		manager.tryLock(this.id, key, time);
+			this.managed.add(key);
+			this.inserted.add(key);
+			this.entities.put(key, null);
+			return cache.getStream(key) != null;
     	}
     	catch(RecoverException e){
-    		try{
-    			tx.rollback();
-    		}
-			catch(Throwable x){
-				throw new RecoverException("rollback fail: " + x.toString(), e); 
-			}
-    		
     		throw e;
     	}
     	catch(Throwable e){
-    		try{
-    			tx.rollback();
-    		}
-			catch(Throwable x){
-				throw new RecoverException(
-						"bug: exception not recognized (rollback fail): " + x.toString(), e); 
-			}
-    		
-    		throw new RecoverException("bug: exception not recognized", e);
+    		throw new RecoverException(e);
     	}
-    	finally{
-    		try{
-    			this.transactionManager.close(tx);
-    		}
-    		catch(TransactionException e){
-    			throw new RecoverException(e);    			
-    		}
-    	}
-    	
-    }
-    
-    /**
-     * Remove um item do cache.
-     * 
-     * @param key Identificação do item no cache.
-     * @return Verdadeiro se o item for removido. Caso contrário falso.
-     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar remover o
-     * item do cache.
-     */
-    public boolean remove(String key) throws RecoverException{
-    	CacheTransactionHandler tx = this.transactionManager.getCurrrent();
-    	
-    	if(tx == null){
-    		return this.removeLocalTX(key);
-    	}
-    	else{
-    		return tx.remove(this.transactionManager, cache, key, this.transactionTimeout);
-    	}
-    }
-    
-    private boolean removeLocalTX(String key) throws RecoverException{
-    	
-    	CacheTransactionHandler tx = this.transactionManager.begin();
-    	
-    	try{
-    		boolean o = tx.remove(this.transactionManager, cache, key, this.transactionTimeout);
-			tx.commit();
-			return o;
-    	}
-    	catch(RecoverException e){
-    		try{
-    			tx.rollback();
-    		}
-			catch(Throwable x){
-				throw new RecoverException("rollback fail: " + x.toString(), e); 
-			}
-    		
-    		throw e;
-    	}
-    	catch(Throwable e){
-    		try{
-    			tx.rollback();
-    		}
-			catch(Throwable x){
-				throw new RecoverException(
-						"bug: exception not recognized (rollback fail): " + x.toString(), e); 
-			}
-    		
-    		throw new RecoverException("bug: exception not recognized", e);
-    	}
-    	finally{
-    		try{
-    			this.transactionManager.close(tx);
-    		}
-    		catch(TransactionException e){
-    			throw new RecoverException(e);    			
-    		}
-    	}
-    	
-    }    
+    }	
     
     /**
      * Obtém a quantidade de itens recuperados.
@@ -496,6 +328,59 @@ public class TxCache
      */
     public long getCountRemovedData() {
         return this.cache.getCountRemovedData();
+    }
+
+    private Object executeMethodInTX(Method method, 
+    		CacheTransactionHandler currentTx, Object ... params) throws Throwable{
+    	
+    	CacheTransactionHandler tx = 
+    			currentTx == null? 
+    					this.transactionManager.begin() : 
+    					currentTx;
+    	
+    	try{
+    		Object r = method.invoke(this, params);
+			if(currentTx == null){
+				tx.commit();
+			}
+			return r;
+    	}
+    	catch(IllegalAccessException e){
+			throw new StorageException("bug!", e); 
+    	}
+    	catch(IllegalArgumentException e){
+			throw new StorageException("bug!", e); 
+    	}
+    	catch(InvocationTargetException e){
+    		Throwable ex = e.getTargetException();
+    		
+    		try{
+    			if(currentTx == null){
+    				tx.rollback();
+    			}
+    		}
+			catch(Throwable x){
+				throw new StorageException(
+						"bug: exception not recognized (rollback fail): " + x.toString(), ex); 
+			}
+    		
+    		if(ex instanceof StorageException || ex instanceof RecoverException){
+        		throw ex;
+    		}
+    		else{
+    			throw new StorageException("bug: exception not recognized: ", ex);
+    		}
+    		
+    	}
+    	finally{
+    		try{
+    			this.transactionManager.close(tx);
+    		}
+    		catch(TransactionException e){
+    			throw new StorageException(e);    			
+    		}
+    	}
+    	
     }
     
 }
