@@ -51,7 +51,7 @@ public class Cache
     }
     
     public TXCache getTXCache(){
-    	return new TXCache(this, null);
+    	return new TXCache(this);
     }
 
     public TXCache getTXCache(CacheTransactionManager txManager, long timeout){
