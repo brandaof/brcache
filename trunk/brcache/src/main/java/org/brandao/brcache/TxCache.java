@@ -30,7 +30,7 @@ import org.brandao.brcache.tx.TransactionException;
  * 
  * @author Brandao
  */
-public class TransactionalCache 
+public class TxCache 
 	implements Serializable{
     
 	private static final long serialVersionUID = -5345989492194115454L;
@@ -43,7 +43,7 @@ public class TransactionalCache
 
 	private long transactionTimeout;
 	
-    public TransactionalCache(CacheTransactionManager transactionManager){
+    public TxCache(CacheTransactionManager transactionManager){
         this(
     		3L*1024L*1024L, 1024, 0.5, 
     		1L*1024L*1024L, 1024, 0.5, 
@@ -70,7 +70,7 @@ public class TransactionalCache
      * @param swaperType Estratégia de armazenamento dos dados em disco.
      * @param quantitySwaperThread Quantidade de processos usados para fazer a permuta.
      */
-    public TransactionalCache(
+    public TxCache(
     		long nodeBufferSize,
     		long nodePageSize,
     		double nodeSwapFactor,
