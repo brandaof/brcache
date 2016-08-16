@@ -45,6 +45,67 @@ public class TxCache
 	private static final long TIME_OUT = 5*60*1000;
 	
 	private static final Method replace;
+
+	private static final Method replaceExact;
+
+	private static final Method putIfAbsent;
+
+	private static final Method put;
+
+	private static final Method putStream;
+
+	private static final Method get;
+
+	private static final Method getStream;
+
+	private static final Method remove;
+
+	private static final Method removeExact;
+	
+	static{
+		try{
+			replace = CacheTransactionHandler.class.getDeclaredMethod(
+					"replace",	CacheTransactionManager.class, 
+					StreamCache.class, String.class, Object.class, long.class, long.class);
+
+			replaceExact = CacheTransactionHandler.class.getDeclaredMethod(
+					"replace", CacheTransactionManager.class, StreamCache.class,
+					String.class, Object.class, 
+					Object.class, long.class, long.class);
+
+			putIfAbsent = CacheTransactionHandler.class.getDeclaredMethod(
+					"putIfAbsent", CacheTransactionManager.class, StreamCache.class,
+					String.class, Object.class, long.class, long.class);
+
+			put = CacheTransactionHandler.class.getDeclaredMethod(
+					"put", CacheTransactionManager.class, StreamCache.class,
+					String.class, Object.class, long.class, long.class);
+
+			putStream = CacheTransactionHandler.class.getDeclaredMethod(
+					"putStream", CacheTransactionManager.class, StreamCache.class, 
+		    		String.class, long.class, InputStream.class, long.class);
+
+			get = CacheTransactionHandler.class.getDeclaredMethod(
+					"get", CacheTransactionManager.class, StreamCache.class,
+					String.class, boolean.class, long.class);
+
+			getStream = CacheTransactionHandler.class.getDeclaredMethod(
+					"getStream", CacheTransactionManager.class, StreamCache.class, 
+		    		String.class, boolean.class, long.class);
+
+			removeExact = CacheTransactionHandler.class.getDeclaredMethod(
+					"remove", CacheTransactionManager.class, StreamCache.class,
+					String.class, Object.class, long.class);
+
+			remove = CacheTransactionHandler.class.getDeclaredMethod(
+					"remove", CacheTransactionManager.class, StreamCache.class,
+		    		String.class, long.class);
+			
+		}
+		catch(Throwable e){
+			throw new ExceptionInInitializerError(e);
+		}
+	}
 	
 	private StreamCache cache;
 	
