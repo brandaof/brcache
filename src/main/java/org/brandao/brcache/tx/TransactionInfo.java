@@ -35,16 +35,54 @@ public class TransactionInfo {
 		this.entities = new HashMap<String, EntryCache>();
 	}
 	
-	public void putObject(CacheTransactionManager manager, StreamCache cache,
-			String key, long maxAliveTime, Object item, long time)
-			throws StorageException {
+	/* métodos de armazenamento */
+	
+	public Object replace(CacheTransactionManager manager, StreamCache cache,
+			String key, Object value, long maxAliveTime, long time) throws StorageException {
 		
 		try{
-	        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-	        ObjectOutputStream oout = new ObjectOutputStream(bout);
-	        oout.writeObject(item);
-	        oout.flush();
-	        this.put(manager, cache, key, maxAliveTime, new ByteArrayInputStream(bout.toByteArray()), time);
+			Object o = this.get(manager, cache, key, true, time);
+			if(o != null){
+				this.put(manager, cache, key, value, maxAliveTime, time);
+				return true;
+			}
+			else
+				return false;
+		}
+		catch(Throwable e){
+			throw new StorageException(e);
+		}
+	}
+	
+	public boolean replace(CacheTransactionManager manager, StreamCache cache,
+			String key, Object oldValue, 
+			Object newValue, long maxAliveTime, long time) throws StorageException {
+		
+		try{
+			Object o = this.get(manager, cache, key, true, time);
+			if(o != null && o.equals(oldValue)){
+				this.put(manager, cache, key, newValue, maxAliveTime, time);
+				return true;
+			}
+			else
+				return false;
+		}
+		catch(Throwable e){
+			throw new StorageException(e);
+		}
+	}
+	
+	public Object putIfAbsent(CacheTransactionManager manager, StreamCache cache,
+			String key, Object value, long maxAliveTime, long time) throws StorageException {
+		
+		try{
+			Object o = this.get(manager, cache, key, true, time);
+			
+			if(o == null){
+				this.put(manager, cache, key, value, maxAliveTime, time);
+			}
+			
+			return o;
 		}
 		catch(StorageException e){
 			throw e;
@@ -53,45 +91,36 @@ public class TransactionInfo {
 			throw new StorageException(e);
 		}
 	}
-
-	public Object getObject(CacheTransactionManager manager, StreamCache cache,
-			String key, boolean forUpdate, long time)
-			throws RecoverException {
-    	InputStream in = null;
-        try{
-            in = this.get(manager, cache, key, forUpdate, time);
-            if(in != null){
-                ObjectInputStream oin = new ObjectInputStream(in);
-                return oin.readObject();
-            }
-            else
-                return null;
-        }
-        catch(RecoverException e){
-            throw e;
-        }
-        catch(Throwable e){
-            throw new RecoverException(e);
-        }
-        finally{
-        	try{
-        		if(in != null)
-        			in.close();
-        	}
-        	catch(Throwable e){
-        	}
-        }
+	
+	public void put(CacheTransactionManager manager, StreamCache cache,
+			String key, Object value, long maxAliveTime, long time) throws StorageException {
+		try{
+			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+			ObjectOutputStream oout = new ObjectOutputStream(bout);
+			oout.writeObject(value);
+			oout.flush();
+			this.putStream(
+				manager, cache, key, maxAliveTime, 
+				new ByteArrayInputStream(bout.toByteArray()), time);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(Throwable e){
+			throw new StorageException(e);
+		}
 	}
 	
-    public void put(CacheTransactionManager manager, StreamCache cache, 
+    public void putStream(CacheTransactionManager manager, StreamCache cache, 
     		String key, long maxAliveTime, InputStream inputData, long time) 
     		throws StorageException {
-    	
+
     	try{
-			manager.tryLock(this.id, key, time);
-			
-			byte[] dta = inputData == null? null : this.getBytes(inputData);
-			
+    		manager.tryLock(this.id, key, time);
+			byte[] dta = 
+				inputData == null? 
+					null : 
+					this.getBytes(inputData);
 			this.managed.add(key);
 			this.inserted.add(key);
 			this.entities.put(key, new EntryCache(dta, maxAliveTime));
@@ -100,8 +129,29 @@ public class TransactionInfo {
     		throw new StorageException(e);
     	}
     }
-
-    public InputStream get(CacheTransactionManager manager, StreamCache cache, 
+	
+	/* métodos de coleta*/
+	
+	public Object get(CacheTransactionManager manager, StreamCache cache,
+			String key, boolean forUpdate, long time) throws RecoverException {
+		try{
+			InputStream in = this.getStream(manager, cache, key, forUpdate, time);
+			if(in != null){
+					ObjectInputStream oin = new ObjectInputStream(in);
+					return oin.readObject();
+			}
+			else
+				return null;
+		}
+		catch(RecoverException e){
+			throw e;
+		}	
+		catch(Throwable e){
+			throw new RecoverException(e);
+		}	
+	}
+    
+    public InputStream getStream(CacheTransactionManager manager, StreamCache cache, 
     		String key, boolean forUpdate, long time) throws RecoverException {
     	
     	try{
@@ -116,6 +166,24 @@ public class TransactionInfo {
     	}
     }
 
+    /* métodos de remoção */
+    
+	public boolean remove(CacheTransactionManager manager, StreamCache cache,
+			String key, Object value, long time) throws StorageException {
+		
+		try{
+			Object o = this.get(manager, cache, key, true, time);
+			if(o != null && o.equals(value)){
+				return this.remove(manager, cache, key, time);
+			}
+			else
+				return false;
+		}
+		catch(Throwable e){
+			throw new StorageException(e);
+		}
+	}
+	
     public boolean remove(CacheTransactionManager manager, StreamCache cache,
     		String key, long time) throws RecoverException{       
     	try{
@@ -123,7 +191,7 @@ public class TransactionInfo {
 			this.managed.add(key);
 			this.inserted.add(key);
 			this.entities.put(key, null);
-			return cache.get(key) != null;
+			return cache.getStream(key) != null;
     	}
     	catch(RecoverException e){
     		throw e;
@@ -132,6 +200,61 @@ public class TransactionInfo {
     		throw new RecoverException(e);
     	}
     }
+	
+    /* métodos de manipulação*/
+    
+	public void savePoint(StreamCache cache) throws IOException, RecoverException{
+		saved.clear();
+
+		for(String key: this.inserted){
+			InputStream in = cache.getStream(key);
+			if(in != null){
+				saved.put(key, new EntryCache(this.getBytes(in), -1));
+			}
+			else{
+				saved.put(key, null);
+			}
+		}
+		
+	}
+    
+	public void rollback(StreamCache cache) throws StorageException, RecoverException {
+		
+		for(String key: this.saved.keySet()){
+			EntryCache entity = saved.get(key);
+			if(entity == null){
+				cache.remove(key);
+			}
+			else{
+				cache.put(key, entity.getMaxAlive(), new ByteArrayInputStream(entity.getData()));
+			}
+		}
+		
+	}
+	
+	public void commit(StreamCache cache) throws RecoverException, StorageException {
+		if(!this.inserted.isEmpty()){
+			for(String key: this.inserted){
+				EntryCache entity = this.entities.get(key);
+				
+				if(entity == null){
+					cache.remove(key);
+				}
+				else{
+					cache.put(key, entity.getMaxAlive(), new ByteArrayInputStream(entity.getData()));
+				}
+			}
+			
+		}
+	}
+	
+	public void clear() throws TransactionException{
+		this.entities.clear();
+		this.inserted.clear();
+		this.saved.clear();
+	}
+    
+    /* métodos internos */
     
     private byte[] getEntity(CacheTransactionManager manager, StreamCache cache,
     		String key, boolean lock, long time) 
@@ -163,7 +286,7 @@ public class TransactionInfo {
 			}
 		}
 		
-		InputStream in = cache.get(key);
+		InputStream in = cache.getStream(key);
 		
 		if(in != null){
 			byte[] dta = this.getBytes(in);
@@ -184,56 +307,5 @@ public class TransactionInfo {
     	bout.close();
     	return bout.toByteArray();
     }
-
-	public void savePoint(StreamCache cache) throws IOException, RecoverException{
-		saved.clear();
-
-		for(String key: this.inserted){
-			InputStream in = cache.get(key);
-			if(in != null){
-				saved.put(key, new EntryCache(this.getBytes(in), -1));
-			}
-			else{
-				saved.put(key, null);
-			}
-		}
-		
-	}
-    
-	public void rollback(StreamCache cache) throws StorageException, RecoverException {
-		
-		for(String key: this.saved.keySet()){
-			EntryCache entity = saved.get(key);
-			if(entity == null){
-				cache.remove(key);
-			}
-			else{
-				cache.put(key, entity.getMaxAlive(), new ByteArrayInputStream(entity.getData()));
-			}
-		}
-		
-	}
-	
-	protected void commit(StreamCache cache) throws RecoverException, StorageException {
-		if(!this.inserted.isEmpty()){
-			for(String key: this.inserted){
-				EntryCache entity = this.entities.get(key);
-				
-				if(entity == null){
-					cache.remove(key);
-				}
-				else{
-					cache.put(key, entity.getMaxAlive(), new ByteArrayInputStream(entity.getData()));
-				}
-			}
-			
-		}
-	}
-	
-	public void clear() throws TransactionException{
-		this.entities.clear();
-		this.inserted.clear();
-		this.saved.clear();
-	}
 	
 }
