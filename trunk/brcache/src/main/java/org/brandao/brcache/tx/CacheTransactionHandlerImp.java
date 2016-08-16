@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.UUID;
 
 import org.brandao.brcache.StreamCache;
@@ -34,6 +35,8 @@ public class CacheTransactionHandlerImp
 
 	private String transactionName;
 	
+	private UUID id;
+	
 	public CacheTransactionHandlerImp(UUID id, 
 			CacheTransactionManager transactionManager, StreamCache cache){
 		super(id);
@@ -45,9 +48,14 @@ public class CacheTransactionHandlerImp
 		this.cache				= cache;
 		this.transactionManager	= transactionManager;
 		this.transactionName    = id.toString();
+		this.id					= id;
 		this.file               = new File(
 				transactionManager.getTransactionPath(), 
 				TRANSACTION_NAME.replace("{{name}}", this.transactionName));
+	}
+	
+	public Serializable getId() {
+		return this.id;
 	}
 	
 	public synchronized void begin() throws TransactionException {
@@ -181,5 +189,5 @@ public class CacheTransactionHandlerImp
 			throw new TransactionException(e);
 		}
 	}
-	
+
 }
