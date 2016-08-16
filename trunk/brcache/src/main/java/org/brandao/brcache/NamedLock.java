@@ -52,7 +52,7 @@ public class NamedLock {
 			return ref;
 		}
 		else{
-			this.unlock(ref, lockName);
+			this.releaseLock(ref, lockName);
 			return null;
 		}
 	}
@@ -67,13 +67,13 @@ public class NamedLock {
 				return ref;
 			}
 			else{
-				this.unlock(ref, lockName);
+				this.releaseLock(ref, lockName);
 				return null;
 			}
 		}
 		catch(InterruptedException e){
 			try{
-				this.unlock(ref, lockName);
+				this.releaseLock(ref, lockName);
 			}
 			catch(Throwable x){
 				throw new InterruptedException("bug: " + x.toString());
@@ -119,7 +119,7 @@ public class NamedLock {
 		this.releaseLock(ref, lockName);
 	}
 	
-	private synchronized void releaseLock(Serializable ref, String lockName){
+	private void releaseLock(Serializable ref, String lockName){
 		_lock.lock();
 		try{
 			Set<UUID> originSet = this.origins.get(lockName);
