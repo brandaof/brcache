@@ -5,10 +5,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 public class Cache 
 	extends StreamCache {
 
+	protected NamedLock locks;
+	
     public Cache(){
         super(
     		3L*1024L*1024L, 1024, 0.5, 
@@ -40,6 +43,7 @@ public class Cache
     	super(nodeBufferSize, nodePageSize, nodeSwapFactor, indexBufferSize, 
     			indexPageSize, indexSwapFactor, dataBufferSize, dataPageSize, blockSize, 
     			dataSwapFactor, maxSizeEntry, maxSizeKey, dataPath, swaperType, quantitySwaperThread);
+    	this.locks = new NamedLock();
     }
     
 	public long size() {
@@ -92,8 +96,10 @@ public class Cache
 		return super.remove(key);
 	}
 
-	public synchronized Object putIfAbsent(String key, 
+	public Object putIfAbsent(String key, 
 			Object value, long maxAliveTime) throws StorageException {
+		
+		Serializable refLock = this.locks.lock(key);
 		try{
 			Object o = this.get(key);
 			if(o == null){
@@ -108,9 +114,16 @@ public class Cache
 		catch(Throwable e){
 			throw new StorageException(e);
 		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
 	}
 
 	public boolean remove(String key, Object value) throws StorageException {
+		
+		Serializable refLock = this.locks.lock(key);
 		try{
 			Object o = this.get(key);
 			if(o != null && o.equals(value)){
@@ -122,10 +135,17 @@ public class Cache
 		catch(Throwable e){
 			throw new StorageException(e);
 		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
 	}
 
 	public boolean replace(String key, Object oldValue, 
 			Object newValue, long maxAliveTime) throws StorageException {
+		
+		Serializable refLock = this.locks.lock(key);
 		try{
 			Object o = this.get(key);
 			if(o != null && o.equals(oldValue)){
@@ -138,9 +158,17 @@ public class Cache
 		catch(Throwable e){
 			throw new StorageException(e);
 		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
 	}
 
-	public Object replace(String key, Object value, long maxAliveTime) throws StorageException {
+	public Object replace(String key, Object value, 
+			long maxAliveTime) throws StorageException {
+		
+		Serializable refLock = this.locks.lock(key);
 		try{
 			Object o = this.get(key);
 			if(o != null){
@@ -152,6 +180,11 @@ public class Cache
 		}
 		catch(Throwable e){
 			throw new StorageException(e);
+		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
 		}
 	}
 
