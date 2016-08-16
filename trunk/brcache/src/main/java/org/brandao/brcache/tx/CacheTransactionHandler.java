@@ -1,10 +1,6 @@
 package org.brandao.brcache.tx;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.RecoverException;
@@ -48,6 +44,6 @@ public interface CacheTransactionHandler
 			String key, Object value, long time) throws StorageException;
 	
     boolean remove(CacheTransactionManager manager, StreamCache cache,
-    		String key, long time) throws RecoverException;
+    		String key, long time) throws StorageException;
     
 }

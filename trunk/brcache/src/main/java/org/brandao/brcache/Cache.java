@@ -180,7 +180,7 @@ public class Cache
 		}
 	}
 	
-	public boolean remove(String key) throws RecoverException {
+	public boolean remove(String key) throws StorageException {
 		return super.remove(key);
 	}
 
