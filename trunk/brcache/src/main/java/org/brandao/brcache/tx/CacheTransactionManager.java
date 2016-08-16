@@ -3,6 +3,8 @@ package org.brandao.brcache.tx;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.brandao.brcache.StreamCache;
+
 public interface CacheTransactionManager {
 
 	void lock(UUID transaction, String key) throws TransactionException;
@@ -17,7 +19,7 @@ public interface CacheTransactionManager {
 	
 	String getTransactionPath();
 	
-	CacheTransactionHandler begin();
+	CacheTransactionHandler begin(StreamCache cache);
 	
 	CacheTransactionHandler getCurrrent();
 	
