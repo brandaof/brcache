@@ -24,6 +24,7 @@ public class NamedLock {
 		
 		Lock lock = null;
 		UUID ref  = UUID.randomUUID();
+		
 		synchronized(this){
 			Set<UUID> originSet = this.origins.get(lockName);
 			lock = this.locks.get(lockName);
@@ -43,11 +44,20 @@ public class NamedLock {
 		}
 		
 		lock.lock();
+		
 		return ref;
 	}
 	
 	public void unlock(Serializable ref, String lockName){
-		Lock lock = null;
+		
+		Lock lock = this.locks.get(lockName);
+		
+		if(lock == null){
+			throw new IllegalStateException("lock not found: " + lockName + ": " + ref);
+		}
+		
+		lock.unlock();
+		
 		synchronized(this){
 			Set<UUID> originSet = this.origins.get(lockName);
 			
@@ -59,14 +69,13 @@ public class NamedLock {
 				throw new IllegalStateException("lock reference not found: " + lockName + ": " + ref);
 			}
 			
-			lock = this.locks.get(lockName);
-			
 			if(originSet.isEmpty() && this.locks.remove(lockName) == null){
 				throw new IllegalStateException("lock not found: " + lockName + ": " + ref);
 			}
+			else{
+				this.origins.remove(lockName);
+			}
 		}
-		
-		lock.unlock();
 		
 	}	
 }
