@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -14,20 +15,79 @@ public class NamedLock {
 	private Map<String,Set<UUID>> origins;
 
 	private Map<String,Lock> locks;
+
+	private Lock _lock;
 	
 	public NamedLock(){
 		this.origins = new HashMap<String, Set<UUID>>();
 		this.locks  = new HashMap<String, Lock>();
+		this._lock = new ReentrantLock();
 	}
 	
 	public Serializable lock(String lockName){
 		
-		Lock lock = null;
 		UUID ref  = UUID.randomUUID();
+		Lock lock = this.getLock(ref, lockName);
 		
-		synchronized(this){
+		lock.lock();
+		
+		return ref;
+	}
+
+    public Serializable lockInterruptibly(String lockName) throws InterruptedException{
+		UUID ref  = UUID.randomUUID();
+		Lock lock = this.getLock(ref, lockName);
+		
+		lock.lockInterruptibly();
+		
+		return ref;
+    }
+
+	public Serializable tryLock(String lockName) throws InterruptedException{
+		
+		UUID ref  = UUID.randomUUID();
+		Lock lock = this.getLock(ref, lockName);
+		
+		if(lock.tryLock()){
+			return ref;
+		}
+		else{
+			this.unlock(ref, lockName);
+			return null;
+		}
+	}
+    
+	public Serializable tryLock(String lockName, long time, TimeUnit unit) throws InterruptedException{
+		
+		UUID ref  = UUID.randomUUID();
+		Lock lock = this.getLock(ref, lockName);
+		
+		try{
+			if(lock.tryLock(time, unit)){
+				return ref;
+			}
+			else{
+				this.unlock(ref, lockName);
+				return null;
+			}
+		}
+		catch(InterruptedException e){
+			try{
+				this.unlock(ref, lockName);
+			}
+			catch(Throwable x){
+				throw new InterruptedException("bug: " + x.toString());
+			}
+			
+			throw e;
+		}
+	}
+	
+	private Lock getLock(UUID ref, String lockName){
+		_lock.lock();
+		try{
 			Set<UUID> originSet = this.origins.get(lockName);
-			lock = this.locks.get(lockName);
+			Lock lock = this.locks.get(lockName);
 			
 			if(originSet == null){
 				originSet = new HashSet<UUID>();
@@ -40,16 +100,14 @@ public class NamedLock {
 				lock = new ReentrantLock();
 				this.locks.put(lockName, lock);
 			}
-			
+			return lock;
 		}
-		
-		lock.lock();
-		
-		return ref;
+		finally{
+			_lock.unlock();
+		}
 	}
 	
 	public void unlock(Serializable ref, String lockName){
-		
 		Lock lock = this.locks.get(lockName);
 		
 		if(lock == null){
@@ -58,7 +116,12 @@ public class NamedLock {
 		
 		lock.unlock();
 		
-		synchronized(this){
+		this.releaseLock(ref, lockName);
+	}
+	
+	private synchronized void releaseLock(Serializable ref, String lockName){
+		_lock.lock();
+		try{
 			Set<UUID> originSet = this.origins.get(lockName);
 			
 			if(originSet == null){
@@ -76,6 +139,9 @@ public class NamedLock {
 				this.origins.remove(lockName);
 			}
 		}
-		
-	}	
+		finally{
+			_lock.unlock();
+		}
+	}
+	
 }
