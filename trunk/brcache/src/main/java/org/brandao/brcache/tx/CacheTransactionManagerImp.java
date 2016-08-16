@@ -62,9 +62,14 @@ public class CacheTransactionManagerImp
 		}
 		
 		Serializable lockId = tx.locks.get(key);
+		
+		if(lockId == null){
+			throw new TransactionException("lock not found: " + txId + ":" + key);
+		}
+		
 		try{
-			lockId = locks.tryLock(key, time, unit);
-			tx.locks.add(lockId);
+			locks.unlock(lockId, key);
+			tx.locks.remove(key);
 		}
 		catch(Throwable e){
 			if(lockId != null){
@@ -74,9 +79,16 @@ public class CacheTransactionManagerImp
 		}
 	}
 
-	public void commit(UUID transaction) throws TransactionException {
-		// TODO Auto-generated method stub
+	public void commit(UUID txId) throws TransactionException {
+		Transaction tx = this.transactionLocks.get(txId);
 		
+		if(tx == null){
+			throw new TransactionException("tx not found: " + txId);
+		}
+		
+		CacheTransactionHandler txHandler = tx.txHandler;
+		
+		txHandler.commit();
 	}
 
 	public void rollback(UUID transaction) throws TransactionException {
@@ -107,6 +119,8 @@ public class CacheTransactionManagerImp
 	private class Transaction{
 		
 		public Serializable id;
+		
+		public CacheTransactionHandler txHandler;
 		
 		public Map<String, Serializable> locks;
 		
