@@ -34,7 +34,7 @@ public class CacheTransactionHandlerImp
 
 	private String transactionName;
 	
-	private CacheTransactionHandlerImp(UUID id, 
+	public CacheTransactionHandlerImp(UUID id, 
 			CacheTransactionManager transactionManager, StreamCache cache){
 		super(id);
 		this.commitInProgress   = false;

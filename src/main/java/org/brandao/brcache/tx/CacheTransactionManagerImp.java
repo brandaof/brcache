@@ -1,19 +1,24 @@
 package org.brandao.brcache.tx;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.brandao.brcache.NamedLock;
+import org.brandao.brcache.StreamCache;
 
 public class CacheTransactionManagerImp 
 	implements CacheTransactionManager{
 
+	private ThreadLocal<CacheTransactionHandler> transactions;
+	
 	private NamedLock locks;
 	
 	private Map<UUID, Transaction> transactionLocks;
+	
+	private String transactionPath;
 	
 	public void lock(UUID txId, String key) throws TransactionException {
 		Serializable lockId = null;
@@ -91,28 +96,46 @@ public class CacheTransactionManagerImp
 		txHandler.commit();
 	}
 
-	public void rollback(UUID transaction) throws TransactionException {
-		// TODO Auto-generated method stub
+	public void rollback(UUID txId) throws TransactionException {
+		Transaction tx = this.transactionLocks.get(txId);
 		
+		if(tx == null){
+			throw new TransactionException("tx not found: " + txId);
+		}
+		
+		CacheTransactionHandler txHandler = tx.txHandler;
+		
+		txHandler.rollback();
+	}
+
+	
+	public void setTransactionPath(String transactionPath) {
+		this.transactionPath = transactionPath;
 	}
 
 	public String getTransactionPath() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.transactionPath;
 	}
 
-	public CacheTransactionHandler begin() {
-		// TODO Auto-generated method stub
-		return null;
+	public CacheTransactionHandler begin(StreamCache cache) {
+		CacheTransactionHandler txh = this.transactions.get();
+		
+		if(txh != null){
+			throw new IllegalStateException("transaction has been started");
+		}
+		
+		UUID txId = UUID.randomUUID();
+		txh = new CacheTransactionHandlerImp(txId, this, cache);
+		this.transactionLocks.put(txId, new Transaction(txId, txh, new HashMap<String, Serializable>()));
+		this.transactions.set(txh);
+		return txh;
 	}
 
 	public CacheTransactionHandler getCurrrent() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.transactions.get();
 	}
 
 	public void close(CacheTransactionHandler tx) throws TransactionException {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -123,6 +146,13 @@ public class CacheTransactionManagerImp
 		public CacheTransactionHandler txHandler;
 		
 		public Map<String, Serializable> locks;
+
+		public Transaction(Serializable id, CacheTransactionHandler txHandler,
+				Map<String, Serializable> locks) {
+			this.id = id;
+			this.txHandler = txHandler;
+			this.locks = locks;
+		}
 		
 	}
 }
