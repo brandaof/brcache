@@ -10,7 +10,9 @@ import java.io.Serializable;
 public class Cache 
 	extends StreamCache {
 
-	protected NamedLock locks;
+	private static final long serialVersionUID = -8558471389768293591L;
+	
+	protected transient NamedLock locks;
 	
     public Cache(){
         super(
