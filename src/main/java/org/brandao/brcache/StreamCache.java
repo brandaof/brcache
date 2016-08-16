@@ -310,10 +310,10 @@ public class StreamCache
      * 
      * @param key Identificação do item no cache.
      * @return Verdadeiro se o item for removido. Caso contrário falso.
-     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar remover o
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
      * item do cache.
      */
-    public boolean remove(String key) throws RecoverException{
+    public boolean remove(String key) throws StorageException{
         
         try{
         	DataMap data = this.dataMap.get(key);
@@ -328,7 +328,7 @@ public class StreamCache
                 return false;
         }
         catch(Throwable e){
-            throw new RecoverException(e);
+            throw new StorageException(e);
         }
         
     }

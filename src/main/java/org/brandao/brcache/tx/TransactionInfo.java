@@ -185,7 +185,7 @@ public class TransactionInfo {
 	}
 	
     public boolean remove(CacheTransactionManager manager, StreamCache cache,
-    		String key, long time) throws RecoverException{       
+    		String key, long time) throws StorageException{       
     	try{
     		manager.tryLock(this.id, key, time);
 			this.managed.add(key);
@@ -193,11 +193,8 @@ public class TransactionInfo {
 			this.entities.put(key, null);
 			return cache.getStream(key) != null;
     	}
-    	catch(RecoverException e){
-    		throw e;
-    	}
     	catch(Throwable e){
-    		throw new RecoverException(e);
+    		throw new StorageException(e);
     	}
     }
 	

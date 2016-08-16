@@ -17,11 +17,7 @@
 
 package org.brandao.brcache;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -29,7 +25,6 @@ import java.lang.reflect.Method;
 import org.brandao.brcache.tx.CacheTransaction;
 import org.brandao.brcache.tx.CacheTransactionHandler;
 import org.brandao.brcache.tx.CacheTransactionManager;
-import org.brandao.brcache.tx.EntryCache;
 import org.brandao.brcache.tx.TransactionException;
 
 /**
@@ -187,7 +182,18 @@ public class TxCache
 	public Object replace(CacheTransactionManager manager, StreamCache cache,
 			String key, Object value, long maxAliveTime, long time) throws StorageException {
 		
-		this.executeMethodInTX(method, currentTx, params);
+		try{
+			return this.executeMethodInTX(replace, 
+					this.transactionManager.getCurrrent(), 
+					manager, cache,
+					key, value, maxAliveTime, time);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(Throwable e){
+			throw new StorageException(e);
+		}
 	}
 	
 	public boolean replace(CacheTransactionManager manager, StreamCache cache,
@@ -195,30 +201,29 @@ public class TxCache
 			Object newValue, long maxAliveTime, long time) throws StorageException {
 		
 		try{
-			Object o = this.get(manager, cache, key, true, time);
-			if(o != null && o.equals(oldValue)){
-				this.put(manager, cache, key, newValue, maxAliveTime, time);
-				return true;
-			}
-			else
-				return false;
+			return (Boolean)this.executeMethodInTX(replaceExact, 
+					this.transactionManager.getCurrrent(), 
+					manager, cache,
+					key, oldValue, 
+					newValue, maxAliveTime, time);
+		}
+		catch(StorageException e){
+			throw e;
 		}
 		catch(Throwable e){
 			throw new StorageException(e);
 		}
+
 	}
 	
 	public Object putIfAbsent(CacheTransactionManager manager, StreamCache cache,
 			String key, Object value, long maxAliveTime, long time) throws StorageException {
 		
 		try{
-			Object o = this.get(manager, cache, key, true, time);
-			
-			if(o == null){
-				this.put(manager, cache, key, value, maxAliveTime, time);
-			}
-			
-			return o;
+			return this.executeMethodInTX(putIfAbsent, 
+					this.transactionManager.getCurrrent(), 
+					manager, cache,
+					key, value, maxAliveTime, time);
 		}
 		catch(StorageException e){
 			throw e;
@@ -231,13 +236,10 @@ public class TxCache
 	public void put(CacheTransactionManager manager, StreamCache cache,
 			String key, Object value, long maxAliveTime, long time) throws StorageException {
 		try{
-			ByteArrayOutputStream bout = new ByteArrayOutputStream();
-			ObjectOutputStream oout = new ObjectOutputStream(bout);
-			oout.writeObject(value);
-			oout.flush();
-			this.putStream(
-				manager, cache, key, maxAliveTime, 
-				new ByteArrayInputStream(bout.toByteArray()), time);
+			this.executeMethodInTX(put, 
+					this.transactionManager.getCurrrent(), 
+					manager, cache,
+					key, value, maxAliveTime, time);
 		}
 		catch(StorageException e){
 			throw e;
@@ -250,20 +252,18 @@ public class TxCache
     public void putStream(CacheTransactionManager manager, StreamCache cache, 
     		String key, long maxAliveTime, InputStream inputData, long time) 
     		throws StorageException {
-
-    	try{
-    		manager.tryLock(this.id, key, time);
-			byte[] dta = 
-				inputData == null? 
-					null : 
-					this.getBytes(inputData);
-			this.managed.add(key);
-			this.inserted.add(key);
-			this.entities.put(key, new EntryCache(dta, maxAliveTime));
-    	}
-    	catch(Throwable e){
-    		throw new StorageException(e);
-    	}
+		try{
+			this.executeMethodInTX(putStream, 
+					this.transactionManager.getCurrrent(), 
+					manager, cache, 
+		    		key, maxAliveTime, inputData, time);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(Throwable e){
+			throw new StorageException(e);
+		}
     }
 	
 	/* métodos de coleta*/
@@ -271,35 +271,34 @@ public class TxCache
 	public Object get(CacheTransactionManager manager, StreamCache cache,
 			String key, boolean forUpdate, long time) throws RecoverException {
 		try{
-			InputStream in = this.getStream(manager, cache, key, forUpdate, time);
-			if(in != null){
-					ObjectInputStream oin = new ObjectInputStream(in);
-					return oin.readObject();
-			}
-			else
-				return null;
+			return this.executeMethodInTX(get, 
+					this.transactionManager.getCurrrent(), 
+					manager, cache,
+					key, forUpdate, time);
 		}
 		catch(RecoverException e){
 			throw e;
-		}	
+		}
 		catch(Throwable e){
 			throw new RecoverException(e);
-		}	
+		}
 	}
     
     public InputStream getStream(CacheTransactionManager manager, StreamCache cache, 
     		String key, boolean forUpdate, long time) throws RecoverException {
     	
-    	try{
-			byte[] dta = this.getEntity(manager, cache, key, forUpdate, time);
-			return dta == null? null : new ByteArrayInputStream(dta);
-    	}
-    	catch(RecoverException e){
-    		throw e;
-    	}
-    	catch(Throwable e){
-    		throw new RecoverException(e);
-    	}
+		try{
+			return (InputStream)this.executeMethodInTX(getStream, 
+					this.transactionManager.getCurrrent(), 
+					manager, cache, 
+		    		key, forUpdate, time);
+		}
+		catch(RecoverException e){
+			throw e;
+		}
+		catch(Throwable e){
+			throw new RecoverException(e);
+		}
     }
 
     /* métodos de remoção */
@@ -308,12 +307,13 @@ public class TxCache
 			String key, Object value, long time) throws StorageException {
 		
 		try{
-			Object o = this.get(manager, cache, key, true, time);
-			if(o != null && o.equals(value)){
-				return this.remove(manager, cache, key, time);
-			}
-			else
-				return false;
+			return (Boolean)this.executeMethodInTX(removeExact, 
+					this.transactionManager.getCurrrent(), 
+					manager, cache,
+					key, value, time);
+		}
+		catch(StorageException e){
+			throw e;
 		}
 		catch(Throwable e){
 			throw new StorageException(e);
@@ -321,20 +321,19 @@ public class TxCache
 	}
 	
     public boolean remove(CacheTransactionManager manager, StreamCache cache,
-    		String key, long time) throws RecoverException{       
-    	try{
-    		manager.tryLock(this.id, key, time);
-			this.managed.add(key);
-			this.inserted.add(key);
-			this.entities.put(key, null);
-			return cache.getStream(key) != null;
-    	}
-    	catch(RecoverException e){
-    		throw e;
-    	}
-    	catch(Throwable e){
-    		throw new RecoverException(e);
-    	}
+    		String key, long time) throws StorageException{       
+		try{
+			return (Boolean)this.executeMethodInTX(remove, 
+					this.transactionManager.getCurrrent(), 
+					manager, cache,
+		    		key, time);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(Throwable e){
+			throw new StorageException(e);
+		}
     }	
     
     /**
@@ -391,6 +390,8 @@ public class TxCache
         return this.cache.getCountRemovedData();
     }
 
+    /* métodos internos */
+    
     private Object executeMethodInTX(Method method, 
     		CacheTransactionHandler currentTx, Object ... params) throws Throwable{
     	
