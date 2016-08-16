@@ -32,10 +32,10 @@ import org.brandao.brcache.tx.TransactionException;
  * 
  * @author Brandao
  */
-public class TxCache 
+public class TXCache 
 	implements Serializable{
     
-	private static final long serialVersionUID = -5345989492194115454L;
+	private static final long serialVersionUID = 1L;
 
 	private static final long TIME_OUT = 5*60*1000;
 	
@@ -97,81 +97,38 @@ public class TxCache
 		    		String.class, long.class);
 
 			replace.setAccessible(true);
-			replaceExact.setAccessible(true);;
-			putIfAbsent.setAccessible(true);;
-			put.setAccessible(true);;
-			putStream.setAccessible(true);;
-			get.setAccessible(true);;
-			getStream.setAccessible(true);;
-			removeExact.setAccessible(true);;
-			remove.setAccessible(true);;
+			replaceExact.setAccessible(true);
+			putIfAbsent.setAccessible(true);
+			put.setAccessible(true);
+			putStream.setAccessible(true);
+			get.setAccessible(true);
+			getStream.setAccessible(true);
+			removeExact.setAccessible(true);
+			remove.setAccessible(true);
 		}
 		catch(Throwable e){
 			throw new ExceptionInInitializerError(e);
 		}
 	}
 	
-	private StreamCache cache;
+	private Cache cache;
 	
 	private CacheTransactionManager transactionManager;
 
 	private long transactionTimeout;
-	
-    public TxCache(CacheTransactionManager transactionManager){
-        this(
-    		3L*1024L*1024L, 1024, 0.5, 
-    		1L*1024L*1024L, 1024, 0.5, 
-    		10L*1024L*1024L, 64*1024, 1*1024, 0.5, 
-    		1*1024*1024L, 100, "/mnt/brcache", SwaperStrategy.FILE, 1, transactionManager);
-    }
-    
-    /**
-     * Cria um novo cache.
-     * 
-     * @param nodeBufferSize Tamanho do buffer, em bytes, onde os nós ficarão armazenados. 
-     * @param nodePageSize Tamanho da página, em bytes, do buffer de nós.
-     * @param nodeSwapFactor Fator de permuta dos nós.
-     * @param indexBufferSize Tamanho do buffer, em bytes, onde os índices ficarão armazenados.
-     * @param indexPageSize Tamanho da página, em bytes, do buffer de índices.
-     * @param indexSwapFactor Fator de permuta dos índices.
-     * @param dataBufferSize Tamanho do buffer, em bytes, onde os dados ficarão armazenados. 
-     * @param dataPageSize Tamanho da página, em bytes, do buffer de dados.
-     * @param blockSize Tamanho do bloco, em bytes.
-     * @param dataSwapFactor Fator de permuta dos dados.
-     * @param maxSizeEntry Tamanho máximo de uma entrada no cache.
-     * @param maxSizeKey Tamanho máximo de uma chave.
-     * @param dataPath Pasta onde os dados do cache serão persistidos.
-     * @param swaperType Estratégia de armazenamento dos dados em disco.
-     * @param quantitySwaperThread Quantidade de processos usados para fazer a permuta.
-     */
-    public TxCache(
-    		long nodeBufferSize,
-    		long nodePageSize,
-    		double nodeSwapFactor,
-    		
-    		long indexBufferSize,
-    		long indexPageSize,
-    		double indexSwapFactor,
-    		
-    		long dataBufferSize,
-    		long dataPageSize,
-    		long blockSize,
-    		double dataSwapFactor,
-    		
-    		long maxSizeEntry,
-    		int maxSizeKey,
-            String dataPath,
-            SwaperStrategy swaperType,
-            int quantitySwaperThread,
-            CacheTransactionManager transactionManager
-    		){
 
-    	this.cache = new StreamCache(nodeBufferSize, nodePageSize, nodeSwapFactor, 
-    			indexBufferSize, indexPageSize, indexSwapFactor, dataBufferSize, dataPageSize, 
-    			blockSize, dataSwapFactor, maxSizeEntry, maxSizeKey, dataPath, swaperType, 
-    			quantitySwaperThread);
+    public TXCache(Cache cache){
+    	this(cache, null, TIME_OUT);
+    }
+	
+    public TXCache(Cache cache, CacheTransactionManager transactionManager){
+    	this(cache, transactionManager, TIME_OUT);
+    }
+
+    public TXCache(Cache cache, CacheTransactionManager transactionManager, long timeout){
+    	this.cache = cache;
     	this.transactionManager = transactionManager;
-    	this.transactionTimeout = TIME_OUT;
+    	this.transactionTimeout = timeout;
     }
     
     public long getTransactionTimeout() {

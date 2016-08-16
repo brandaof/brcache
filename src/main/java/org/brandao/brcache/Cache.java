@@ -7,6 +7,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+import org.brandao.brcache.tx.CacheTransactionManager;
+
 public class Cache 
 	extends StreamCache {
 
@@ -46,6 +48,14 @@ public class Cache
     			indexPageSize, indexSwapFactor, dataBufferSize, dataPageSize, blockSize, 
     			dataSwapFactor, maxSizeEntry, maxSizeKey, dataPath, swaperType, quantitySwaperThread);
     	this.locks = new NamedLock();
+    }
+    
+    public TXCache getTXCache(){
+    	return new TXCache(this, null);
+    }
+
+    public TXCache getTXCache(CacheTransactionManager txManager, long timeout){
+    	return new TXCache(this, txManager, timeout);
     }
     
 	/* métodos de armazenamento */
