@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.RecoverException;
@@ -116,7 +117,7 @@ public class TransactionInfo {
     		throws StorageException {
 
     	try{
-    		manager.tryLock(this.id, key, time);
+    		manager.tryLock(this.id, key, time, TimeUnit.MILLISECONDS);
 			byte[] dta = 
 				inputData == null? 
 					null : 
@@ -187,7 +188,7 @@ public class TransactionInfo {
     public boolean remove(CacheTransactionManager manager, StreamCache cache,
     		String key, long time) throws StorageException{       
     	try{
-    		manager.tryLock(this.id, key, time);
+    		manager.tryLock(this.id, key, time, TimeUnit.MILLISECONDS);
 			this.managed.add(key);
 			this.inserted.add(key);
 			this.entities.put(key, null);
@@ -279,7 +280,7 @@ public class TransactionInfo {
 				manager.lock(this.id, key);
 			}
 			else{
-				manager.tryLock(this.id, key, time);
+				manager.tryLock(this.id, key, time, TimeUnit.MILLISECONDS);
 			}
 		}
 		
