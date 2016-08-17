@@ -9,6 +9,25 @@ import java.io.Serializable;
 
 import org.brandao.brcache.tx.CacheTransactionManager;
 
+/**
+ * Permite armazenar e recuperar valores associados as suas 
+ * respectivas chaves. 
+ * Também permite obter um cache transacional.
+ * 
+ * <pre>
+ * ex:
+ *    
+ *    Cache cache = new Cache();
+ *    cache.put("umaChave", meuObjeto, 1200);
+ *    
+ * ex2:
+ *    
+ *    MeuObjeto o = cache.get("umaChave");
+ *
+ * </pre>
+ * @author Brandao
+ *
+ */
 public class Cache 
 	extends StreamCache {
 
@@ -73,10 +92,21 @@ public class Cache
     	this.locks = new NamedLock();
     }
     
+    /**
+     * Obtém o cache com suporte transacional.
+     * @return cache.
+     */
     public TXCache getTXCache(){
     	return new TXCache(this);
     }
 
+    /**
+     * Obtém o cache com suporte transacional com um gestor transacional e tempo limite específicos.
+     * @param txManager gestor transacional.
+     * @param timeout tempo limite. É o tempo máximo que se espera em ms para concluir uma operação
+     * no cache.
+     * @return cache
+     */
     public TXCache getTXCache(CacheTransactionManager txManager, long timeout){
     	return new TXCache(this, txManager, timeout);
     }
@@ -116,12 +146,12 @@ public class Cache
 	}
 	
 	/**
-	 * Substitui o valor associada à chave somente se ele for igual a um determinado valor.
+	 * Substitui o valor associado à chave somente se ele for igual a um determinado valor.
 	 * @param key chave associado ao valor.
 	 * @param oldValue valor esperado associado à chave.
 	 * @param newValue valor para ser associado à chave.
 	 * @param maxAliveTime tempo máximo de vida do valor no cache.
-	 * @return <code>verdadeiro</code> se o valor for substituido. Caso contrário, falso.
+	 * @return <code>verdadeiro</code> se o valor for substituido. Caso contrário, <code>falso</code>.
 	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
      * item no cache.
 	 */
@@ -185,7 +215,7 @@ public class Cache
 	/**
 	 * Associa uma valor a uma chave.
 	 * @param key chave associado ao valor.
-	 * @param value  valor para ser associado à chave.
+	 * @param value valor para ser associado à chave.
 	 * @param maxAliveTime tempo máximo de vida do valor no cache.
 	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
      * item no cache.
@@ -209,10 +239,11 @@ public class Cache
 	/* métodos de coleta*/
 	
 	/**
-	 * 
-	 * @param key
-	 * @return
-	 * @throws RecoverException
+	 * Obtém o valor associado à chave.
+	 * @param key chave associado ao valor.
+	 * @return valor para ser associado à chave.
+	 * @throws RecoverException Lançada se ocorrer alguma falha ao tentar recuperar o
+     * item do cache.
 	 */
 	public Object get(String key) throws RecoverException {
 		try{
@@ -234,6 +265,14 @@ public class Cache
 
     /* métodos de remoção */
 
+	/**
+	 * Remove o valor assoiado à chave somente se ele for igual a um determinado valor.
+	 * @param key chave associado ao valor.
+	 * @return valor para ser associado à chave.
+	 * @return <code>verdadeiro</code> se o valor for removido. Caso contrário, <code>falso</code>.
+	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
+     * item do cache.
+	 */
 	public boolean remove(String key, Object value) throws StorageException {
 		
 		Serializable refLock = this.locks.lock(key);
@@ -255,6 +294,13 @@ public class Cache
 		}
 	}
 	
+	/**
+	 * Remove o valor associado à chave.
+	 * @param key chave associado ao valor.
+	 * @return <code>verdadeiro</code> se o valor for removido. Caso contrário, <code>falso</code>.
+	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
+     * item do cache.
+	 */
 	public boolean remove(String key) throws StorageException {
 		return super.remove(key);
 	}
