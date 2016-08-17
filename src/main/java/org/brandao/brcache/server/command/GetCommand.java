@@ -3,7 +3,7 @@ package org.brandao.brcache.server.command;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.brandao.brcache.StreamCache;
+import org.brandao.brcache.Cache;
 import org.brandao.brcache.CacheInputStream;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.server.ParameterException;

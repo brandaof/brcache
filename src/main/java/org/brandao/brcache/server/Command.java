@@ -17,7 +17,7 @@
 
 package org.brandao.brcache.server;
 
-import org.brandao.brcache.StreamCache;
+import org.brandao.brcache.Cache;
 
 /**
  *
@@ -25,7 +25,7 @@ import org.brandao.brcache.StreamCache;
  */
 public interface Command {
     
-    void execute(Terminal terminal, StreamCache cache, TerminalReader reader, 
+    void execute(Terminal terminal, Cache cache, TerminalReader reader, 
     		TerminalWriter writer, String[] parameters) 
             throws ReadDataException, WriteDataException, ParameterException;
     
