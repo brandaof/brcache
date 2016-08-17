@@ -227,7 +227,7 @@ public class StreamCache
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
      * item no cache.
      */
-    public void put(String key, long maxAliveTime, InputStream inputData) throws StorageException{
+    public void putStream(String key, long maxAliveTime, InputStream inputData) throws StorageException{
         
         if(key.length() > this.maxLengthKey)
             throw new StorageException("key is very large");
