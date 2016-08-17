@@ -25,7 +25,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import org.brandao.brcache.StreamCache;
+
+import org.brandao.brcache.Cache;
 import org.brandao.brcache.client.BrCacheClient;
 
 /**
@@ -39,7 +40,7 @@ public class CacheList<T>
 
 	private static final long serialVersionUID = -617590377196604703L;
 
-	private static StreamCache cache;
+	private static Cache cache;
     
     private static BrCacheClient client;
 
@@ -258,7 +259,7 @@ public class CacheList<T>
      * Obtém o cache associado à coleção.
      * @return Cache
      */
-    public static StreamCache getCache() {
+    public static Cache getCache() {
         return cache;
     }
 
@@ -266,7 +267,7 @@ public class CacheList<T>
      * Define o cache associado à coleção.
      * @param aCache Cache.
      */
-    public static void setCache(StreamCache aCache) {
+    public static void setCache(Cache aCache) {
         cache = aCache;
     }
 

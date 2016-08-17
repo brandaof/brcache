@@ -24,7 +24,7 @@ import org.brandao.brcache.server.WriteDataException;
  */
 public class GetCommand extends AbstractCommand{
 
-	public void execute(Terminal terminal, StreamCache cache, TerminalReader reader,
+	public void execute(Terminal terminal, Cache cache, TerminalReader reader,
 			TerminalWriter writer, String[] parameters)
 			throws ReadDataException, WriteDataException, ParameterException {
 

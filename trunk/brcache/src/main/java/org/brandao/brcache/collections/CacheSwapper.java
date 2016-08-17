@@ -19,7 +19,8 @@
 package org.brandao.brcache.collections;
 
 import java.io.Serializable;
-import org.brandao.brcache.StreamCache;
+
+import org.brandao.brcache.Cache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 import org.brandao.brcache.client.BrCacheClient;
@@ -68,8 +69,8 @@ public class CacheSwapper
         }
     }
 
-    public void sendItem(long index, Object item, StreamCache cache) throws StorageException {
-        cache.putObject(new String(this.id + ":" + index), this.getMaxalive(), item);
+    public void sendItem(long index, Object item, Cache cache) throws StorageException {
+        cache.put(this.id + ":" + index, item, this.getMaxalive());
     }
 
     public void sendItem(long index, Object item, BrCacheClient client) throws StorageException {
@@ -96,8 +97,8 @@ public class CacheSwapper
         }
     }
 
-    public Object getItem(long index, StreamCache cache) throws RecoverException {
-        return cache.getObject(new String(this.id + ":" + index));
+    public Object getItem(long index, Cache cache) throws RecoverException {
+        return cache.get(this.id + ":" + index);
     }
 
     public Object getItem(long index, BrCacheClient client) throws RecoverException {
@@ -123,11 +124,14 @@ public class CacheSwapper
         catch (RecoverException ex) {
             throw new RuntimeException(ex);
         }
+        catch (StorageException ex) {
+            throw new RuntimeException(ex);
+        }
     }
     
-    private void clear(StreamCache cache) throws RecoverException{
+    private void clear(Cache cache) throws StorageException{
         for(int i=0;i<=this.maxIndex;i++){
-            cache.remove(new String(this.id + ":" + i));
+            cache.remove(this.id + ":" + i);
         }
     }
     
