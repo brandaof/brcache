@@ -25,11 +25,28 @@ import java.lang.reflect.Method;
 import org.brandao.brcache.tx.CacheTransaction;
 import org.brandao.brcache.tx.CacheTransactionHandler;
 import org.brandao.brcache.tx.CacheTransactionManager;
+import org.brandao.brcache.tx.CacheTransactionManagerImp;
 import org.brandao.brcache.tx.TransactionException;
 
 /**
- * Cache Transacional
+ * Permite armazenar e recuperar valores associados as suas 
+ * respectivas chaves dentro ou não de uma transação.
  * 
+ * ex:
+ * 
+ *    Cache cache = new Cache();
+ *    TXCache txCache = cache.getTXCache();
+ *    CacheTransaction tx = txCache.beginTransaction();
+ *    try{
+ *        cache.put("chave1", objeto1, 1200);
+ *        cache.remove("chave2");
+ *        cache.putIfAbsent("chave3", objeto3, 1200);
+ *        tx.commit();
+ *    }
+ *    catch(Throwable e){
+ *        tx.rollback();
+ *    }
+ *    
  * @author Brandao
  */
 public class TXCache 
@@ -117,28 +134,56 @@ public class TXCache
 
 	private long transactionTimeout;
 
+	/**
+	 * Cria um cache transacional a partir de um cache.
+	 * @param cache cache não transacional.
+	 */
     public TXCache(Cache cache){
-    	this(cache, null, TIME_OUT);
+    	this(cache, new CacheTransactionManagerImp() , TIME_OUT);
     }
 	
+    /**
+     * Cria um cache transacional especificando o gestor transacional.
+     * @param cache cache não transacional.
+     * @param transactionManager gestor transacional.
+     */
     public TXCache(Cache cache, CacheTransactionManager transactionManager){
     	this(cache, transactionManager, TIME_OUT);
     }
 
+    /**
+     * Cria um cache transacional especificando o gestor transacional e o tempo limite.
+     * @param cache cache não transacional.
+     * @param transactionManager gestor transacional.
+     * @param timeout tempo limite. É o tempo máximo que se espera em ms para concluir uma operação
+     * no cache.
+     */
     public TXCache(Cache cache, CacheTransactionManager transactionManager, long timeout){
     	this.cache = cache;
     	this.transactionManager = transactionManager;
     	this.transactionTimeout = timeout;
     }
     
+    /**
+     * Obté o tempo limite de uma operação.
+     * @return tempo.
+     */
     public long getTransactionTimeout() {
 		return transactionTimeout;
 	}
 
+    /**
+     * Define o tempo limite de uma operação.
+     * @param transactionTimeout tempo.
+     */
 	public void setTransactionTimeout(long transactionTimeout) {
 		this.transactionTimeout = transactionTimeout;
 	}
 
+	/**
+	 * Inicia uma transação.
+	 * @return transação.
+	 */
 	public CacheTransaction beginTransaction(){
     	return this.transactionManager.begin(this.cache);
     }
