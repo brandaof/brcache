@@ -226,7 +226,7 @@ public class Cache
 			ObjectOutputStream oout = new ObjectOutputStream(bout);
 			oout.writeObject(value);
 			oout.flush();
-			this.put(key, maxAliveTime, new ByteArrayInputStream(bout.toByteArray()));
+			this.putStream(key, maxAliveTime, new ByteArrayInputStream(bout.toByteArray()));
 		}
 		catch(StorageException e){
 			throw e;

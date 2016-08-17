@@ -224,7 +224,7 @@ public class TransactionInfo {
 				cache.remove(key);
 			}
 			else{
-				cache.put(key, entity.getMaxAlive(), new ByteArrayInputStream(entity.getData()));
+				cache.putStream(key, entity.getMaxAlive(), new ByteArrayInputStream(entity.getData()));
 			}
 		}
 		
@@ -239,7 +239,7 @@ public class TransactionInfo {
 					cache.remove(key);
 				}
 				else{
-					cache.put(key, entity.getMaxAlive(), new ByteArrayInputStream(entity.getData()));
+					cache.putStream(key, entity.getMaxAlive(), new ByteArrayInputStream(entity.getData()));
 				}
 			}
 			

@@ -50,6 +50,7 @@ import org.brandao.brcache.tx.TransactionException;
  * @author Brandao
  */
 public class TXCache 
+	extends Cache
 	implements Serializable{
     
 	private static final long serialVersionUID = 1L;
@@ -200,13 +201,13 @@ public class TXCache
      * item no cache.
      */
 	public Object replace(
-			String key, Object value, long maxAliveTime, long time) throws StorageException {
+			String key, Object value, long maxAliveTime) throws StorageException {
 		
 		try{
 			return this.executeMethodInTX(replace, 
 					this.transactionManager.getCurrrent(), 
 					this.transactionManager, this.cache,
-					key, value, maxAliveTime, time);
+					key, value, maxAliveTime, this.transactionTimeout);
 		}
 		catch(StorageException e){
 			throw e;
@@ -228,14 +229,14 @@ public class TXCache
 	 */
 	public boolean replace(
 			String key, Object oldValue, 
-			Object newValue, long maxAliveTime, long time) throws StorageException {
+			Object newValue, long maxAliveTime) throws StorageException {
 		
 		try{
 			return (Boolean)this.executeMethodInTX(replaceExact, 
 					this.transactionManager.getCurrrent(), 
 					this.transactionManager, this.cache,
 					key, oldValue, 
-					newValue, maxAliveTime, time);
+					newValue, maxAliveTime, this.transactionTimeout);
 		}
 		catch(StorageException e){
 			throw e;
@@ -256,13 +257,13 @@ public class TXCache
      * item no cache.
 	 */
 	public Object putIfAbsent(
-			String key, Object value, long maxAliveTime, long time) throws StorageException {
+			String key, Object value, long maxAliveTime) throws StorageException {
 		
 		try{
 			return this.executeMethodInTX(putIfAbsent, 
 					this.transactionManager.getCurrrent(), 
 					this.transactionManager, this.cache,
-					key, value, maxAliveTime, time);
+					key, value, maxAliveTime, this.transactionTimeout);
 		}
 		catch(StorageException e){
 			throw e;
@@ -281,12 +282,12 @@ public class TXCache
      * item no cache.
 	 */
 	public void put(
-			String key, Object value, long maxAliveTime, long time) throws StorageException {
+			String key, Object value, long maxAliveTime) throws StorageException {
 		try{
 			this.executeMethodInTX(put, 
 					this.transactionManager.getCurrrent(), 
 					this.transactionManager, this.cache,
-					key, value, maxAliveTime, time);
+					key, value, maxAliveTime, this.transactionTimeout);
 		}
 		catch(StorageException e){
 			throw e;
@@ -305,13 +306,13 @@ public class TXCache
      * item no cache.
      */
     public void putStream(
-    		String key, long maxAliveTime, InputStream inputData, long time) 
+    		String key, long maxAliveTime, InputStream inputData) 
     		throws StorageException {
 		try{
 			this.executeMethodInTX(putStream, 
 					this.transactionManager.getCurrrent(), 
 					this.transactionManager, this.cache, 
-		    		key, maxAliveTime, inputData, time);
+		    		key, maxAliveTime, inputData, this.transactionTimeout);
 		}
 		catch(StorageException e){
 			throw e;
@@ -331,12 +332,17 @@ public class TXCache
      * item do cache.
 	 */
 	public Object get(
-			String key, boolean forUpdate, long time) throws RecoverException {
+			String key) throws RecoverException {
+		return this.get(key, false);
+	}
+    
+	public Object get(
+			String key, boolean forUpdate) throws RecoverException {
 		try{
 			return this.executeMethodInTX(get, 
 					this.transactionManager.getCurrrent(), 
 					this.transactionManager, this.cache,
-					key, forUpdate, time);
+					key, forUpdate, this.transactionTimeout);
 		}
 		catch(RecoverException e){
 			throw e;
@@ -354,13 +360,18 @@ public class TXCache
      * item do cache.
      */
     public InputStream getStream( 
-    		String key, boolean forUpdate, long time) throws RecoverException {
+    		String key) throws RecoverException {
+    	return this.getStream(key, false);
+    }
+    
+    public InputStream getStream( 
+    		String key, boolean forUpdate) throws RecoverException {
     	
 		try{
 			return (InputStream)this.executeMethodInTX(getStream, 
 					this.transactionManager.getCurrrent(), 
 					this.transactionManager, this.cache, 
-		    		key, forUpdate, time);
+		    		key, forUpdate, this.transactionTimeout);
 		}
 		catch(RecoverException e){
 			throw e;
@@ -381,13 +392,13 @@ public class TXCache
      * item do cache.
 	 */
 	public boolean remove(
-			String key, Object value, long time) throws StorageException {
+			String key, Object value) throws StorageException {
 		
 		try{
 			return (Boolean)this.executeMethodInTX(removeExact, 
 					this.transactionManager.getCurrrent(), 
 					this.transactionManager, this.cache,
-					key, value, time);
+					key, value, this.transactionTimeout);
 		}
 		catch(StorageException e){
 			throw e;
@@ -405,12 +416,12 @@ public class TXCache
      * item do cache.
 	 */
     public boolean remove(
-    		String key, long time) throws StorageException{       
+    		String key) throws StorageException{       
 		try{
 			return (Boolean)this.executeMethodInTX(remove, 
 					this.transactionManager.getCurrrent(), 
 					this.transactionManager, this.cache,
-		    		key, time);
+		    		key, this.transactionTimeout);
 		}
 		catch(StorageException e){
 			throw e;
