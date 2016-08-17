@@ -13,9 +13,13 @@ public class Cache
 	extends StreamCache {
 
 	private static final long serialVersionUID = -8558471389768293591L;
-	
+
 	protected transient NamedLock locks;
 	
+    /**
+     * Cria um novo cache.
+     * 
+     */
     public Cache(){
         super(
     		3L*1024L*1024L, 1024, 0.5, 
@@ -24,6 +28,25 @@ public class Cache
     		1*1024*1024L, 100, "/mnt/brcache", SwaperStrategy.FILE, 1);
     }
     
+    /**
+     * Cria um novo cache.
+     * 
+     * @param nodeBufferSize Tamanho do buffer, em bytes, onde os nós ficarão armazenados. 
+     * @param nodePageSize Tamanho da página, em bytes, do buffer de nós.
+     * @param nodeSwapFactor Fator de permuta dos nós.
+     * @param indexBufferSize Tamanho do buffer, em bytes, onde os índices ficarão armazenados.
+     * @param indexPageSize Tamanho da página, em bytes, do buffer de índices.
+     * @param indexSwapFactor Fator de permuta dos índices.
+     * @param dataBufferSize Tamanho do buffer, em bytes, onde os dados ficarão armazenados. 
+     * @param dataPageSize Tamanho da página, em bytes, do buffer de dados.
+     * @param blockSize Tamanho do bloco, em bytes.
+     * @param dataSwapFactor Fator de permuta dos dados.
+     * @param maxSizeEntry Tamanho máximo de uma entrada no cache.
+     * @param maxSizeKey Tamanho máximo de uma chave.
+     * @param dataPath Pasta onde os dados do cache serão persistidos.
+     * @param swaperType Estratégia de armazenamento dos dados em disco.
+     * @param quantitySwaperThread Quantidade de processos usados para fazer a permuta.
+     */
     public Cache(
     		long nodeBufferSize,
     		long nodePageSize,
@@ -60,6 +83,15 @@ public class Cache
     
 	/* métodos de armazenamento */
 	
+    /**
+     * Substitui o valor associado à chave somente se ele existir.
+     * @param key chave associado ao valor.
+     * @param value valor para ser associado à chave.
+     * @param maxAliveTime tempo máximo de vida do valor no cache.
+     * @return o valor anterior associado à chave.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
+     * item no cache.
+     */
 	public Object replace(String key, Object value, 
 			long maxAliveTime) throws StorageException {
 		
@@ -83,6 +115,16 @@ public class Cache
 		}
 	}
 	
+	/**
+	 * Substitui o valor associada à chave somente se ele for igual a um determinado valor.
+	 * @param key chave associado ao valor.
+	 * @param oldValue valor esperado associado à chave.
+	 * @param newValue valor para ser associado à chave.
+	 * @param maxAliveTime tempo máximo de vida do valor no cache.
+	 * @return <code>verdadeiro</code> se o valor for substituido. Caso contrário, falso.
+	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
+     * item no cache.
+	 */
 	public boolean replace(String key, Object oldValue, 
 			Object newValue, long maxAliveTime) throws StorageException {
 		
@@ -106,6 +148,15 @@ public class Cache
 		}
 	}
 	
+	/**
+	 * Associa o valor a chave somente se a chave não estiver associada a um valor.
+	 * @param key chave associado ao valor.
+	 * @param value valor para ser associado à chave.
+	 * @param maxAliveTime tempo máximo de vida do valor no cache.
+	 * @return valor anterior associado à chave.
+	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
+     * item no cache.
+	 */
 	public Object putIfAbsent(String key, 
 			Object value, long maxAliveTime) throws StorageException {
 		
@@ -131,6 +182,14 @@ public class Cache
 		}
 	}
 	
+	/**
+	 * Associa uma valor a uma chave.
+	 * @param key chave associado ao valor.
+	 * @param value  valor para ser associado à chave.
+	 * @param maxAliveTime tempo máximo de vida do valor no cache.
+	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
+     * item no cache.
+	 */
 	public void put(String key, Object value, long maxAliveTime) throws StorageException {
 		try{
 			ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -149,6 +208,12 @@ public class Cache
 
 	/* métodos de coleta*/
 	
+	/**
+	 * 
+	 * @param key
+	 * @return
+	 * @throws RecoverException
+	 */
 	public Object get(String key) throws RecoverException {
 		try{
 			InputStream in = super.getStream(key);
