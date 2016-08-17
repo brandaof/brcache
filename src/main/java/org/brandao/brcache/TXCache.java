@@ -190,6 +190,15 @@ public class TXCache
 
 	/* métodos de armazenamento */
 	
+    /**
+     * Substitui o valor associado à chave somente se ele existir.
+     * @param key chave associado ao valor.
+     * @param value valor para ser associado à chave.
+     * @param maxAliveTime tempo máximo de vida do valor no cache.
+     * @return o valor anterior associado à chave.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
+     * item no cache.
+     */
 	public Object replace(
 			String key, Object value, long maxAliveTime, long time) throws StorageException {
 		
@@ -207,6 +216,16 @@ public class TXCache
 		}
 	}
 	
+	/**
+	 * Substitui o valor associado à chave somente se ele for igual a um determinado valor.
+	 * @param key chave associado ao valor.
+	 * @param oldValue valor esperado associado à chave.
+	 * @param newValue valor para ser associado à chave.
+	 * @param maxAliveTime tempo máximo de vida do valor no cache.
+	 * @return <code>verdadeiro</code> se o valor for substituido. Caso contrário, <code>falso</code>.
+	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
+     * item no cache.
+	 */
 	public boolean replace(
 			String key, Object oldValue, 
 			Object newValue, long maxAliveTime, long time) throws StorageException {
@@ -227,6 +246,15 @@ public class TXCache
 
 	}
 	
+	/**
+	 * Associa o valor a chave somente se a chave não estiver associada a um valor.
+	 * @param key chave associado ao valor.
+	 * @param value valor para ser associado à chave.
+	 * @param maxAliveTime tempo máximo de vida do valor no cache.
+	 * @return valor anterior associado à chave.
+	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
+     * item no cache.
+	 */
 	public Object putIfAbsent(
 			String key, Object value, long maxAliveTime, long time) throws StorageException {
 		
@@ -244,6 +272,14 @@ public class TXCache
 		}
 	}
 	
+	/**
+	 * Associa uma valor a uma chave.
+	 * @param key chave associado ao valor.
+	 * @param value valor para ser associado à chave.
+	 * @param maxAliveTime tempo máximo de vida do valor no cache.
+	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
+     * item no cache.
+	 */
 	public void put(
 			String key, Object value, long maxAliveTime, long time) throws StorageException {
 		try{
@@ -260,6 +296,14 @@ public class TXCache
 		}
 	}
 	
+    /**
+     * Inclui ou sobrescreve um item no cache.
+     * @param key Identificação do item no cache.
+     * @param maxAliveTime Tempo máximo em milesegundos que o item ficará no cache.
+     * @param inputData Fluxo de dados que representa o item.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
+     * item no cache.
+     */
     public void putStream(
     		String key, long maxAliveTime, InputStream inputData, long time) 
     		throws StorageException {
@@ -279,6 +323,13 @@ public class TXCache
 	
 	/* métodos de coleta*/
 	
+	/**
+	 * Obtém o valor associado à chave.
+	 * @param key chave associado ao valor.
+	 * @return valor para ser associado à chave.
+	 * @throws RecoverException Lançada se ocorrer alguma falha ao tentar recuperar o
+     * item do cache.
+	 */
 	public Object get(
 			String key, boolean forUpdate, long time) throws RecoverException {
 		try{
@@ -295,6 +346,13 @@ public class TXCache
 		}
 	}
     
+    /**
+     * Recupera um item do cache.
+     * @param key Identificação do item no cache.
+     * @return Fluxo de dados que representa o item ou <code>null</code>.
+     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar recuperar o
+     * item do cache.
+     */
     public InputStream getStream( 
     		String key, boolean forUpdate, long time) throws RecoverException {
     	
@@ -314,6 +372,14 @@ public class TXCache
 
     /* métodos de remoção */
     
+	/**
+	 * Remove o valor assoiado à chave somente se ele for igual a um determinado valor.
+	 * @param key chave associado ao valor.
+	 * @return valor para ser associado à chave.
+	 * @return <code>verdadeiro</code> se o valor for removido. Caso contrário, <code>falso</code>.
+	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
+     * item do cache.
+	 */
 	public boolean remove(
 			String key, Object value, long time) throws StorageException {
 		
@@ -331,6 +397,13 @@ public class TXCache
 		}
 	}
 	
+	/**
+	 * Remove o valor associado à chave.
+	 * @param key chave associado ao valor.
+	 * @return <code>verdadeiro</code> se o valor for removido. Caso contrário, <code>falso</code>.
+	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
+     * item do cache.
+	 */
     public boolean remove(
     		String key, long time) throws StorageException{       
 		try{
