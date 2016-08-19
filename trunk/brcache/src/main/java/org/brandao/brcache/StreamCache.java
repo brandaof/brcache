@@ -33,13 +33,26 @@ import org.brandao.brcache.collections.Swapper;
 import org.brandao.brcache.collections.treehugemap.CharNode;
 
 /**
- * Faz o mapeamento chave valor. Uma chave somente pode 
- * estar associado a um valor. Não são permtidos chaves
- * duplicadas. 
+ * É a Base para um cache. Ele faz o mapeamento chave-fluxo de 
+ * bytes. Uma chave somente pode estar associado a um 
+ * fluxo de bytes. Não são permtidos chaves duplicadas. 
+ * 
+ * <pre>
+ * ex:
+ *    
+ *    Cache cache = ...;
+ *    InputStream valueStream = ...;
+ *    cache.put("uma_chave", valueStream, 1200);
+ *    
+ * ex2:
+ *    
+ *    InputStream value = cache.get("uma_chave");
+ *
+ * </pre>
  * 
  * @author Brandao
  */
-public class StreamCache 
+public abstract class StreamCache 
 	implements Serializable{
     
     private static final long serialVersionUID = 8023029671447700902L;

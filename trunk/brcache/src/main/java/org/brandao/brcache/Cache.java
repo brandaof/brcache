@@ -11,19 +11,19 @@ import org.brandao.brcache.tx.CacheTransactionManager;
 import org.brandao.concurrent.NamedLock;
 
 /**
- * Faz o mapeamento chave valor. Uma chave somente pode 
- * estar associado a um valor. Não são permtidos chaves
- * duplicadas. 
+ * É a classe central do BRCache. Ele faz o mapeamento chave valor. 
+ * Uma chave somente pode estar associado a um valor. 
+ * Não são permtidos chaves duplicadas. 
  * 
  * <pre>
  * ex:
  *    
  *    Cache cache = ...;
- *    cache.put("umaChave", meuObjeto, 1200);
+ *    cache.put("uma_chave", meuObjeto, 1200);
  *    
  * ex2:
  *    
- *    MeuObjeto o = cache.get("umaChave");
+ *    MeuObjeto o = cache.get("uma_chave");
  *
  * </pre>
  * @author Brandao
