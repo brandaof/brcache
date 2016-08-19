@@ -38,9 +38,9 @@ import org.brandao.brcache.tx.TransactionException;
  *    TXCache txCache = cache.getTXCache();
  *    CacheTransaction tx = txCache.beginTransaction();
  *    try{
- *        cache.put("chave1", objeto1, 1200);
+ *        cache.put("chave1", objeto1);
  *        cache.remove("chave2");
- *        cache.putIfAbsent("chave3", objeto3, 1200);
+ *        cache.putIfAbsent("chave3", objeto3);
  *        tx.commit();
  *    }
  *    catch(Throwable e){

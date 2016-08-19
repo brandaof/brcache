@@ -141,6 +141,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.brandao</groupId>
+            <artifactId>named-lock</artifactId>
+            <version>1.0-b1</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>

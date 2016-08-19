@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.brandao.brcache.NamedLock;
 import org.brandao.brcache.StreamCache;
+import org.brandao.concurrent.NamedLock;
 
 public class CacheTransactionManagerImp 
 	implements CacheTransactionManager{

@@ -33,7 +33,9 @@ import org.brandao.brcache.collections.Swapper;
 import org.brandao.brcache.collections.treehugemap.CharNode;
 
 /**
- * Representa um cache.
+ * Faz o mapeamento chave valor. Uma chave somente pode 
+ * estar associado a um valor. Não são permtidos chaves
+ * duplicadas. 
  * 
  * @author Brandao
  */
