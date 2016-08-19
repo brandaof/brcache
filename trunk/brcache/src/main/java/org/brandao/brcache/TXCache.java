@@ -155,7 +155,7 @@ public class TXCache
      * Cria um cache transacional especificando o gestor transacional e o tempo limite.
      * @param cache cache não transacional.
      * @param transactionManager gestor transacional.
-     * @param timeout tempo limite. É o tempo máximo que se espera em ms para concluir uma operação
+     * @param timeout tempo limite. É o tempo máximo que se espera, em ms, para concluir uma operação
      * no cache.
      */
     public TXCache(Cache cache, CacheTransactionManager transactionManager, long timeout){
