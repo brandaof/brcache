@@ -274,7 +274,7 @@ public abstract class StreamCache
     /**
      * Obtém o fluxo de bytes de um valor associado a chave.
      * @param key identificação do item no cache.
-     * @return Fluxo de dados que representa o item ou <code>null</code>.
+     * @return fluxo de bytes que representa o item ou <code>null</code>.
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar recuperar o
      * item do cache.
      */
