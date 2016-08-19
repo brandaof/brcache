@@ -8,16 +8,17 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import org.brandao.brcache.tx.CacheTransactionManager;
+import org.brandao.concurrent.NamedLock;
 
 /**
- * Permite armazenar e recuperar valores associados as suas 
- * respectivas chaves. 
- * Também permite obter um cache transacional.
+ * Faz o mapeamento chave valor. Uma chave somente pode 
+ * estar associado a um valor. Não são permtidos chaves
+ * duplicadas. 
  * 
  * <pre>
  * ex:
  *    
- *    Cache cache = new Cache();
+ *    Cache cache = ...;
  *    cache.put("umaChave", meuObjeto, 1200);
  *    
  * ex2:
@@ -30,7 +31,7 @@ import org.brandao.brcache.tx.CacheTransactionManager;
  */
 public class Cache 
 	extends StreamCache {
-
+	
 	private static final long serialVersionUID = -8558471389768293591L;
 
 	protected transient NamedLock locks;
