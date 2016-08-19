@@ -29,8 +29,7 @@ import org.brandao.brcache.tx.CacheTransactionManagerImp;
 import org.brandao.brcache.tx.TransactionException;
 
 /**
- * Permite armazenar e recuperar valores associados as suas 
- * respectivas chaves dentro ou não de uma transação.
+ * Provê suporte transacional a um cache.
  * 
  * ex:
  * 
