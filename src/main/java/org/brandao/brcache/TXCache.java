@@ -297,10 +297,10 @@ public class TXCache
 	}
 	
     /**
-     * Inclui ou sobrescreve um item no cache.
-     * @param key Identificação do item no cache.
-     * @param maxAliveTime Tempo máximo em milesegundos que o item ficará no cache.
-     * @param inputData Fluxo de dados que representa o item.
+	 * Associa o fluxo de bytes de um valor a uma chave.
+	 * @param key chave associado ao fluxo.
+	 * @param maxAliveTime tempo máximo de vida do valor no cache.
+     * @param inputData fluxo de bytes.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
      * item no cache.
      */
@@ -352,8 +352,8 @@ public class TXCache
 	}
     
     /**
-     * Recupera um item do cache.
-     * @param key Identificação do item no cache.
+     * Obtém o fluxo de bytes de um valor associado a chave.
+     * @param key identificação do item no cache.
      * @return Fluxo de dados que representa o item ou <code>null</code>.
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar recuperar o
      * item do cache.
@@ -363,6 +363,15 @@ public class TXCache
     	return this.getStream(key, false);
     }
     
+    /**
+     * Recupera o fluxo de bytes de um valor associado a chave bloqueando ou não 
+     * seu acesso as demais transações.
+     * @param key Identificação do item no cache.
+     * @param forUpdate <code>true</code> para bloquear o item. Caso contrário <code>false</code>.
+     * @return Fluxo de dados que representa o item ou <code>null</code>.
+     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar recuperar o
+     * item do cache.
+     */
     public InputStream getStream( 
     		String key, boolean forUpdate) throws RecoverException {
     	
