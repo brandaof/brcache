@@ -235,10 +235,10 @@ public abstract class StreamCache
     }
     
     /**
-     * Inclui ou sobrescreve um item no cache.
-     * @param key Identificação do item no cache.
-     * @param maxAliveTime Tempo máximo em milesegundos que o item ficará no cache.
-     * @param inputData Fluxo de dados que representa o item.
+	 * Associa o fluxo de bytes de um valor a uma chave.
+	 * @param key chave associado ao fluxo.
+	 * @param maxAliveTime tempo máximo de vida do valor no cache.
+     * @param inputData fluxo de bytes.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
      * item no cache.
      */
@@ -272,8 +272,8 @@ public abstract class StreamCache
     }
 
     /**
-     * Recupera um item do cache.
-     * @param key Identificação do item no cache.
+     * Obtém o fluxo de bytes de um valor associado a chave.
+     * @param key identificação do item no cache.
      * @return Fluxo de dados que representa o item ou <code>null</code>.
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar recuperar o
      * item do cache.
