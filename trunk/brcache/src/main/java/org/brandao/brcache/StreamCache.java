@@ -33,7 +33,7 @@ import org.brandao.brcache.collections.Swapper;
 import org.brandao.brcache.collections.treehugemap.CharNode;
 
 /**
- * É a Base para um cache. Ele faz o mapeamento chave-fluxo de 
+ * É a base para um cache. Ele faz o mapeamento chave-fluxo de 
  * bytes. Uma chave somente pode estar associado a um 
  * fluxo de bytes. Não são permtidos chaves duplicadas. 
  * 
@@ -235,12 +235,11 @@ public abstract class StreamCache
     }
     
     /**
-	 * Associa o fluxo de bytes de um valor a uma chave.
+	 * Associa o fluxo de bytes do valor à chave.
 	 * @param key chave associado ao fluxo.
 	 * @param maxAliveTime tempo máximo de vida do valor no cache.
-     * @param inputData fluxo de bytes.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
-     * item no cache.
+     * @param inputData fluxo de bytes do valor.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
     public void putStream(String key, long maxAliveTime, InputStream inputData) throws StorageException{
         
@@ -272,11 +271,11 @@ public abstract class StreamCache
     }
 
     /**
-     * Obtém o fluxo de bytes de um valor associado a chave.
-     * @param key identificação do item no cache.
-     * @return fluxo de bytes que representa o item ou <code>null</code>.
-     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar recuperar o
-     * item do cache.
+     * Obtém o fluxo de bytes do valor associado à chave.
+     * @param key chave associado ao fluxo.
+     * @return fluxo de bytes do valor ou <code>null</code>.
+     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
+     * item.
      */
     public InputStream getStream(String key) throws RecoverException{
         
@@ -319,12 +318,12 @@ public abstract class StreamCache
     }
     
     /**
-     * Remove um item do cache.
+     * Remove o valor associado à chave.
      * 
-     * @param key Identificação do item no cache.
-     * @return Verdadeiro se o item for removido. Caso contrário falso.
+     * @param key chave associado ao valor.
+     * @return <code>true</code> se o valor for removido. Caso contrário <code>falso</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
-     * item do cache.
+     * item.
      */
     public boolean remove(String key) throws StorageException{
         
