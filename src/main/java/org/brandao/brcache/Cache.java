@@ -120,10 +120,10 @@ public class Cache
      * @param key chave associada ao valor.
      * @param value valor para ser associado à chave.
      * @param maxAliveTime tempo máximo de vida do valor no cache.
-     * @return o valor anterior associado à chave.
+     * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-	public Object replace(String key, Object value, 
+	public boolean replace(String key, Object value, 
 			long maxAliveTime) throws StorageException {
 		
 		Serializable refLock = this.locks.lock(key);

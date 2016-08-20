@@ -201,11 +201,11 @@ public class TXCache
      * @return o valor anterior associado à chave.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-	public Object replace(
+	public boolean replace(
 			String key, Object value, long maxAliveTime) throws StorageException {
 		
 		try{
-			return this.executeMethodInTX(replace, 
+			return (Boolean)this.executeMethodInTX(replace, 
 					this.transactionManager.getCurrrent(), 
 					this.transactionManager, this.cache,
 					key, value, maxAliveTime, this.transactionTimeout);
