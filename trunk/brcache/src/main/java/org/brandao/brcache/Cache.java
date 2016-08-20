@@ -11,9 +11,10 @@ import org.brandao.brcache.tx.CacheTransactionManager;
 import org.brandao.concurrent.NamedLock;
 
 /**
- * É a classe central do BRCache. Ele faz o mapeamento chave-valor. 
- * Uma chave somente pode estar associado a um valor. 
- * Não são permtidos chaves duplicadas. 
+ * É a classe central do BRCache. 
+ * <p>Ele faz o mapeamento chave-valor. Uma chave 
+ * somente pode estar associado a um valor. Não são
+ * permtidos chaves duplicadas.</p> 
  * 
  * <pre>
  * ex:
@@ -104,9 +105,9 @@ public class Cache
     /**
      * Obtém o cache com suporte transacional com um gestor transacional e tempo limite específicos.
      * @param txManager gestor transacional.
-     * @param timeout tempo limite. É o tempo máximo que se espera em ms para concluir uma operação
+     * @param timeout tempo limite. É o tempo máximo que se espera, em milisegundos, para concluir uma operação
      * no cache.
-     * @return cache
+     * @return cache com suporte transacional.
      */
     public TXCache getTXCache(CacheTransactionManager txManager, long timeout){
     	return new TXCache(this, txManager, timeout);
@@ -263,7 +264,7 @@ public class Cache
     /* métodos de remoção */
 
 	/**
-	 * Remove o valor assoiado à chave somente se ele for igual a um determinado valor.
+	 * Remove o valor associado à chave somente se ele for igual a um determinado valor.
 	 * @param key chave associado ao valor.
 	 * @param value valor esperado associado à chave.
 	 * @return <code>true</code> se o valor for removido. Caso contrário, <code>false</code>.
@@ -304,14 +305,29 @@ public class Cache
 
     /* métodos de manipulação*/
     
+	/**
+	 * Obtém a quantidade de item contido no cache.
+	 * @return quantidade de itens.
+	 */
 	public long size() {
 		return super.getCountRemoved() - super.getCountWrite();
 	}
 
+	/**
+	 * Verifica se o cache está vazio.
+	 * @return <code>true</code> se o cache estiver vazio. Caso contrário, <code>false</code>.
+	 */
 	public boolean isEmpty() {
-		return super.getCountWrite() == 0;
+		return this.size() == 0;
 	}
 
+	/**
+	 * Verifica se uma chave está associado a um valor.
+	 * @param key chave associado ao valor.
+	 * @return <code>true</code> se existir um valor associado à chave. Caso contrário, <code>false</code>.
+     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
+     * item.
+	 */
 	public boolean containsKey(String key) throws RecoverException {
 		return super.getStream(key) != null;
 	}

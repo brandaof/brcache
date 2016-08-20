@@ -155,7 +155,7 @@ public class TXCache
      * Cria um cache transacional especificando o gestor transacional e o tempo limite.
      * @param cache cache não transacional.
      * @param transactionManager gestor transacional.
-     * @param timeout tempo limite. É o tempo máximo que se espera, em ms, para concluir uma operação
+     * @param timeout tempo limite. É o tempo máximo que se espera, em milisegundos, para concluir uma operação
      * no cache.
      */
     public TXCache(Cache cache, CacheTransactionManager transactionManager, long timeout){
@@ -165,8 +165,8 @@ public class TXCache
     }
     
     /**
-     * Obté o tempo limite de uma operação.
-     * @return tempo.
+     * Obtém o tempo limite de uma operação.
+     * @return tempo em milisegundos.
      */
     public long getTransactionTimeout() {
 		return transactionTimeout;
@@ -174,7 +174,7 @@ public class TXCache
 
     /**
      * Define o tempo limite de uma operação.
-     * @param transactionTimeout tempo.
+     * @param transactionTimeout tempo em milisegundos.
      */
 	public void setTransactionTimeout(long transactionTimeout) {
 		this.transactionTimeout = transactionTimeout;
@@ -221,7 +221,7 @@ public class TXCache
 	 * @param oldValue valor esperado associado à chave.
 	 * @param newValue valor para ser associado à chave.
 	 * @param maxAliveTime tempo máximo de vida do valor no cache.
-	 * @return <code>verdadeiro</code> se o valor for substituido. Caso contrário, <code>falso</code>.
+	 * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
 	public boolean replace(
@@ -399,7 +399,7 @@ public class TXCache
 	 * Remove o valor assoiado à chave somente se ele for igual a um determinado valor.
 	 * @param key chave associado ao valor.
 	 * @return valor para ser associado à chave.
-	 * @return <code>verdadeiro</code> se o valor for removido. Caso contrário, <code>falso</code>.
+	 * @return <code>true</code> se o valor for removido. Caso contrário, <code>false</code>.
 	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
      * item.
 	 */
@@ -423,7 +423,7 @@ public class TXCache
 	/**
 	 * Remove o valor associado à chave.
 	 * @param key chave associado ao valor.
-	 * @return <code>verdadeiro</code> se o valor for removido. Caso contrário, <code>falso</code>.
+	 * @return <code>true</code> se o valor for removido. Caso contrário, <code>false</code>.
 	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
      * item.
 	 */
