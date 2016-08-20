@@ -11,7 +11,7 @@ import org.brandao.brcache.tx.CacheTransactionManager;
 import org.brandao.concurrent.NamedLock;
 
 /**
- * É a classe central do BRCache. Ele faz o mapeamento chave valor. 
+ * É a classe central do BRCache. Ele faz o mapeamento chave-valor. 
  * Uma chave somente pode estar associado a um valor. 
  * Não são permtidos chaves duplicadas. 
  * 
@@ -151,7 +151,7 @@ public class Cache
 	 * @param oldValue valor esperado associado à chave.
 	 * @param newValue valor para ser associado à chave.
 	 * @param maxAliveTime tempo máximo de vida do valor no cache.
-	 * @return <code>verdadeiro</code> se o valor for substituido. Caso contrário, <code>falso</code>.
+	 * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
 	public boolean replace(String key, Object oldValue, 
@@ -265,7 +265,7 @@ public class Cache
 	/**
 	 * Remove o valor assoiado à chave somente se ele for igual a um determinado valor.
 	 * @param key chave associado ao valor.
-	 * @return valor para ser associado à chave.
+	 * @param value valor esperado associado à chave.
 	 * @return <code>true</code> se o valor for removido. Caso contrário, <code>false</code>.
 	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
      * item.
