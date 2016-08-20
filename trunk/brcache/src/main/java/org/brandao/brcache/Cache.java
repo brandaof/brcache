@@ -117,7 +117,7 @@ public class Cache
 	
     /**
      * Substitui o valor associado à chave somente se ele existir.
-     * @param key chave associado ao valor.
+     * @param key chave associada ao valor.
      * @param value valor para ser associado à chave.
      * @param maxAliveTime tempo máximo de vida do valor no cache.
      * @return o valor anterior associado à chave.
@@ -148,7 +148,7 @@ public class Cache
 	
 	/**
 	 * Substitui o valor associado à chave somente se ele for igual a um determinado valor.
-	 * @param key chave associado ao valor.
+	 * @param key chave associada ao valor.
 	 * @param oldValue valor esperado associado à chave.
 	 * @param newValue valor para ser associado à chave.
 	 * @param maxAliveTime tempo máximo de vida do valor no cache.
@@ -180,7 +180,7 @@ public class Cache
 	
 	/**
 	 * Associa o valor à chave somente se a chave não estiver associada a um valor.
-	 * @param key chave associado ao valor.
+	 * @param key chave associada ao valor.
 	 * @param value valor para ser associado à chave.
 	 * @param maxAliveTime tempo máximo de vida do valor no cache.
 	 * @return valor anterior associado à chave.
@@ -213,7 +213,7 @@ public class Cache
 	
 	/**
 	 * Associa o valor à chave.
-	 * @param key chave associado ao valor.
+	 * @param key chave associada ao valor.
 	 * @param value valor para ser associado à chave.
 	 * @param maxAliveTime tempo máximo de vida do valor no cache.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
@@ -238,7 +238,7 @@ public class Cache
 	
 	/**
 	 * Obtém o valor associado à chave.
-	 * @param key chave associado ao valor.
+	 * @param key chave associada ao valor.
      * @return valor associado à chave ou <code>null</code>.
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
      * item.
@@ -265,7 +265,7 @@ public class Cache
 
 	/**
 	 * Remove o valor associado à chave somente se ele for igual a um determinado valor.
-	 * @param key chave associado ao valor.
+	 * @param key chave associada ao valor.
 	 * @param value valor esperado associado à chave.
 	 * @return <code>true</code> se o valor for removido. Caso contrário, <code>false</code>.
 	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
@@ -294,7 +294,7 @@ public class Cache
 	
 	/**
 	 * Remove o valor associado à chave.
-	 * @param key chave associado ao valor.
+	 * @param key chave associada ao valor.
 	 * @return <code>true</code> se o valor for removido. Caso contrário, <code>false</code>.
 	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
      * item.
@@ -306,7 +306,7 @@ public class Cache
     /* métodos de manipulação*/
     
 	/**
-	 * Obtém a quantidade de item contido no cache.
+	 * Obtém a quantidade de itens contido no cache.
 	 * @return quantidade de itens.
 	 */
 	public long size() {
@@ -323,7 +323,7 @@ public class Cache
 
 	/**
 	 * Verifica se uma chave está associado a um valor.
-	 * @param key chave associado ao valor.
+	 * @param key chave associada ao valor.
 	 * @return <code>true</code> se existir um valor associado à chave. Caso contrário, <code>false</code>.
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
      * item.

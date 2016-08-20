@@ -236,7 +236,7 @@ public abstract class StreamCache
     
     /**
 	 * Associa o fluxo de bytes do valor à chave.
-	 * @param key chave associado ao fluxo.
+	 * @param key chave associada ao fluxo.
 	 * @param maxAliveTime tempo máximo de vida do valor no cache.
      * @param inputData fluxo de bytes do valor.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
@@ -272,7 +272,7 @@ public abstract class StreamCache
 
     /**
      * Obtém o fluxo de bytes do valor associado à chave.
-     * @param key chave associado ao fluxo.
+     * @param key chave associada ao fluxo.
      * @return fluxo de bytes do valor ou <code>null</code>.
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
      * item.
@@ -319,7 +319,7 @@ public abstract class StreamCache
     
     /**
      * Remove o valor associado à chave.
-     * @param key chave associado ao valor.
+     * @param key chave associada ao valor.
      * @return <code>true</code> se o valor for removido. Caso contrário <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
      * item.
