@@ -135,6 +135,7 @@ public class CacheTransactionManagerImp
 		txh = new CacheTransactionHandlerImp(txId, this, cache);
 		this.transactionLocks.put(txId, new Transaction(txh, new HashMap<String, Serializable>()));
 		this.transactions.set(txh);
+		txh.begin();
 		return txh;
 	}
 
