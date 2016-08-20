@@ -12,6 +12,8 @@ public interface CacheTransactionHandler
 
 	Serializable getId();
 	
+	void begin();
+	
 	/* métodos de armazenamento */
 	
 	Object replace(CacheTransactionManager manager, StreamCache cache,

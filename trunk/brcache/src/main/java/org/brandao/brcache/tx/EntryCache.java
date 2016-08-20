@@ -1,6 +1,10 @@
 package org.brandao.brcache.tx;
 
-public class EntryCache {
+import java.io.Serializable;
+
+public class EntryCache implements Serializable{
+
+	private static final long serialVersionUID = 1758078916724690796L;
 
 	private byte[] data;
 	

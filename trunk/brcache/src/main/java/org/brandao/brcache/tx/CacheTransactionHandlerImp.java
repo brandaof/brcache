@@ -4,15 +4,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.UUID;
 
+import org.brandao.brcache.RecoverException;
+import org.brandao.brcache.StorageException;
 import org.brandao.brcache.StreamCache;
 
 public class CacheTransactionHandlerImp
-	extends TransactionInfo 
 	implements CacheTransactionHandler{
 
 	private static final String TRANSACTION_NAME = "{{name}}.tx";
@@ -39,12 +41,11 @@ public class CacheTransactionHandlerImp
 	
 	public CacheTransactionHandlerImp(UUID id, 
 			CacheTransactionManager transactionManager, StreamCache cache){
-		super(id);
+		this.transactionInfo    = new TransactionInfo(id);
 		this.commitInProgress   = false;
 		this.started            = false;
 		this.commited           = false;
 		this.rolledBack         = false;
-		this.transactionInfo    = new TransactionInfo(id);
 		this.cache				= cache;
 		this.transactionManager	= transactionManager;
 		this.transactionName    = id.toString();
@@ -58,13 +59,13 @@ public class CacheTransactionHandlerImp
 		return this.id;
 	}
 	
-	public synchronized void begin() throws TransactionException {
+	public synchronized void begin() {
 		
 		if(this.started)
-			throw new TransactionException("transaction has been started");
+			throw new IllegalStateException("transaction has been started");
 
 		if(this.commitInProgress)
-			throw new TransactionException("commit in progress");
+			throw new IllegalStateException("commit in progress");
 		
 		this.started = true;
 	}
@@ -188,6 +189,57 @@ public class CacheTransactionHandlerImp
 		catch (Throwable e) {
 			throw new TransactionException(e);
 		}
+	}
+
+	public Object replace(CacheTransactionManager manager, StreamCache cache,
+			String key, Object value, long maxAliveTime, long time)
+			throws StorageException {
+		return this.transactionInfo.replace(manager, cache, key, value, maxAliveTime, time);
+	}
+
+	public boolean replace(CacheTransactionManager manager, StreamCache cache,
+			String key, Object oldValue, Object newValue, long maxAliveTime,
+			long time) throws StorageException {
+		return this.transactionInfo.replace(manager, cache, key, oldValue, newValue, maxAliveTime, time);
+	}
+
+	public Object putIfAbsent(CacheTransactionManager manager,
+			StreamCache cache, String key, Object value, long maxAliveTime,
+			long time) throws StorageException {
+		return this.transactionInfo.putIfAbsent(manager, cache, key, value, maxAliveTime, time);
+	}
+
+	public void put(CacheTransactionManager manager, StreamCache cache,
+			String key, Object value, long maxAliveTime, long time)
+			throws StorageException {
+		this.transactionInfo.put(manager, cache, key, value, maxAliveTime, time);
+	}
+
+	public void putStream(CacheTransactionManager manager, StreamCache cache,
+			String key, long maxAliveTime, InputStream inputData, long time)
+			throws StorageException {
+		this.transactionInfo.putStream(manager, cache, key, maxAliveTime, inputData, time);
+	}
+
+	public Object get(CacheTransactionManager manager, StreamCache cache,
+			String key, boolean forUpdate, long time) throws RecoverException {
+		return this.transactionInfo.get(manager, cache, key, forUpdate, time);
+	}
+
+	public InputStream getStream(CacheTransactionManager manager,
+			StreamCache cache, String key, boolean forUpdate, long time)
+			throws RecoverException {
+		return this.transactionInfo.getStream(manager, cache, key, forUpdate, time);
+	}
+
+	public boolean remove(CacheTransactionManager manager, StreamCache cache,
+			String key, Object value, long time) throws StorageException {
+		return this.transactionInfo.remove(manager, cache, key, value, time);
+	}
+
+	public boolean remove(CacheTransactionManager manager, StreamCache cache,
+			String key, long time) throws StorageException {
+		return this.transactionInfo.remove(manager, cache, key, time);
 	}
 
 }

@@ -505,7 +505,7 @@ public class TXCache
     					currentTx;
     	
     	try{
-    		Object r = method.invoke(this, params);
+    		Object r = method.invoke(tx, params);
 			if(currentTx == null){
 				tx.commit();
 			}

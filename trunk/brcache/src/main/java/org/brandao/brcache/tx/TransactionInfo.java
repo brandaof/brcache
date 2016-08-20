@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -17,7 +18,9 @@ import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 
-public class TransactionInfo {
+public class TransactionInfo implements Serializable {
+
+	private static final long serialVersionUID = 3758041685386590737L;
 
 	private UUID id;
 	
@@ -34,6 +37,7 @@ public class TransactionInfo {
 		this.inserted = new HashSet<String>();
 		this.managed  = new HashSet<String>();
 		this.entities = new HashMap<String, EntryCache>();
+		this.saved    = new HashMap<String, EntryCache>();
 	}
 	
 	/* métodos de armazenamento */
