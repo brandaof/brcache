@@ -31,11 +31,13 @@ import org.brandao.brcache.tx.TransactionException;
 /**
  * Provê suporte transacional a um cache.
  * 
+ * <pre>
  * ex:
  * 
- *    Cache cache = new Cache();
+ *    Cache cache = ...;
  *    TXCache txCache = cache.getTXCache();
  *    CacheTransaction tx = txCache.beginTransaction();
+ *    
  *    try{
  *        cache.put("chave1", objeto1);
  *        cache.remove("chave2");
@@ -45,7 +47,8 @@ import org.brandao.brcache.tx.TransactionException;
  *    catch(Throwable e){
  *        tx.rollback();
  *    }
- *    
+ * </pre>
+ * 
  * @author Brandao
  */
 public class TXCache 
@@ -192,7 +195,7 @@ public class TXCache
 	
     /**
      * Substitui o valor associado à chave somente se ele existir.
-     * @param key chave associado ao valor.
+     * @param key chave associada ao valor.
      * @param value valor para ser associado à chave.
      * @param maxAliveTime tempo máximo de vida do valor no cache.
      * @return o valor anterior associado à chave.
@@ -217,7 +220,7 @@ public class TXCache
 	
 	/**
 	 * Substitui o valor associado à chave somente se ele for igual a um determinado valor.
-	 * @param key chave associado ao valor.
+	 * @param key chave associada ao valor.
 	 * @param oldValue valor esperado associado à chave.
 	 * @param newValue valor para ser associado à chave.
 	 * @param maxAliveTime tempo máximo de vida do valor no cache.
@@ -246,7 +249,7 @@ public class TXCache
 	
 	/**
 	 * Associa o valor a chave somente se a chave não estiver associada a um valor.
-	 * @param key chave associado ao valor.
+	 * @param key chave associada ao valor.
 	 * @param value valor para ser associado à chave.
 	 * @param maxAliveTime tempo máximo de vida do valor no cache.
 	 * @return valor anterior associado à chave.
@@ -271,7 +274,7 @@ public class TXCache
 	
 	/**
 	 * Associa o valor à chave.
-	 * @param key chave associado ao valor.
+	 * @param key chave associada ao valor.
 	 * @param value valor para ser associado à chave.
 	 * @param maxAliveTime tempo máximo de vida do valor no cache.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
@@ -294,7 +297,7 @@ public class TXCache
 	
     /**
 	 * Associa o fluxo de bytes do valor à chave.
-	 * @param key chave associado ao fluxo.
+	 * @param key chave associada ao fluxo.
 	 * @param maxAliveTime tempo máximo de vida do valor no cache.
      * @param inputData fluxo de bytes do valor.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
@@ -320,7 +323,7 @@ public class TXCache
 	
 	/**
 	 * Obtém o valor associado à chave.
-	 * @param key chave associado ao valor.
+	 * @param key chave associada ao valor.
      * @return valor associado à chave ou <code>null</code>.
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
      * item.
@@ -333,7 +336,7 @@ public class TXCache
 	/**
      * Obtém o valor associado à chave bloqueando ou não 
      * seu acesso as demais transações.
-     * @param key identificação do item no cache.
+     * @param key chave associada ao valor.
      * @param forUpdate <code>true</code> para bloquear o item. Caso contrário <code>false</code>.
      * @return valor associado à chave ou <code>null</code>.
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
@@ -357,7 +360,7 @@ public class TXCache
     
     /**
      * Obtém o fluxo de bytes do valor associado à chave.
-     * @param key chave associado ao fluxo.
+     * @param key chave associada ao fluxo.
      * @return fluxo de bytes do valor ou <code>null</code>.
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
      * item.
@@ -370,7 +373,7 @@ public class TXCache
     /**
      * Obtém o fluxo de bytes do valor associado à chave bloqueando ou não 
      * seu acesso as demais transações.
-     * @param key identificação do item no cache.
+     * @param key chave associada ao fluxo.
      * @param forUpdate <code>true</code> para bloquear o item. Caso contrário <code>false</code>.
      * @return fluxo de bytes do valor ou <code>null</code>.
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
@@ -397,7 +400,7 @@ public class TXCache
     
 	/**
 	 * Remove o valor assoiado à chave somente se ele for igual a um determinado valor.
-	 * @param key chave associado ao valor.
+	 * @param key chave associada ao valor.
 	 * @return valor para ser associado à chave.
 	 * @return <code>true</code> se o valor for removido. Caso contrário, <code>false</code>.
 	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
@@ -422,7 +425,7 @@ public class TXCache
 	
 	/**
 	 * Remove o valor associado à chave.
-	 * @param key chave associado ao valor.
+	 * @param key chave associada ao valor.
 	 * @return <code>true</code> se o valor for removido. Caso contrário, <code>false</code>.
 	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
      * item.
@@ -445,7 +448,6 @@ public class TXCache
     
     /**
      * Obtém a quantidade de itens recuperados.
-     * 
      * @return Quantidade de itens recuperados.
      */
     public long getCountRead(){
@@ -454,7 +456,6 @@ public class TXCache
 
     /**
      * Obtém a quantidade de itens armazenados.
-     * 
      * @return Quantidade de itens armazenados.
      */
     public long getCountWrite(){
@@ -463,7 +464,6 @@ public class TXCache
 
     /**
      * Obtém a quantidade de itens removidos.
-     * 
      * @return Quantidade de itens removidos.
      */
     public long getCountRemoved() {
@@ -472,7 +472,6 @@ public class TXCache
 
     /**
      * Obtém a quantidade de bytes recuperados.
-     * 
      * @return Quantidade de bytes recuperados.
      */
     public long getCountReadData() {
@@ -481,7 +480,6 @@ public class TXCache
     
     /**
      * Obtém a quantidade de bytes armazenados.
-     * 
      * @return Quantidade de bytes armazenados.
      */
     public long getCountWriteData() {
@@ -490,7 +488,6 @@ public class TXCache
 
     /**
      * Obtém a quantidade de bytes removidos.
-     * 
      * @return Quantidade de bytes removidos.
      */
     public long getCountRemovedData() {
