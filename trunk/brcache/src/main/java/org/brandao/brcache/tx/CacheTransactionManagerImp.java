@@ -20,6 +20,13 @@ public class CacheTransactionManagerImp
 	
 	private String transactionPath;
 	
+	public CacheTransactionManagerImp(){
+		this.transactionLocks = new HashMap<UUID, CacheTransactionManagerImp.Transaction>();
+		this.locks = new NamedLock();
+		this.transactionPath = "/mnt/brcache/tx";
+		this.transactions = new ThreadLocal<CacheTransactionHandler>();
+	}
+	
 	public void lock(UUID txId, String key) throws TransactionException {
 		Serializable lockId = null;
 		try{
