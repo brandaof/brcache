@@ -120,8 +120,7 @@ public class Cache
      * @param value valor para ser associado à chave.
      * @param maxAliveTime tempo máximo de vida do valor no cache.
      * @return o valor anterior associado à chave.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
-     * item no cache.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
 	public Object replace(String key, Object value, 
 			long maxAliveTime) throws StorageException {
@@ -153,8 +152,7 @@ public class Cache
 	 * @param newValue valor para ser associado à chave.
 	 * @param maxAliveTime tempo máximo de vida do valor no cache.
 	 * @return <code>verdadeiro</code> se o valor for substituido. Caso contrário, <code>falso</code>.
-	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
-     * item no cache.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
 	public boolean replace(String key, Object oldValue, 
 			Object newValue, long maxAliveTime) throws StorageException {
@@ -180,13 +178,12 @@ public class Cache
 	}
 	
 	/**
-	 * Associa o valor a chave somente se a chave não estiver associada a um valor.
+	 * Associa o valor à chave somente se a chave não estiver associada a um valor.
 	 * @param key chave associado ao valor.
 	 * @param value valor para ser associado à chave.
 	 * @param maxAliveTime tempo máximo de vida do valor no cache.
 	 * @return valor anterior associado à chave.
-	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
-     * item no cache.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
 	public Object putIfAbsent(String key, 
 			Object value, long maxAliveTime) throws StorageException {
@@ -214,12 +211,11 @@ public class Cache
 	}
 	
 	/**
-	 * Associa uma valor a uma chave.
+	 * Associa o valor à chave.
 	 * @param key chave associado ao valor.
 	 * @param value valor para ser associado à chave.
 	 * @param maxAliveTime tempo máximo de vida do valor no cache.
-	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o
-     * item no cache.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
 	public void put(String key, Object value, long maxAliveTime) throws StorageException {
 		try{
@@ -242,9 +238,9 @@ public class Cache
 	/**
 	 * Obtém o valor associado à chave.
 	 * @param key chave associado ao valor.
-	 * @return valor para ser associado à chave.
-	 * @throws RecoverException Lançada se ocorrer alguma falha ao tentar recuperar o
-     * item do cache.
+     * @return valor associado à chave ou <code>null</code>.
+     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
+     * item.
 	 */
 	public Object get(String key) throws RecoverException {
 		try{
@@ -270,9 +266,9 @@ public class Cache
 	 * Remove o valor assoiado à chave somente se ele for igual a um determinado valor.
 	 * @param key chave associado ao valor.
 	 * @return valor para ser associado à chave.
-	 * @return <code>verdadeiro</code> se o valor for removido. Caso contrário, <code>falso</code>.
+	 * @return <code>true</code> se o valor for removido. Caso contrário, <code>false</code>.
 	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
-     * item do cache.
+     * item.
 	 */
 	public boolean remove(String key, Object value) throws StorageException {
 		
@@ -298,9 +294,9 @@ public class Cache
 	/**
 	 * Remove o valor associado à chave.
 	 * @param key chave associado ao valor.
-	 * @return <code>verdadeiro</code> se o valor for removido. Caso contrário, <code>falso</code>.
+	 * @return <code>true</code> se o valor for removido. Caso contrário, <code>false</code>.
 	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
-     * item do cache.
+     * item.
 	 */
 	public boolean remove(String key) throws StorageException {
 		return super.remove(key);
