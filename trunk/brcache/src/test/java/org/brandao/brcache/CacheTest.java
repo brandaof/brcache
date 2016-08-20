@@ -4,9 +4,9 @@ import junit.framework.TestCase;
 
 public class CacheTest extends TestCase{
 
-	private static final String KEY = "teste";
+	private static final String KEY    = "teste";
 
-	private static final String VALUE = "value";
+	private static final String VALUE  = "value";
 
 	private static final String VALUE2 = "val";
 	
@@ -49,7 +49,7 @@ public class CacheTest extends TestCase{
 	public void testputIfAbsentExistValue() throws StorageException, RecoverException{
 		Cache cache = new Cache();
 		cache.put(KEY, VALUE, 0);
-		TestCase.assertNull(cache.putIfAbsent(KEY, VALUE2, 0));
+		TestCase.assertEquals(VALUE, cache.putIfAbsent(KEY, VALUE2, 0));
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 

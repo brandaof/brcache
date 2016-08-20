@@ -42,7 +42,7 @@ public class Cache
      * 
      */
     public Cache(){
-        super(
+        this(
     		3L*1024L*1024L, 1024, 0.5, 
     		1L*1024L*1024L, 1024, 0.5, 
     		10L*1024L*1024L, 64*1024, 1*1024, 0.5, 
