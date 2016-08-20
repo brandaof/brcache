@@ -319,7 +319,6 @@ public abstract class StreamCache
     
     /**
      * Remove o valor associado à chave.
-     * 
      * @param key chave associado ao valor.
      * @return <code>true</code> se o valor for removido. Caso contrário <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
