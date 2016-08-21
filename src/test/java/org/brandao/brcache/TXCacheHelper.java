@@ -24,7 +24,7 @@ public class TXCacheHelper {
 
 		public void run(){
 			try{
-				this.execute(cache, value, key, value2);
+				this.execute(cache, key, value, value2);
 			}
 			catch(Throwable e){
 				this.error = e; 
