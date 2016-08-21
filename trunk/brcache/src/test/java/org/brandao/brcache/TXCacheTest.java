@@ -2,7 +2,6 @@ package org.brandao.brcache;
 
 import org.brandao.brcache.TXCacheHelper.ConcurrentTask;
 import org.brandao.brcache.tx.CacheTransaction;
-import org.brandao.brcache.tx.TransactionException;
 
 import junit.framework.TestCase;
 
@@ -117,7 +116,108 @@ public class TXCacheTest extends TestCase{
 
 	/* replace */
 	
-	public void testExplicitTransactionReplace() throws Throwable{
+	public void testReplace() throws StorageException{
+		TXCache cache = new Cache().getTXCache();
+		TestCase.assertFalse(cache.replace(KEY, VALUE, 0));
+	}
+
+	public void testReplaceSuccess() throws StorageException, RecoverException{
+		TXCache cache = new Cache().getTXCache();
+		cache.put(KEY, VALUE, 0);
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		TestCase.assertTrue(cache.replace(KEY, VALUE2, 0));
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+	}
+
+	public void testReplaceExact() throws StorageException{
+		TXCache cache = new Cache().getTXCache();
+		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0));
+	}
+
+	public void testReplaceExactSuccess() throws StorageException, RecoverException{
+		TXCache cache = new Cache().getTXCache();
+		cache.put(KEY, VALUE, 0);
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		TestCase.assertTrue(cache.replace(KEY, VALUE, VALUE2, 0));
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+	}
+
+	/* putIfAbsent */
+	
+	public void testputIfAbsent() throws StorageException, RecoverException{
+		TXCache cache = new Cache().getTXCache();
+		TestCase.assertNull(cache.putIfAbsent(KEY, VALUE, 0));
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+	}
+
+	public void testputIfAbsentExistValue() throws StorageException, RecoverException{
+		TXCache cache = new Cache().getTXCache();
+		cache.put(KEY, VALUE, 0);
+		TestCase.assertEquals(VALUE, cache.putIfAbsent(KEY, VALUE2, 0));
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+	}
+
+	/* put */
+	
+	public void testPut() throws StorageException, RecoverException{
+		TXCache cache = new Cache().getTXCache();
+		TestCase.assertNull((String)cache.get(KEY));
+		cache.put(KEY, VALUE, 0);
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+	}
+
+	/* get */
+	
+	public void testGet() throws StorageException, RecoverException{
+		TXCache cache = new Cache().getTXCache();
+		TestCase.assertNull((String)cache.get(KEY));
+		cache.put(KEY, VALUE, 0);
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+	}
+
+	public void testGetOverride() throws StorageException, RecoverException{
+		TXCache cache = new Cache().getTXCache();
+		TestCase.assertNull((String)cache.get(KEY));
+		cache.put(KEY, VALUE, 0);
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		cache.put(KEY, VALUE2, 0);
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+	}
+
+	/* remove */
+	
+	public void testRemoveExact() throws StorageException, RecoverException{
+		TXCache cache = new Cache().getTXCache();
+		
+		TestCase.assertNull((String)cache.get(KEY));
+		TestCase.assertFalse(cache.remove(KEY, VALUE));
+		
+		cache.put(KEY, VALUE, 0);
+		
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		
+		TestCase.assertFalse(cache.remove(KEY, VALUE2));
+		TestCase.assertTrue(cache.remove(KEY, VALUE));
+	}
+
+	public void testRemove() throws StorageException, RecoverException{
+		TXCache cache = new Cache().getTXCache();
+		
+		TestCase.assertNull((String)cache.get(KEY));
+		TestCase.assertFalse(cache.remove(KEY));
+		
+		cache.put(KEY, VALUE, 0);
+		
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		
+		TestCase.assertTrue(cache.remove(KEY));
+	}	
+	
+	/* concurrent transaction*/
+	
+	/* replace */
+	
+	public void testConcurrentTransactionReplace() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
@@ -141,7 +241,7 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertEquals(VALUE, cache.get(KEY));
 	}
 
-	public void testExplicitTransactionReplaceSuccess() throws Throwable{
+	public void testConcurrentTransactionReplaceSuccess() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
@@ -171,7 +271,7 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
-	public void testExplicitTransactionReplaceExact() throws Throwable{
+	public void testConcurrentTransactionReplaceExact() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
@@ -197,7 +297,7 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
-	public void testExplicitTransactionReplaceExactSuccess() throws Throwable{
+	public void testConcurrentTransactionReplaceExactSuccess() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
@@ -227,7 +327,7 @@ public class TXCacheTest extends TestCase{
 
 	/* putIfAbsent */
 	
-	public void testExplicitTransactionPutIfAbsent() throws Throwable{
+	public void testConcurrentTransactionPutIfAbsent() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
@@ -254,7 +354,7 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 	}
 
-	public void testExplicitTransactionPutIfAbsentExistValue() throws Throwable{
+	public void testConcurrentTransactionPutIfAbsentExistValue() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
@@ -283,7 +383,7 @@ public class TXCacheTest extends TestCase{
 
 	/* put */
 	
-	public void testExplicitTransactionPut() throws Throwable{
+	public void testConcurrentTransactionPut() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
@@ -312,7 +412,7 @@ public class TXCacheTest extends TestCase{
 
 	/* get */
 	
-	public void testExplicitTransactionGet() throws Throwable{
+	public void testConcurrentTransactionGet() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
@@ -339,7 +439,7 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 	}
 
-	public void testExplicitTransactionGetOverride() throws Throwable{
+	public void testConcurrentTransactionGetOverride() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
@@ -370,7 +470,7 @@ public class TXCacheTest extends TestCase{
 
 	/* remove */
 	
-	public void testExplicitTransactionRemoveExact() throws Throwable{
+	public void testConcurrentTransactionRemoveExact() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
@@ -403,7 +503,7 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 	}
 
-	public void testExplicitTransactionRemove() throws Throwable{
+	public void testConcurrentTransactionRemove() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
