@@ -97,6 +97,7 @@ public class TXCacheTest extends TestCase{
 		
 		TestCase.assertFalse(cache.remove(KEY, VALUE2));
 		TestCase.assertTrue(cache.remove(KEY, VALUE));
+		TestCase.assertNull(cache.get(KEY));
 	}
 
 	public void testRemove() throws StorageException, RecoverException{
@@ -110,84 +111,120 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		
 		TestCase.assertTrue(cache.remove(KEY));
+		TestCase.assertNull(cache.get(KEY));
 	}
 	
 	/* with explicit transaction */
 
 	/* replace */
 	
-	public void testReplace() throws StorageException{
+	public void testExplicitTransactionReplace() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
+		CacheTransaction tx = cache.beginTransaction();
+		TestCase.assertFalse(cache.replace(KEY, VALUE, 0));
+		tx.commit();
 		TestCase.assertFalse(cache.replace(KEY, VALUE, 0));
 	}
 
-	public void testReplaceSuccess() throws StorageException, RecoverException{
+	public void testExplicitTransactionReplaceSuccess() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
+		CacheTransaction tx = cache.beginTransaction();
 		cache.put(KEY, VALUE, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		TestCase.assertTrue(cache.replace(KEY, VALUE2, 0));
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+		tx.commit();
+		
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 	}
 
-	public void testReplaceExact() throws StorageException{
+	public void testExplicitTransactionReplaceExact() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
+		CacheTransaction tx = cache.beginTransaction();
+		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0));
+		tx.commit();
 		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0));
 	}
 
-	public void testReplaceExactSuccess() throws StorageException, RecoverException{
+	public void testExplicitTransactionReplaceExactSuccess() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
+		CacheTransaction tx = cache.beginTransaction();
 		cache.put(KEY, VALUE, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		TestCase.assertTrue(cache.replace(KEY, VALUE, VALUE2, 0));
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+		tx.commit();
+		
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 	}
 
 	/* putIfAbsent */
 	
-	public void testputIfAbsent() throws StorageException, RecoverException{
+	public void testExplicitTransactionPutIfAbsent() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
+		CacheTransaction tx = cache.beginTransaction();
 		TestCase.assertNull(cache.putIfAbsent(KEY, VALUE, 0));
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		tx.commit();
+		
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
-	public void testputIfAbsentExistValue() throws StorageException, RecoverException{
+	public void testExplicitTransactionPutIfAbsentExistValue() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
+		CacheTransaction tx = cache.beginTransaction();
 		cache.put(KEY, VALUE, 0);
 		TestCase.assertEquals(VALUE, cache.putIfAbsent(KEY, VALUE2, 0));
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		tx.commit();
+		
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
 	/* put */
 	
-	public void testPut() throws StorageException, RecoverException{
+	public void testExplicitTransactionPut() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
+		CacheTransaction tx = cache.beginTransaction();
 		TestCase.assertNull((String)cache.get(KEY));
 		cache.put(KEY, VALUE, 0);
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		tx.commit();
+		
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
 	/* get */
 	
-	public void testGet() throws StorageException, RecoverException{
+	public void testExplicitTransactionGet() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
+		CacheTransaction tx = cache.beginTransaction();
 		TestCase.assertNull((String)cache.get(KEY));
 		cache.put(KEY, VALUE, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		tx.commit();
+		
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
-	public void testGetOverride() throws StorageException, RecoverException{
+	public void testExplicitTransactionGetOverride() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
+		CacheTransaction tx = cache.beginTransaction();
 		TestCase.assertNull((String)cache.get(KEY));
 		cache.put(KEY, VALUE, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		cache.put(KEY, VALUE2, 0);
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+		tx.commit();
+		
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 	}
 
 	/* remove */
 	
-	public void testRemoveExact() throws StorageException, RecoverException{
+	public void testExplicitTransactionRemoveExact() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
+		CacheTransaction tx = cache.beginTransaction();
 		
 		TestCase.assertNull((String)cache.get(KEY));
 		TestCase.assertFalse(cache.remove(KEY, VALUE));
@@ -198,10 +235,14 @@ public class TXCacheTest extends TestCase{
 		
 		TestCase.assertFalse(cache.remove(KEY, VALUE2));
 		TestCase.assertTrue(cache.remove(KEY, VALUE));
+		tx.commit();
+		
+		TestCase.assertTrue(cache.remove(KEY, VALUE));
 	}
 
-	public void testRemove() throws StorageException, RecoverException{
+	public void testExplicitTransactionRemove() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
+		CacheTransaction tx = cache.beginTransaction();
 		
 		TestCase.assertNull((String)cache.get(KEY));
 		TestCase.assertFalse(cache.remove(KEY));
@@ -211,6 +252,10 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		
 		TestCase.assertTrue(cache.remove(KEY));
+		TestCase.assertNull(cache.get(KEY));
+		tx.commit();
+		
+		TestCase.assertNull(cache.get(KEY));
 	}	
 	
 	/* concurrent transaction*/
