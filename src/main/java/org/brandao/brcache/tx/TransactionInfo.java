@@ -130,16 +130,11 @@ public class TransactionInfo implements Serializable {
 					inputData == null? 
 						null : 
 						this.getBytes(inputData);
-    		if(this.managed.contains(key)){
-    			this.entities.put(key, new EntryCache(dta, maxAliveTime));
-    			this.updated.add(key);
-    		}
-    		else{
-    			this.lock(manager, key, time);
-    			this.managed.add(key);
-    			this.updated.add(key);
-    			this.entities.put(key, new EntryCache(dta, maxAliveTime));
-    		}
+			
+			this.lock(manager, key, time);
+			this.managed.add(key);
+			this.updated.add(key);
+			this.entities.put(key, new EntryCache(dta, maxAliveTime));
     	}
     	catch(Throwable e){
     		throw new StorageException(e);
@@ -203,11 +198,13 @@ public class TransactionInfo implements Serializable {
     public boolean remove(CacheTransactionManager manager, StreamCache cache,
     		String key, long time) throws StorageException{       
     	try{
+			this.lock(manager, key, time);
+			
     		if(this.managed.contains(key)){
+    			this.updated.add(key);
     			return this.entities.put(key, EMPTY) != null;
     		}
     		else{
-    			this.lock(manager, key, time);
     			this.managed.add(key);
     			this.updated.add(key);
     			this.entities.put(key, null);
@@ -254,12 +251,12 @@ public class TransactionInfo implements Serializable {
 		if(!this.updated.isEmpty()){
 			for(String key: this.updated){
 				EntryCache entity = this.entities.get(key);
-				
-				if(entity == null){
+				byte[] dta = entity.getData();
+				if(dta == null){
 					cache.remove(key);
 				}
 				else{
-					cache.putStream(key, entity.getMaxAlive(), new ByteArrayInputStream(entity.getData()));
+					cache.putStream(key, entity.getMaxAlive(), new ByteArrayInputStream(dta));
 				}
 			}
 			
