@@ -9,7 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author Brandao
  *
  */
-public class Memory {
+class Memory {
 
 	/**
 	 * Blocos de dados.

@@ -1,6 +1,6 @@
 package org.brandao.brcache;
 
-public class HugeListCalculator {
+class HugeListCalculator {
 
 	public static HugeListInfo calculate(
 			long dataBufferSize, long dataPageSize, 

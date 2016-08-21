@@ -23,7 +23,7 @@ import java.io.Serializable;
  * 
  * @author Brandao
  */
-public class DataMap implements Serializable{
+class DataMap implements Serializable{
     
 	private static final long serialVersionUID = -2531845084336308095L;
 

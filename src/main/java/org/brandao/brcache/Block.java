@@ -3,7 +3,7 @@ package org.brandao.brcache;
 import java.io.Serializable;
 
 @SuppressWarnings("serial")
-public class Block 
+class Block 
     implements Serializable{
 
     public long id;
