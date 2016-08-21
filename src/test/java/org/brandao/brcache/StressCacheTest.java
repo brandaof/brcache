@@ -46,7 +46,7 @@ public class StressCacheTest extends TestCase{
     public void test() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
         Collections.setPath("/mnt/brcache");
-        final StreamCache cache = new StreamCache();
+        final Cache cache = new Cache();
 
         Thread read =
             new Thread(){
@@ -98,7 +98,7 @@ public class StressCacheTest extends TestCase{
                                 //int rv = r.nextInt(200000);
                                 String key = String.valueOf(rv)/* + "- INDEX AJBK - "*/;
                                 String value = key + text;
-                                cache.putObject(key, 0, value);
+                                cache.put(key, value, 0);
                             }
                             catch(Exception e){
                                 e.printStackTrace();
@@ -137,7 +137,7 @@ public class StressCacheTest extends TestCase{
                             String value = key + text;
                                 
                             try{
-                                String val = (String) cache.getObject(key);
+                                String val = (String) cache.get(key);
                                 if(val != null){
                                     //System.out.println(val);
                                     Assert.assertEquals(value, val);
@@ -162,7 +162,7 @@ public class StressCacheTest extends TestCase{
     public void test2() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
         Collections.setPath("/mnt/brcache");
-        final StreamCache cache = new StreamCache();
+        final Cache cache = new Cache();
 
         Thread read =
             new Thread(){
@@ -205,7 +205,7 @@ public class StressCacheTest extends TestCase{
             try{
                 String key = String.valueOf(i) + "- INDEX AJBK - ";
                 String value = key + text;
-                cache.putObject(key, 0, value);
+                cache.put(key, value, 0);
             }
             catch(Exception e){
                 e.printStackTrace();
@@ -223,7 +223,7 @@ public class StressCacheTest extends TestCase{
                         String key = String.valueOf(rv) + "- INDEX AJBK - ";
                         String value = key + text;
                         try{
-                            String val = (String) cache.getObject(key);
+                            String val = (String) cache.get(key);
                             if(val != null){
                                 //System.out.println(val);
                                 Assert.assertEquals(value, val);
