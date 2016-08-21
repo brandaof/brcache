@@ -1,5 +1,9 @@
 package org.brandao.brcache;
 
+import org.brandao.brcache.TXCacheHelper.ConcurrentTask;
+import org.brandao.brcache.tx.CacheTransaction;
+import org.brandao.brcache.tx.TransactionException;
+
 import junit.framework.TestCase;
 
 public class TXCacheTest extends TestCase{
@@ -109,6 +113,325 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertTrue(cache.remove(KEY));
 	}
 	
-	/* with Transaction */
+	/* with explicit transaction */
+
+	/* replace */
+	
+	public void testExplicitTransactionReplace() throws Throwable{
+		TXCache cache = new Cache().getTXCache();
+
+		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
+
+			@Override
+			protected void execute(TXCache cache, String value, String key,
+					String value2) throws Throwable {
+				cache.put(key, value, 0);
+			}
+			
+		};
+		
+		CacheTransaction tx = cache.beginTransaction();
+		TestCase.assertNull(cache.get(KEY, true));
+		task.start();
+		Thread.sleep(2000);
+		TestCase.assertFalse(cache.replace(KEY, VALUE, 0));
+		tx.commit();
+		
+		Thread.sleep(1000);
+		TestCase.assertEquals(VALUE, cache.get(KEY));
+	}
+
+	public void testExplicitTransactionReplaceSuccess() throws Throwable{
+		TXCache cache = new Cache().getTXCache();
+
+		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
+
+			@Override
+			protected void execute(TXCache cache, String value, String key,
+					String value2) throws Throwable {
+				cache.put(key, value, 0);
+			}
+			
+		};
+		
+		CacheTransaction tx = cache.beginTransaction();
+		
+		cache.put(KEY, VALUE, 0);
+		
+		task.start();
+		Thread.sleep(2000);
+		
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		TestCase.assertTrue(cache.replace(KEY, VALUE2, 0));
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+		
+		tx.commit();
+		
+		Thread.sleep(1000);
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+	}
+
+	public void testExplicitTransactionReplaceExact() throws Throwable{
+		TXCache cache = new Cache().getTXCache();
+
+		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
+
+			@Override
+			protected void execute(TXCache cache, String value, String key,
+					String value2) throws Throwable {
+				cache.put(key, value, 0);
+			}
+			
+		};
+		
+		CacheTransaction tx = cache.beginTransaction();
+		cache.get(KEY, true);
+		
+		task.start();
+		Thread.sleep(2000);
+		
+		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0));
+		tx.commit();
+		
+		Thread.sleep(1000);
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+	}
+
+	public void testExplicitTransactionReplaceExactSuccess() throws Throwable{
+		TXCache cache = new Cache().getTXCache();
+
+		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
+
+			@Override
+			protected void execute(TXCache cache, String value, String key,
+					String value2) throws Throwable {
+				cache.put(key, value, 0);
+			}
+			
+		};
+		
+		CacheTransaction tx = cache.beginTransaction();
+		cache.put(KEY, VALUE, 0);
+		
+		task.start();
+		Thread.sleep(2000);
+		
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		TestCase.assertTrue(cache.replace(KEY, VALUE, VALUE2, 0));
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+		tx.commit();
+		
+		Thread.sleep(1000);
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+	}
+
+	/* putIfAbsent */
+	
+	public void testExplicitTransactionPutIfAbsent() throws Throwable{
+		TXCache cache = new Cache().getTXCache();
+
+		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
+
+			@Override
+			protected void execute(TXCache cache, String value, String key,
+					String value2) throws Throwable {
+				cache.put(key, value2, 0);
+			}
+			
+		};
+		
+		CacheTransaction tx = cache.beginTransaction();
+		cache.get(KEY, true);
+		
+		task.start();
+		Thread.sleep(2000);
+		
+		TestCase.assertNull(cache.putIfAbsent(KEY, VALUE, 0));
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		tx.commit();
+		
+		Thread.sleep(1000);
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+	}
+
+	public void testExplicitTransactionPutIfAbsentExistValue() throws Throwable{
+		TXCache cache = new Cache().getTXCache();
+
+		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
+
+			@Override
+			protected void execute(TXCache cache, String value, String key,
+					String value2) throws Throwable {
+				cache.put(key, value2, 0);
+			}
+			
+		};
+		
+		CacheTransaction tx = cache.beginTransaction();
+		cache.put(KEY, VALUE, 0);
+		
+		task.start();
+		Thread.sleep(2000);
+		
+		TestCase.assertEquals(VALUE, cache.putIfAbsent(KEY, VALUE2, 0));
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		tx.commit();
+		
+		Thread.sleep(1000);
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+	}
+
+	/* put */
+	
+	public void testExplicitTransactionPut() throws Throwable{
+		TXCache cache = new Cache().getTXCache();
+
+		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
+
+			@Override
+			protected void execute(TXCache cache, String value, String key,
+					String value2) throws Throwable {
+				cache.put(key, value2, 0);
+			}
+			
+		};
+		
+		CacheTransaction tx = cache.beginTransaction();
+		TestCase.assertNull((String)cache.get(KEY));
+		cache.put(KEY, VALUE, 0);
+		
+		task.start();
+		Thread.sleep(2000);
+		
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		tx.commit();
+		
+		Thread.sleep(1000);
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+	}
+
+	/* get */
+	
+	public void testExplicitTransactionGet() throws Throwable{
+		TXCache cache = new Cache().getTXCache();
+
+		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
+
+			@Override
+			protected void execute(TXCache cache, String value, String key,
+					String value2) throws Throwable {
+				cache.put(key, value2, 0);
+			}
+			
+		};
+		
+		CacheTransaction tx = cache.beginTransaction();
+		TestCase.assertNull((String)cache.get(KEY));
+		cache.put(KEY, VALUE, 0);
+		
+		task.start();
+		Thread.sleep(2000);
+		
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		tx.commit();
+		
+		Thread.sleep(1000);
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+	}
+
+	public void testExplicitTransactionGetOverride() throws Throwable{
+		TXCache cache = new Cache().getTXCache();
+
+		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
+
+			@Override
+			protected void execute(TXCache cache, String value, String key,
+					String value2) throws Throwable {
+				cache.put(key, value2, 0);
+			}
+			
+		};
+		
+		CacheTransaction tx = cache.beginTransaction();
+		TestCase.assertNull((String)cache.get(KEY));
+		cache.put(KEY, VALUE, 0);
+		
+		task.start();
+		Thread.sleep(2000);
+		
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		cache.put(KEY, VALUE2, 0);
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+		tx.commit();
+		
+		Thread.sleep(1000);
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+	}
+
+	/* remove */
+	
+	public void testExplicitTransactionRemoveExact() throws Throwable{
+		TXCache cache = new Cache().getTXCache();
+
+		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
+
+			@Override
+			protected void execute(TXCache cache, String value, String key,
+					String value2) throws Throwable {
+				cache.put(key, value2, 0);
+			}
+			
+		};
+		
+		CacheTransaction tx = cache.beginTransaction();
+		
+		TestCase.assertNull((String)cache.get(KEY));
+		TestCase.assertFalse(cache.remove(KEY, VALUE));
+		cache.put(KEY, VALUE, 0);
+
+		task.start();
+		Thread.sleep(2000);
+		
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		
+		TestCase.assertFalse(cache.remove(KEY, VALUE2));
+		TestCase.assertTrue(cache.remove(KEY, VALUE));
+		TestCase.assertNull(cache.get(KEY));
+		tx.commit();
+		
+		Thread.sleep(1000);
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+	}
+
+	public void testExplicitTransactionRemove() throws Throwable{
+		TXCache cache = new Cache().getTXCache();
+
+		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
+
+			@Override
+			protected void execute(TXCache cache, String value, String key,
+					String value2) throws Throwable {
+				cache.put(key, value2, 0);
+			}
+			
+		};
+		
+		CacheTransaction tx = cache.beginTransaction();
+		
+		TestCase.assertNull((String)cache.get(KEY));
+		TestCase.assertFalse(cache.remove(KEY));
+		cache.put(KEY, VALUE, 0);
+
+		task.start();
+		Thread.sleep(2000);
+		
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		TestCase.assertTrue(cache.remove(KEY));
+		TestCase.assertNull(cache.get(KEY));
+		tx.commit();
+		
+		Thread.sleep(1000);
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+	}
 	
 }

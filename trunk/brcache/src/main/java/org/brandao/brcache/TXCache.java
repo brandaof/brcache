@@ -26,7 +26,6 @@ import org.brandao.brcache.tx.CacheTransaction;
 import org.brandao.brcache.tx.CacheTransactionHandler;
 import org.brandao.brcache.tx.CacheTransactionManager;
 import org.brandao.brcache.tx.CacheTransactionManagerImp;
-import org.brandao.brcache.tx.TransactionException;
 
 /**
  * Provê suporte transacional a um cache.
@@ -538,6 +537,7 @@ public class TXCache
     		}
     		
     	}
+    	/*
     	finally{
     		try{
     			this.transactionManager.close(tx);
@@ -546,6 +546,7 @@ public class TXCache
     			throw new StorageException(e);    			
     		}
     	}
+    	*/
     	
     }
     

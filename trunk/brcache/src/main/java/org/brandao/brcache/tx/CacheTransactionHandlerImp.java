@@ -182,7 +182,7 @@ public class CacheTransactionHandlerImp
 			this.persistTransaction(file, this.transactionInfo);
 			this.transactionInfo.commit(cache);
 			this.clearTransaction(this.transactionInfo);
-			this.commitInProgress = true;
+			this.commitInProgress = false;
 			this.commited         = true;
 			this.rolledBack       = false;
 		}

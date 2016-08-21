@@ -30,9 +30,11 @@ public class CacheTransactionManagerImp
 	public void lock(UUID txId, String key) throws TransactionException {
 		Serializable lockId = null;
 		try{
-			lockId = locks.lock(key);
 			Transaction tx = transactionLocks.get(txId);
-			tx.locks.put(key, lockId);
+			if(!tx.locks.containsKey(key)){
+				lockId = locks.lock(key);
+				tx.locks.put(key, lockId);
+			}
 		}
 		catch(Throwable e){
 			if(lockId != null){
@@ -46,14 +48,17 @@ public class CacheTransactionManagerImp
 			throws TransactionException {
 		Serializable lockId = null;
 		try{
-			lockId = locks.tryLock(key, time, unit);
-			
-			if(lockId == null){
-				throw new TransactionException("timeout");
-			}
-			
 			Transaction tx = transactionLocks.get(txId);
-			tx.locks.put(key, lockId);
+			
+			if(!tx.locks.containsKey(key)){
+				lockId = locks.tryLock(key, time, unit);
+				
+				if(lockId == null){
+					throw new TransactionException("timeout");
+				}
+				
+				tx.locks.put(key, lockId);
+			}
 		}
 		catch(Throwable e){
 			if(lockId != null){
@@ -144,9 +149,16 @@ public class CacheTransactionManagerImp
 	}
 
 	public void close(CacheTransactionHandler tx) throws TransactionException {
+		
+		CacheTransactionHandler current = this.transactions.get();
+		
+		if(current != tx){
+			throw new TransactionException("invalid current transaction");
+		}
+		
 		UUID txId = (UUID) tx.getId();
 		
-		Transaction txInfo = this.transactionLocks.get(txId);
+		Transaction txInfo = this.transactionLocks.remove(txId);
 		Map<String, Serializable> locks = txInfo.locks;
 		
 		for(String lockName: locks.keySet()){
@@ -154,11 +166,7 @@ public class CacheTransactionManagerImp
 			this.locks.unlock(ref, lockName);
 		}
 		
-		CacheTransactionHandler current = this.transactions.get();
 		this.transactions.remove();
-		if(current != tx)
-			throw new TransactionException("invalid current transaction");
-		
 	}
 
 	private class Transaction{
