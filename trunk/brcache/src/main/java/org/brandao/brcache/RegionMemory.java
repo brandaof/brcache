@@ -7,7 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 
-public class RegionMemory implements Serializable{
+class RegionMemory implements Serializable{
 
 	private static final long serialVersionUID = -8225524015808420667L;
 
