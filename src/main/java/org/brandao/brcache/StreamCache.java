@@ -42,11 +42,11 @@ import org.brandao.brcache.collections.treehugemap.CharNode;
  *    
  *    Cache cache = ...;
  *    InputStream valueStream = ...;
- *    cache.put("uma_chave", valueStream, 1200);
+ *    cache.putStream("uma_chave", valueStream, 1200);
  *    
  * ex2:
  *    
- *    InputStream value = cache.get("uma_chave");
+ *    InputStream value = cache.getStream("uma_chave");
  *
  * </pre>
  * 
