@@ -132,6 +132,7 @@ public class TransactionInfo implements Serializable {
 						this.getBytes(inputData);
     		if(this.managed.contains(key)){
     			this.entities.put(key, new EntryCache(dta, maxAliveTime));
+    			this.updated.add(key);
     		}
     		else{
     			this.lock(manager, key, time);
