@@ -237,7 +237,7 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertTrue(cache.remove(KEY, VALUE));
 		tx.commit();
 		
-		TestCase.assertTrue(cache.remove(KEY, VALUE));
+		TestCase.assertFalse(cache.remove(KEY, VALUE));
 	}
 
 	public void testExplicitTransactionRemove() throws Throwable{
