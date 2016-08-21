@@ -22,10 +22,14 @@ public class TransactionInfo implements Serializable {
 
 	private static final long serialVersionUID = 3758041685386590737L;
 
+	private static final EntryCache EMPTY = new EntryCache(null, -1);
+	
 	private UUID id;
 	
-	private Set<String> inserted;
+	private Set<String> updated;
 
+	private Set<String> locked;
+	
 	private Set<String> managed;
 	
 	private Map<String, EntryCache> entities;
@@ -34,7 +38,8 @@ public class TransactionInfo implements Serializable {
 	
 	public TransactionInfo(UUID id){
 		this.id       = id;
-		this.inserted = new HashSet<String>();
+		this.updated  = new HashSet<String>();
+		this.locked   = new HashSet<String>();
 		this.managed  = new HashSet<String>();
 		this.entities = new HashMap<String, EntryCache>();
 		this.saved    = new HashMap<String, EntryCache>();
@@ -121,14 +126,19 @@ public class TransactionInfo implements Serializable {
     		throws StorageException {
 
     	try{
-    		manager.tryLock(this.id, key, time, TimeUnit.MILLISECONDS);
 			byte[] dta = 
-				inputData == null? 
-					null : 
-					this.getBytes(inputData);
-			this.managed.add(key);
-			this.inserted.add(key);
-			this.entities.put(key, new EntryCache(dta, maxAliveTime));
+					inputData == null? 
+						null : 
+						this.getBytes(inputData);
+    		if(this.managed.contains(key)){
+    			this.entities.put(key, new EntryCache(dta, maxAliveTime));
+    		}
+    		else{
+    			this.lock(manager, key, time);
+    			this.managed.add(key);
+    			this.updated.add(key);
+    			this.entities.put(key, new EntryCache(dta, maxAliveTime));
+    		}
     	}
     	catch(Throwable e){
     		throw new StorageException(e);
@@ -142,8 +152,8 @@ public class TransactionInfo implements Serializable {
 		try{
 			InputStream in = this.getStream(manager, cache, key, forUpdate, time);
 			if(in != null){
-					ObjectInputStream oin = new ObjectInputStream(in);
-					return oin.readObject();
+				ObjectInputStream oin = new ObjectInputStream(in);
+				return oin.readObject();
 			}
 			else
 				return null;
@@ -192,11 +202,16 @@ public class TransactionInfo implements Serializable {
     public boolean remove(CacheTransactionManager manager, StreamCache cache,
     		String key, long time) throws StorageException{       
     	try{
-    		manager.tryLock(this.id, key, time, TimeUnit.MILLISECONDS);
-			this.managed.add(key);
-			this.inserted.add(key);
-			this.entities.put(key, null);
-			return cache.getStream(key) != null;
+    		if(this.managed.contains(key)){
+    			return this.entities.put(key, EMPTY) != null;
+    		}
+    		else{
+    			this.lock(manager, key, time);
+    			this.managed.add(key);
+    			this.updated.add(key);
+    			this.entities.put(key, null);
+    			return cache.getStream(key) != null;
+    		}
     	}
     	catch(Throwable e){
     		throw new StorageException(e);
@@ -208,7 +223,7 @@ public class TransactionInfo implements Serializable {
 	public void savePoint(StreamCache cache) throws IOException, RecoverException{
 		saved.clear();
 
-		for(String key: this.inserted){
+		for(String key: this.updated){
 			InputStream in = cache.getStream(key);
 			if(in != null){
 				saved.put(key, new EntryCache(this.getBytes(in), -1));
@@ -235,8 +250,8 @@ public class TransactionInfo implements Serializable {
 	}
 	
 	public void commit(StreamCache cache) throws RecoverException, StorageException {
-		if(!this.inserted.isEmpty()){
-			for(String key: this.inserted){
+		if(!this.updated.isEmpty()){
+			for(String key: this.updated){
 				EntryCache entity = this.entities.get(key);
 				
 				if(entity == null){
@@ -251,8 +266,10 @@ public class TransactionInfo implements Serializable {
 	}
 	
 	public void clear() throws TransactionException{
+		this.updated.clear();
+		this.locked.clear();
+		this.managed.clear();
 		this.entities.clear();
-		this.inserted.clear();
 		this.saved.clear();
 	}
     
@@ -269,10 +286,26 @@ public class TransactionInfo implements Serializable {
     	else{
     		byte[] dta = this.getSharedEntity(manager, cache, key, lock, time);
 			this.managed.add(key);
-			this.entities.put(key, new EntryCache(dta, -1));
+			this.entities.put(key, EMPTY);
     		
     		return dta;
     	}
+    }
+    
+    private void lock(CacheTransactionManager manager, String key, long time) throws TransactionException{
+    	
+    	if(this.locked.contains(key)){
+    		return;
+    	}
+    	
+    	if(time <= 0){
+    		manager.lock(this.id, key);
+    	}
+    	else{
+			manager.tryLock(this.id, key, time, TimeUnit.MILLISECONDS);
+    	}
+    	
+    	this.locked.add(key);
     }
     
     private byte[] getSharedEntity(CacheTransactionManager manager, StreamCache cache,
@@ -280,12 +313,7 @@ public class TransactionInfo implements Serializable {
     		throws IOException, TransactionException, RecoverException{
     	
 		if(lock){
-			if(time <= 0){
-				manager.lock(this.id, key);
-			}
-			else{
-				manager.tryLock(this.id, key, time, TimeUnit.MILLISECONDS);
-			}
+			this.lock(manager, key, time);
 		}
 		
 		InputStream in = cache.getStream(key);
