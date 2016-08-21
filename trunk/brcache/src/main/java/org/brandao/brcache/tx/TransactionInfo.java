@@ -22,8 +22,6 @@ public class TransactionInfo implements Serializable {
 
 	private static final long serialVersionUID = 3758041685386590737L;
 
-	private static final EntryCache EMPTY = new EntryCache(null, -1);
-	
 	private UUID id;
 	
 	private Set<String> updated;
