@@ -202,7 +202,7 @@ public class TransactionInfo implements Serializable {
 			
     		if(this.managed.contains(key)){
     			this.updated.add(key);
-    			return this.entities.put(key, EMPTY) != null;
+    			return this.entities.put(key, null) != null;
     		}
     		else{
     			this.managed.add(key);
@@ -251,12 +251,12 @@ public class TransactionInfo implements Serializable {
 		if(!this.updated.isEmpty()){
 			for(String key: this.updated){
 				EntryCache entity = this.entities.get(key);
-				byte[] dta = entity.getData();
-				if(dta == null){
+				
+				if(entity == null){
 					cache.remove(key);
 				}
 				else{
-					cache.putStream(key, entity.getMaxAlive(), new ByteArrayInputStream(dta));
+					cache.putStream(key, entity.getMaxAlive(), new ByteArrayInputStream(entity.getData()));
 				}
 			}
 			
@@ -279,12 +279,12 @@ public class TransactionInfo implements Serializable {
     	
     	if(this.managed.contains(key)){
     		EntryCache entry = this.entities.get(key);
-    		return entry.getData();
+    		return entry == null? null : entry.getData();
     	}
     	else{
     		byte[] dta = this.getSharedEntity(manager, cache, key, lock, time);
 			this.managed.add(key);
-			this.entities.put(key, EMPTY);
+			this.entities.put(key, dta == null? null : new EntryCache(dta, -1));
     		
     		return dta;
     	}
