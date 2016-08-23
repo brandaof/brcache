@@ -45,6 +45,8 @@ public class TerminalConstants {
     
     public static final String SUCCESS = "OK";
 
+    public static final String NOT_FOUND = "NOT_FOUND";
+    
     public static final String INSERT_ENTRY_FAIL = "INSERT ENTRY FAIL";
     
     public static final String READ_ENTRY_FAIL = "READ ENTRY FAIL";

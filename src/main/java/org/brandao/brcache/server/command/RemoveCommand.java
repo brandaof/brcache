@@ -24,18 +24,24 @@ public class RemoveCommand extends AbstractCommand{
                     TerminalWriter writer, String[] parameters)
                     throws ReadDataException, WriteDataException, ParameterException {
 
-    //if(parameters == null || parameters.length < 2)
-    //    throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
-
-    try {
-        cache.remove(parameters[1]);
-    }
-    catch (StorageException e) {
-        throw new ParameterException(e);
-    }
-
-    writer.sendMessage(TerminalConstants.SUCCESS);
-    writer.flush();
+	    //if(parameters == null || parameters.length < 2)
+	    //    throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
+	
+		boolean result;
+	    try {
+	        result = cache.remove(parameters[1]);
+	    }
+	    catch (StorageException e) {
+	        throw new ParameterException(e);
+	    }
+	
+	    if(result){
+	    	writer.sendMessage(TerminalConstants.SUCCESS);
+	    }
+	    else{
+	    	writer.sendMessage(TerminalConstants.NOT_FOUND);
+	    }
+	    writer.flush();
 
     }
 
