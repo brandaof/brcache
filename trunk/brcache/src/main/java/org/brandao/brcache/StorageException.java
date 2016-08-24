@@ -27,20 +27,12 @@ public class StorageException extends CacheException{
     
 	private static final long serialVersionUID = 2848276802048022365L;
 
-	public StorageException() {
-        super();
+    public StorageException(Throwable thrwbl, CacheError error, Object ... params) {
+        super(thrwbl, error, params);
     }
 
-    public StorageException(String string) {
-        super(string);
+    public StorageException(CacheError error, Object ... params) {
+        super(error, params);
     }
-
-    public StorageException(String string, Throwable thrwbl) {
-        super(string, thrwbl);
-    }
-
-    public StorageException(Throwable thrwbl) {
-        super(thrwbl);
-    }
-
+    
 }

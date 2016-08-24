@@ -1,25 +1,21 @@
 package org.brandao.brcache.tx;
 
+import org.brandao.brcache.CacheError;
+import org.brandao.brcache.CacheException;
+
 public class TransactionException 
-	extends Exception{
+	extends CacheException{
 
-	public TransactionException() {
-		super();
+	private static final long serialVersionUID = 7884198916723934702L;
+
+	public TransactionException(CacheError error, Object... params) {
+		super(error, params);
 		// TODO Auto-generated constructor stub
 	}
 
-	public TransactionException(String message, Throwable cause) {
-		super(message, cause);
-		// TODO Auto-generated constructor stub
-	}
-
-	public TransactionException(String message) {
-		super(message);
-		// TODO Auto-generated constructor stub
-	}
-
-	public TransactionException(Throwable cause) {
-		super(cause);
+	public TransactionException(Throwable thrwbl, CacheError error,
+			Object... params) {
+		super(thrwbl, error, params);
 		// TODO Auto-generated constructor stub
 	}
 

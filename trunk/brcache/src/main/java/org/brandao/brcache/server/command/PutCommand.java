@@ -4,14 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.brandao.brcache.Cache;
-import org.brandao.brcache.StorageException;
-import org.brandao.brcache.server.ParameterException;
-import org.brandao.brcache.server.ReadDataException;
 import org.brandao.brcache.server.Terminal;
 import org.brandao.brcache.server.TerminalConstants;
 import org.brandao.brcache.server.TerminalReader;
 import org.brandao.brcache.server.TerminalWriter;
-import org.brandao.brcache.server.WriteDataException;
+import org.brandao.brcache.server.error.ServerError;
+import org.brandao.brcache.server.error.ServerErrorException;
+import org.brandao.brcache.server.error.ServerErrors;
 
 /**
  * Representa o comando PUT.
@@ -25,8 +24,7 @@ import org.brandao.brcache.server.WriteDataException;
 public class PutCommand extends AbstractCommand{
 
 	public void execute(Terminal terminal, Cache cache, TerminalReader reader, TerminalWriter writer,
-			String[] parameters) throws ReadDataException, WriteDataException,
-			ParameterException {
+			String[] parameters) throws ServerErrorException {
 		
         int time;
         int size;
@@ -39,14 +37,14 @@ public class PutCommand extends AbstractCommand{
                 time = Integer.parseInt(parameters[3]);
             }
             catch(NumberFormatException e){
-                throw new ParameterException(TerminalConstants.INVALID_TIME);
+                throw new ServerErrorException(ServerErrors.ERROR_1003, ServerErrors.ERROR_1003.toString("time"));
             }
 
             try{
                 size = Integer.parseInt(parameters[4]);
             }
             catch(NumberFormatException e){
-                throw new ParameterException(TerminalConstants.INVALID_SIZE);
+                throw new ServerErrorException(ServerErrors.ERROR_1003, ServerErrors.ERROR_1003.toString("size"));
             }
             
             InputStream stream = null;
@@ -64,18 +62,21 @@ public class PutCommand extends AbstractCommand{
             
             String end = reader.getMessage();
             
-            if(!TerminalConstants.BOUNDARY_MESSAGE.equals(end))
-                throw new ParameterException(TerminalConstants.READ_ENTRY_FAIL);
+            if(!TerminalConstants.BOUNDARY_MESSAGE.equals(end)){
+                throw new ServerErrorException(ServerErrors.ERROR_1004, ServerErrors.ERROR_1004.toString());
+            }
             	
             writer.sendMessage(TerminalConstants.SUCCESS);
             writer.flush();
         }
         catch (IOException ex) {
-            throw new WriteDataException(TerminalConstants.INSERT_ENTRY_FAIL, ex);
+            throw new ServerErrorException(ServerErrors.ERROR_1005, ServerErrors.ERROR_1005.toString(), ex);
         }
-        catch(StorageException ex){
-            throw new WriteDataException(TerminalConstants.INSERT_ENTRY_FAIL, ex);
-        }		
+        catch(Throwable ex){
+        	ServerError error = ServerErrors.getError(ex.getMessage(), ex.getClass());
+            throw new ServerErrorException(error, error.toString(), ex);
+        }
+        
 	}
 
 }

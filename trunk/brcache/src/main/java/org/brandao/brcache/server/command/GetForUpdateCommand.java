@@ -5,10 +5,15 @@ import java.io.OutputStream;
 
 import org.brandao.brcache.Cache;
 import org.brandao.brcache.CacheInputStream;
+import org.brandao.brcache.RecoverException;
+import org.brandao.brcache.TXCache;
+import org.brandao.brcache.server.ParameterException;
+import org.brandao.brcache.server.ReadDataException;
 import org.brandao.brcache.server.Terminal;
 import org.brandao.brcache.server.TerminalConstants;
 import org.brandao.brcache.server.TerminalReader;
 import org.brandao.brcache.server.TerminalWriter;
+import org.brandao.brcache.server.WriteDataException;
 import org.brandao.brcache.server.error.ServerError;
 import org.brandao.brcache.server.error.ServerErrorException;
 import org.brandao.brcache.server.error.ServerErrors;
@@ -16,24 +21,31 @@ import org.brandao.brcache.server.error.ServerErrors;
 /**
  * Representa o comando GET.
  * Sua sintaxe é:
- * GET <nome> <reserved>\r\n
+ * GET_FOR_UPDATE <nome> <reserved> lock\r\n
  * 
  * @author Brandao
  *
  */
-public class GetCommand extends AbstractCommand{
+public class GetForUpdateCommand extends AbstractCommand{
 
 	public void execute(Terminal terminal, Cache cache, TerminalReader reader,
 			TerminalWriter writer, String[] parameters)
 			throws ServerErrorException {
 
+		
+		if(!(cache instanceof TXCache)){
+			throw new ServerErrorException(ServerErrors.ERROR_1009, ServerErrors.ERROR_1009.toString());
+		}
+		
+		TXCache txCahe = (TXCache)cache;
+		
         try{
             //if(parameters == null || parameters.length < 2)
             //    throw new ParameterException(TerminalConstants.INVALID_NUMBER_OF_PARAMETERS);
 
             CacheInputStream in = null;
             try{
-                in = (CacheInputStream) cache.get(parameters[1]);
+                in = (CacheInputStream) txCahe.get(parameters[1], true);
                 if(in != null){
                     String responseMessage = 
                 		"VALUE " +
@@ -78,17 +90,8 @@ public class GetCommand extends AbstractCommand{
             throw new ServerErrorException(ServerErrors.ERROR_1005, ServerErrors.ERROR_1005.toString(), ex);
         }
         catch(Throwable ex){
-        	Throwable cause = ex;
-        	String message  = cause.getMessage();
-        	
-        	if(message == null && ex.getCause() != null){
-        		cause   = ex.getCause();
-        		message = cause.getMessage();
-        	}
-        	
-        	ServerError error = ServerErrors.getError(cause.getMessage(), cause.getClass());
+        	ServerError error = ServerErrors.getError(ex.getMessage(), ex.getClass());
             throw new ServerErrorException(error, error.toString(), ex);
-        	
         }
 	}
 

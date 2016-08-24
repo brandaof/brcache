@@ -26,20 +26,15 @@ public class CorruptedDataException extends RecoverException{
     
 	private static final long serialVersionUID = 938650810100616907L;
 
-	public CorruptedDataException() {
-        super();
-    }
+	public CorruptedDataException(CacheError error, Object... params) {
+		super(error, params);
+		// TODO Auto-generated constructor stub
+	}
 
-    public CorruptedDataException(String string) {
-        super(string);
-    }
-
-    public CorruptedDataException(String string, Throwable thrwbl) {
-        super(string, thrwbl);
-    }
-
-    public CorruptedDataException(Throwable thrwbl) {
-        super(thrwbl);
-    }
+	public CorruptedDataException(Throwable thrwbl, CacheError error,
+			Object... params) {
+		super(thrwbl, error, params);
+		// TODO Auto-generated constructor stub
+	}
 
 }
