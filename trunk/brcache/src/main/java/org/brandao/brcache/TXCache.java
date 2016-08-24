@@ -220,6 +220,9 @@ public class TXCache
 		catch(StorageException e){
 			throw e;
 		}
+		catch(RecoverException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
 		catch(Throwable e){
 			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
@@ -248,6 +251,9 @@ public class TXCache
 		catch(StorageException e){
 			throw e;
 		}
+		catch(RecoverException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
 		catch(Throwable e){
 			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
@@ -273,6 +279,9 @@ public class TXCache
 		}
 		catch(StorageException e){
 			throw e;
+		}
+		catch(RecoverException e){
+			throw new StorageException(e, e.getError(), e.getParams());
 		}
 		catch(Throwable e){
 			throw new StorageException(e, CacheErrors.ERROR_1020);
@@ -360,6 +369,9 @@ public class TXCache
 		catch(RecoverException e){
 			throw e;
 		}
+		catch(StorageException e){
+			throw new RecoverException(e, e.getError(), e.getParams());
+		}
 		catch(Throwable e){
 			throw new RecoverException(e, CacheErrors.ERROR_1021);
 		}
@@ -424,6 +436,9 @@ public class TXCache
 		}
 		catch(StorageException e){
 			throw e;
+		}
+		catch(RecoverException e){
+			throw new StorageException(e, e.getError(), e.getParams());
 		}
 		catch(Throwable e){
 			throw new StorageException(e, CacheErrors.ERROR_1020);
