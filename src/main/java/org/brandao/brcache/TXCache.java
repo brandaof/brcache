@@ -220,7 +220,7 @@ public class TXCache
 		catch(StorageException e){
 			throw e;
 		}
-		catch(RecoverException e){
+		catch(CacheException e){
 			throw new StorageException(e, e.getError(), e.getParams());
 		}
 		catch(Throwable e){
@@ -251,7 +251,7 @@ public class TXCache
 		catch(StorageException e){
 			throw e;
 		}
-		catch(RecoverException e){
+		catch(CacheException e){
 			throw new StorageException(e, e.getError(), e.getParams());
 		}
 		catch(Throwable e){
@@ -280,7 +280,7 @@ public class TXCache
 		catch(StorageException e){
 			throw e;
 		}
-		catch(RecoverException e){
+		catch(CacheException e){
 			throw new StorageException(e, e.getError(), e.getParams());
 		}
 		catch(Throwable e){
@@ -306,6 +306,9 @@ public class TXCache
 		catch(StorageException e){
 			throw e;
 		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
 		catch(Throwable e){
 			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
@@ -329,6 +332,9 @@ public class TXCache
 		}
 		catch(StorageException e){
 			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
 		}
 		catch(Throwable e){
 			throw new StorageException(e, CacheErrors.ERROR_1020);
@@ -369,7 +375,7 @@ public class TXCache
 		catch(RecoverException e){
 			throw e;
 		}
-		catch(StorageException e){
+		catch(CacheException e){
 			throw new RecoverException(e, e.getError(), e.getParams());
 		}
 		catch(Throwable e){
@@ -410,6 +416,9 @@ public class TXCache
 		catch(RecoverException e){
 			throw e;
 		}
+		catch(CacheException e){
+			throw new RecoverException(e, e.getError(), e.getParams());
+		}
 		catch(Throwable e){
 			throw new RecoverException(e, CacheErrors.ERROR_1021);
 		}
@@ -437,7 +446,7 @@ public class TXCache
 		catch(StorageException e){
 			throw e;
 		}
-		catch(RecoverException e){
+		catch(CacheException e){
 			throw new StorageException(e, e.getError(), e.getParams());
 		}
 		catch(Throwable e){
@@ -462,6 +471,9 @@ public class TXCache
 		}
 		catch(StorageException e){
 			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
 		}
 		catch(Throwable e){
 			throw new StorageException(e, CacheErrors.ERROR_1020);
