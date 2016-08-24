@@ -148,7 +148,18 @@ public class CacheTransactionManagerImp
 	}
 
 	public CacheTransactionHandler getCurrrent() {
-		return this.transactions.get();
+		return this.getCurrrent(true);
+	}
+	
+	public CacheTransactionHandler getCurrrent(boolean required) {
+		CacheTransactionHandler currentTX = this.transactions.get();
+		
+		if(currentTX == null && required){
+			throw new TransactionException(CacheErrors.ERROR_1013);
+		}
+		else{
+			return currentTX;
+		}
 	}
 
 	public void close(CacheTransactionHandler tx) throws TransactionException {

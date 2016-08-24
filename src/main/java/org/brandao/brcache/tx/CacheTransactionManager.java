@@ -22,6 +22,8 @@ public interface CacheTransactionManager {
 	CacheTransactionHandler begin(StreamCache cache);
 	
 	CacheTransactionHandler getCurrrent();
+
+	CacheTransactionHandler getCurrrent(boolean required);
 	
 	void close(CacheTransactionHandler tx) throws TransactionException;
 }

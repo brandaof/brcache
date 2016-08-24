@@ -19,8 +19,8 @@ public class CacheError {
 		return message;
 	}
 	
-	public String toString(Object ... params){
-		return "ERROR " + this.id + ": " + String.format(this.message, params);
+	public String getString(Object ... params){
+		return "ERROR " + this.id + ": " + String.format(this.message, (Object[])params);
 	}
 	
 }
