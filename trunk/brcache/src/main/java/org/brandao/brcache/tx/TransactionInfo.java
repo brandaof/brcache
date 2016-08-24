@@ -15,6 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.brandao.brcache.CacheErrors;
+import org.brandao.brcache.CacheException;
 import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
@@ -58,11 +59,11 @@ public class TransactionInfo implements Serializable {
 			else
 				return false;
 		}
-		catch(StorageException e){
-			throw e;
-		}
-		catch(RecoverException e){
+		catch(CacheException e){
 			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
 	}
 	
@@ -79,11 +80,11 @@ public class TransactionInfo implements Serializable {
 			else
 				return false;
 		}
-		catch(StorageException e){
-			throw e;
-		}
-		catch(RecoverException e){
+		catch(CacheException e){
 			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
 	}
 	
@@ -99,11 +100,11 @@ public class TransactionInfo implements Serializable {
 			
 			return o;
 		}
-		catch(StorageException e){
-			throw e;
-		}
-		catch(RecoverException e){
+		catch(CacheException e){
 			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
 	}
 	
@@ -118,8 +119,8 @@ public class TransactionInfo implements Serializable {
 				manager, cache, key, maxAliveTime, 
 				new ByteArrayInputStream(bout.toByteArray()), time);
 		}
-		catch(StorageException e){
-			throw e;
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
 		}
 		catch(Throwable e){
 			throw new StorageException(e, CacheErrors.ERROR_1020);
@@ -141,8 +142,8 @@ public class TransactionInfo implements Serializable {
 			this.updated.add(key);
 			this.entities.put(key, new EntryCache(dta, maxAliveTime));
     	}
-		catch(TransactionException e){
-			throw new StorageException(e, CacheErrors.ERROR_1022);
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
 		}
 		catch(Throwable e){
 			throw new StorageException(e, CacheErrors.ERROR_1020);
@@ -162,9 +163,9 @@ public class TransactionInfo implements Serializable {
 			else
 				return null;
 		}
-		catch(RecoverException e){
-			throw e;
-		}	
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
 		catch(Throwable e){
 			throw new StorageException(e, CacheErrors.ERROR_1021);
 		}
@@ -180,8 +181,8 @@ public class TransactionInfo implements Serializable {
     	catch(RecoverException e){
     		throw e;
     	}
-		catch(TransactionException e){
-			throw new StorageException(e, CacheErrors.ERROR_1022);
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
 		}
 		catch(Throwable e){
 			throw new StorageException(e, CacheErrors.ERROR_1021);
@@ -201,12 +202,9 @@ public class TransactionInfo implements Serializable {
 			else
 				return false;
 		}
-    	catch(StorageException e){
-    		throw e;
-    	}
-    	catch(RecoverException e){
-    		throw new StorageException(e, e.getError(), e.getParams());
-    	}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
 		catch(Throwable e){
 			throw new StorageException(e, CacheErrors.ERROR_1021);
 		}
@@ -228,11 +226,8 @@ public class TransactionInfo implements Serializable {
     			return cache.getStream(key) != null;
     		}
     	}
-    	catch(RecoverException e){
-    		throw new StorageException(e, e.getError(), e.getParams());
-    	}
-		catch(TransactionException e){
-			throw new StorageException(e, CacheErrors.ERROR_1022);
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
 		}
 		catch(Throwable e){
 			throw new StorageException(e, CacheErrors.ERROR_1021);
