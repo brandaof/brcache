@@ -10,6 +10,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.UUID;
 
+import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 import org.brandao.brcache.StreamCache;
@@ -61,11 +62,13 @@ public class CacheTransactionHandlerImp
 	
 	public synchronized void begin() {
 		
-		if(this.started)
-			throw new IllegalStateException("transaction has been started");
+		if(this.started){
+			throw new TransactionException(CacheErrors.ERROR_1016);
+		}
 
-		if(this.commitInProgress)
-			throw new IllegalStateException("commit in progress");
+		if(this.commitInProgress){
+			throw new TransactionException(CacheErrors.ERROR_1010);
+		}
 		
 		this.started = true;
 	}
@@ -84,15 +87,18 @@ public class CacheTransactionHandlerImp
 	
 	private void rollback(TransactionInfo transactionInfo) throws TransactionException {
 
-		if(this.rolledBack)
-			throw new TransactionException("transaction has been rolled back");
+		if(this.rolledBack){
+			throw new TransactionException(CacheErrors.ERROR_1011);
+		}
 
-		if(this.commited)
-			throw new TransactionException("transaction has been commited");
+		if(this.commited){
+			throw new TransactionException(CacheErrors.ERROR_1012);
+		}
 		
-		if(!started)
-			throw new TransactionException("transaction not started");
-			
+		if(!started){
+			throw new TransactionException(CacheErrors.ERROR_1013);
+		}
+		
 		try{
 			if(this.file.exists()){
 				TransactionInfo localTransactionInfo = 
@@ -116,8 +122,8 @@ public class CacheTransactionHandlerImp
 		catch(TransactionException e){
 			throw e;
 		}
-		catch(Throwable e){
-			throw new TransactionException(e);
+		catch (Throwable e) {
+			throw new TransactionException(e, CacheErrors.ERROR_1018);
 		}
 		
 	}
@@ -167,14 +173,17 @@ public class CacheTransactionHandlerImp
 	}
 	
 	public void commit() throws TransactionException {
-		if(this.rolledBack)
-			throw new TransactionException("transaction has been rolled back");
+		if(this.rolledBack){
+			throw new TransactionException(CacheErrors.ERROR_1011);
+		}
 
-		if(this.commited)
-			throw new TransactionException("transaction has been commited");
+		if(this.commited){
+			throw new TransactionException(CacheErrors.ERROR_1012);
+		}
 		
-		if(!started)
-			throw new TransactionException("transaction not started");
+		if(!started){
+			throw new TransactionException(CacheErrors.ERROR_1013);
+		}
 		
 		try{
 			this.commitInProgress = true;
@@ -186,9 +195,10 @@ public class CacheTransactionHandlerImp
 			this.commited         = true;
 			this.rolledBack       = false;
 		}
-		catch (Throwable e) {
-			throw new TransactionException(e);
+		catch(Throwable e){
+			throw new TransactionException(e, CacheErrors.ERROR_1019);
 		}
+		
 	}
 
 	public Object replace(CacheTransactionManager manager, StreamCache cache,

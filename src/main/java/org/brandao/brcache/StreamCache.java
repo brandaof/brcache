@@ -244,7 +244,7 @@ public abstract class StreamCache
     public void putStream(String key, long maxAliveTime, InputStream inputData) throws StorageException{
         
         if(key.length() > this.maxLengthKey)
-            throw new StorageException("key is very large");
+            throw new StorageException(CacheErrors.ERROR_1008);
         
         DataMap oldMap  = null;
         DataMap map     = new DataMap();
@@ -260,7 +260,7 @@ public abstract class StreamCache
             throw 
             	e instanceof StorageException? 
             		(StorageException)e : 
-            		new StorageException(e);
+            		new StorageException(e, CacheErrors.ERROR_1015);
         }
         finally{
 	    	if(oldMap != null){
@@ -313,7 +313,7 @@ public abstract class StreamCache
             return null;
         }
         catch(Throwable e){
-            throw new RecoverException(e);
+            throw new RecoverException(e, CacheErrors.ERROR_1015);
         }
     }
     
@@ -339,7 +339,7 @@ public abstract class StreamCache
                 return false;
         }
         catch(Throwable e){
-            throw new StorageException(e);
+            throw new StorageException(e, CacheErrors.ERROR_1015);
         }
         
     }
@@ -370,7 +370,7 @@ public abstract class StreamCache
             	writeData += read;
             	
         		if(writeData > this.maxBytesToStorageEntry)
-        			throw new StorageException("data is very large");
+                    throw new StorageException(CacheErrors.ERROR_1007);
                
                 synchronized(this.dataList){
                 	Block block = new Block(map.getId(), index++, data, read);
@@ -408,7 +408,7 @@ public abstract class StreamCache
         catch(IOException e){
             this.countRemovedData += writeData;
             this.releaseSegments(map);
-            throw new StorageException(e);
+            throw new StorageException(e, CacheErrors.ERROR_1014);
         }
         /*finally{
         	if(buffer != null){

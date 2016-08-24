@@ -22,12 +22,13 @@ import java.io.IOException;
 import java.net.Socket;
 
 import org.brandao.brcache.Cache;
-import org.brandao.brcache.StorageException;
 import org.brandao.brcache.server.command.ExitCommand;
 import org.brandao.brcache.server.command.GetCommand;
 import org.brandao.brcache.server.command.PutCommand;
 import org.brandao.brcache.server.command.RemoveCommand;
 import org.brandao.brcache.server.command.StatsCommand;
+import org.brandao.brcache.server.error.ServerErrorException;
+import org.brandao.brcache.server.error.ServerErrors;
 
 /**
  *
@@ -105,12 +106,14 @@ public class Terminal {
         }
     }
     
-    public void execute() throws WriteDataException, ReadDataException, StorageException{
+    public void execute() throws Throwable{
     	int index;
     	int start;
     	int end;
         String[] command = new String[6];
+        
         while(this.run){
+        	
             try{
                 String message = reader.getMessage();
                 index = 0;
@@ -137,39 +140,26 @@ public class Terminal {
             	if(command[0].charAt(0) == 'e')
             		EXIT.execute(this, cache, reader, writer, command);
                 else{
-                    this.writer.sendMessage(String.format(TerminalConstants.UNKNOW_COMMAND, command[0]));
+                    this.writer.sendMessage(ServerErrors.ERROR_1001.toString(command[0]));
                     this.writer.flush();
                 }
             }
             catch (IndexOutOfBoundsException ex) {
             	ex.printStackTrace();
-                this.writer.sendMessage(String.format(TerminalConstants.UNKNOW_COMMAND, "empty"));
+                this.writer.sendMessage(ServerErrors.ERROR_1002.toString());
                 this.writer.flush();
             }
-            catch (ReadDataException ex) {
-            	ex.printStackTrace();
+            catch (ServerErrorException ex) {
+            	
             	if(ex.getCause() instanceof EOFException && !"premature end of data".equals(ex.getCause().getMessage()))
         			throw ex;
             	
-                this.writer.sendMessage(ex.getMessage());
-                this.writer.flush();
-            }
-            catch (WriteDataException ex) {
-            	ex.printStackTrace();
-            	if(ex.getCause() instanceof EOFException && !"premature end of data".equals(ex.getCause().getMessage()))
-        			throw ex;
-            	
-                this.writer.sendMessage(ex.getMessage());
-                this.writer.flush();
-            }
-            catch (ParameterException ex) {
-            	ex.printStackTrace();
                 this.writer.sendMessage(ex.getMessage());
                 this.writer.flush();
             }
             catch(Throwable ex){
             	ex.printStackTrace();
-                throw new StorageException(ex);
+                throw ex;
             }
         }
     }

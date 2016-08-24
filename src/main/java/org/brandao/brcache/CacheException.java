@@ -17,29 +17,31 @@
 
 package org.brandao.brcache;
 
+
 /**
- * Exceção lançada quando ocorre uma falha ao interagir com o cache.
+ * É a base de uma exceção no <b>BRCache</b>. Lançada se ocorrer alguma falha ao 
+ * tentar manipular os dados no cache.
  * 
  * @author Brandao
  */
-public class CacheException  extends Exception{
+public class CacheException extends RuntimeException{
     
 	private static final long serialVersionUID = -2125449136205991256L;
 
-	public CacheException() {
-        super();
+	private int code;
+	
+    public CacheException(Throwable thrwbl, CacheError error, Object ... params) {
+        super(error.toString(params), thrwbl);
+        this.code = error.getId();
     }
 
-    public CacheException(String string) {
-        super(string);
-    }
-
-    public CacheException(String string, Throwable thrwbl) {
-        super(string, thrwbl);
-    }
-
-    public CacheException(Throwable thrwbl) {
-        super(thrwbl);
+    public CacheException(CacheError error, Object ... params) {
+        super(error.toString(params));
+        this.code = error.getId();
     }
     
+	public int getCode() {
+		return code;
+	}
+
 }

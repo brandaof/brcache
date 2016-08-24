@@ -18,6 +18,7 @@
 package org.brandao.brcache.server;
 
 import org.brandao.brcache.Cache;
+import org.brandao.brcache.server.error.ServerErrorException;
 
 /**
  *
@@ -27,6 +28,6 @@ public interface Command {
     
     void execute(Terminal terminal, Cache cache, TerminalReader reader, 
     		TerminalWriter writer, String[] parameters) 
-            throws ReadDataException, WriteDataException, ParameterException;
+            throws ServerErrorException;
     
 }
