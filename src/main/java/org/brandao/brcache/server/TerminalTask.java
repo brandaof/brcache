@@ -67,7 +67,7 @@ class TerminalTask implements Runnable{
                     this.readBufferSize, this.writeBufferSize);
             this.terminal.execute();
         }
-        catch(Exception e){
+        catch(Throwable e){
             e.printStackTrace();
         }
         finally{

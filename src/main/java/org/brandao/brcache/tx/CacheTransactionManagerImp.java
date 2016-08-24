@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.StreamCache;
 import org.brandao.concurrent.NamedLock;
 
@@ -40,7 +41,7 @@ public class CacheTransactionManagerImp
 			if(lockId != null){
 				this.locks.unlock(lockId, key);
 			}
-			throw new TransactionException(e);
+			throw new TransactionException(e, CacheErrors.ERROR_1023);
 		}
 	}
 
