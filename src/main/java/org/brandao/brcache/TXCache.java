@@ -511,10 +511,10 @@ public class TXCache
 			return r;
     	}
     	catch(IllegalAccessException e){
-			throw new IllegalAccessException("bug!", e); 
+    		throw new CacheException(new Exception("bug!", e), CacheErrors.ERROR_1023);
     	}
     	catch(IllegalArgumentException e){
-			throw new IllegalAccessException("bug!", e); 
+    		throw new CacheException(new Exception("bug!", e), CacheErrors.ERROR_1023);
     	}
     	catch(InvocationTargetException e){
     		Throwable ex = e.getTargetException();
@@ -525,15 +525,18 @@ public class TXCache
     			}
     		}
 			catch(Throwable x){
-				throw new StorageException(
-						"bug: exception not recognized (rollback fail): " + x.toString(), ex); 
+	    		throw new CacheException(
+    				new Exception(
+						"bug: exception not recognized (rollback fail): " + x.toString(), ex), 
+						CacheErrors.ERROR_1018);
+				
 			}
     		
     		if(ex instanceof StorageException || ex instanceof RecoverException){
         		throw ex;
     		}
     		else{
-    			throw new StorageException("bug: exception not recognized: ", ex);
+        		throw new CacheException(new Exception("bug: exception not recognized: ", e), CacheErrors.ERROR_1023);
     		}
     		
     	}
