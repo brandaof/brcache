@@ -167,6 +167,14 @@ public class TXCache
     }
     
     /**
+     * Obtém o gestor transacional.
+     * @return gestor transacional.
+     */
+    public CacheTransactionManager getTransactionManager(){
+    	return this.transactionManager;
+    }
+    
+    /**
      * Obtém o tempo limite de uma operação.
      * @return tempo em milisegundos.
      */
@@ -205,7 +213,7 @@ public class TXCache
 		
 		try{
 			return (Boolean)this.executeMethodInTX(replace, 
-					this.transactionManager.getCurrrent(), 
+					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
 					key, value, maxAliveTime, this.transactionTimeout);
 		}
@@ -232,7 +240,7 @@ public class TXCache
 		
 		try{
 			return (Boolean)this.executeMethodInTX(replaceExact, 
-					this.transactionManager.getCurrrent(), 
+					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
 					key, oldValue, 
 					newValue, maxAliveTime, this.transactionTimeout);
@@ -259,7 +267,7 @@ public class TXCache
 		
 		try{
 			return this.executeMethodInTX(putIfAbsent, 
-					this.transactionManager.getCurrrent(), 
+					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
 					key, value, maxAliveTime, this.transactionTimeout);
 		}
@@ -282,7 +290,7 @@ public class TXCache
 			String key, Object value, long maxAliveTime) throws StorageException {
 		try{
 			this.executeMethodInTX(put, 
-					this.transactionManager.getCurrrent(), 
+					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
 					key, value, maxAliveTime, this.transactionTimeout);
 		}
@@ -306,7 +314,7 @@ public class TXCache
     		throws StorageException {
 		try{
 			this.executeMethodInTX(putStream, 
-					this.transactionManager.getCurrrent(), 
+					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache, 
 		    		key, maxAliveTime, inputData, this.transactionTimeout);
 		}
@@ -345,7 +353,7 @@ public class TXCache
 			String key, boolean forUpdate) throws RecoverException {
 		try{
 			return this.executeMethodInTX(get, 
-					this.transactionManager.getCurrrent(), 
+					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
 					key, forUpdate, this.transactionTimeout);
 		}
@@ -383,7 +391,7 @@ public class TXCache
     	
 		try{
 			return (InputStream)this.executeMethodInTX(getStream, 
-					this.transactionManager.getCurrrent(), 
+					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache, 
 		    		key, forUpdate, this.transactionTimeout);
 		}
@@ -410,7 +418,7 @@ public class TXCache
 		
 		try{
 			return (Boolean)this.executeMethodInTX(removeExact, 
-					this.transactionManager.getCurrrent(), 
+					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
 					key, value, this.transactionTimeout);
 		}
@@ -433,7 +441,7 @@ public class TXCache
     		String key) throws StorageException{       
 		try{
 			return (Boolean)this.executeMethodInTX(remove, 
-					this.transactionManager.getCurrrent(), 
+					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
 		    		key, this.transactionTimeout);
 		}

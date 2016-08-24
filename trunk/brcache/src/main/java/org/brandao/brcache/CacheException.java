@@ -41,13 +41,13 @@ public class CacheException extends RuntimeException{
     }
     
     public CacheException(Throwable thrwbl, CacheError error, Object ... params) {
-        super(error.toString(params), thrwbl);
+        super(error.getString(params), thrwbl);
         this.error = error;
         this.params = params;
     }
 
     public CacheException(CacheError error, Object ... params) {
-        super(error.toString(params));
+        super(error.getString(params));
         this.error = error;
         this.params = params;
     }
