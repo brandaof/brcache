@@ -6,8 +6,6 @@ public class CacheErrors {
 
 	public static final CacheError ERROR_1008 = new CacheError(1008, "Key is very large!");
 
-	public static final CacheError ERROR_1009 = new CacheError(1009, "Transaction not supported!");
-
 	public static final CacheError ERROR_1010 = new CacheError(1010, "Commit in progress!");
 
 	public static final CacheError ERROR_1011 = new CacheError(1011, "Transaction has been rolled back!");
@@ -28,6 +26,8 @@ public class CacheErrors {
 	
 	public static final CacheError ERROR_1021 = new CacheError(1021, "Get item error!");
 
-	public static final CacheError ERROR_1022 = new CacheError(1012, "Fails to acquire the lock!");
+	public static final CacheError ERROR_1022 = new CacheError(1022, "Fails to acquire the lock!");
+
+	public static final CacheError ERROR_1023 = new CacheError(1023, "Fails to execute action!");
 	
 }
