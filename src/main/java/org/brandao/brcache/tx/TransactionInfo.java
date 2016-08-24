@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
@@ -57,8 +58,11 @@ public class TransactionInfo implements Serializable {
 			else
 				return false;
 		}
-		catch(Throwable e){
-			throw new StorageException(e);
+		catch(StorageException e){
+			throw e;
+		}
+		catch(RecoverException e){
+			throw new StorageException(e, e.getError(), e.getParams());
 		}
 	}
 	
@@ -75,8 +79,11 @@ public class TransactionInfo implements Serializable {
 			else
 				return false;
 		}
-		catch(Throwable e){
-			throw new StorageException(e);
+		catch(StorageException e){
+			throw e;
+		}
+		catch(RecoverException e){
+			throw new StorageException(e, e.getError(), e.getParams());
 		}
 	}
 	
@@ -95,8 +102,8 @@ public class TransactionInfo implements Serializable {
 		catch(StorageException e){
 			throw e;
 		}
-		catch(Throwable e){
-			throw new StorageException(e);
+		catch(RecoverException e){
+			throw new StorageException(e, e.getError(), e.getParams());
 		}
 	}
 	
@@ -115,7 +122,7 @@ public class TransactionInfo implements Serializable {
 			throw e;
 		}
 		catch(Throwable e){
-			throw new StorageException(e);
+			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
 	}
 	
@@ -134,9 +141,12 @@ public class TransactionInfo implements Serializable {
 			this.updated.add(key);
 			this.entities.put(key, new EntryCache(dta, maxAliveTime));
     	}
-    	catch(Throwable e){
-    		throw new StorageException(e);
-    	}
+		catch(TransactionException e){
+			throw new StorageException(e, CacheErrors.ERROR_1022);
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
     }
 	
 	/* métodos de coleta*/
@@ -156,8 +166,8 @@ public class TransactionInfo implements Serializable {
 			throw e;
 		}	
 		catch(Throwable e){
-			throw new RecoverException(e);
-		}	
+			throw new StorageException(e, CacheErrors.ERROR_1021);
+		}
 	}
     
     public InputStream getStream(CacheTransactionManager manager, StreamCache cache, 
@@ -170,9 +180,12 @@ public class TransactionInfo implements Serializable {
     	catch(RecoverException e){
     		throw e;
     	}
-    	catch(Throwable e){
-    		throw new RecoverException(e);
-    	}
+		catch(TransactionException e){
+			throw new StorageException(e, CacheErrors.ERROR_1022);
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1021);
+		}
     }
 
     /* métodos de remoção */
@@ -188,8 +201,14 @@ public class TransactionInfo implements Serializable {
 			else
 				return false;
 		}
+    	catch(StorageException e){
+    		throw e;
+    	}
+    	catch(RecoverException e){
+    		throw new StorageException(e, e.getError(), e.getParams());
+    	}
 		catch(Throwable e){
-			throw new StorageException(e);
+			throw new StorageException(e, CacheErrors.ERROR_1021);
 		}
 	}
 	
@@ -209,9 +228,15 @@ public class TransactionInfo implements Serializable {
     			return cache.getStream(key) != null;
     		}
     	}
-    	catch(Throwable e){
-    		throw new StorageException(e);
+    	catch(RecoverException e){
+    		throw new StorageException(e, e.getError(), e.getParams());
     	}
+		catch(TransactionException e){
+			throw new StorageException(e, CacheErrors.ERROR_1022);
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1021);
+		}
     }
 	
     /* métodos de manipulação*/

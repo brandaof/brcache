@@ -260,7 +260,7 @@ public abstract class StreamCache
             throw 
             	e instanceof StorageException? 
             		(StorageException)e : 
-            		new StorageException(e, CacheErrors.ERROR_1015);
+            		new StorageException(e, CacheErrors.ERROR_1020);
         }
         finally{
 	    	if(oldMap != null){
@@ -313,7 +313,7 @@ public abstract class StreamCache
             return null;
         }
         catch(Throwable e){
-            throw new RecoverException(e, CacheErrors.ERROR_1015);
+            throw new RecoverException(e, CacheErrors.ERROR_1021);
         }
     }
     
@@ -339,7 +339,7 @@ public abstract class StreamCache
                 return false;
         }
         catch(Throwable e){
-            throw new StorageException(e, CacheErrors.ERROR_1015);
+            throw new StorageException(e, CacheErrors.ERROR_1022);
         }
         
     }

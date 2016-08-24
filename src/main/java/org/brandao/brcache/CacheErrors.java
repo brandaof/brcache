@@ -18,13 +18,16 @@ public class CacheErrors {
 
 	public static final CacheError ERROR_1014 = new CacheError(1014, "cache write error!");
 
-	public static final CacheError ERROR_1015 = new CacheError(1015, "Unknow error!");
-
 	public static final CacheError ERROR_1016 = new CacheError(1016, "Transaction has been started!");
 
 	public static final CacheError ERROR_1018 = new CacheError(1018, "Rollback error!");
 
 	public static final CacheError ERROR_1019 = new CacheError(1019, "Commit error!");
 
+	public static final CacheError ERROR_1020 = new CacheError(1020, "Store item error!");
+	
+	public static final CacheError ERROR_1021 = new CacheError(1021, "Get item error!");
+
+	public static final CacheError ERROR_1022 = new CacheError(1012, "Fails to acquire the lock!");
 	
 }
