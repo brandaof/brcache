@@ -213,7 +213,7 @@ public class TXCache
 			throw e;
 		}
 		catch(Throwable e){
-			throw new StorageException(e);
+			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
 	}
 	
@@ -241,7 +241,7 @@ public class TXCache
 			throw e;
 		}
 		catch(Throwable e){
-			throw new StorageException(e);
+			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
 
 	}
@@ -267,7 +267,7 @@ public class TXCache
 			throw e;
 		}
 		catch(Throwable e){
-			throw new StorageException(e);
+			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
 	}
 	
@@ -290,7 +290,7 @@ public class TXCache
 			throw e;
 		}
 		catch(Throwable e){
-			throw new StorageException(e);
+			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
 	}
 	
@@ -314,7 +314,7 @@ public class TXCache
 			throw e;
 		}
 		catch(Throwable e){
-			throw new StorageException(e);
+			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
     }
 	
@@ -353,7 +353,7 @@ public class TXCache
 			throw e;
 		}
 		catch(Throwable e){
-			throw new RecoverException(e);
+			throw new RecoverException(e, CacheErrors.ERROR_1021);
 		}
 	}
     
@@ -391,7 +391,7 @@ public class TXCache
 			throw e;
 		}
 		catch(Throwable e){
-			throw new RecoverException(e);
+			throw new RecoverException(e, CacheErrors.ERROR_1021);
 		}
     }
 
@@ -418,7 +418,7 @@ public class TXCache
 			throw e;
 		}
 		catch(Throwable e){
-			throw new StorageException(e);
+			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
 	}
 	
@@ -441,7 +441,7 @@ public class TXCache
 			throw e;
 		}
 		catch(Throwable e){
-			throw new StorageException(e);
+			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
     }	
     
@@ -511,10 +511,10 @@ public class TXCache
 			return r;
     	}
     	catch(IllegalAccessException e){
-			throw new StorageException("bug!", e); 
+			throw new IllegalAccessException("bug!", e); 
     	}
     	catch(IllegalArgumentException e){
-			throw new StorageException("bug!", e); 
+			throw new IllegalAccessException("bug!", e); 
     	}
     	catch(InvocationTargetException e){
     		Throwable ex = e.getTargetException();
