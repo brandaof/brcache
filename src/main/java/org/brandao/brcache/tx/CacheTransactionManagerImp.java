@@ -55,7 +55,7 @@ public class CacheTransactionManagerImp
 				lockId = locks.tryLock(key, time, unit);
 				
 				if(lockId == null){
-					throw new TransactionException("timeout");
+					throw new TransactionException(CacheErrors.ERROR_1024);
 				}
 				
 				tx.locks.put(key, lockId);
@@ -67,7 +67,7 @@ public class CacheTransactionManagerImp
 			}
 			throw e instanceof TransactionException? 
 					(TransactionException)e : 
-					new TransactionException(e);
+					new TransactionException(e, CacheErrors.ERROR_1023);
 		}
 	}
 
@@ -76,13 +76,13 @@ public class CacheTransactionManagerImp
 		Transaction tx = transactionLocks.get(txId);
 		
 		if(tx == null){
-			throw new TransactionException("tx not found: " + txId);
+			throw new TransactionException(CacheErrors.ERROR_1025, txId);
 		}
 		
 		Serializable lockId = tx.locks.get(key);
 		
 		if(lockId == null){
-			throw new TransactionException("lock not found: " + txId + ":" + key);
+			throw new TransactionException(CacheErrors.ERROR_1026, txId, key);
 		}
 		
 		try{
@@ -93,7 +93,9 @@ public class CacheTransactionManagerImp
 			if(lockId != null){
 				this.locks.unlock(lockId, key);
 			}
-			throw new TransactionException(e);
+			throw e instanceof TransactionException? 
+					(TransactionException)e : 
+					new TransactionException(e, CacheErrors.ERROR_1023);
 		}
 	}
 
@@ -101,7 +103,7 @@ public class CacheTransactionManagerImp
 		Transaction tx = this.transactionLocks.get(txId);
 		
 		if(tx == null){
-			throw new TransactionException("tx not found: " + txId);
+			throw new TransactionException(CacheErrors.ERROR_1025, txId);
 		}
 		
 		CacheTransactionHandler txHandler = tx.txHandler;
@@ -113,7 +115,7 @@ public class CacheTransactionManagerImp
 		Transaction tx = this.transactionLocks.get(txId);
 		
 		if(tx == null){
-			throw new TransactionException("tx not found: " + txId);
+			throw new TransactionException(CacheErrors.ERROR_1025, txId);
 		}
 		
 		CacheTransactionHandler txHandler = tx.txHandler;
@@ -134,7 +136,7 @@ public class CacheTransactionManagerImp
 		CacheTransactionHandler txh = this.transactions.get();
 		
 		if(txh != null){
-			throw new IllegalStateException("transaction has been started");
+			throw new TransactionException(CacheErrors.ERROR_1016);
 		}
 		
 		UUID txId = UUID.randomUUID();
@@ -154,7 +156,7 @@ public class CacheTransactionManagerImp
 		CacheTransactionHandler current = this.transactions.get();
 		
 		if(current != tx){
-			throw new TransactionException("invalid current transaction");
+			throw new TransactionException(CacheErrors.ERROR_1027);
 		}
 		
 		UUID txId = (UUID) tx.getId();

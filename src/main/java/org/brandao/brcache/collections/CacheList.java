@@ -26,9 +26,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.brandao.brcache.Cache;
-import org.brandao.brcache.client.BrCacheClient;
-
 /**
  * Representa uma coleção de objetos de um determinado tipo. Os objetos dessa
  * coleção são armazenados em cache de forma segmentada.
@@ -40,11 +37,9 @@ public class CacheList<T>
 
 	private static final long serialVersionUID = -617590377196604703L;
 
-	private static Cache cache;
-    
-    private static BrCacheClient client;
-
     private final HugeArrayList<T> internalList;
+    
+    private static Swapper swapper;
     
     /**
      * Cria uma nova instância.
@@ -58,16 +53,14 @@ public class CacheList<T>
             double swapFactorElements, 
             double fragmentFactorElements){
         
-        CacheSwapper swap = new CacheSwapper();
-        
         this.internalList = 
             new HugeArrayList<T>(
                 Collections.getNextId(), 
                 maxCapacityElementsOnMemory, 
                 swapFactorElements, 
                 fragmentFactorElements, 
-                swap, 
-                0);
+                swapper, 
+                1);
         
         this.internalList.setForceSwap(true);
     }
@@ -256,36 +249,22 @@ public class CacheList<T>
     }
 
     /**
-     * Obtém o cache associado à coleção.
-     * @return Cache
+     * Obtém o responsável por fazer a troca de dados entre as instâncias.
+     * @return responsável.
+     * @see {@link Swapper}
      */
-    public static Cache getCache() {
-        return cache;
-    }
+    public static Swapper getSwapper() {
+		return swapper;
+	}
 
     /**
-     * Define o cache associado à coleção.
-     * @param aCache Cache.
+     * Define o responsável por fazer a troca de dados entre as instâncias.
+     * @param swapper responsável.
+     * @see {@link Swapper}
      */
-    public static void setCache(Cache aCache) {
-        cache = aCache;
-    }
-
-    /**
-     * Obtém o cliente do cache associado à coleção
-     * @return Cliente.
-     */
-    public static BrCacheClient getClient() {
-        return client;
-    }
-
-    /**
-     * Define o cliente do cache associado à coleção
-     * @param aClient Cliente
-     */
-    public static void setClient(BrCacheClient aClient) {
-        client = aClient;
-    }
+	public static void setSwapper(Swapper swapper) {
+		CacheList.swapper = swapper;
+	}
 
     /**
      * Define se itens podem ser incluidos, atualizados ou removidos.

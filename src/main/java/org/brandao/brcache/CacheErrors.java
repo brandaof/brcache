@@ -29,5 +29,13 @@ public class CacheErrors {
 	public static final CacheError ERROR_1022 = new CacheError(1022, "Fails to acquire the lock!");
 
 	public static final CacheError ERROR_1023 = new CacheError(1023, "Fails to execute action!");
+
+	public static final CacheError ERROR_1024 = new CacheError(1024, "transaction timeout!");
+
+	public static final CacheError ERROR_1025 = new CacheError(1025, "transaction %s not found!");
+
+	public static final CacheError ERROR_1026 = new CacheError(1026, "Lock %s not found for key %s!");
+
+	public static final CacheError ERROR_1027 = new CacheError(1027, "Invalid current transaction!");
 	
 }

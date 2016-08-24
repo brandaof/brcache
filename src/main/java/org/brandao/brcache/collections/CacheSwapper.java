@@ -23,7 +23,6 @@ import java.io.Serializable;
 import org.brandao.brcache.Cache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
-import org.brandao.brcache.client.BrCacheClient;
 
 /**
  * Faz com que entidades sejam enviadas para um determinado cache.
@@ -41,8 +40,11 @@ public class CacheSwapper
     
     private long maxIndex;
     
-    public CacheSwapper(){
+    private Cache cache;
+    
+    public CacheSwapper(Cache cache){
         this.maxIndex = -1;
+        this.cache = cache;
     }
     
     public void setId(String value) {
@@ -59,31 +61,20 @@ public class CacheSwapper
             throw new IllegalStateException("invalid item: " + index);
         
         try{
-            if(CacheList.getCache() != null)
-                this.sendItem(index, item.getItem(), CacheList.getCache());
-            else
-                this.sendItem(index, item.getItem(), CacheList.getClient());
+            this.sendItem(index, item.getItem());
         }
         catch (StorageException ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    public void sendItem(long index, Object item, Cache cache) throws StorageException {
+    public void sendItem(long index, Object item) throws StorageException {
         cache.put(this.id + ":" + index, item, this.getMaxalive());
     }
 
-    public void sendItem(long index, Object item, BrCacheClient client) throws StorageException {
-        client.put(new String(this.id + ":" + index), this.getMaxalive(), item);
-    }
-    
     public Entry<?> getItem(long index) {
         try{
-            Object item;
-            if(CacheList.getCache() != null)
-                item = this.getItem(index, CacheList.getCache());
-            else
-                item = this.getItem(index, CacheList.getClient());
+            Object item = cache.get(this.id + ":" + index);
             
             if(item == null)
                 return null;
@@ -97,14 +88,6 @@ public class CacheSwapper
         }
     }
 
-    public Object getItem(long index, Cache cache) throws RecoverException {
-        return cache.get(this.id + ":" + index);
-    }
-
-    public Object getItem(long index, BrCacheClient client) throws RecoverException {
-        return client.get(new String(this.id + ":" + index));
-    }
-    
     public long getMaxalive() {
         return maxalive;
     }
@@ -115,16 +98,9 @@ public class CacheSwapper
 
     public void clear() {
         try{
-            if(CacheList.getCache() != null)
-                this.clear(CacheList.getCache());
-            else
-                this.clear(CacheList.getClient());
-                
+            this.clear(this.cache);
         }
-        catch (RecoverException ex) {
-            throw new RuntimeException(ex);
-        }
-        catch (StorageException ex) {
+        catch (Throwable ex) {
             throw new RuntimeException(ex);
         }
     }
@@ -132,12 +108,6 @@ public class CacheSwapper
     private void clear(Cache cache) throws StorageException{
         for(int i=0;i<=this.maxIndex;i++){
             cache.remove(this.id + ":" + i);
-        }
-    }
-    
-    private void clear(BrCacheClient client) throws RecoverException{
-        for(int i=0;i<=this.maxIndex;i++){
-            client.remove(new String(this.id + ":" + i));
         }
     }
     
