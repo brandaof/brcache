@@ -23,11 +23,21 @@ package org.brandao.brcache;
  * @author Brandao.
  */
 public class CorruptedDataException extends RecoverException{
-    
-	private static final long serialVersionUID = 938650810100616907L;
+
+	private static final long serialVersionUID = 4887368633482097027L;
+
+	public CorruptedDataException() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	public CorruptedDataException(CacheError error, Object... params) {
 		super(error, params);
+		// TODO Auto-generated constructor stub
+	}
+
+	public CorruptedDataException(String message) {
+		super(message);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -36,5 +46,6 @@ public class CorruptedDataException extends RecoverException{
 		super(thrwbl, error, params);
 		// TODO Auto-generated constructor stub
 	}
+    
 
 }

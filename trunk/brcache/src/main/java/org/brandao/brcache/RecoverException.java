@@ -26,12 +26,25 @@ public class RecoverException extends CacheException{
     
 	private static final long serialVersionUID = -6109029104730203681L;
 
-	public RecoverException(Throwable thrwbl, CacheError error, Object ... params) {
-        super(thrwbl, error, params);
-    }
-    
-    public RecoverException(CacheError error, Object ... params) {
-        super(error, params);
-    }
-    
+	public RecoverException() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public RecoverException(CacheError error, Object... params) {
+		super(error, params);
+		// TODO Auto-generated constructor stub
+	}
+
+	public RecoverException(String message) {
+		super(message);
+		// TODO Auto-generated constructor stub
+	}
+
+	public RecoverException(Throwable thrwbl, CacheError error,
+			Object... params) {
+		super(thrwbl, error, params);
+		// TODO Auto-generated constructor stub
+	}
+
 }

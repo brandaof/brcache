@@ -28,20 +28,36 @@ public class CacheException extends RuntimeException{
     
 	private static final long serialVersionUID = -2125449136205991256L;
 
-	private int code;
+	private CacheError error;
 	
+	private Object[] params;
+	
+    public CacheException() {
+    	super();
+    }
+
+    public CacheException(String message) {
+    	super(message);
+    }
+    
     public CacheException(Throwable thrwbl, CacheError error, Object ... params) {
         super(error.toString(params), thrwbl);
-        this.code = error.getId();
+        this.error = error;
+        this.params = params;
     }
 
     public CacheException(CacheError error, Object ... params) {
         super(error.toString(params));
-        this.code = error.getId();
+        this.error = error;
+        this.params = params;
     }
-    
-	public int getCode() {
-		return code;
+
+	public CacheError getError() {
+		return error;
+	}
+
+	public Object getParams() {
+		return params;
 	}
 
 }
