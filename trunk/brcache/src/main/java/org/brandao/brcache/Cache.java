@@ -136,8 +136,11 @@ public class Cache
 			else
 				return false;
 		}
-		catch(Throwable e){
-			throw new StorageException(e);
+		catch(StorageException e){
+			throw e;
+		}
+		catch(RecoverException e){
+			throw new StorageException(e, e.getError(), e.getParams());
 		}
 		finally{
 			if(refLock != null){
@@ -168,8 +171,11 @@ public class Cache
 			else
 				return false;
 		}
-		catch(Throwable e){
-			throw new StorageException(e);
+		catch(StorageException e){
+			throw e;
+		}
+		catch(RecoverException e){
+			throw new StorageException(e, e.getError(), e.getParams());
 		}
 		finally{
 			if(refLock != null){
@@ -201,8 +207,8 @@ public class Cache
 		catch(StorageException e){
 			throw e;
 		}
-		catch(Throwable e){
-			throw new StorageException(e);
+		catch(RecoverException e){
+			throw new StorageException(e, e.getError(), e.getParams());
 		}
 		finally{
 			if(refLock != null){
@@ -230,7 +236,7 @@ public class Cache
 			throw e;
 		}
 		catch(Throwable e){
-			throw new StorageException(e);
+			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
 	}
 
@@ -257,8 +263,8 @@ public class Cache
 			throw e;
 		}	
 		catch(Throwable e){
-			throw new RecoverException(e);
-		}	
+			throw new StorageException(e, CacheErrors.ERROR_1021);
+		}
 	}
 
     /* métodos de remoção */
@@ -282,8 +288,14 @@ public class Cache
 			else
 				return false;
 		}
+    	catch(StorageException e){
+    		throw e;
+    	}
+    	catch(RecoverException e){
+    		throw new StorageException(e, e.getError(), e.getParams());
+    	}
 		catch(Throwable e){
-			throw new StorageException(e);
+			throw new StorageException(e, CacheErrors.ERROR_1021);
 		}
 		finally{
 			if(refLock != null){
