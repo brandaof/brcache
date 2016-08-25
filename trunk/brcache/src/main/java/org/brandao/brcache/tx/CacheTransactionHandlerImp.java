@@ -170,14 +170,19 @@ public class CacheTransactionHandlerImp
 	}
 	
 	public void close(){
-		transactionInfo.close();
-		file.delete();
-		this.cache 				= null;
-		this.file 				= null;
-		this.transactionInfo 	= null;
-		this.transactionManager = null;
-		this.started 			= false;
-		this.commitInProgress 	= false;
+		try{
+			transactionInfo.close();
+			file.delete();
+			this.cache 				= null;
+			this.file 				= null;
+			this.transactionInfo 	= null;
+			this.transactionManager = null;
+			this.started 			= false;
+			this.commitInProgress 	= false;
+		}
+		catch(Throwable e){
+			throw new TransactionException(e, CacheErrors.ERROR_1023);
+		}
 	}
 	
 	public void commit() throws TransactionException {
