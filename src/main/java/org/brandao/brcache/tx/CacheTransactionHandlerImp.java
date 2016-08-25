@@ -42,7 +42,6 @@ public class CacheTransactionHandlerImp
 	
 	public CacheTransactionHandlerImp(UUID id, 
 			CacheTransactionManager transactionManager, StreamCache cache){
-		this.transactionInfo    = new TransactionInfo(id);
 		this.commitInProgress   = false;
 		this.started            = false;
 		this.commited           = false;
@@ -51,9 +50,6 @@ public class CacheTransactionHandlerImp
 		this.transactionManager	= transactionManager;
 		this.transactionName    = id.toString();
 		this.id					= id;
-		this.file               = new File(
-				transactionManager.getTransactionPath(), 
-				TRANSACTION_NAME.replace("{{name}}", this.transactionName));
 	}
 	
 	public Serializable getId() {
@@ -61,6 +57,11 @@ public class CacheTransactionHandlerImp
 	}
 	
 	public synchronized void begin() {
+		
+		this.transactionInfo = new TransactionInfo(id, transactionManager.getTransactionPath());
+		this.file            = new File(
+				transactionManager.getTransactionPath(), 
+				TRANSACTION_NAME.replace("{{name}}", this.transactionName));
 		
 		if(this.started){
 			throw new TransactionException(CacheErrors.ERROR_1016);
@@ -104,15 +105,15 @@ public class CacheTransactionHandlerImp
 				TransactionInfo localTransactionInfo = 
 						this.readPersistedTransaction(this.file);
 				this.rollback(localTransactionInfo);
-				this.clearTransaction(localTransactionInfo);
+				this.closeTransaction(localTransactionInfo);
 			}
 			else{
 				if(this.commitInProgress){
 					this.transactionInfo.rollback(this.cache);
-					this.clearTransaction(this.transactionInfo);
+					this.closeTransaction(this.transactionInfo);
 				}
 				else{
-					this.clearTransaction(this.transactionInfo);
+					this.closeTransaction(this.transactionInfo);
 					return;
 				}
 			}
@@ -164,12 +165,16 @@ public class CacheTransactionHandlerImp
 		this.commitInProgress = true;
 	}
 	
-	protected void clearTransaction(TransactionInfo transactionInfo) throws TransactionException{
-		file.delete();
-		transactionInfo.clear();
+	protected void closeTransaction(TransactionInfo transactionInfo) throws TransactionException{
+		//transactionInfo.clear();
 		this.transactionManager.close(this);
-		this.started = false;
-		this.commitInProgress = false;
+		file.delete();
+		this.cache 				= null;
+		this.file 				= null;
+		this.transactionInfo 	= null;
+		this.transactionManager = null;
+		this.started 			= false;
+		this.commitInProgress 	= false;
 	}
 	
 	public void commit() throws TransactionException {
@@ -190,7 +195,7 @@ public class CacheTransactionHandlerImp
 			this.transactionInfo.savePoint(this.cache);
 			this.persistTransaction(file, this.transactionInfo);
 			this.transactionInfo.commit(cache);
-			this.clearTransaction(this.transactionInfo);
+			this.closeTransaction(this.transactionInfo);
 			this.commitInProgress = false;
 			this.commited         = true;
 			this.rolledBack       = false;

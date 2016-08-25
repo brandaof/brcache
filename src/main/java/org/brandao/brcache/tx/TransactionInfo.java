@@ -14,11 +14,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.brandao.brcache.Cache;
 import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.CacheException;
 import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
+import org.brandao.brcache.SwaperStrategy;
 
 public class TransactionInfo implements Serializable {
 
@@ -32,16 +34,29 @@ public class TransactionInfo implements Serializable {
 	
 	private Set<String> managed;
 	
-	private Map<String, EntryCache> entities;
+	private Map<String, Long> times;
+	
+	//private Map<String, EntryCache> entities;
+	private StreamCache entities;
 	
 	private Map<String, EntryCache> saved;
 	
-	public TransactionInfo(UUID id){
+	private String path;
+	
+	public TransactionInfo(UUID id, String path){
 		this.id       = id;
 		this.updated  = new HashSet<String>();
 		this.locked   = new HashSet<String>();
 		this.managed  = new HashSet<String>();
-		this.entities = new HashMap<String, EntryCache>();
+		this.times    = new HashMap<String, Long>();
+		//this.entities = new HashMap<String, EntryCache>();
+		this.path     = path + "/" + id.toString();
+		this.entities =	new Cache(
+    		3L*1024L, 1024, 0.1, 
+    		1L*1024L, 512, 0.1, 
+    		6L*1024L, 1024, 512, 0.2, 
+    		12*1024*1024L, 1024, this.path, SwaperStrategy.FILE, 1);
+
 		this.saved    = new HashMap<String, EntryCache>();
 	}
 	
@@ -115,6 +130,7 @@ public class TransactionInfo implements Serializable {
 			ObjectOutputStream oout = new ObjectOutputStream(bout);
 			oout.writeObject(value);
 			oout.flush();
+			oout.close();
 			this.putStream(
 				manager, cache, key, maxAliveTime, 
 				new ByteArrayInputStream(bout.toByteArray()), time);
@@ -132,15 +148,17 @@ public class TransactionInfo implements Serializable {
     		throws StorageException {
 
     	try{
+    		/*
 			byte[] dta = 
 					inputData == null? 
 						null : 
 						this.getBytes(inputData);
-			
+			*/
 			this.lock(manager, key, time);
+			this.entities.putStream(key, 0, inputData);
 			this.managed.add(key);
 			this.updated.add(key);
-			this.entities.put(key, new EntryCache(dta, maxAliveTime));
+			this.times.put(key, maxAliveTime);
     	}
 		catch(CacheException e){
 			throw new StorageException(e, e.getError(), e.getParams());
@@ -175,8 +193,8 @@ public class TransactionInfo implements Serializable {
     		String key, boolean forUpdate, long time) throws RecoverException {
     	
     	try{
-			byte[] dta = this.getEntity(manager, cache, key, forUpdate, time);
-			return dta == null? null : new ByteArrayInputStream(dta);
+			InputStream dta = this.getEntity(manager, cache, key, forUpdate, time);
+			return dta;
     	}
     	catch(RecoverException e){
     		throw e;
@@ -217,12 +235,11 @@ public class TransactionInfo implements Serializable {
 			
     		if(this.managed.contains(key)){
     			this.updated.add(key);
-    			return this.entities.put(key, null) != null;
+    			return this.entities.remove(key);
     		}
     		else{
     			this.managed.add(key);
     			this.updated.add(key);
-    			this.entities.put(key, null);
     			return cache.getStream(key) != null;
     		}
     	}
@@ -268,43 +285,57 @@ public class TransactionInfo implements Serializable {
 	public void commit(StreamCache cache) throws RecoverException, StorageException {
 		if(!this.updated.isEmpty()){
 			for(String key: this.updated){
-				EntryCache entity = this.entities.get(key);
+				InputStream entity = this.entities.getStream(key);
 				
 				if(entity == null){
 					cache.remove(key);
 				}
 				else{
-					cache.putStream(key, entity.getMaxAlive(), new ByteArrayInputStream(entity.getData()));
+					long time = this.times.get(key);
+					cache.putStream(key, time, entity);
 				}
 			}
 			
 		}
 	}
 	
+	/*
 	public void clear() throws TransactionException{
 		this.updated.clear();
 		this.locked.clear();
+		
+		if(!this.managed.isEmpty()){
+			for(String key: this.managed){
+				this.entities.remove(key);
+			}
+		}
+		
+		this.times.clear();
 		this.managed.clear();
-		this.entities.clear();
 		this.saved.clear();
 	}
-    
+    */
+	
     /* métodos internos */
     
-    private byte[] getEntity(CacheTransactionManager manager, StreamCache cache,
+    private InputStream getEntity(CacheTransactionManager manager, StreamCache cache,
     		String key, boolean lock, long time) 
     		throws RecoverException, IOException, TransactionException{
     	
     	if(this.managed.contains(key)){
-    		EntryCache entry = this.entities.get(key);
-    		return entry == null? null : entry.getData();
+    		InputStream entry = this.entities.getStream(key);
+    		return entry;
     	}
     	else{
-    		byte[] dta = this.getSharedEntity(manager, cache, key, lock, time);
+    		InputStream dta = this.getSharedEntity(manager, cache, key, lock, time);
 			this.managed.add(key);
-			this.entities.put(key, dta == null? null : new EntryCache(dta, -1));
-    		
-    		return dta;
+			
+			if(dta != null){
+				this.entities.putStream(key, 0, dta);
+				return this.entities.getStream(key);
+			}
+			else
+				return dta;
     	}
     }
     
@@ -324,7 +355,7 @@ public class TransactionInfo implements Serializable {
     	this.locked.add(key);
     }
     
-    private byte[] getSharedEntity(CacheTransactionManager manager, StreamCache cache,
+    private InputStream getSharedEntity(CacheTransactionManager manager, StreamCache cache,
     		String key, boolean lock, long time) 
     		throws IOException, TransactionException, RecoverException{
     	
@@ -334,12 +365,7 @@ public class TransactionInfo implements Serializable {
 		
 		InputStream in = cache.getStream(key);
 		
-		if(in != null){
-			byte[] dta = this.getBytes(in);
-			return dta;
-		}
-		
-		return in == null? null : this.getBytes(in);
+		return in;
     }
     
     private byte[] getBytes(InputStream in) throws IOException {

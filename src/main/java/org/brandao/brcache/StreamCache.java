@@ -256,7 +256,12 @@ public abstract class StreamCache
             this.countWrite++;
         }
         catch(Throwable e){
-    		this.releaseSegments(map);
+        	try{
+        		this.releaseSegments(map);
+        	}
+        	catch(Throwable ex){
+        		e.printStackTrace();
+        	}
             throw 
             	e instanceof StorageException? 
             		(StorageException)e : 

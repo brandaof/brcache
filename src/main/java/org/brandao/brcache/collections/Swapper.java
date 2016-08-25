@@ -17,13 +17,15 @@
 
 package org.brandao.brcache.collections;
 
+import java.io.Serializable;
+
 /**
  * Permite o envio e recebimento de entidades de outro nível. 
  * Por exemplo, as entidades podem ser enviadas para o disco ou outro cache.
  * 
  * @author Brandao
  */
-public interface Swapper {
+public interface Swapper extends Serializable{
     
     /**
      * Define a identificação do agrupamento de entidades.

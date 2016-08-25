@@ -25,7 +25,9 @@ import java.util.List;
  */
 public class StringTreeNodes<T> implements TreeNodes<T>{
 
-    public TreeMapKey getKey(Object key) {
+	private static final long serialVersionUID = -8387188156629418047L;
+
+	public TreeMapKey getKey(Object key) {
     	String strKey = (String)key;
     	strKey = strKey.toLowerCase();
         StringTreeMapKey k = new StringTreeMapKey();
