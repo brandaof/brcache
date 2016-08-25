@@ -1,5 +1,6 @@
 package org.brandao.brcache.tx;
 
+import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -18,6 +19,8 @@ public interface CacheTransactionManager {
 	void rollback(UUID transaction) throws TransactionException;
 	
 	String getTransactionPath();
+	
+	void setConfiguration(Properties config);
 	
 	CacheTransactionHandler begin(StreamCache cache);
 	
