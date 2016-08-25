@@ -374,7 +374,17 @@ abstract class AbstractCollectionSegment<I,T>
     }
 
     public void clear(){
+    	this.firstItem = null;
+    	this.segments.clear();
+    	this.swapCandidates.clear();
         this.swap.clear();
+    }
+    
+    public void destroy(){
+    	this.firstItem = null;
+    	this.segments.clear();
+    	this.swapCandidates.clear();
+        this.swap.destroy();
     }
     
     private synchronized void addListedItemOnMemory(Entry<T> item){

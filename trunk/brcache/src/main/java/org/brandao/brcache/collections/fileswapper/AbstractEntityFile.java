@@ -253,6 +253,10 @@ public abstract class AbstractEntityFile<T>
 			this.fileAccess.close();
 	}
 
+	public void delete() throws IOException {
+		this.file.delete();
+	}
+	
 	public boolean exists() {
 		return this.file.exists();
 	}
