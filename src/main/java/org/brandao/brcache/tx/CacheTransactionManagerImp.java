@@ -180,6 +180,7 @@ public class CacheTransactionManagerImp
 			this.locks.unlock(ref, lockName);
 		}
 		
+		txInfo.txHandler.close();
 		this.transactions.remove();
 	}
 

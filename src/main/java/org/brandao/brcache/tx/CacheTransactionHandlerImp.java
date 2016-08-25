@@ -169,7 +169,7 @@ public class CacheTransactionHandlerImp
 		this.transactionManager.close(this);
 	}
 	
-	private void close(){
+	public void close(){
 		transactionInfo.close();
 		file.delete();
 		this.cache 				= null;

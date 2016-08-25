@@ -14,6 +14,8 @@ public interface CacheTransactionHandler
 	
 	void begin();
 	
+	void close();
+	
 	/* métodos de armazenamento */
 	
 	Object replace(CacheTransactionManager manager, StreamCache cache,
