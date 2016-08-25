@@ -26,7 +26,6 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		TestCase.assertTrue(cache.replace(KEY, VALUE2, 0));
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
-		System.gc();
 	}
 
 	public void testReplaceExact() throws StorageException{

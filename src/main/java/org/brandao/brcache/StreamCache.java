@@ -540,7 +540,7 @@ public abstract class StreamCache
 	}
 	
 	/**
-	 * Destrói os dados contidos nessa instância. Deve ser executado se {@link #isDeleteOnExit()} 
+	 * Destrói os dados contidos nesta instância. Deve ser executado se {@link #isDeleteOnExit()} 
 	 * for <code>false</code>.
 	 */
 	public void destroy(){
