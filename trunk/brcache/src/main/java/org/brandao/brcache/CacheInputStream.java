@@ -93,6 +93,8 @@ public class CacheInputStream extends InputStream{
                 	block = arrayDataList[this.currentSegmentIndex];
                 	origin = block == null? null : block.buffer;
                 }
+                else
+                	origin = null;
             }
             else{
                 int lenRead = length;

@@ -17,13 +17,14 @@
 
 package org.brandao.brcache.collections.treehugemap;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  *
  * @author Brandao
  */
-public interface TreeNodes<T> {
+public interface TreeNodes<T> extends Serializable{
 
     void init(List<TreeNode<T>> nodes);
     

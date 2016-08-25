@@ -38,19 +38,21 @@ import org.brandao.brcache.collections.fileswapper.SimpleIndexEntityFile;
  */
 public class FileSwaper implements DiskSwapper {
     
-    private String id;
+	private static final long serialVersionUID = -9192895825998099336L;
+
+	private String id;
     
     private String pathName;
     
-    private transient File path;
+    private File path;
     
-    private final SimpleIndex index;
+    private SimpleIndex index;
     
     private SimpleIndexEntityFile indexFile;
 
     private DataBlockEntityFile dataFile;
     
-    private volatile transient boolean hasCreatePath;
+    private volatile boolean hasCreatePath;
     
     public FileSwaper(){
         this.index = new SimpleIndex();
@@ -160,6 +162,44 @@ public class FileSwaper implements DiskSwapper {
         }
     }
 
+    private void writeObject(java.io.ObjectOutputStream stream)
+            throws IOException {
+    	stream.writeUTF(id == null? "" : id);
+    	stream.writeUTF(pathName == null? "" : pathName);
+    	stream.writeBoolean(this.hasCreatePath);
+    }
+
+    private void readObject(java.io.ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+    	
+    	this.id            = stream.readUTF();
+    	this.pathName      = stream.readUTF();
+        this.hasCreatePath = stream.readBoolean();
+
+        this.id       = this.id.isEmpty()? null : this.id;
+        this.pathName = this.pathName.isEmpty()? null : this.pathName;
+        
+        if(!this.hasCreatePath){
+        	return;
+        }
+        
+        this.path = this.pathName == null? Collections.getPath() : new File(this.pathName);
+
+        if (!this.path.exists()){
+            this.path.mkdirs();
+        }
+
+        File idxFile = new File(this.path, this.id + ".idx");
+        this.indexFile = new SimpleIndexEntityFile(idxFile);
+        this.indexFile.open();
+
+        File datFile = new File(this.path, this.id + ".dat");
+        this.dataFile = new DataBlockEntityFile(datFile, 2*1024);
+        this.dataFile.open();
+        
+        this.hasCreatePath = true;
+    }
+    
     public void clear() {
         File rootPath = this.pathName == null? Collections.getPath() : new File(this.pathName);
         if(rootPath.exists())

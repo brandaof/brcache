@@ -382,7 +382,8 @@ class RegionMemory implements Serializable{
 	private void writeObject(ObjectOutputStream stream) throws IOException {
 		stream.writeInt(this.length);
 		this.write(stream, 0, this.length);
-		Memory.release(this);
+		//Release ocorre no método finalize
+		//Memory.release(this);
     }
 
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
