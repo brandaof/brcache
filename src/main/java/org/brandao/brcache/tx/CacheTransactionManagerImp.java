@@ -3,6 +3,7 @@ package org.brandao.brcache.tx;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -26,6 +27,10 @@ public class CacheTransactionManagerImp
 		this.locks = new NamedLock();
 		this.transactionPath = "/mnt/brcache/tx";
 		this.transactions = new ThreadLocal<CacheTransactionHandler>();
+	}
+	
+	public void setConfiguration(Properties config){
+		
 	}
 	
 	public void lock(UUID txId, String key) throws TransactionException {

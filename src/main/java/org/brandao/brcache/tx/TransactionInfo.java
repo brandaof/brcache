@@ -36,26 +36,41 @@ public class TransactionInfo implements Serializable {
 	
 	private Map<String, Long> times;
 	
-	//private Map<String, EntryCache> entities;
 	private StreamCache entities;
 	
 	private Map<String, EntryCache> saved;
 	
 	private String path;
 	
-	public TransactionInfo(UUID id, String path){
+	public TransactionInfo(UUID id,
+			long nodeBufferSize,
+    		long nodePageSize,
+    		double nodeSwapFactor,
+    		
+    		long indexBufferSize,
+    		long indexPageSize,
+    		double indexSwapFactor,
+    		
+    		long dataBufferSize,
+    		long dataPageSize,
+    		long blockSize,
+    		double dataSwapFactor,
+    		
+    		long maxSizeEntry,
+    		int maxSizeKey,
+            SwaperStrategy swaperType,
+			String path){
 		this.id       = id;
 		this.updated  = new HashSet<String>();
 		this.locked   = new HashSet<String>();
 		this.managed  = new HashSet<String>();
 		this.times    = new HashMap<String, Long>();
-		//this.entities = new HashMap<String, EntryCache>();
 		this.path     = path + "/" + id.toString();
 		this.entities =	new Cache(
-    		3L*1024L, 1024, 0.1, 
-    		1L*1024L, 512, 0.1, 
-    		6L*1024L, 1024, 512, 0.2, 
-    		12*1024*1024L, 1024, this.path, SwaperStrategy.FILE, 1);
+			nodeBufferSize, nodePageSize, nodeSwapFactor,
+			indexBufferSize, indexPageSize, indexSwapFactor, 
+			dataBufferSize, dataPageSize, blockSize, dataSwapFactor, 
+			maxSizeEntry, maxSizeKey, this.path, swaperType, 1);
 		this.entities.setDeleteOnExit(false);
 		this.saved    = new HashMap<String, EntryCache>();
 	}
