@@ -62,6 +62,10 @@ abstract class AbstractCollectionSegment<I,T>
 
     private BlockingQueue<Entry<T>> swapCandidates;
     
+    private transient Thread[] swapperThreads;
+    
+    private boolean live;
+    
     public AbstractCollectionSegment(
             String id, int maxCapacity, double clearFactor,
             double fragmentFactor,
@@ -79,12 +83,13 @@ abstract class AbstractCollectionSegment<I,T>
         this.lastSegment         = -1;
         this.swap                = swap;
         this.forceSwap           = true;
+        this.live                = true;
         this.swap.setId(this.id);
 
-        Thread[] swapperThreads = new Thread[quantitySwaperThread];
+        swapperThreads = new Thread[quantitySwaperThread];
         
         for(int i=0;i<swapperThreads.length;i++){
-        	SwapperThread<T> swapperThread = new SwapperThread<T>(swapCandidates, this);
+        	SwapperThread swapperThread = new SwapperThread(swapCandidates, this);
         	swapperThreads[i] = new Thread(swapperThread);
         	swapperThreads[i].start();
         }
@@ -94,7 +99,7 @@ abstract class AbstractCollectionSegment<I,T>
     }
     
     public void run(){
-        while(true){
+        while(this.live){
             try{
                 Thread.sleep(1000);
             	clearLimit();
@@ -105,7 +110,11 @@ abstract class AbstractCollectionSegment<I,T>
         }
     }
     
-    protected synchronized int getNextKey() {
+    public boolean isLive() {
+		return live;
+	}
+
+	protected synchronized int getNextKey() {
         return globalID++;
     }
     
@@ -381,6 +390,12 @@ abstract class AbstractCollectionSegment<I,T>
     }
     
     public void destroy(){
+    	
+    	for(Thread st: this.swapperThreads){
+    		st.interrupt();
+    	}
+    	
+    	this.live      = false;
     	this.firstItem = null;
     	this.segments.clear();
     	this.swapCandidates.clear();
@@ -432,5 +447,32 @@ abstract class AbstractCollectionSegment<I,T>
             this.addListedItemOnMemory(item);
         }
     }
-    
+
+    public class SwapperThread implements Runnable{
+
+    	private BlockingQueue<Entry<T>> itens;
+    	
+    	private CollectionSegmentSwapper<T> swapper;
+    	
+    	public SwapperThread(BlockingQueue<Entry<T>> itens, CollectionSegmentSwapper<T> swapper){
+    		this.itens = itens;
+    		this.swapper = swapper;
+    	}
+    	
+    	public void run() {
+    		while(AbstractCollectionSegment.this.live){
+    			try{
+    				Entry<T> segment = itens.take();
+    				swapper.swapOnDisk(segment);
+    			}
+    			catch(Throwable e){
+    				if(!(e instanceof InterruptedException)){
+    					e.printStackTrace();
+    				}
+    			}
+    		}
+    		
+    	}
+    	
+    }    
 }
