@@ -201,10 +201,32 @@ public class FileSwaper implements DiskSwapper {
     }
     
     public void clear() {
-        File rootPath = this.pathName == null? Collections.getPath() : new File(this.pathName);
-        if(rootPath.exists())
-            Collections.deleteDir(rootPath);
+    	try{
+    		this.indexFile.createNewFile();
+    		this.dataFile.createNewFile();
+    		/*
+	        File rootPath  = this.pathName == null? Collections.getPath() : new File(this.pathName);
+	        if(rootPath.exists())
+	            Collections.deleteDir(rootPath);
+            */
+    	}
+    	catch(Throwable e){
+    		throw new IllegalStateException(e);
+    	}
     }
+
+	public void destroy() {
+    	try{
+    		this.indexFile.close();
+    		this.indexFile.delete();
+    		this.dataFile.close();
+    		this.dataFile.delete();
+    		this.hasCreatePath = false;
+    	}
+    	catch(Throwable e){
+    		throw new IllegalStateException(e);
+    	}
+	}
     
     
 }

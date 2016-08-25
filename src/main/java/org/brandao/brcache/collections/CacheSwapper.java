@@ -110,5 +110,8 @@ public class CacheSwapper
             cache.remove(this.id + ":" + i);
         }
     }
+
+	public void destroy() {
+	}
     
 }

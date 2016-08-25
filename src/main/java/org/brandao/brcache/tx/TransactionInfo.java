@@ -56,7 +56,7 @@ public class TransactionInfo implements Serializable {
     		1L*1024L, 512, 0.1, 
     		6L*1024L, 1024, 512, 0.2, 
     		12*1024*1024L, 1024, this.path, SwaperStrategy.FILE, 1);
-
+		this.entities.setDeleteOnExit(false);
 		this.saved    = new HashMap<String, EntryCache>();
 	}
 	
@@ -299,8 +299,15 @@ public class TransactionInfo implements Serializable {
 		}
 	}
 	
-	/*
-	public void clear() throws TransactionException{
+	public void close() throws TransactionException{
+		
+		this.entities.destroy();
+		this.locked.clear();
+		this.managed.clear();
+		this.saved.clear();
+		this.times.clear();
+		this.updated.clear();
+		/*
 		this.updated.clear();
 		this.locked.clear();
 		
@@ -313,8 +320,8 @@ public class TransactionInfo implements Serializable {
 		this.times.clear();
 		this.managed.clear();
 		this.saved.clear();
+		*/
 	}
-    */
 	
     /* métodos internos */
     

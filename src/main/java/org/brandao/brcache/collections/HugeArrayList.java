@@ -39,7 +39,7 @@ public class HugeArrayList<T>
     
     private CollectionSegmentImp<T> elements;
     
-    private boolean enableFinalize;
+    private boolean deleteOnExit;
     
     public HugeArrayList() {
         this(
@@ -60,7 +60,7 @@ public class HugeArrayList<T>
             int quantityClearThread) {
         
         this.size = 0;
-        this.enableFinalize = false;
+        this.deleteOnExit = true;
         id = id == null? Collections.getNextId() : id;
         swap = swap == null? new TreeFileSwaper() : swap;
         
@@ -214,8 +214,13 @@ public class HugeArrayList<T>
 
     public synchronized void clear() {
         this.elements.clear();
+        this.size = 0;
     }
 
+    public void destroy(){
+    	this.elements.destroy();
+    }
+    
     public void add(int index, T element) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -259,19 +264,19 @@ public class HugeArrayList<T>
         return this.elements.getId();
     }
 
-    public boolean isEnableFinalize() {
-        return enableFinalize;
-    }
+    public boolean isDeleteOnExit() {
+		return deleteOnExit;
+	}
 
-    public void setEnableFinalize(boolean enableFinalize) {
-        this.enableFinalize = enableFinalize;
-    }
-    
-    @Override
+	public void setDeleteOnExit(boolean deleteOnExit) {
+		this.deleteOnExit = deleteOnExit;
+	}
+
+	@Override
     protected void finalize() throws Throwable{
         try{
-            if(this.enableFinalize && !this.elements.isReadOnly())
-                this.clear();
+            if(this.deleteOnExit)
+                this.destroy();
         }
         finally{
             super.finalize();

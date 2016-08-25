@@ -174,6 +174,15 @@ public class TreeMap<K,T>
         return put(k, root, element);
     }
     
+    public void setDeleteOnExit(boolean value){
+    	this.nodes.setDeleteOnExit(value);
+    	this.values.setDeleteOnExit(value);
+    }
+
+    public boolean isDeleteOnExit(){
+    	return this.nodes.isDeleteOnExit();
+    }
+    
     public int size() {
         return this.values.size();
     }
@@ -218,6 +227,11 @@ public class TreeMap<K,T>
         this.nodes.clear();
     }
 
+    public void destroy() {
+		this.values.destroy();
+		this.nodes.destroy();
+    }
+    
     public void flush(){
         this.nodes.flush();
         this.values.flush();

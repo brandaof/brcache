@@ -17,6 +17,7 @@
 
 package org.brandao.brcache;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -91,6 +92,7 @@ public abstract class StreamCache
     
     private String dataPath;
     
+    private boolean deleteOnExit;
     /**
      * Cria um novo cache.
      * 
@@ -162,6 +164,7 @@ public abstract class StreamCache
 		                this.getSwaper(swaperType),
 		                quantitySwaperThread
 		                );
+		        this.dataList.setDeleteOnExit(false);
 	    	}
 	    	catch(IllegalArgumentException e){
 	    		throw new IllegalArgumentException("fail create data buffer", e);
@@ -204,6 +207,7 @@ public abstract class StreamCache
 	                    this.getSwaper(swaperType),
 	                    quantitySwaperThread
 	                    );
+		        this.dataMap.setDeleteOnExit(false);
 	    	}
 	    	catch(IllegalArgumentException e){
 	    		throw new IllegalArgumentException("fail data map", e);
@@ -211,13 +215,13 @@ public abstract class StreamCache
 	    	
         }
     	
-    	
         this.modCount               = 0;
         this.dataPath               = dataPath;
         this.freeSegments           = new LinkedBlockingQueue<Integer>();
         this.segmentSize            = (int)blockSize;
         this.maxBytesToStorageEntry = maxSizeEntry;
         this.maxLengthKey           = maxSizeKey;
+        this.deleteOnExit           = true;
     }
     
     /**
@@ -498,6 +502,76 @@ public abstract class StreamCache
      */
     public long getCountRemovedData() {
         return countRemovedData;
+    }
+    
+    /**
+     * Verifica se os arquivos contidos na pasta de dados serão 
+     * destruidos junto com essa instância. 
+     * @return <code>true</code> para destruir todos os arquivos. 
+     * Caso contrário, <code>false</code>.
+     */
+    public boolean isDeleteOnExit() {
+		return deleteOnExit;
+	}
+
+    /**
+     * Define que os arquivos contidos na pasta de dados sejam 
+     * destruidos junto com essa instância. 
+     * @param deleteOnExit <code>true</code> para destruir todos os arquivos. 
+     * Caso contrário, <code>false</code>.
+     */
+	public void setDeleteOnExit(boolean deleteOnExit) {
+		this.deleteOnExit = deleteOnExit;
+	}
+
+	/**
+	 * Remove todas as entradas contidas no cache.
+	 */
+	public void clear(){
+		this.countRead 			= 0;
+		this.countReadData 		= 0;
+		this.countRemoved 		= 0;
+		this.countRemovedData 	= 0;
+		this.countWrite 		= 0;
+		this.countWriteData 	= 0;
+		this.dataList.clear();
+		this.dataMap.clear();
+		this.freeSegments.clear();
+	}
+	
+	/**
+	 * Destrói os dados contidos nessa instância. Deve ser executado se {@link #isDeleteOnExit()} 
+	 * for <code>false</code>.
+	 */
+	public void destroy(){
+		this.dataList.destroy();
+		this.dataMap.destroy();
+		this.freeSegments.clear();
+		this.deleteDir(new File(dataPath));
+	}
+	
+	private boolean deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        return dir.delete();
+    }
+    
+    protected void finalize() throws Throwable{
+    	try{
+    		if(this.deleteOnExit){
+    			this.destroy();
+    		}
+    	}
+    	finally{
+    		super.finalize();
+    	}
     }
     
 }

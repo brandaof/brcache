@@ -166,8 +166,11 @@ public class CacheTransactionHandlerImp
 	}
 	
 	protected void closeTransaction(TransactionInfo transactionInfo) throws TransactionException{
-		//transactionInfo.clear();
 		this.transactionManager.close(this);
+	}
+	
+	private void close(){
+		transactionInfo.close();
 		file.delete();
 		this.cache 				= null;
 		this.file 				= null;

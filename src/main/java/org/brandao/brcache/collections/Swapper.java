@@ -19,6 +19,8 @@ package org.brandao.brcache.collections;
 
 import java.io.Serializable;
 
+import org.brandao.brcache.Cache;
+
 /**
  * Permite o envio e recebimento de entidades de outro nível. 
  * Por exemplo, as entidades podem ser enviadas para o disco ou outro cache.
@@ -29,27 +31,33 @@ public interface Swapper extends Serializable{
     
     /**
      * Define a identificação do agrupamento de entidades.
-     * @param value Identificação do agrupamento.
+     * @param value identificação do agrupamento.
      */
     void setId(String value);
     
     /**
      * Envia uma entidade para o agrupamento.
-     * @param index Índice da entidade.
+     * @param index índice da entidade.
      * @param item Item.
      */
     void sendItem(long index, Entry<?> item);
 
     /**
      * Recupera uma entidade do agrupamento.
-     * @param index Índice
+     * @param index índice
      * @return item.
      */
     Entry<?> getItem(long index);
     
     /**
-     * Remove todas as entidade do agrupamento.
+     * Remove todos os agrupamentos.
      */
     void clear();
+    
+    /**
+     * Destrói todos as agrupamentos. Executado quando a instâcnia do 
+     * {@link Cache} associado a ele é destruido. 
+     */
+    void destroy();
     
 }

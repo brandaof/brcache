@@ -34,7 +34,9 @@ import java.io.OutputStream;
  */
 public class TreeFileSwaper implements DiskSwapper {
     
-    public static final String PATH = "brcache.swapper.path";
+	private static final long serialVersionUID = -6050325151685902395L;
+
+	public static final String PATH = "brcache.swapper.path";
     
     private String id;
     
@@ -165,10 +167,7 @@ public class TreeFileSwaper implements DiskSwapper {
     }
 
     public void clear() {
-        File root = this.pathName == null? Collections.getPath() : new File(this.pathName);
-        File rootPath = new File(root, id);
-        if(rootPath.exists())
-            Collections.deleteDir(rootPath);
+    	throw new UnsupportedOperationException("not implemented yet");
     }
 
     public void setRootPath(String path) {
@@ -178,6 +177,13 @@ public class TreeFileSwaper implements DiskSwapper {
     public String getRootPath() {
         return this.pathName;
     }
+
+	public void destroy() {
+        File root = this.pathName == null? Collections.getPath() : new File(this.pathName);
+        File rootPath = new File(root, id);
+        if(rootPath.exists())
+            Collections.deleteDir(rootPath);
+	}
     
     
 }
