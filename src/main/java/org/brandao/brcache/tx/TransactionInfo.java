@@ -20,7 +20,6 @@ import org.brandao.brcache.CacheException;
 import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
-import org.brandao.brcache.SwaperStrategy;
 
 public class TransactionInfo implements Serializable {
 
@@ -42,25 +41,21 @@ public class TransactionInfo implements Serializable {
 	
 	private String path;
 	
-	private CacheTransactionConfig cacheTransactionConfig;
+	private BRCacheTransactionConfig cacheTransactionConfig;
 	
 	public TransactionInfo(UUID id,
-			CacheTransactionConfig cacheTransactionConfig,
-			String path){
+			BRCacheTransactionConfig cacheTransactionConfig){
 		this.id                     = id;
 		this.updated                = new HashSet<String>();
 		this.locked                 = new HashSet<String>();
 		this.managed                = new HashSet<String>();
 		this.times                  = new HashMap<String, Long>();
-		this.path                   = path + "/" + id.toString();
+		this.path                   = cacheTransactionConfig.getDataPath() + "/" + id.toString();
 		this.cacheTransactionConfig = cacheTransactionConfig;
-		this.entities =	new Cache(
-			cacheTransactionConfig.getNodesBufferSize(), cacheTransactionConfig.getNodesPageSize(), cacheTransactionConfig.getNodesSwapFactor(),
-			cacheTransactionConfig.getIndexBufferSize(), cacheTransactionConfig.getIndexPageSize(), cacheTransactionConfig.getIndexSwapFactor(), 
-			cacheTransactionConfig.getDataBufferSize(), cacheTransactionConfig.getDataPageSize(), cacheTransactionConfig.getDataBlockSize(), cacheTransactionConfig.getDataSwapFactor(), 
-			cacheTransactionConfig.getMaxSizeEntry(), cacheTransactionConfig.getMaxSizeKey(), this.path, cacheTransactionConfig.getSwapper(), cacheTransactionConfig.getSwapperThread());
+		this.entities				= new Cache(cacheTransactionConfig);
+		this.saved    				= new HashMap<String, EntryCache>();
+		
 		this.entities.setDeleteOnExit(false);
-		this.saved    = new HashMap<String, EntryCache>();
 	}
 	
 	/* métodos de armazenamento */
