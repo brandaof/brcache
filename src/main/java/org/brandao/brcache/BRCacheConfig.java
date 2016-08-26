@@ -72,7 +72,7 @@ public class BRCacheConfig implements Serializable{
         this.indexSwapFactor     = config.getDouble("index_swap_factor",	"0.5");
         this.dataBufferSize      = config.getLong("data_buffer_size",		"64m");
         this.dataBlockSize       = config.getLong("data_block_size",		"1k");
-        this.dataPageSize        = config.getLong("data_page_size",			"16k");
+        this.dataPageSize        = config.getLong("data_page_size",			"8k");
         this.dataSwapFactor      = config.getDouble("data_swap_factor",		"0.5");
         this.maxSizeEntry        = config.getLong("max_size_entry",			"1m");
         this.maxSizeKey          = config.getInt("max_size_key",			"100");
