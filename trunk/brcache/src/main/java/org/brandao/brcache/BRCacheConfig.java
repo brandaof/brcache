@@ -49,20 +49,20 @@ public class BRCacheConfig implements Serializable{
     
     public void setConfiguration(Configuration config){
     	this.configuration       = config;
-        this.nodesBufferSize     = config.getLong("nodes_buffer_size",		"1m");
+        this.nodesBufferSize     = config.getLong("nodes_buffer_size",		"5m");
         this.nodesPageSize       = config.getLong("nodes_page_size",		"1k");
-        this.nodesSwapFactor     = config.getDouble("nodes_swap_factor",	"0.4");
+        this.nodesSwapFactor     = config.getDouble("nodes_swap_factor",	"0.5");
         this.indexBufferSize     = config.getLong("index_buffer_size",		"1m");
         this.indexPageSize       = config.getLong("index_page_size",		"1k");
-        this.indexSwapFactor     = config.getDouble("index_swap_factor",	"0.4");
-        this.dataBufferSize      = config.getLong("data_buffer_size",		"10m");
-        this.dataBlockSize       = config.getLong("data_block_size",		"1k");
-        this.dataPageSize        = config.getLong("data_page_size",			"64k");
-        this.dataSwapFactor      = config.getDouble("data_swap_factor",		"0.4");
+        this.indexSwapFactor     = config.getDouble("index_swap_factor",	"0.5");
+        this.dataBufferSize      = config.getLong("data_buffer_size",		"64m");
+        this.dataBlockSize       = config.getLong("data_block_size",		"64b");
+        this.dataPageSize        = config.getLong("data_page_size",			"1k");
+        this.dataSwapFactor      = config.getDouble("data_swap_factor",		"0.5");
         this.maxSizeEntry        = config.getLong("max_size_entry",			"1m");
         this.maxSizeKey          = config.getInt("max_size_key",			"100");
-        this.swapperThread       = config.getInt("swapper_thread",			"1");
-        this.dataPath            = config.getString("data_path",			"/var/brcache");
+        this.swapperThread       = config.getInt("swapper_thread",			"4");
+        this.dataPath            = config.getString("data_path",			"/mnt/brcache");
         this.swapper             = SwaperStrategy.valueOf(config.getString("swapper_type","FILE").toUpperCase());
     }
     

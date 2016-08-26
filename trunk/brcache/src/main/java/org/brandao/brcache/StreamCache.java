@@ -144,8 +144,16 @@ public abstract class StreamCache
             int quantitySwaperThread
     		){
 
+        this.modCount               = 0;
+        this.dataPath               = dataPath;
+        this.freeSegments           = new LinkedBlockingQueue<Integer>();
+        this.segmentSize            = (int)blockSize;
+        this.maxBytesToStorageEntry = maxSizeEntry;
+        this.maxLengthKey           = maxSizeKey;
+        this.deleteOnExit           = true;
+    	
         synchronized(Collections.class){
-        	Collections.setPath(dataPath);
+        	//Collections.setPath(dataPath);
 	    	HugeListInfo nodeInfo;
 	    	HugeListInfo indexInfo;
 	    	HugeListInfo dataInfo; 
@@ -214,13 +222,6 @@ public abstract class StreamCache
 	    	
         }
     	
-        this.modCount               = 0;
-        this.dataPath               = dataPath;
-        this.freeSegments           = new LinkedBlockingQueue<Integer>();
-        this.segmentSize            = (int)blockSize;
-        this.maxBytesToStorageEntry = maxSizeEntry;
-        this.maxLengthKey           = maxSizeKey;
-        this.deleteOnExit           = true;
     }
     
     /**
