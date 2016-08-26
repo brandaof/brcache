@@ -14,7 +14,7 @@ class Memory {
 	/**
 	 * Blocos de dados.
 	 */
-	private static int segmentSize = 64;
+	private static int segmentSize = 512;
 	
 	/**
 	 * Blocos alocados e livres.
