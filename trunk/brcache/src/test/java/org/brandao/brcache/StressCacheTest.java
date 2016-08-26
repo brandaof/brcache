@@ -63,15 +63,11 @@ public class StressCacheTest extends TestCase{
                                 "read entry: " + (read-lastRead) + "/sec");
                             
                             Runtime runtime = Runtime.getRuntime();
-                            // Run the garbage collector
-                            //runtime.gc();
-                            // Calculate the used memory
                             long memory = runtime.totalMemory() - runtime.freeMemory();
                             System.out.println("Total memory is MB: " + ((runtime.totalMemory()/1024L)/1024L));
                             System.out.println("Used memory is B: " + memory);
                             System.out.println("Used memory is MB: " + ((memory/1024L)/1024L));
                             lastRead = cache.getCountRead();
-                            
                             lastWrite = cache.getCountWrite();
                             Thread.sleep(1000);
                             read = cache.getCountRead();
@@ -87,7 +83,7 @@ public class StressCacheTest extends TestCase{
         read.start();
         
         for(int i=0;i<2;i++){
-            Thread th;
+            Thread th; 
             if(i % 2 == 0){
                 th = new Thread(){
                     public void run(){
