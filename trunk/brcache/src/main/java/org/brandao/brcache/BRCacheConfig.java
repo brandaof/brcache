@@ -8,40 +8,43 @@ public class BRCacheConfig implements Serializable{
 
 	private static final long serialVersionUID = 9065603898804344980L;
 
-	private long nodesBufferSize;
+	protected long nodesBufferSize;
     
-    private long nodesPageSize;
+	protected long nodesPageSize;
     
-    private double nodesSwapFactor;
+	protected double nodesSwapFactor;
     
-    private long indexBufferSize;
+	protected long indexBufferSize;
     
-    private long indexPageSize;
+	protected long indexPageSize;
     
-    private double indexSwapFactor;
+	protected double indexSwapFactor;
     
-    private long dataBufferSize;
+	protected long dataBufferSize;
     
-    private long dataBlockSize;
+	protected long dataBlockSize;
     
-    private long dataPageSize;
+	protected long dataPageSize;
     
-    private double dataSwapFactor;
+	protected double dataSwapFactor;
 	
-    private long maxSizeEntry;
+	protected long maxSizeEntry;
     
-    private int maxSizeKey;
+    protected int maxSizeKey;
     
-    private int swapperThread;
+    protected int swapperThread;
     
-    private SwaperStrategy swapper;
+    protected SwaperStrategy swapper;
     
-    private String dataPath;
+    protected String dataPath;
+    
+    protected Configuration configuration;
     
     public BRCacheConfig(){
     }
 
     public void setConfiguration(Configuration config){
+    	this.configuration       = config;
         this.nodesBufferSize     = config.getLong("nodes_buffer_size",		"3k");
         this.nodesPageSize       = config.getLong("nodes_page_size",		"1k");
         this.nodesSwapFactor     = config.getDouble("nodes_swap_factor",	"0.1");
@@ -59,6 +62,10 @@ public class BRCacheConfig implements Serializable{
         this.swapper             = SwaperStrategy.valueOf(config.getString("swapper_type","file"));
     }
     
+	public Configuration getConfiguration() {
+		return configuration;
+	}
+
 	public String getDataPath() {
 		return dataPath;
 	}

@@ -41,10 +41,10 @@ public class CacheTransactionHandlerImp
 	
 	private UUID id;
 	
-	private CacheTransactionConfig cacheTransactionConfig;
+	private BRCacheTransactionConfig cacheTransactionConfig;
 	
 	public CacheTransactionHandlerImp(
-			CacheTransactionConfig cacheTransactionConfig,
+			BRCacheTransactionConfig cacheTransactionConfig,
 			UUID id, 
 			CacheTransactionManager transactionManager, 
 			StreamCache cache){
@@ -68,11 +68,8 @@ public class CacheTransactionHandlerImp
 		
 		//this.transactionInfo = new TransactionInfo(id, transactionManager.getTransactionPath());
 		this.transactionInfo = new TransactionInfo(
-				id, 
-				nodes_buffer_size, nodes_page_size, nodes_swap_factor, 
-				index_buffer_size, index_page_size, index_swap_factor, 
-				dataBufferSize, dataPageSize, blockSize, dataSwapFactor, 
-				maxSizeEntry, maxSizeKey, swaperType, path);
+				id, this.cacheTransactionConfig);
+		
 		this.file            = new File(
 				transactionManager.getTransactionPath(), 
 				TRANSACTION_NAME.replace("{{name}}", this.transactionName));

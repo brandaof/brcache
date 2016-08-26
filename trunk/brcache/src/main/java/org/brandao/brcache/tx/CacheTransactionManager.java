@@ -3,8 +3,8 @@ package org.brandao.brcache.tx;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.brandao.brcache.BRCacheConfig;
 import org.brandao.brcache.StreamCache;
-import org.brandao.brcache.server.Configuration;
 
 public interface CacheTransactionManager {
 
@@ -20,7 +20,7 @@ public interface CacheTransactionManager {
 	
 	String getTransactionPath();
 	
-	void setConfiguration(Configuration config);
+	void setConfiguration(BRCacheConfig config);
 	
 	CacheTransactionHandler begin(StreamCache cache);
 	
