@@ -8,9 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.brandao.brcache.BRCacheConfig;
 import org.brandao.brcache.CacheErrors;
-import org.brandao.brcache.Configuration;
 import org.brandao.brcache.StreamCache;
-import org.brandao.brcache.SwaperStrategy;
 import org.brandao.concurrent.NamedLock;
 
 public class CacheTransactionManagerImp 
@@ -32,14 +30,16 @@ public class CacheTransactionManagerImp
 	}
 	
 	public void setConfiguration(BRCacheConfig config){
-		this.config = config;
-
+		this.config                 = config;
 		this.transactionLocks       = new HashMap<UUID, CacheTransactionManagerImp.Transaction>();
 		this.locks                  = new NamedLock();
 		this.transactions           = new ThreadLocal<CacheTransactionHandler>();
-        this.transactionPath        = config.getDataPath() + "/tx";
+		
 		this.cacheTransactionConfig = new BRCacheTransactionConfig();
 		this.cacheTransactionConfig.setConfiguration(config.getConfiguration());
+		
+        this.transactionPath = this.cacheTransactionConfig.getDataPath();
+
 	}
 	
 	public void lock(UUID txId, String key) throws TransactionException {

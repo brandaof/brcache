@@ -37,18 +37,21 @@ public class Cache
 
 	protected transient NamedLock locks;
 	
-	private BRCacheConfig config;
+	protected BRCacheConfig config;
 	
     /**
      * Cria um novo cache.
      * 
      */
     public Cache(){
+    	this(new BRCacheConfig());
+    	/*
         this(
     		3L*1024L*1024L, 1024, 0.5, 
     		1L*1024L*1024L, 1024, 0.5, 
     		10L*1024L*1024L, 64*1024, 1*1024, 0.5, 
     		1*1024*1024L, 100, "/mnt/brcache", SwaperStrategy.FILE, 1);
+		*/
     }
     
     public Cache(BRCacheConfig config){
@@ -79,7 +82,7 @@ public class Cache
      * @param swaperType Estratégia de armazenamento dos dados em disco.
      * @param quantitySwaperThread Quantidade de processos usados para fazer a permuta.
      */
-    public Cache(
+    private Cache(
     		long nodeBufferSize,
     		long nodePageSize,
     		double nodeSwapFactor,
@@ -353,6 +356,14 @@ public class Cache
 	 */
 	public boolean containsKey(String key) throws RecoverException {
 		return super.getStream(key) != null;
+	}
+
+	/**
+	 * Obtém a configuração do cache.
+	 * @return configuração.
+	 */
+	public BRCacheConfig getConfig() {
+		return config;
 	}
 	
 }
