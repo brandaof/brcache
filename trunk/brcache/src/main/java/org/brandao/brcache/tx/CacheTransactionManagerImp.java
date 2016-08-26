@@ -3,12 +3,13 @@ package org.brandao.brcache.tx;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.StreamCache;
+import org.brandao.brcache.SwaperStrategy;
+import org.brandao.brcache.server.Configuration;
 import org.brandao.concurrent.NamedLock;
 
 public class CacheTransactionManagerImp 
@@ -22,15 +23,21 @@ public class CacheTransactionManagerImp
 	
 	private String transactionPath;
 	
+	private Configuration config;
+
+	private CacheTransactionConfig cacheTransactionConfig;
+    
 	public CacheTransactionManagerImp(){
-		this.transactionLocks = new HashMap<UUID, CacheTransactionManagerImp.Transaction>();
-		this.locks = new NamedLock();
-		this.transactionPath = "/mnt/brcache/tx";
-		this.transactions = new ThreadLocal<CacheTransactionHandler>();
 	}
 	
-	public void setConfiguration(Properties config){
-		
+	public void setConfiguration(Configuration config){
+		this.config = config;
+
+		this.transactionLocks       = new HashMap<UUID, CacheTransactionManagerImp.Transaction>();
+		this.locks                  = new NamedLock();
+		this.transactions           = new ThreadLocal<CacheTransactionHandler>();
+        this.transactionPath        = config.getString("data_path", "/var/brcache") + "/tx";
+		this.cacheTransactionConfig = new CacheTransactionConfig(this.config);
 	}
 	
 	public void lock(UUID txId, String key) throws TransactionException {
@@ -145,7 +152,15 @@ public class CacheTransactionManagerImp
 		}
 		
 		UUID txId = UUID.randomUUID();
-		txh = new CacheTransactionHandlerImp(txId, this, cache);
+		//txh = new CacheTransactionHandlerImp(txId, this, cache);
+		
+		txh = new CacheTransactionHandlerImp(
+				nodes_buffer_size, nodes_page_size, nodes_swap_factor, 
+				index_buffer_size, index_page_size, index_swap_factor, 
+				data_buffer_size, data_block_size, data_page_size, data_swap_factor, 
+				max_size_entry, max_size_key, swapper_thread, swapper, 
+				txId, this, cache);
+		
 		this.transactionLocks.put(txId, new Transaction(txh, new HashMap<String, Serializable>()));
 		this.transactions.set(txh);
 		txh.begin();

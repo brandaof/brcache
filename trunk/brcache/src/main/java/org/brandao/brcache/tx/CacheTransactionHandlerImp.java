@@ -14,6 +14,7 @@ import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 import org.brandao.brcache.StreamCache;
+import org.brandao.brcache.SwaperStrategy;
 
 public class CacheTransactionHandlerImp
 	implements CacheTransactionHandler{
@@ -40,8 +41,14 @@ public class CacheTransactionHandlerImp
 	
 	private UUID id;
 	
-	public CacheTransactionHandlerImp(UUID id, 
-			CacheTransactionManager transactionManager, StreamCache cache){
+	private CacheTransactionConfig cacheTransactionConfig;
+	
+	public CacheTransactionHandlerImp(
+			CacheTransactionConfig cacheTransactionConfig,
+			UUID id, 
+			CacheTransactionManager transactionManager, 
+			StreamCache cache){
+		
 		this.commitInProgress   = false;
 		this.started            = false;
 		this.commited           = false;
@@ -50,6 +57,7 @@ public class CacheTransactionHandlerImp
 		this.transactionManager	= transactionManager;
 		this.transactionName    = id.toString();
 		this.id					= id;
+		this.cacheTransactionConfig = cacheTransactionConfig;
 	}
 	
 	public Serializable getId() {
@@ -58,7 +66,13 @@ public class CacheTransactionHandlerImp
 	
 	public synchronized void begin() {
 		
-		this.transactionInfo = new TransactionInfo(id, transactionManager.getTransactionPath());
+		//this.transactionInfo = new TransactionInfo(id, transactionManager.getTransactionPath());
+		this.transactionInfo = new TransactionInfo(
+				id, 
+				nodes_buffer_size, nodes_page_size, nodes_swap_factor, 
+				index_buffer_size, index_page_size, index_swap_factor, 
+				dataBufferSize, dataPageSize, blockSize, dataSwapFactor, 
+				maxSizeEntry, maxSizeKey, swaperType, path);
 		this.file            = new File(
 				transactionManager.getTransactionPath(), 
 				TRANSACTION_NAME.replace("{{name}}", this.transactionName));

@@ -42,35 +42,23 @@ public class TransactionInfo implements Serializable {
 	
 	private String path;
 	
+	private CacheTransactionConfig cacheTransactionConfig;
+	
 	public TransactionInfo(UUID id,
-			long nodeBufferSize,
-    		long nodePageSize,
-    		double nodeSwapFactor,
-    		
-    		long indexBufferSize,
-    		long indexPageSize,
-    		double indexSwapFactor,
-    		
-    		long dataBufferSize,
-    		long dataPageSize,
-    		long blockSize,
-    		double dataSwapFactor,
-    		
-    		long maxSizeEntry,
-    		int maxSizeKey,
-            SwaperStrategy swaperType,
+			CacheTransactionConfig cacheTransactionConfig,
 			String path){
-		this.id       = id;
-		this.updated  = new HashSet<String>();
-		this.locked   = new HashSet<String>();
-		this.managed  = new HashSet<String>();
-		this.times    = new HashMap<String, Long>();
-		this.path     = path + "/" + id.toString();
+		this.id                     = id;
+		this.updated                = new HashSet<String>();
+		this.locked                 = new HashSet<String>();
+		this.managed                = new HashSet<String>();
+		this.times                  = new HashMap<String, Long>();
+		this.path                   = path + "/" + id.toString();
+		this.cacheTransactionConfig = cacheTransactionConfig;
 		this.entities =	new Cache(
-			nodeBufferSize, nodePageSize, nodeSwapFactor,
-			indexBufferSize, indexPageSize, indexSwapFactor, 
-			dataBufferSize, dataPageSize, blockSize, dataSwapFactor, 
-			maxSizeEntry, maxSizeKey, this.path, swaperType, 1);
+			cacheTransactionConfig.getNodesBufferSize(), cacheTransactionConfig.getNodesPageSize(), cacheTransactionConfig.getNodesSwapFactor(),
+			cacheTransactionConfig.getIndexBufferSize(), cacheTransactionConfig.getIndexPageSize(), cacheTransactionConfig.getIndexSwapFactor(), 
+			cacheTransactionConfig.getDataBufferSize(), cacheTransactionConfig.getDataPageSize(), cacheTransactionConfig.getDataBlockSize(), cacheTransactionConfig.getDataSwapFactor(), 
+			cacheTransactionConfig.getMaxSizeEntry(), cacheTransactionConfig.getMaxSizeKey(), this.path, cacheTransactionConfig.getSwapper(), cacheTransactionConfig.getSwapperThread());
 		this.entities.setDeleteOnExit(false);
 		this.saved    = new HashMap<String, EntryCache>();
 	}
