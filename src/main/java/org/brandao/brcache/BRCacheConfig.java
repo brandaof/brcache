@@ -43,23 +43,27 @@ public class BRCacheConfig implements Serializable{
     public BRCacheConfig(){
     }
 
+    public BRCacheConfig(Configuration config){
+    	this.setConfiguration(config);
+    }
+    
     public void setConfiguration(Configuration config){
     	this.configuration       = config;
-        this.nodesBufferSize     = config.getLong("nodes_buffer_size",		"3k");
+        this.nodesBufferSize     = config.getLong("nodes_buffer_size",		"1m");
         this.nodesPageSize       = config.getLong("nodes_page_size",		"1k");
-        this.nodesSwapFactor     = config.getDouble("nodes_swap_factor",	"0.1");
-        this.indexBufferSize     = config.getLong("index_buffer_size",		"1k");
-        this.indexPageSize       = config.getLong("index_page_size",		"512b");
-        this.indexSwapFactor     = config.getDouble("index_swap_factor",	"0.1");
-        this.dataBufferSize      = config.getLong("data_buffer_size",		"6k");
-        this.dataBlockSize       = config.getLong("data_block_size",		"512b");
-        this.dataPageSize        = config.getLong("data_page_size",			"64b");
-        this.dataSwapFactor      = config.getDouble("data_swap_factor",		"0.1");
+        this.nodesSwapFactor     = config.getDouble("nodes_swap_factor",	"0.4");
+        this.indexBufferSize     = config.getLong("index_buffer_size",		"1m");
+        this.indexPageSize       = config.getLong("index_page_size",		"1k");
+        this.indexSwapFactor     = config.getDouble("index_swap_factor",	"0.4");
+        this.dataBufferSize      = config.getLong("data_buffer_size",		"10m");
+        this.dataBlockSize       = config.getLong("data_block_size",		"1k");
+        this.dataPageSize        = config.getLong("data_page_size",			"64k");
+        this.dataSwapFactor      = config.getDouble("data_swap_factor",		"0.4");
         this.maxSizeEntry        = config.getLong("max_size_entry",			"1m");
-        this.maxSizeKey          = config.getInt("max_size_key",			"48");
+        this.maxSizeKey          = config.getInt("max_size_key",			"100");
         this.swapperThread       = config.getInt("swapper_thread",			"1");
         this.dataPath            = config.getString("data_path",			"/var/brcache");
-        this.swapper             = SwaperStrategy.valueOf(config.getString("swapper_type","file"));
+        this.swapper             = SwaperStrategy.valueOf(config.getString("swapper_type","FILE").toUpperCase());
     }
     
 	public Configuration getConfiguration() {
