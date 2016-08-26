@@ -93,10 +93,8 @@ public abstract class StreamCache
     private String dataPath;
     
     private boolean deleteOnExit;
-    /**
-     * Cria um novo cache.
-     * 
-     */
+    
+    /*
     public StreamCache(){
         this(
     		3L*1024L*1024L, 1024, 0.5, 
@@ -104,6 +102,7 @@ public abstract class StreamCache
     		10L*1024L*1024L, 64*1024, 1*1024, 0.5, 
     		1*1024*1024L, 100, "/mnt/brcache", SwaperStrategy.FILE, 1);
     }
+    */
     
     /**
      * Cria um novo cache.

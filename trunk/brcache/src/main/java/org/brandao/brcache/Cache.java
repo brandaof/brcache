@@ -44,7 +44,7 @@ public class Cache
      * 
      */
     public Cache(){
-    	this(new BRCacheConfig());
+    	this(new BRCacheConfig(new Configuration()));
     	/*
         this(
     		3L*1024L*1024L, 1024, 0.5, 
