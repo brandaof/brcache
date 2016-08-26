@@ -38,6 +38,7 @@ public class Cache
 	protected transient NamedLock locks;
 	
 	private BRCacheConfig config;
+	
     /**
      * Cria um novo cache.
      * 
