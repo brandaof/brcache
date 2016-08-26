@@ -164,6 +164,8 @@ public class TXCache
     	this.cache = cache;
     	this.transactionManager = transactionManager;
     	this.transactionTimeout = timeout;
+    	
+    	this.transactionManager.setConfiguration(cache.getConfig());
     }
     
     /**
