@@ -1,10 +1,10 @@
 package org.brandao.brcache.tx;
 
-import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.brandao.brcache.StreamCache;
+import org.brandao.brcache.server.Configuration;
 
 public interface CacheTransactionManager {
 
@@ -20,7 +20,7 @@ public interface CacheTransactionManager {
 	
 	String getTransactionPath();
 	
-	void setConfiguration(Properties config);
+	void setConfiguration(Configuration config);
 	
 	CacheTransactionHandler begin(StreamCache cache);
 	

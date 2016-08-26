@@ -37,6 +37,7 @@ public class Cache
 
 	protected transient NamedLock locks;
 	
+	private BRCacheConfig config;
     /**
      * Cria um novo cache.
      * 
@@ -47,6 +48,15 @@ public class Cache
     		1L*1024L*1024L, 1024, 0.5, 
     		10L*1024L*1024L, 64*1024, 1*1024, 0.5, 
     		1*1024*1024L, 100, "/mnt/brcache", SwaperStrategy.FILE, 1);
+    }
+    
+    public Cache(BRCacheConfig config){
+    	this(
+    			config.getNodesBufferSize(), config.getNodesPageSize(), config.getNodesSwapFactor(),
+    			config.getIndexBufferSize(), config.getIndexPageSize(), config.getIndexSwapFactor(), 
+    			config.getDataBufferSize(), config.getDataPageSize(), config.getDataBlockSize(), config.getDataSwapFactor(), 
+    			config.getMaxSizeEntry(), config.getMaxSizeKey(), config.getDataPath(), config.getSwapper(), config.getSwapperThread());
+    	this.config = config;
     }
     
     /**

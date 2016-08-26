@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.brandao.brcache.server;
+package org.brandao.brcache;
 
 import java.math.BigDecimal;
 import java.util.Properties;
@@ -33,6 +33,22 @@ public class Configuration extends Properties{
     private static final BigDecimal GB = new BigDecimal(1024*1024*1024);
 
     private static final BigDecimal TB = new BigDecimal(1024*1024*1024*1024);
+
+    public Object getObject(String property, String defaultValue){
+        String value = super.getProperty(property, defaultValue);
+        
+        if(value == null)
+            throw new IllegalStateException("property not found: " + property);
+        else{
+            try{
+            	Class<?> clazz = Class.forName(value, true, Thread.currentThread().getContextClassLoader());
+            	return clazz.newInstance();
+            }
+            catch(Throwable e){
+                throw new IllegalStateException("invalid property: " + property);
+            }
+        }
+    }
     
     public boolean getBoolean(String property, String defaultValue){
         String value = super.getProperty(property, defaultValue);
