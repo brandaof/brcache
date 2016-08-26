@@ -4,6 +4,17 @@ import java.io.Serializable;
 
 import org.brandao.brcache.SwaperStrategy;
 
+/**
+ * Configuração de um cache.
+ * <pre>
+ * ex:
+ *     BRCacheConfig config = new BRCacheConfig();
+ *     ...
+ *     Cache cache = new Cache(config);
+ * </pre>
+ * @author Brandao
+ *
+ */
 public class BRCacheConfig implements Serializable{
 
 	private static final long serialVersionUID = 9065603898804344980L;
@@ -47,6 +58,10 @@ public class BRCacheConfig implements Serializable{
     	this.setConfiguration(config);
     }
     
+    /**
+     * Define os metadados de configuração.
+     * @param config metadados.
+     */
     public void setConfiguration(Configuration config){
     	this.configuration       = config;
         this.nodesBufferSize     = config.getLong("nodes_buffer_size",		"1m");
@@ -66,14 +81,28 @@ public class BRCacheConfig implements Serializable{
         this.swapper             = SwaperStrategy.valueOf(config.getString("swapper_type","FILE").toUpperCase());
     }
     
+    /**
+     * Obtém os metadados de configuração.
+     * @return metadados.
+     */
 	public Configuration getConfiguration() {
 		return configuration;
 	}
 
+	/**
+	 * Obtém a pasta onde o servidor irá fazer o swap dos dados quando 
+	 * o limite da memória for atingido.
+	 * @return pasta.
+	 */
 	public String getDataPath() {
 		return dataPath;
 	}
 
+	/**
+	 * Define a pasta onde o servidor irá fazer o swap dos dados quando 
+	 * o limite da memória for atingido.
+	 * @param dataPath pasta.
+	 */
 	public void setDataPath(String dataPath) {
 		this.dataPath = dataPath;
 	}
