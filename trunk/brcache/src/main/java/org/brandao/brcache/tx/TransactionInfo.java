@@ -39,10 +39,6 @@ public class TransactionInfo implements Serializable {
 	
 	private Map<String, EntryCache> saved;
 	
-	private String path;
-	
-	private BRCacheTransactionConfig cacheTransactionConfig;
-	
 	public TransactionInfo(UUID id,
 			BRCacheTransactionConfig cacheTransactionConfig){
 		this.id                     = id;
@@ -50,10 +46,15 @@ public class TransactionInfo implements Serializable {
 		this.locked                 = new HashSet<String>();
 		this.managed                = new HashSet<String>();
 		this.times                  = new HashMap<String, Long>();
-		this.path                   = cacheTransactionConfig.getDataPath() + "/" + id.toString();
-		this.cacheTransactionConfig = cacheTransactionConfig;
-		this.entities				= new Cache(cacheTransactionConfig);
 		this.saved    				= new HashMap<String, EntryCache>();
+		
+		this.entities = 
+				new Cache(
+					new BRCacheTransactionConfigWrapper(
+						cacheTransactionConfig,
+						cacheTransactionConfig.getDataPath() + "/" + id.toString()
+					)
+				);
 		
 		this.entities.setDeleteOnExit(false);
 	}
