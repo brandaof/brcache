@@ -21,12 +21,15 @@ import java.math.BigDecimal;
 import java.util.Properties;
 
 /**
- *
+ * Propriedades do cache.
+ * 
  * @author Brandao
  */
 public class Configuration extends Properties{
 
-    private static final BigDecimal KB = new BigDecimal(1024);
+	private static final long serialVersionUID = -8191796505743584525L;
+
+	private static final BigDecimal KB = new BigDecimal(1024);
 
     private static final BigDecimal MB = new BigDecimal(1024*1024);
 
@@ -34,6 +37,12 @@ public class Configuration extends Properties{
 
     private static final BigDecimal TB = new BigDecimal(1024*1024*1024*1024);
 
+    /**
+     * Obtém a propriedade do tipo <code>Object</code>.
+     * @param property propriedade.
+     * @param defaultValue valor padrão.
+     * @return propriedade.
+     */
     public Object getObject(String property, String defaultValue){
         String value = super.getProperty(property, defaultValue);
         
@@ -50,6 +59,12 @@ public class Configuration extends Properties{
         }
     }
     
+    /**
+     * Obtém uma propriedade do tipo <code>boolean</code>.
+     * @param property propriedade.
+     * @param defaultValue valor padrão.
+     * @return propriedade.
+     */
     public boolean getBoolean(String property, String defaultValue){
         String value = super.getProperty(property, defaultValue);
         
@@ -59,6 +74,12 @@ public class Configuration extends Properties{
             return value.equalsIgnoreCase("true");
     }
     
+    /**
+     * Obtém a propriedade do tipo <code>String</code>.
+     * @param property propriedade.
+     * @param defaultValue valor padrão.
+     * @return propriedade.
+     */
     public String getString(String property, String defaultValue){
         String value = super.getProperty(property, defaultValue);
         
@@ -68,22 +89,52 @@ public class Configuration extends Properties{
             return value;
     }
     
+    /**
+     * Obtém a propriedade do tipo <code>int</code>.
+     * @param property propriedade.
+     * @param defaultValue valor padrão.
+     * @return propriedade.
+     */
     public int getInt(String property, String defaultValue){
         return this.getNumber(property, defaultValue).intValue();
     }
 
+    /**
+     * Obtém a propriedade do tipo <code>long</code>.
+     * @param property propriedade.
+     * @param defaultValue valor padrão.
+     * @return propriedade.
+     */
     public long getLong(String property, String defaultValue){
         return this.getNumber(property, defaultValue).longValue();
     }
     
+    /**
+     * Obtém a propriedade do tipo <code>double</code>.
+     * @param property propriedade.
+     * @param defaultValue valor padrão.
+     * @return propriedade.
+     */
     public double getDouble(String property, String defaultValue){
         return this.getNumber(property, defaultValue).doubleValue();
     }
 
+    /**
+     * Obtém a propriedade do tipo <code>float</code>.
+     * @param property propriedade.
+     * @param defaultValue valor padrão.
+     * @return propriedade.
+     */
     public float getFloat(String property, String defaultValue){
         return this.getNumber(property, defaultValue).floatValue();
     }
 
+    /**
+     * Obtém a propriedade do tipo <code>Number</code>.
+     * @param property propriedade.
+     * @param defaultValue valor padrão.
+     * @return propriedade.
+     */
     public BigDecimal getNumber(String property, String defaultValue){
         String value = super.getProperty(property, defaultValue);
         

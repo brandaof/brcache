@@ -1,5 +1,10 @@
 package org.brandao.brcache;
 
+/**
+ * Descreve os erros do cache.
+ * @author Brandao
+ *
+ */
 public class CacheErrors {
 
 	/**
