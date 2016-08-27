@@ -254,12 +254,10 @@ public abstract class StreamCache
         DataMap map     = new DataMap();
         try{
             map.setId(this.modCount++);
-            
-            if(maxAliveTime > 0){
-            	map.setMaxLiveTime(System.currentTimeMillis() + maxAliveTime);
-            }
-            else
-            	map.setMaxLiveTime(maxAliveTime);
+            map.setCreationTime(System.currentTimeMillis());
+            map.setMostRecentTime(map.getCreationTime());
+            map.setTimeToIdle(0);
+            map.setTimeToLive(maxAliveTime);
             
             this.putData(map, inputData);
             oldMap = this.dataMap.put(key, map);
@@ -301,14 +299,17 @@ public abstract class StreamCache
             
             if(map != null){
             	
-            	if( map.getMaxLiveTime() > 0 && System.currentTimeMillis() > map.getMaxLiveTime()){
+            	long currentTime = System.currentTimeMillis();
+            	
+            	if(currentTime > map.getExpirationTime()){
             		this.remove(key, map);
             		return null;
             	}
             	
                 Block[] segments = new Block[map.getSegments()];
-                Block current = this.dataList.get(map.getFirstSegment());
-                int i=0;
+                Block current    = this.dataList.get(map.getFirstSegment());
+                int i            = 0;
+                
                 while(current != null){
 
                     /*

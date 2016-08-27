@@ -120,5 +120,29 @@ public class CacheInputStream extends InputStream{
     public long getSize(){
     	return this.map.getLength();
     }
+
+	public long getTimeToLive() {
+		return map.getTimeToLive();
+	}
+    
+	public long getCreationTime() {
+		return map.getCreationTime();
+	}
+	
+	public long getTimeToIdle() {
+		return map.getTimeToIdle();
+	}
+	
+	public long getMostRecentTime() {
+		return map.getMostRecentTime();
+	}
+	
+    public long getExpirationTime(){
+    	return map.getExpirationTime();
+    }
+
+    public long getTimeToLiveRemaining(){
+    	return map.getTimeToLiveRemaining();
+    }
     
 }
