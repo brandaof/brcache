@@ -254,7 +254,13 @@ public abstract class StreamCache
         DataMap map     = new DataMap();
         try{
             map.setId(this.modCount++);
-            map.setMaxLiveTime(maxAliveTime);
+            
+            if(maxAliveTime > 0){
+            	map.setMaxLiveTime(System.currentTimeMillis() + maxAliveTime);
+            }
+            else
+            	map.setMaxLiveTime(maxAliveTime);
+            
             this.putData(map, inputData);
             oldMap = this.dataMap.put(key, map);
             this.countWrite++;
@@ -286,7 +292,7 @@ public abstract class StreamCache
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
      * item.
      */
-    public InputStream getStream(String key) throws RecoverException{
+    public InputStream getStream(String key) throws RecoverException {
         
         try{
             countRead++;
@@ -294,6 +300,12 @@ public abstract class StreamCache
             DataMap map = this.dataMap.get(key);
             
             if(map != null){
+            	
+            	if( map.getMaxLiveTime() > 0 && System.currentTimeMillis() > map.getMaxLiveTime()){
+            		this.remove(key, map);
+            		return null;
+            	}
+            	
                 Block[] segments = new Block[map.getSegments()];
                 Block current = this.dataList.get(map.getFirstSegment());
                 int i=0;
@@ -339,10 +351,8 @@ public abstract class StreamCache
         	DataMap data = this.dataMap.get(key);
 
             if(data != null){
-            	this.dataMap.put(key, null);                
-            	this.releaseSegments(data);
-                countRemoved++;
-                return true;
+            	this.remove(key, data);
+            	return true;
             }
             else
                 return false;
@@ -351,6 +361,12 @@ public abstract class StreamCache
             throw new StorageException(e, CacheErrors.ERROR_1022);
         }
         
+    }
+    
+    private void remove(String key, DataMap data){
+    	this.dataMap.put(key, null);                
+    	this.releaseSegments(data);
+        countRemoved++;
     }
     
     private void putData(DataMap map, InputStream inputData) throws StorageException{
