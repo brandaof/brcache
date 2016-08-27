@@ -29,7 +29,11 @@ class DataMap implements Serializable{
 
 	private long id;
     
-    private long maxLiveTime;
+    private long timeToLive;
+    
+    private long creationTime;
+    
+    private long timeToIdle;
     
     private short flag;
     
@@ -39,36 +43,48 @@ class DataMap implements Serializable{
     
     private long length;
     
-    public long getMaxLiveTime() {
-        return maxLiveTime;
+    private long mostRecentTime;
+    
+    public long getExpirationTime(){
+    	long ttlExpiry = timeToLive == 0? Long.MAX_VALUE : creationTime + timeToLive;
+		long ttiExpiry = timeToIdle == 0? Long.MAX_VALUE : mostRecentTime + timeToIdle;	
+    	return Math.min(ttlExpiry, ttiExpiry);
     }
 
-    public void setMaxLiveTime(long maxLiveTime) {
-        this.maxLiveTime = maxLiveTime;
+    public long getTimeToLiveRemaining(){
+    	return timeToLive == 0? 0 : creationTime + timeToLive - System.currentTimeMillis();
     }
-
-    public long getLength() {
-        return length;
-    }
-
-    public void setLength(long length) {
-        this.length = length;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-	public int getFirstSegment() {
-		return firstSegment;
+    
+	public long getId() {
+		return id;
 	}
 
-	public void setFirstSegment(int firstSegment) {
-		this.firstSegment = firstSegment;
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public long getTimeToLive() {
+		return timeToLive;
+	}
+
+	public void setTimeToLive(long timeToLive) {
+		this.timeToLive = timeToLive;
+	}
+
+	public long getCreationTime() {
+		return creationTime;
+	}
+
+	public void setCreationTime(long creationTime) {
+		this.creationTime = creationTime;
+	}
+
+	public long getTimeToIdle() {
+		return timeToIdle;
+	}
+
+	public void setTimeToIdle(long timeToIdle) {
+		this.timeToIdle = timeToIdle;
 	}
 
 	public short getFlag() {
@@ -79,12 +95,36 @@ class DataMap implements Serializable{
 		this.flag = flag;
 	}
 
+	public int getFirstSegment() {
+		return firstSegment;
+	}
+
+	public void setFirstSegment(int firstSegment) {
+		this.firstSegment = firstSegment;
+	}
+
 	public int getSegments() {
 		return segments;
 	}
 
 	public void setSegments(int segments) {
 		this.segments = segments;
+	}
+
+	public long getLength() {
+		return length;
+	}
+
+	public void setLength(long length) {
+		this.length = length;
+	}
+
+	public long getMostRecentTime() {
+		return mostRecentTime;
+	}
+
+	public void setMostRecentTime(long mostRecentTime) {
+		this.mostRecentTime = mostRecentTime;
 	}
 
 }

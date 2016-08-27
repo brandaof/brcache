@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import org.brandao.brcache.Cache;
 import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.CacheException;
+import org.brandao.brcache.CacheInputStream;
 import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
@@ -25,6 +26,8 @@ public class TransactionInfo implements Serializable {
 
 	private static final long serialVersionUID = 3758041685386590737L;
 
+	private static final String ORIGIN_PREFIX = "o:";
+	
 	private UUID id;
 	
 	private Set<String> updated;
@@ -37,7 +40,7 @@ public class TransactionInfo implements Serializable {
 	
 	private StreamCache entities;
 	
-	private Map<String, EntryCache> saved;
+	private Set<String> saved;
 	
 	public TransactionInfo(UUID id,
 			BRCacheTransactionConfig cacheTransactionConfig){
@@ -46,7 +49,7 @@ public class TransactionInfo implements Serializable {
 		this.locked                 = new HashSet<String>();
 		this.managed                = new HashSet<String>();
 		this.times                  = new HashMap<String, Long>();
-		this.saved    				= new HashMap<String, EntryCache>();
+		this.saved    				= new HashSet<String>();
 		
 		this.entities = 
 				new Cache(
@@ -256,12 +259,18 @@ public class TransactionInfo implements Serializable {
 		saved.clear();
 
 		for(String key: this.updated){
-			InputStream in = cache.getStream(key);
+			CacheInputStream in = (CacheInputStream) cache.getStream(key);
 			if(in != null){
-				saved.put(key, new EntryCache(this.getBytes(in), -1));
+				String orgKey = ORIGIN_PREFIX + key;
+				long time     = in.getTimeToLiveRemaining();
+				if(time > 0){
+					this.entities.putStream(orgKey, 0, in);
+					this.times.put(orgKey, time);
+					saved.add(key);
+				}
 			}
 			else{
-				saved.put(key, null);
+				saved.add(key);
 			}
 		}
 		
@@ -269,13 +278,16 @@ public class TransactionInfo implements Serializable {
     
 	public void rollback(StreamCache cache) throws StorageException, RecoverException {
 		
-		for(String key: this.saved.keySet()){
-			EntryCache entity = saved.get(key);
-			if(entity == null){
+		for(String key: this.saved){
+			
+			String orgKey = ORIGIN_PREFIX + key;
+			InputStream in = this.entities.getStream(orgKey);
+			
+			if(in == null){
 				cache.remove(key);
 			}
 			else{
-				cache.putStream(key, entity.getMaxAlive(), new ByteArrayInputStream(entity.getData()));
+				cache.putStream(key, this.times.get(orgKey), in);
 			}
 		}
 		
@@ -333,11 +345,12 @@ public class TransactionInfo implements Serializable {
     		return entry;
     	}
     	else{
-    		InputStream dta = this.getSharedEntity(manager, cache, key, lock, time);
+    		CacheInputStream dta = (CacheInputStream) this.getSharedEntity(manager, cache, key, lock, time);
 			this.managed.add(key);
 			
 			if(dta != null){
 				this.entities.putStream(key, 0, dta);
+				this.times.put(key, dta.getTimeToLiveRemaining());
 				return this.entities.getStream(key);
 			}
 			else
