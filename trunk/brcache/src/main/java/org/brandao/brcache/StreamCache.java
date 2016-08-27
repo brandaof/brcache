@@ -307,6 +307,9 @@ public abstract class StreamCache
             		return null;
             	}
             	
+            	map.setMostRecentTime(System.currentTimeMillis());
+            	this.dataMap.replace(key, map, map);
+            	
                 Block[] segments = new Block[map.getSegments()];
                 Block current    = this.dataList.get(map.getFirstSegment());
                 int i            = 0;

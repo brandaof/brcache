@@ -56,6 +56,34 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
     	}
     }
     
+    public boolean replaceValue(List<T> values, TreeNode<T> node, T oldValue, T value){
+    	synchronized(values){
+    		T old = node.getValue(values);
+    		if(old != null && old.equals(value)){
+	    		node.setValue(values, value);
+	    		return true;
+    		}
+    		else{
+    			return false;
+    		}
+    	}
+    	
+    }
+
+    public boolean replaceValue(List<T> values, TreeNode<T> node, T value){
+    	synchronized(values){
+    		T old = node.getValue(values);
+    		if(old != null){
+	    		node.setValue(values, value);
+	    		return true;
+    		}
+    		else{
+    			return false;
+    		}
+    	}
+    	
+    }
+    
     public T removeValue(List<T> values, TreeNode<T> node) {
     	synchronized(values){
     		T old = node.getValue(values);
