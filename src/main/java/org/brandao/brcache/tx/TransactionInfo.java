@@ -36,7 +36,7 @@ public class TransactionInfo implements Serializable {
 	
 	private Set<String> managed;
 	
-	private Map<String, Long> times;
+	private Map<String, Long> cacheItemMetaData;
 	
 	private StreamCache entities;
 	
@@ -65,12 +65,12 @@ public class TransactionInfo implements Serializable {
 	/* métodos de armazenamento */
 	
 	public Object replace(CacheTransactionManager manager, StreamCache cache,
-			String key, Object value, long maxAliveTime, long time) throws StorageException {
+			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException {
 		
 		try{
 			Object o = this.get(manager, cache, key, true, time);
 			if(o != null){
-				this.put(manager, cache, key, value, maxAliveTime, time);
+				this.put(manager, cache, key, value, timeToLive, timeToIdle, time);
 				return true;
 			}
 			else
@@ -86,12 +86,12 @@ public class TransactionInfo implements Serializable {
 	
 	public boolean replace(CacheTransactionManager manager, StreamCache cache,
 			String key, Object oldValue, 
-			Object newValue, long maxAliveTime, long time) throws StorageException {
+			Object newValue, long timeToLive, long timeToIdle, long time) throws StorageException {
 		
 		try{
 			Object o = this.get(manager, cache, key, true, time);
 			if(o != null && o.equals(oldValue)){
-				this.put(manager, cache, key, newValue, maxAliveTime, time);
+				this.put(manager, cache, key, newValue, timeToLive, timeToIdle, time);
 				return true;
 			}
 			else
@@ -106,13 +106,13 @@ public class TransactionInfo implements Serializable {
 	}
 	
 	public Object putIfAbsent(CacheTransactionManager manager, StreamCache cache,
-			String key, Object value, long maxAliveTime, long time) throws StorageException {
+			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException {
 		
 		try{
 			Object o = this.get(manager, cache, key, true, time);
 			
 			if(o == null){
-				this.put(manager, cache, key, value, maxAliveTime, time);
+				this.put(manager, cache, key, value, timeToLive, timeToIdle, time);
 			}
 			
 			return o;
@@ -126,7 +126,7 @@ public class TransactionInfo implements Serializable {
 	}
 	
 	public void put(CacheTransactionManager manager, StreamCache cache,
-			String key, Object value, long maxAliveTime, long time) throws StorageException {
+			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException {
 		try{
 			ByteArrayOutputStream bout = new ByteArrayOutputStream();
 			ObjectOutputStream oout = new ObjectOutputStream(bout);
@@ -134,7 +134,7 @@ public class TransactionInfo implements Serializable {
 			oout.flush();
 			oout.close();
 			this.putStream(
-				manager, cache, key, maxAliveTime, 
+				manager, cache, key, timeToLive, timeToIdle, 
 				new ByteArrayInputStream(bout.toByteArray()), time);
 		}
 		catch(CacheException e){
@@ -146,7 +146,7 @@ public class TransactionInfo implements Serializable {
 	}
 	
     public void putStream(CacheTransactionManager manager, StreamCache cache, 
-    		String key, long maxAliveTime, InputStream inputData, long time) 
+    		String key, long timeToLive, long timeToIdle, InputStream inputData, long time) 
     		throws StorageException {
 
     	try{
@@ -157,7 +157,7 @@ public class TransactionInfo implements Serializable {
 						this.getBytes(inputData);
 			*/
 			this.lock(manager, key, time);
-			this.entities.putStream(key, 0, inputData);
+			this.entities.putStream(key, 0, 0, inputData);
 			this.managed.add(key);
 			this.updated.add(key);
 			this.times.put(key, maxAliveTime);
