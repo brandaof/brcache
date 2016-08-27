@@ -39,6 +39,8 @@ public interface TreeNodes<T> extends Serializable{
     T getValue(List<T> values, TreeNode<T> node);
     
     T setValue(List<T> values, TreeNode<T> node, T value);
+
+    boolean replaceValue(List<T> values, TreeNode<T> node, T oldValue, T value);
     
     T removeValue(List<T> values, TreeNode<T> node);
     
