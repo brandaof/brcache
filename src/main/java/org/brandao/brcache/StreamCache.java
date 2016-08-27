@@ -241,11 +241,12 @@ public abstract class StreamCache
     /**
 	 * Associa o fluxo de bytes do valor à chave.
 	 * @param key chave associada ao fluxo.
-	 * @param maxAliveTime tempo máximo de vida do valor no cache.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
      * @param inputData fluxo de bytes do valor.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    public void putStream(String key, long maxAliveTime, InputStream inputData) throws StorageException{
+    public void putStream(String key, long timeToLive, long timeToIdle, InputStream inputData) throws StorageException{
         
         if(key.length() > this.maxLengthKey)
             throw new StorageException(CacheErrors.ERROR_1008);
@@ -258,8 +259,8 @@ public abstract class StreamCache
             map.setId(this.modCount++);
             map.setCreationTime(System.currentTimeMillis());
             map.setMostRecentTime(map.getCreationTime());
-            map.setTimeToIdle(0);
-            map.setTimeToLive(maxAliveTime);
+            map.setTimeToIdle(timeToIdle);
+            map.setTimeToLive(timeToLive);
             
             this.putData(map, inputData);
             oldMap = this.dataMap.put(key, map);
@@ -302,13 +303,19 @@ public abstract class StreamCache
             
             if(map != null){
             	
+            	//Verifica se o item já expirou
             	if(map.isDead()){
+            		//Se expirou, remove do cache e retorna null.
             		this.remove(key, map);
             		return null;
             	}
             	
-            	map.setMostRecentTime(System.currentTimeMillis());
-            	this.dataMap.replace(key, map, map);
+            	//Se timeToIdle foi definido, é atualizado o tempo do último acesso.
+            	if(map.getTimeToIdle() > 0){
+	            	map.setMostRecentTime(System.currentTimeMillis());
+	            	//a instância no momento do replace porde não ser a mesma passada em oldElement.
+	            	this.dataMap.replace(key, map, map);
+            	}
             	
                 Block[] segments = new Block[map.getSegments()];
                 Block current    = this.dataList.get(map.getFirstSegment());
