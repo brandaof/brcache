@@ -145,4 +145,8 @@ public class CacheInputStream extends InputStream{
     	return map.getTimeToLiveRemaining();
     }
     
+    public long getTimeToIdleRemaining(){
+    	return map.getTimeToIdleRemaining();
+    }
+    
 }

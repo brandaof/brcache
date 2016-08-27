@@ -36,7 +36,7 @@ public class TransactionInfo implements Serializable {
 	
 	private Set<String> managed;
 	
-	private Map<String, Long> cacheItemMetaData;
+	private Map<String, CacheItemMetadata> cacheItemMetadata;
 	
 	private StreamCache entities;
 	
@@ -44,12 +44,12 @@ public class TransactionInfo implements Serializable {
 	
 	public TransactionInfo(UUID id,
 			BRCacheTransactionConfig cacheTransactionConfig){
-		this.id                     = id;
-		this.updated                = new HashSet<String>();
-		this.locked                 = new HashSet<String>();
-		this.managed                = new HashSet<String>();
-		this.times                  = new HashMap<String, Long>();
-		this.saved    				= new HashSet<String>();
+		this.id                = id;
+		this.updated           = new HashSet<String>();
+		this.locked            = new HashSet<String>();
+		this.managed           = new HashSet<String>();
+		this.cacheItemMetadata = new HashMap<String, CacheItemMetadata>();
+		this.saved             =  new HashSet<String>();
 		
 		this.entities = 
 				new Cache(
@@ -150,17 +150,11 @@ public class TransactionInfo implements Serializable {
     		throws StorageException {
 
     	try{
-    		/*
-			byte[] dta = 
-					inputData == null? 
-						null : 
-						this.getBytes(inputData);
-			*/
 			this.lock(manager, key, time);
 			this.entities.putStream(key, 0, 0, inputData);
 			this.managed.add(key);
 			this.updated.add(key);
-			this.times.put(key, maxAliveTime);
+			this.cacheItemMetadata.put(key, new CacheItemMetadata(timeToLive, timeToIdle));
     	}
 		catch(CacheException e){
 			throw new StorageException(e, e.getError(), e.getParams());
@@ -266,8 +260,12 @@ public class TransactionInfo implements Serializable {
 				long timeToLive = in.getTimeToLiveRemaining();
 				long time       = in.getTimeToLive();
 				
-				this.entities.putStream(orgKey, 0, in); //Se for usar o cache raiz tem que colocar o tempo do timeout da transação.
-				this.times.put(orgKey, time > 0? timeToLive : time);
+				//Se for usar o cache raiz tem que colocar o tempo do timeout da transação.
+				this.entities.putStream(orgKey, 0, 0, in); 
+				this.cacheItemMetadata.put(orgKey, 
+						new CacheItemMetadata(
+							in.getTimeToLiveRemaining(), 
+							in.getTimeToIdle()));
 				saved.add(key);
 			}
 			else{

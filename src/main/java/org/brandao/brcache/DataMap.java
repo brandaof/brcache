@@ -61,6 +61,17 @@ class DataMap implements Serializable{
 	    	return timeToLiveRemaining;
     	}
     }
+
+    public long getTimeToIdleRemaining(){
+    	if(this.timeToIdle == 0){
+    		return 0;
+    	}
+    	else{
+	    	long currentTime         = System.currentTimeMillis();
+	    	long timeToIdleRemaining = mostRecentTime + timeToIdle - currentTime;
+	    	return timeToIdleRemaining;
+    	}
+    }
     
     public boolean isDead(){
     	long currentTime = System.currentTimeMillis();
