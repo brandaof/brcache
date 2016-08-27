@@ -52,7 +52,19 @@ class DataMap implements Serializable{
     }
 
     public long getTimeToLiveRemaining(){
-    	return timeToLive == 0? 0 : creationTime + timeToLive - System.currentTimeMillis();
+    	if(this.timeToLive == 0){
+    		return 0;
+    	}
+    	else{
+	    	long currentTime         = System.currentTimeMillis();
+	    	long timeToLiveRemaining = creationTime + timeToLive - currentTime;
+	    	return timeToLiveRemaining;
+    	}
+    }
+    
+    public boolean isDead(){
+    	long currentTime = System.currentTimeMillis();
+    	return currentTime > this.getExpirationTime();
     }
     
 	public long getId() {

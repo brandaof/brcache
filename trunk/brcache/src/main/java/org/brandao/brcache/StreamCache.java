@@ -252,7 +252,9 @@ public abstract class StreamCache
         
         DataMap oldMap  = null;
         DataMap map     = new DataMap();
+        
         try{
+        	
             map.setId(this.modCount++);
             map.setCreationTime(System.currentTimeMillis());
             map.setMostRecentTime(map.getCreationTime());
@@ -262,6 +264,7 @@ public abstract class StreamCache
             this.putData(map, inputData);
             oldMap = this.dataMap.put(key, map);
             this.countWrite++;
+            
         }
         catch(Throwable e){
         	try{
@@ -299,9 +302,7 @@ public abstract class StreamCache
             
             if(map != null){
             	
-            	long currentTime = System.currentTimeMillis();
-            	
-            	if(currentTime > map.getExpirationTime()){
+            	if(map.isDead()){
             		this.remove(key, map);
             		return null;
             	}
