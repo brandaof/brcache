@@ -131,9 +131,7 @@ public class TreeMap<K,T>
             return this.put(key, next, value);
         }
         else{
-            T oldValue = node.getValue(this.values);
-            node.setValue(this.values, value);
-            return oldValue;
+        	return this.treeNodes.setValue(this.values, node, value);
         }
     }
     
@@ -147,7 +145,7 @@ public class TreeMap<K,T>
                 return this.get(key, next);
         }
         else
-            return node.getValue(this.values);
+            return this.treeNodes.getValue(this.values, node);
         
     }
 
@@ -161,14 +159,12 @@ public class TreeMap<K,T>
                 return (T) get(key, next);
         }
         else{
-            T value = node.getValue(this.values);
-            node.removeValue(this.values);
-            return value;
+        	return this.treeNodes.removeValue(this.values, node);
         }
         
     }
     
-    public synchronized T put(K key, T element){
+    public T put(K key, T element){
     	TreeMapKey k = this.treeNodes.getKey(key);
         TreeNode<T> root = this.treeNodes.getFirst(this.nodes);
         return put(k, root, element);

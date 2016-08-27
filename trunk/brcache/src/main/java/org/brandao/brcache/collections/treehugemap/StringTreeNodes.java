@@ -42,6 +42,28 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
         return k.pos == k.limit;
     }
 
+    public T getValue(List<T> values, TreeNode<T> node){
+    	synchronized(values){
+    		return node.getValue(values);
+    	}
+    }
+    
+    public T setValue(List<T> values, TreeNode<T> node, T value){
+    	synchronized(values){
+    		T old = node.getValue(values);
+    		node.setValue(values, value);
+    		return old;
+    	}
+    }
+    
+    public T removeValue(List<T> values, TreeNode<T> node) {
+    	synchronized(values){
+    		T old = node.getValue(values);
+    		node.removeValue(values);
+    		return old;
+    	}
+    }
+    
     public TreeNode<T> getNext(List<TreeNode<T>> nodes, TreeMapKey key, TreeNode<T> node, boolean read) {
         StringTreeMapKey k = (StringTreeMapKey)key;
         

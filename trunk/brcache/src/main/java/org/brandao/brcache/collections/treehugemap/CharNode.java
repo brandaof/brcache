@@ -108,25 +108,21 @@ public class CharNode<T> implements TreeNode<T>{
 
     public void setValue(List<T> values, T value) {
         if(this.valueId == -1){
-            synchronized(values){
-                if(this.valueId == -1){
-                    values.add(value);
-                    this.valueId = values.size() - 1;
-                }
-                else
-                    values.set((int)this.valueId, value);
+            if(this.valueId == -1){
+                values.add(value);
+                this.valueId = values.size() - 1;
             }
+            else
+                values.set((int)this.valueId, value);
         }
         else
             values.set((int)this.valueId, value);
     }
 
     public void removeValue(List<T> values) {
-    	synchronized(values){
-	        if(this.valueId != -1){
-	            values.set((int)this.valueId, null);
-	        }
-    	}
+        if(this.valueId != -1){
+            values.set((int)this.valueId, null);
+        }
     }
 
     public T getValue(List<T> values) {
