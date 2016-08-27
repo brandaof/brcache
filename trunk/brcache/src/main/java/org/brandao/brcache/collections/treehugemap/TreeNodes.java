@@ -43,5 +43,7 @@ public interface TreeNodes<T> extends Serializable{
     boolean replaceValue(List<T> values, TreeNode<T> node, T oldValue, T value);
     
     T removeValue(List<T> values, TreeNode<T> node);
+ 
+    boolean removeValue(List<T> values, TreeNode<T> node, T oldValue);
     
 }

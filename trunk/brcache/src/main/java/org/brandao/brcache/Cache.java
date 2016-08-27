@@ -133,18 +133,19 @@ public class Cache
      * Substitui o valor associado à chave somente se ele existir.
      * @param key chave associada ao valor.
      * @param value valor para ser associado à chave.
-     * @param maxAliveTime tempo máximo de vida do valor no cache.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
      * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
 	public boolean replace(String key, Object value, 
-			long maxAliveTime) throws StorageException {
+			long timeToLive, long timeToIdle) throws StorageException {
 		
 		Serializable refLock = this.locks.lock(key);
 		try{
 			Object o = this.get(key);
 			if(o != null){
-				this.put(key, value, maxAliveTime);
+				this.put(key, value, timeToLive, timeToIdle);
 				return true;
 			}
 			else
@@ -168,18 +169,19 @@ public class Cache
 	 * @param key chave associada ao valor.
 	 * @param oldValue valor esperado associado à chave.
 	 * @param newValue valor para ser associado à chave.
-	 * @param maxAliveTime tempo máximo de vida do valor no cache.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
 	 * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
 	public boolean replace(String key, Object oldValue, 
-			Object newValue, long maxAliveTime) throws StorageException {
+			Object newValue, long timeToLive, long timeToIdle) throws StorageException {
 		
 		Serializable refLock = this.locks.lock(key);
 		try{
 			Object o = this.get(key);
 			if(o != null && o.equals(oldValue)){
-				this.put(key, newValue, maxAliveTime);
+				this.put(key, newValue, timeToLive, timeToIdle);
 				return true;
 			}
 			else
@@ -202,18 +204,19 @@ public class Cache
 	 * Associa o valor à chave somente se a chave não estiver associada a um valor.
 	 * @param key chave associada ao valor.
 	 * @param value valor para ser associado à chave.
-	 * @param maxAliveTime tempo máximo de vida do valor no cache.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
 	 * @return valor anterior associado à chave.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
 	public Object putIfAbsent(String key, 
-			Object value, long maxAliveTime) throws StorageException {
+			Object value, long timeToLive, long timeToIdle) throws StorageException {
 		
 		Serializable refLock = this.locks.lock(key);
 		try{
 			Object o = this.get(key);
 			if(o == null){
-				this.put(key, value, maxAliveTime);
+				this.put(key, value, timeToLive, timeToIdle);
 			}
 			
 			return o;
@@ -235,16 +238,17 @@ public class Cache
 	 * Associa o valor à chave.
 	 * @param key chave associada ao valor.
 	 * @param value valor para ser associado à chave.
-	 * @param maxAliveTime tempo máximo de vida do valor no cache.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
-	public void put(String key, Object value, long maxAliveTime) throws StorageException {
+	public void put(String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
 		try{
 			ByteArrayOutputStream bout = new ByteArrayOutputStream();
 			ObjectOutputStream oout = new ObjectOutputStream(bout);
 			oout.writeObject(value);
 			oout.flush();
-			this.putStream(key, maxAliveTime, new ByteArrayInputStream(bout.toByteArray()));
+			this.putStream(key, timeToLive, timeToIdle, new ByteArrayInputStream(bout.toByteArray()));
 		}
 		catch(StorageException e){
 			throw e;
