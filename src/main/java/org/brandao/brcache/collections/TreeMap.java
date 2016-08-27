@@ -167,10 +167,25 @@ public class TreeMap<K,T>
             if(next == null)
                 return null;
             else
-                return (T) get(key, next);
+                return (T)remove(key, next);
         }
         else{
         	return this.treeNodes.removeValue(this.values, node);
+        }
+        
+    }
+
+    private boolean remove(TreeMapKey key, TreeNode<T> node, T oldValue){
+        
+        if(!this.treeNodes.isEquals(key, node)){
+            TreeNode<T> next = this.treeNodes.getNext(this.nodes, key, node, true);
+            if(next == null)
+                return false;
+            else
+                return remove(key, next, oldValue);
+        }
+        else{
+        	return this.treeNodes.removeValue(this.values, node, oldValue);
         }
         
     }
@@ -230,6 +245,15 @@ public class TreeMap<K,T>
             return this.remove(k, root);
     }
 
+    public boolean remove(Object key, T oldValue) {
+    	TreeMapKey k = this.treeNodes.getKey(key);
+        TreeNode<T> root = this.treeNodes.getFirst(this.nodes);
+        if(root == null)
+            return false;
+        else
+            return this.remove(k, root, oldValue);
+    }
+    
     public void putAll(Map<? extends K, ? extends T> m) {
         for(K key: m.keySet())
             this.put(key, m.get(key));

@@ -376,7 +376,7 @@ public abstract class StreamCache
     }
     
     private void remove(String key, DataMap data){
-    	this.dataMap.put(key, null);                
+    	this.dataMap.remove(key, data);
     	this.releaseSegments(data);
         countRemoved++;
     }

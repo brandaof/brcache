@@ -91,6 +91,18 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
     		return old;
     	}
     }
+
+    public boolean removeValue(List<T> values, TreeNode<T> node, T oldValue) {
+    	synchronized(values){
+    		T old = node.getValue(values);
+    		if(old != null && old.equals(oldValue)){
+        		node.removeValue(values);
+        		return true;
+    		}
+    		else
+    			return false;
+    	}
+    }
     
     public TreeNode<T> getNext(List<TreeNode<T>> nodes, TreeMapKey key, TreeNode<T> node, boolean read) {
         StringTreeMapKey k = (StringTreeMapKey)key;
