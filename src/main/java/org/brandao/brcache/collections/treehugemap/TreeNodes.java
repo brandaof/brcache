@@ -36,4 +36,10 @@ public interface TreeNodes<T> extends Serializable{
 
     TreeNode<T> getFirst(List<TreeNode<T>> nodes);
     
+    T getValue(List<T> values, TreeNode<T> node);
+    
+    T setValue(List<T> values, TreeNode<T> node, T value);
+    
+    T removeValue(List<T> values, TreeNode<T> node);
+    
 }
