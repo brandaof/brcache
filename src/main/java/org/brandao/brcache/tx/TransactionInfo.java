@@ -261,13 +261,14 @@ public class TransactionInfo implements Serializable {
 		for(String key: this.updated){
 			CacheInputStream in = (CacheInputStream) cache.getStream(key);
 			if(in != null){
+				
 				String orgKey = ORIGIN_PREFIX + key;
-				long time     = in.getTimeToLiveRemaining();
-				if(time > 0){
-					this.entities.putStream(orgKey, 0, in);
-					this.times.put(orgKey, time);
-					saved.add(key);
-				}
+				long timeToLive = in.getTimeToLiveRemaining();
+				long time       = in.getTimeToLive();
+				
+				this.entities.putStream(orgKey, 0, in); //Se for usar o cache raiz tem que colocar o tempo do timeout da transação.
+				this.times.put(orgKey, time > 0? timeToLive : time);
+				saved.add(key);
 			}
 			else{
 				saved.add(key);
