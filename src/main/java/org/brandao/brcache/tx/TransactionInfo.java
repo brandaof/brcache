@@ -19,6 +19,7 @@ import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.CacheException;
 import org.brandao.brcache.CacheInputStream;
 import org.brandao.brcache.ItemCacheInputStream;
+import org.brandao.brcache.ItemCacheMetadata;
 import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;

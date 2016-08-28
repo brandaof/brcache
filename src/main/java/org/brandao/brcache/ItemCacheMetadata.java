@@ -1,8 +1,7 @@
-package org.brandao.brcache.tx;
+package org.brandao.brcache;
 
 import java.io.Serializable;
 
-import org.brandao.brcache.CacheInputStream;
 
 public class ItemCacheMetadata implements Serializable{
 

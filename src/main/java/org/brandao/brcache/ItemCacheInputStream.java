@@ -3,7 +3,6 @@ package org.brandao.brcache;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.brandao.brcache.tx.ItemCacheMetadata;
 
 /**
  * Permite gera
