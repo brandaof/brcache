@@ -5,6 +5,11 @@ import java.io.InputStream;
 
 import org.brandao.brcache.tx.ItemCacheMetadata;
 
+/**
+ * Permite gera
+ * @author cliente
+ *
+ */
 public class ItemCacheInputStream 
 	extends CacheInputStream{
 
