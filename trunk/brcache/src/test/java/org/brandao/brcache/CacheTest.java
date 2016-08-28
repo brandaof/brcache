@@ -14,27 +14,27 @@ public class CacheTest extends TestCase{
 	
 	public void testReplace() throws StorageException{
 		Cache cache = new Cache();
-		TestCase.assertFalse(cache.replace(KEY, VALUE, 0));
+		TestCase.assertFalse(cache.replace(KEY, VALUE, 0, 0));
 	}
 
 	public void testReplaceSuccess() throws StorageException, RecoverException{
 		Cache cache = new Cache();
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
-		TestCase.assertTrue(cache.replace(KEY, VALUE2, 0));
+		TestCase.assertTrue(cache.replace(KEY, VALUE2, 0, 0));
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 	}
 
 	public void testReplaceExact() throws StorageException{
 		Cache cache = new Cache();
-		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0));
+		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0, 0));
 	}
 
 	public void testReplaceExactSuccess() throws StorageException, RecoverException{
 		Cache cache = new Cache();
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
-		TestCase.assertTrue(cache.replace(KEY, VALUE, VALUE2, 0));
+		TestCase.assertTrue(cache.replace(KEY, VALUE, VALUE2, 0, 0));
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 	}
 
@@ -42,14 +42,14 @@ public class CacheTest extends TestCase{
 	
 	public void testputIfAbsent() throws StorageException, RecoverException{
 		Cache cache = new Cache();
-		TestCase.assertNull(cache.putIfAbsent(KEY, VALUE, 0));
+		TestCase.assertNull(cache.putIfAbsent(KEY, VALUE, 0, 0));
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
 	public void testputIfAbsentExistValue() throws StorageException, RecoverException{
 		Cache cache = new Cache();
-		cache.put(KEY, VALUE, 0);
-		TestCase.assertEquals(VALUE, cache.putIfAbsent(KEY, VALUE2, 0));
+		cache.put(KEY, VALUE, 0, 0);
+		TestCase.assertEquals(VALUE, cache.putIfAbsent(KEY, VALUE2, 0, 0));
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
@@ -58,7 +58,7 @@ public class CacheTest extends TestCase{
 	public void testPut() throws StorageException, RecoverException{
 		Cache cache = new Cache();
 		TestCase.assertNull((String)cache.get(KEY));
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
@@ -67,16 +67,16 @@ public class CacheTest extends TestCase{
 	public void testGet() throws StorageException, RecoverException{
 		Cache cache = new Cache();
 		TestCase.assertNull((String)cache.get(KEY));
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
 	public void testGetOverride() throws StorageException, RecoverException{
 		Cache cache = new Cache();
 		TestCase.assertNull((String)cache.get(KEY));
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
-		cache.put(KEY, VALUE2, 0);
+		cache.put(KEY, VALUE2, 0, 0);
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 	}
 
@@ -88,7 +88,7 @@ public class CacheTest extends TestCase{
 		TestCase.assertNull((String)cache.get(KEY));
 		TestCase.assertFalse(cache.remove(KEY, VALUE));
 		
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		
@@ -102,7 +102,7 @@ public class CacheTest extends TestCase{
 		TestCase.assertNull((String)cache.get(KEY));
 		TestCase.assertFalse(cache.remove(KEY));
 		
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		
