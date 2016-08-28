@@ -32,8 +32,11 @@ public class TransactionInfo implements Serializable {
 	
 	private Set<String> updated;
 
-	private Set<String> locked;
+	//private Set<String> locked;
 	
+	/**
+	 * Contém as chaves gerenciadas pela transação.
+	 */
 	private Set<String> managed;
 	
 	private Map<String, CacheItemMetadata> cacheItemMetadata;
@@ -46,7 +49,7 @@ public class TransactionInfo implements Serializable {
 			BRCacheTransactionConfig cacheTransactionConfig){
 		this.id                = id;
 		this.updated           = new HashSet<String>();
-		this.locked            = new HashSet<String>();
+		//this.locked            = new HashSet<String>();
 		this.managed           = new HashSet<String>();
 		this.cacheItemMetadata = new HashMap<String, CacheItemMetadata>();
 		this.saved             =  new HashSet<String>();
@@ -150,9 +153,8 @@ public class TransactionInfo implements Serializable {
     		throws StorageException {
 
     	try{
-			this.lock(manager, key, time);
+    		this.manageItem(manager, cache, key, time);
 			this.entities.putStream(key, 0, 0, inputData);
-			this.managed.add(key);
 			this.updated.add(key);
 			this.cacheItemMetadata.put(key, new CacheItemMetadata(timeToLive, timeToIdle));
     	}
@@ -227,14 +229,12 @@ public class TransactionInfo implements Serializable {
     public boolean remove(CacheTransactionManager manager, StreamCache cache,
     		String key, long time) throws StorageException{       
     	try{
-			this.lock(manager, key, time);
+    		this.manageItem(manager, cache, key, time);
 			
-    		if(this.managed.contains(key)){
-    			this.updated.add(key);
+    		if(this.updated.contains(key)){
     			return this.entities.remove(key);
     		}
     		else{
-    			this.managed.add(key);
     			this.updated.add(key);
     			return cache.getStream(key) != null;
     		}
@@ -254,18 +254,15 @@ public class TransactionInfo implements Serializable {
 
 		for(String key: this.updated){
 			CacheInputStream in = (CacheInputStream) cache.getStream(key);
+			
 			if(in != null){
-				
 				String orgKey = ORIGIN_PREFIX + key;
-				long timeToLive = in.getTimeToLiveRemaining();
-				long time       = in.getTimeToLive();
-				
 				//Se for usar o cache raiz tem que colocar o tempo do timeout da transação.
 				this.entities.putStream(orgKey, 0, 0, in); 
 				this.cacheItemMetadata.put(orgKey, 
 						new CacheItemMetadata(
 							in.getTimeToLiveRemaining(), 
-							in.getTimeToIdle()));
+							in.getTimeToIdleRemaining()));
 				saved.add(key);
 			}
 			else{
@@ -344,11 +341,11 @@ public class TransactionInfo implements Serializable {
     		return entry;
     	}
     	else{
-    		CacheInputStream dta = (CacheInputStream) this.getSharedEntity(manager, cache, key, lock, time);
-			this.managed.add(key);
+			this.manageItem(manager, cache, key, time);
+    		CacheInputStream dta = (CacheInputStream) this.getSharedEntity(manager, cache, key, lock);
 			
 			if(dta != null){
-				this.entities.putStream(key, 0, dta);
+				this.entities.putStream(key, 0, 0, dta);
 				this.times.put(key, dta.getTimeToLiveRemaining());
 				return this.entities.getStream(key);
 			}
@@ -357,9 +354,9 @@ public class TransactionInfo implements Serializable {
     	}
     }
     
-    private void lock(CacheTransactionManager manager, String key, long time) throws TransactionException{
+    private void manageItem(CacheTransactionManager manager, StreamCache cache, String key, long time){
     	
-    	if(this.locked.contains(key)){
+    	if(this.managed.contains(key)){
     		return;
     	}
     	
@@ -370,19 +367,15 @@ public class TransactionInfo implements Serializable {
 			manager.tryLock(this.id, key, time, TimeUnit.MILLISECONDS);
     	}
     	
-    	this.locked.add(key);
+    	this.managed.add(key);
     }
+
     
     private InputStream getSharedEntity(CacheTransactionManager manager, StreamCache cache,
-    		String key, boolean lock, long time) 
+    		String key, boolean lock) 
     		throws IOException, TransactionException, RecoverException{
     	
-		if(lock){
-			this.lock(manager, key, time);
-		}
-		
 		InputStream in = cache.getStream(key);
-		
 		return in;
     }
     

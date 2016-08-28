@@ -310,7 +310,7 @@ public abstract class StreamCache
             		return null;
             	}
             	
-            	//Se timeToIdle foi definido, é atualizado o tempo do último acesso.
+            	//Se timeToIdle foi definido, é atualizado o horário do último acesso.
             	if(map.getTimeToIdle() > 0){
 	            	map.setMostRecentTime(System.currentTimeMillis());
 	            	//a instância no momento do replace porde não ser a mesma passada em oldElement.
