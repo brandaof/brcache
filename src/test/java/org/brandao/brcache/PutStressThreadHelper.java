@@ -24,7 +24,7 @@ public class PutStressThreadHelper extends Thread{
 		        long k = this.key.getAndIncrement();
 		        String key = String.valueOf(k);
 		        String value = key + this.value;
-		        cache.put(key, value, 0);
+		        cache.put(key, value, 0, 0);
 			}
 			catch(Throwable e){
 				this.error = e;

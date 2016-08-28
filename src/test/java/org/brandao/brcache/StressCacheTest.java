@@ -94,7 +94,7 @@ public class StressCacheTest extends TestCase{
                                 //int rv = r.nextInt(200000);
                                 String key = String.valueOf(rv)/* + "- INDEX AJBK - "*/;
                                 String value = key + text;
-                                cache.put(key, value, 0);
+                                cache.put(key, value, 0, 0);
                             }
                             catch(Exception e){
                                 e.printStackTrace();
@@ -201,7 +201,7 @@ public class StressCacheTest extends TestCase{
             try{
                 String key = String.valueOf(i) + "- INDEX AJBK - ";
                 String value = key + text;
-                cache.put(key, value, 0);
+                cache.put(key, value, 0, 0);
             }
             catch(Exception e){
                 e.printStackTrace();
