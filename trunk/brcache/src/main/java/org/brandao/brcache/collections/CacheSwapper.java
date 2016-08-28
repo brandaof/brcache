@@ -69,7 +69,7 @@ public class CacheSwapper
     }
 
     public void sendItem(long index, Object item) throws StorageException {
-        cache.put(this.id + ":" + index, item, this.getMaxalive());
+        cache.put(this.id + ":" + index, item, this.getMaxalive(), 0);
     }
 
     public Entry<?> getItem(long index) {

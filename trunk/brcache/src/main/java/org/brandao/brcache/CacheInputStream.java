@@ -185,4 +185,8 @@ public class CacheInputStream extends InputStream{
     	return this.map.getFlag();
     }
     
+    public boolean isOverrideMetadata(){
+    	return false;
+    }
+    
 }

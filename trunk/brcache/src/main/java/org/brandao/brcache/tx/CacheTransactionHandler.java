@@ -19,20 +19,20 @@ public interface CacheTransactionHandler
 	/* métodos de armazenamento */
 	
 	Object replace(CacheTransactionManager manager, StreamCache cache,
-			String key, Object value, long maxAliveTime, long time) throws StorageException;
+			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException;
 	
 	boolean replace(CacheTransactionManager manager, StreamCache cache,
 			String key, Object oldValue, 
-			Object newValue, long maxAliveTime, long time) throws StorageException;
+			Object newValue, long timeToLive, long timeToIdle, long time) throws StorageException;
 	
 	Object putIfAbsent(CacheTransactionManager manager, StreamCache cache,
-			String key, Object value, long maxAliveTime, long time) throws StorageException;
+			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException;
 	
 	void put(CacheTransactionManager manager, StreamCache cache,
-			String key, Object value, long maxAliveTime, long time) throws StorageException;
+			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException;
 	
     void putStream(CacheTransactionManager manager, StreamCache cache, 
-    		String key, long maxAliveTime, InputStream inputData, long time) 
+    		String key, long timeToLive, long timeToIdle, InputStream inputData, long time) 
     		throws StorageException;
 	
 	/* métodos de coleta*/

@@ -3,6 +3,12 @@ package org.brandao.brcache;
 import java.io.Serializable;
 
 
+/**
+ * Auxilia o registro de itens usando o {@link ItemCacheInputStream}.
+ * 
+ * @author Brandao.
+ *
+ */
 public class ItemCacheMetadata implements Serializable{
 
 	private static final long serialVersionUID = 1059371320140414547L;
