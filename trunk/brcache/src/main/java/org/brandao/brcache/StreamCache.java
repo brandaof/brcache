@@ -248,12 +248,6 @@ public abstract class StreamCache
      */
     public void putStream(String key, long timeToLive, long timeToIdle, 
     		InputStream inputData) throws StorageException{
-    	this.putStream(key, timeToLive, timeToIdle, -1, -1, inputData);
-    }
-    
-    protected void putStream(String key, long timeToLive, long timeToIdle, 
-    		long mostRecentTime, long creationTime, 
-    		InputStream inputData) throws StorageException{
         
         if(key.length() > this.maxLengthKey)
             throw new StorageException(CacheErrors.ERROR_1008);
@@ -262,9 +256,7 @@ public abstract class StreamCache
         DataMap map     = new DataMap();
         
         try{
-        	
-            map.setId(this.modCount++);
-            
+        	//ItemCacheInputStream permite manipular além dos dados os metadados do item.
             if(inputData instanceof ItemCacheInputStream){
             	ItemCacheInputStream input = (ItemCacheInputStream)inputData;
             	DataMap itemMetadata = input.getMap();
@@ -274,21 +266,31 @@ public abstract class StreamCache
                 map.setTimeToIdle(itemMetadata.getTimeToIdle());
                 map.setTimeToLive(itemMetadata.getTimeToLive());
                 
+            	//o cache transacional pode tentar restaurar um item já expirado.
+                //Nesse caso, tem que remove-lo. 
+                //Somente será removido se o item ainda for o mesmo gerenciado pela transação.
                 if(map.isDead()){
-                	
+                	this.remove(key, map);
+                	return;
                 }
+                
             }
             else{
+            	//Gera os metadados do item.
 	            map.setCreationTime(System.currentTimeMillis());
 	            map.setMostRecentTime(map.getCreationTime());
 	            map.setTimeToIdle(timeToIdle);
 	            map.setTimeToLive(timeToLive);
             }
             
+            //Toda item inserido tem que ter uma nova id. Mesmo que ele exista.
+            map.setId(this.modCount++);
+            //Registra os dados no buffer de dados.
             this.putData(map, inputData);
+            //Faz a indexação do item e retorna o índice atual, caso exista.
             oldMap = this.dataMap.put(key, map);
-            this.countWrite++;
             
+            this.countWrite++;
         }
         catch(Throwable e){
         	try{
@@ -399,9 +401,10 @@ public abstract class StreamCache
     }
     
     private void remove(String key, DataMap data){
-    	this.dataMap.remove(key, data);
-    	this.releaseSegments(data);
-        countRemoved++;
+    	if(this.dataMap.remove(key, data)){
+	    	this.releaseSegments(data);
+	        countRemoved++;
+    	}
     }
     
     private void putData(DataMap map, InputStream inputData) throws StorageException{
