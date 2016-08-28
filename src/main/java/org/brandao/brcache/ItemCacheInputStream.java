@@ -5,8 +5,10 @@ import java.io.InputStream;
 
 
 /**
- * Permite gera
- * @author cliente
+ * Representa o fluxo de bytes de um item de um cache 
+ * permitindo manipular seus metadados.
+ * 
+ * @author Brandao.
  *
  */
 public class ItemCacheInputStream 
@@ -36,11 +38,6 @@ public class ItemCacheInputStream
 		this.stream = stream;
 	}
 	
-	public ItemCacheInputStream(StreamCache cache, DataMap map,
-			Block[] dataList) {
-		super(cache, map, dataList);
-	}
-
     @Override
     public int read(byte[] bytes, int i, int i1) throws IOException {
         return this.stream.read(bytes, i, i1);

@@ -14,7 +14,6 @@ import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 import org.brandao.brcache.StreamCache;
-import org.brandao.brcache.SwaperStrategy;
 
 public class CacheTransactionHandlerImp
 	implements CacheTransactionHandler{
@@ -226,33 +225,33 @@ public class CacheTransactionHandlerImp
 	}
 
 	public Object replace(CacheTransactionManager manager, StreamCache cache,
-			String key, Object value, long maxAliveTime, long time)
+			String key, Object value, long timeToLive, long timeToIdle, long time)
 			throws StorageException {
-		return this.transactionInfo.replace(manager, cache, key, value, maxAliveTime, time);
+		return this.transactionInfo.replace(manager, cache, key, value, timeToLive, timeToIdle, time);
 	}
 
 	public boolean replace(CacheTransactionManager manager, StreamCache cache,
-			String key, Object oldValue, Object newValue, long maxAliveTime,
+			String key, Object oldValue, Object newValue, long timeToLive, long timeToIdle,
 			long time) throws StorageException {
-		return this.transactionInfo.replace(manager, cache, key, oldValue, newValue, maxAliveTime, time);
+		return this.transactionInfo.replace(manager, cache, key, oldValue, newValue, timeToLive, timeToIdle, time);
 	}
 
 	public Object putIfAbsent(CacheTransactionManager manager,
-			StreamCache cache, String key, Object value, long maxAliveTime,
+			StreamCache cache, String key, Object value, long timeToLive, long timeToIdle,
 			long time) throws StorageException {
-		return this.transactionInfo.putIfAbsent(manager, cache, key, value, maxAliveTime, time);
+		return this.transactionInfo.putIfAbsent(manager, cache, key, value, timeToLive, timeToIdle, time);
 	}
 
 	public void put(CacheTransactionManager manager, StreamCache cache,
-			String key, Object value, long maxAliveTime, long time)
+			String key, Object value, long timeToLive, long timeToIdle, long time)
 			throws StorageException {
-		this.transactionInfo.put(manager, cache, key, value, maxAliveTime, time);
+		this.transactionInfo.put(manager, cache, key, value, timeToLive, timeToIdle, time);
 	}
 
 	public void putStream(CacheTransactionManager manager, StreamCache cache,
-			String key, long maxAliveTime, InputStream inputData, long time)
+			String key, long timeToLive, long timeToIdle, InputStream inputData, long time)
 			throws StorageException {
-		this.transactionInfo.putStream(manager, cache, key, maxAliveTime, inputData, time);
+		this.transactionInfo.putStream(manager, cache, key, timeToLive, timeToIdle, inputData, time);
 	}
 
 	public Object get(CacheTransactionManager manager, StreamCache cache,

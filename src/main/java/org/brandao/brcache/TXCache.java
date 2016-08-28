@@ -80,24 +80,24 @@ public class TXCache
 		try{
 			replace = CacheTransactionHandler.class.getDeclaredMethod(
 					"replace",	CacheTransactionManager.class, 
-					StreamCache.class, String.class, Object.class, long.class, long.class);
+					StreamCache.class, String.class, Object.class, long.class, long.class, long.class);
 
 			replaceExact = CacheTransactionHandler.class.getDeclaredMethod(
 					"replace", CacheTransactionManager.class, StreamCache.class,
 					String.class, Object.class, 
-					Object.class, long.class, long.class);
+					Object.class, long.class, long.class, long.class);
 
 			putIfAbsent = CacheTransactionHandler.class.getDeclaredMethod(
 					"putIfAbsent", CacheTransactionManager.class, StreamCache.class,
-					String.class, Object.class, long.class, long.class);
+					String.class, Object.class, long.class, long.class, long.class);
 
 			put = CacheTransactionHandler.class.getDeclaredMethod(
 					"put", CacheTransactionManager.class, StreamCache.class,
-					String.class, Object.class, long.class, long.class);
+					String.class, Object.class, long.class, long.class, long.class);
 
 			putStream = CacheTransactionHandler.class.getDeclaredMethod(
 					"putStream", CacheTransactionManager.class, StreamCache.class, 
-		    		String.class, long.class, InputStream.class, long.class);
+		    		String.class, long.class, long.class, InputStream.class, long.class);
 
 			get = CacheTransactionHandler.class.getDeclaredMethod(
 					"get", CacheTransactionManager.class, StreamCache.class,
