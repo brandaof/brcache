@@ -39,16 +39,44 @@ public class CacheInputStream extends InputStream{
     private StreamCache cache;
     
     private byte[] bufByte = new byte[1];
-    
+
+    public CacheInputStream(){
+    	this(null, null, null);
+    }
+
     public CacheInputStream(StreamCache cache, DataMap map, Block[] dataList){
-        this.map = map;
-        this.arrayDataList = dataList;
-        this.currentDataindex = 0;
+        this.map                 = map;
+        this.arrayDataList       = dataList;
+        this.currentDataindex    = 0;
         this.currentSegmentIndex = 0;
-        this.cache = cache;
+        this.cache               = cache;
     }
     
-    @Override
+    public DataMap getMap() {
+		return map;
+	}
+
+	public void setMap(DataMap map) {
+		this.map = map;
+	}
+
+	public Block[] getArrayDataList() {
+		return arrayDataList;
+	}
+
+	public void setArrayDataList(Block[] arrayDataList) {
+		this.arrayDataList = arrayDataList;
+	}
+
+	public StreamCache getCache() {
+		return cache;
+	}
+
+	public void setCache(StreamCache cache) {
+		this.cache = cache;
+	}
+
+	@Override
     public int read(byte[] bytes, int i, int i1) throws IOException {
         return transfer(bytes, i, i1 );
     }
@@ -117,6 +145,10 @@ public class CacheInputStream extends InputStream{
         }
     }
     
+    public long getId(){
+    	return this.map.getId();
+    }
+    
     public long getSize(){
     	return this.map.getLength();
     }
@@ -147,6 +179,10 @@ public class CacheInputStream extends InputStream{
     
     public long getTimeToIdleRemaining(){
     	return map.getTimeToIdleRemaining();
+    }
+
+    public short getFlag(){
+    	return this.map.getFlag();
     }
     
 }

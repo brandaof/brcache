@@ -18,6 +18,7 @@ import org.brandao.brcache.Cache;
 import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.CacheException;
 import org.brandao.brcache.CacheInputStream;
+import org.brandao.brcache.ItemCacheInputStream;
 import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
@@ -39,7 +40,7 @@ public class TransactionInfo implements Serializable {
 	 */
 	private Set<String> managed;
 	
-	private Map<String, CacheItemMetadata> cacheItemMetadata;
+	private Map<String, ItemCacheMetadata> cacheItemMetadata;
 	
 	private StreamCache entities;
 	
@@ -51,7 +52,7 @@ public class TransactionInfo implements Serializable {
 		this.updated           = new HashSet<String>();
 		//this.locked            = new HashSet<String>();
 		this.managed           = new HashSet<String>();
-		this.cacheItemMetadata = new HashMap<String, CacheItemMetadata>();
+		this.cacheItemMetadata = new HashMap<String, ItemCacheMetadata>();
 		this.saved             =  new HashSet<String>();
 		
 		this.entities = 
@@ -156,7 +157,8 @@ public class TransactionInfo implements Serializable {
     		this.manageItem(manager, cache, key, time);
 			this.entities.putStream(key, 0, 0, inputData);
 			this.updated.add(key);
-			this.cacheItemMetadata.put(key, new CacheItemMetadata(timeToLive, timeToIdle));
+			this.cacheItemMetadata.put(key, new ItemCacheMetadata
+					(-1, timeToLive, timeToIdle, -1, -1, -1, -1, (short)-1, -1));
     	}
 		catch(CacheException e){
 			throw new StorageException(e, e.getError(), e.getParams());
@@ -259,10 +261,7 @@ public class TransactionInfo implements Serializable {
 				String orgKey = ORIGIN_PREFIX + key;
 				//Se for usar o cache raiz tem que colocar o tempo do timeout da transação.
 				this.entities.putStream(orgKey, 0, 0, in); 
-				this.cacheItemMetadata.put(orgKey, 
-						new CacheItemMetadata(
-							in.getTimeToLiveRemaining(), 
-							in.getTimeToIdleRemaining()));
+				this.cacheItemMetadata.put(orgKey, new ItemCacheMetadata(in));
 				saved.add(key);
 			}
 			else{
@@ -283,7 +282,19 @@ public class TransactionInfo implements Serializable {
 				cache.remove(key);
 			}
 			else{
-				cache.putStream(key, this.times.get(orgKey), in);
+				ItemCacheMetadata metadata = this.cacheItemMetadata.get(orgKey);
+				ItemCacheInputStream item = 
+						new ItemCacheInputStream(
+							metadata.getId(),
+							metadata.getTimeToLive(), 
+							metadata.getTimeToIdle(),
+							metadata.getCreationTime(), 
+							metadata.getMostRecentTime(), 
+							metadata.getFlag(), 
+							metadata.getSize(), 
+							in
+						);
+				cache.putStream(key, -1, -1, item);
 			}
 		}
 		
@@ -292,14 +303,17 @@ public class TransactionInfo implements Serializable {
 	public void commit(StreamCache cache) throws RecoverException, StorageException {
 		if(!this.updated.isEmpty()){
 			for(String key: this.updated){
-				InputStream entity = this.entities.getStream(key);
+				CacheInputStream entity = (CacheInputStream) this.entities.getStream(key);
 				
 				if(entity == null){
 					cache.remove(key);
 				}
 				else{
-					long time = this.times.get(key);
-					cache.putStream(key, time, entity);
+					ItemCacheMetadata metadata = this.cacheItemMetadata.get(key);
+					ItemCacheInputStream in = new ItemCacheInputStream(
+							-1, metadata.getTimeToLive(), metadata.getTimeToIdle(), 
+							-1, -1, entity.getFlag(), entity.getSize(), entity);
+					cache.putStream(key, -1, -1, in);
 				}
 			}
 			
@@ -307,12 +321,10 @@ public class TransactionInfo implements Serializable {
 	}
 	
 	public void close() throws TransactionException{
-		
 		this.entities.destroy();
-		this.locked.clear();
 		this.managed.clear();
 		this.saved.clear();
-		this.times.clear();
+		this.cacheItemMetadata.clear();
 		this.updated.clear();
 		/*
 		this.updated.clear();
