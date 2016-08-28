@@ -232,12 +232,12 @@ public class TransactionInfo implements Serializable {
     public boolean remove(CacheTransactionManager manager, StreamCache cache,
     		String key, long time) throws StorageException{       
     	try{
-    		this.manageItem(manager, cache, key, time);
-			
-    		if(this.updated.contains(key)){
+    		if(this.managed.contains(key)){
+    			this.updated.add(key);
     			return this.entities.remove(key);
     		}
     		else{
+        		this.manageItem(manager, cache, key, time);
     			this.updated.add(key);
     			return cache.getStream(key) != null;
     		}
