@@ -283,17 +283,7 @@ public class TransactionInfo implements Serializable {
 			}
 			else{
 				ItemCacheMetadata metadata = this.cacheItemMetadata.get(orgKey);
-				ItemCacheInputStream item = 
-						new ItemCacheInputStream(
-							metadata.getId(),
-							metadata.getTimeToLive(), 
-							metadata.getTimeToIdle(),
-							metadata.getCreationTime(), 
-							metadata.getMostRecentTime(), 
-							metadata.getFlag(), 
-							metadata.getSize(), 
-							in
-						);
+				ItemCacheInputStream item  = new ItemCacheInputStream(metadata, in);
 				cache.putStream(key, -1, -1, item);
 			}
 		}
@@ -358,7 +348,7 @@ public class TransactionInfo implements Serializable {
 			
 			if(dta != null){
 				this.entities.putStream(key, 0, 0, dta);
-				this.times.put(key, dta.getTimeToLiveRemaining());
+				this.cacheItemMetadata.put(key, new ItemCacheMetadata(dta));
 				return this.entities.getStream(key);
 			}
 			else

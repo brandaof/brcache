@@ -3,10 +3,24 @@ package org.brandao.brcache;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.brandao.brcache.tx.ItemCacheMetadata;
+
 public class ItemCacheInputStream 
 	extends CacheInputStream{
 
 	private InputStream stream;
+	
+	public ItemCacheInputStream(ItemCacheMetadata metadata, InputStream stream){
+		this(
+			metadata.getId(),
+			metadata.getTimeToLive(), 
+			metadata.getTimeToIdle(),
+			metadata.getCreationTime(), 
+			metadata.getMostRecentTime(), 
+			metadata.getFlag(), 
+			metadata.getSize(),
+			stream);
+	}
 	
 	public ItemCacheInputStream(long id, long timeToLive, 
 			long timeToIdle, long creationTime, long mostRecentTime, 
