@@ -211,13 +211,13 @@ public class TXCache
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
 	public boolean replace(
-			String key, Object value, long maxAliveTime) throws StorageException {
+			String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
 		
 		try{
 			return (Boolean)this.executeMethodInTX(replace, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
-					key, value, maxAliveTime, this.transactionTimeout);
+					key, value, timeToLive, timeToIdle, this.transactionTimeout);
 		}
 		catch(StorageException e){
 			throw e;
@@ -241,14 +241,14 @@ public class TXCache
 	 */
 	public boolean replace(
 			String key, Object oldValue, 
-			Object newValue, long maxAliveTime) throws StorageException {
+			Object newValue, long timeToLive, long timeToIdle) throws StorageException {
 		
 		try{
 			return (Boolean)this.executeMethodInTX(replaceExact, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
 					key, oldValue, 
-					newValue, maxAliveTime, this.transactionTimeout);
+					newValue, timeToLive, timeToIdle, this.transactionTimeout);
 		}
 		catch(StorageException e){
 			throw e;
@@ -271,13 +271,13 @@ public class TXCache
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
 	public Object putIfAbsent(
-			String key, Object value, long maxAliveTime) throws StorageException {
+			String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
 		
 		try{
 			return this.executeMethodInTX(putIfAbsent, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
-					key, value, maxAliveTime, this.transactionTimeout);
+					key, value, timeToLive, timeToIdle, this.transactionTimeout);
 		}
 		catch(StorageException e){
 			throw e;
@@ -298,12 +298,12 @@ public class TXCache
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
 	public void put(
-			String key, Object value, long maxAliveTime) throws StorageException {
+			String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
 		try{
 			this.executeMethodInTX(put, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
-					key, value, maxAliveTime, this.transactionTimeout);
+					key, value, timeToLive, timeToIdle, this.transactionTimeout);
 		}
 		catch(StorageException e){
 			throw e;
@@ -324,13 +324,13 @@ public class TXCache
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
     public void putStream(
-    		String key, long maxAliveTime, InputStream inputData) 
+    		String key, long timeToLive, long timeToIdle, InputStream inputData) 
     		throws StorageException {
 		try{
 			this.executeMethodInTX(putStream, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache, 
-		    		key, maxAliveTime, inputData, this.transactionTimeout);
+		    		key, timeToLive, timeToIdle, inputData, this.transactionTimeout);
 		}
 		catch(StorageException e){
 			throw e;
