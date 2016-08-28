@@ -246,7 +246,14 @@ public abstract class StreamCache
      * @param inputData fluxo de bytes do valor.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    public void putStream(String key, long timeToLive, long timeToIdle, InputStream inputData) throws StorageException{
+    public void putStream(String key, long timeToLive, long timeToIdle, 
+    		InputStream inputData) throws StorageException{
+    	this.putStream(key, timeToLive, timeToIdle, -1, -1, inputData);
+    }
+    
+    protected void putStream(String key, long timeToLive, long timeToIdle, 
+    		long mostRecentTime, long creationTime, 
+    		InputStream inputData) throws StorageException{
         
         if(key.length() > this.maxLengthKey)
             throw new StorageException(CacheErrors.ERROR_1008);
@@ -257,10 +264,26 @@ public abstract class StreamCache
         try{
         	
             map.setId(this.modCount++);
-            map.setCreationTime(System.currentTimeMillis());
-            map.setMostRecentTime(map.getCreationTime());
-            map.setTimeToIdle(timeToIdle);
-            map.setTimeToLive(timeToLive);
+            
+            if(inputData instanceof ItemCacheInputStream){
+            	ItemCacheInputStream input = (ItemCacheInputStream)inputData;
+            	DataMap itemMetadata = input.getMap();
+            	
+                map.setCreationTime(itemMetadata.getCreationTime());
+                map.setMostRecentTime(itemMetadata.getMostRecentTime());
+                map.setTimeToIdle(itemMetadata.getTimeToIdle());
+                map.setTimeToLive(itemMetadata.getTimeToLive());
+                
+                if(map.isDead()){
+                	
+                }
+            }
+            else{
+	            map.setCreationTime(System.currentTimeMillis());
+	            map.setMostRecentTime(map.getCreationTime());
+	            map.setTimeToIdle(timeToIdle);
+	            map.setTimeToLive(timeToLive);
+            }
             
             this.putData(map, inputData);
             oldMap = this.dataMap.put(key, map);

@@ -44,8 +44,26 @@ class DataMap implements Serializable{
     private long length;
     
     private long mostRecentTime;
+
+    public DataMap(){
+    	this(-1, 0, -1, 0, (short)0, -1, 0, 0, 0);
+    }
     
-    public long getExpirationTime(){
+    public DataMap(long id, long timeToLive, long creationTime,
+			long timeToIdle, short flag, int firstSegment, int segments,
+			long length, long mostRecentTime) {
+		this.id = id;
+		this.timeToLive = timeToLive;
+		this.creationTime = creationTime;
+		this.timeToIdle = timeToIdle;
+		this.flag = flag;
+		this.firstSegment = firstSegment;
+		this.segments = segments;
+		this.length = length;
+		this.mostRecentTime = mostRecentTime;
+	}
+
+	public long getExpirationTime(){
     	long ttlExpiry = timeToLive == 0? Long.MAX_VALUE : creationTime + timeToLive;
 		long ttiExpiry = timeToIdle == 0? Long.MAX_VALUE : mostRecentTime + timeToIdle;	
     	return Math.min(ttlExpiry, ttiExpiry);
