@@ -17,27 +17,27 @@ public class TXCacheTest extends TestCase{
 	
 	public void testReplace() throws StorageException{
 		TXCache cache = new Cache().getTXCache();
-		TestCase.assertFalse(cache.replace(KEY, VALUE, 0));
+		TestCase.assertFalse(cache.replace(KEY, VALUE, 0, 0));
 	}
 
 	public void testReplaceSuccess() throws StorageException, RecoverException{
 		TXCache cache = new Cache().getTXCache();
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
-		TestCase.assertTrue(cache.replace(KEY, VALUE2, 0));
+		TestCase.assertTrue(cache.replace(KEY, VALUE2, 0, 0));
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 	}
 
 	public void testReplaceExact() throws StorageException{
 		TXCache cache = new Cache().getTXCache();
-		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0));
+		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0, 0));
 	}
 
 	public void testReplaceExactSuccess() throws StorageException, RecoverException{
 		TXCache cache = new Cache().getTXCache();
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
-		TestCase.assertTrue(cache.replace(KEY, VALUE, VALUE2, 0));
+		TestCase.assertTrue(cache.replace(KEY, VALUE, VALUE2, 0, 0));
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 	}
 
@@ -45,14 +45,14 @@ public class TXCacheTest extends TestCase{
 	
 	public void testputIfAbsent() throws StorageException, RecoverException{
 		TXCache cache = new Cache().getTXCache();
-		TestCase.assertNull(cache.putIfAbsent(KEY, VALUE, 0));
+		TestCase.assertNull(cache.putIfAbsent(KEY, VALUE, 0, 0));
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
 	public void testputIfAbsentExistValue() throws StorageException, RecoverException{
 		TXCache cache = new Cache().getTXCache();
-		cache.put(KEY, VALUE, 0);
-		TestCase.assertEquals(VALUE, cache.putIfAbsent(KEY, VALUE2, 0));
+		cache.put(KEY, VALUE, 0, 0);
+		TestCase.assertEquals(VALUE, cache.putIfAbsent(KEY, VALUE2, 0, 0));
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
@@ -61,7 +61,7 @@ public class TXCacheTest extends TestCase{
 	public void testPut() throws StorageException, RecoverException{
 		TXCache cache = new Cache().getTXCache();
 		TestCase.assertNull((String)cache.get(KEY));
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
@@ -70,16 +70,16 @@ public class TXCacheTest extends TestCase{
 	public void testGet() throws StorageException, RecoverException{
 		TXCache cache = new Cache().getTXCache();
 		TestCase.assertNull((String)cache.get(KEY));
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
 	public void testGetOverride() throws StorageException, RecoverException{
 		TXCache cache = new Cache().getTXCache();
 		TestCase.assertNull((String)cache.get(KEY));
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
-		cache.put(KEY, VALUE2, 0);
+		cache.put(KEY, VALUE2, 0, 0);
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 	}
 
@@ -91,7 +91,7 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertNull((String)cache.get(KEY));
 		TestCase.assertFalse(cache.remove(KEY, VALUE));
 		
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		
@@ -106,7 +106,7 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertNull((String)cache.get(KEY));
 		TestCase.assertFalse(cache.remove(KEY));
 		
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		
@@ -121,17 +121,17 @@ public class TXCacheTest extends TestCase{
 	public void testExplicitTransactionReplace() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
-		TestCase.assertFalse(cache.replace(KEY, VALUE, 0));
+		TestCase.assertFalse(cache.replace(KEY, VALUE, 0, 0));
 		tx.commit();
-		TestCase.assertFalse(cache.replace(KEY, VALUE, 0));
+		TestCase.assertFalse(cache.replace(KEY, VALUE, 0, 0));
 	}
 
 	public void testExplicitTransactionReplaceSuccess() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
-		TestCase.assertTrue(cache.replace(KEY, VALUE2, 0));
+		TestCase.assertTrue(cache.replace(KEY, VALUE2, 0, 0));
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 		tx.commit();
 		
@@ -141,17 +141,17 @@ public class TXCacheTest extends TestCase{
 	public void testExplicitTransactionReplaceExact() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
-		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0));
+		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0, 0));
 		tx.commit();
-		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0));
+		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0, 0));
 	}
 
 	public void testExplicitTransactionReplaceExactSuccess() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
-		TestCase.assertTrue(cache.replace(KEY, VALUE, VALUE2, 0));
+		TestCase.assertTrue(cache.replace(KEY, VALUE, VALUE2, 0, 0));
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 		tx.commit();
 		
@@ -163,7 +163,7 @@ public class TXCacheTest extends TestCase{
 	public void testExplicitTransactionPutIfAbsent() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
-		TestCase.assertNull(cache.putIfAbsent(KEY, VALUE, 0));
+		TestCase.assertNull(cache.putIfAbsent(KEY, VALUE, 0, 0));
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		tx.commit();
 		
@@ -173,8 +173,8 @@ public class TXCacheTest extends TestCase{
 	public void testExplicitTransactionPutIfAbsentExistValue() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
-		cache.put(KEY, VALUE, 0);
-		TestCase.assertEquals(VALUE, cache.putIfAbsent(KEY, VALUE2, 0));
+		cache.put(KEY, VALUE, 0, 0);
+		TestCase.assertEquals(VALUE, cache.putIfAbsent(KEY, VALUE2, 0, 0));
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		tx.commit();
 		
@@ -187,7 +187,7 @@ public class TXCacheTest extends TestCase{
 		TXCache cache = new Cache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
 		TestCase.assertNull((String)cache.get(KEY));
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		tx.commit();
 		
@@ -200,7 +200,7 @@ public class TXCacheTest extends TestCase{
 		TXCache cache = new Cache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
 		TestCase.assertNull((String)cache.get(KEY));
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		tx.commit();
 		
@@ -211,9 +211,9 @@ public class TXCacheTest extends TestCase{
 		TXCache cache = new Cache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
 		TestCase.assertNull((String)cache.get(KEY));
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
-		cache.put(KEY, VALUE2, 0);
+		cache.put(KEY, VALUE2, 0, 0);
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 		tx.commit();
 		
@@ -229,7 +229,7 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertNull((String)cache.get(KEY));
 		TestCase.assertFalse(cache.remove(KEY, VALUE));
 		
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		
@@ -247,7 +247,7 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertNull((String)cache.get(KEY));
 		TestCase.assertFalse(cache.remove(KEY));
 		
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		
@@ -270,7 +270,7 @@ public class TXCacheTest extends TestCase{
 			@Override
 			protected void execute(TXCache cache, String value, String key,
 					String value2) throws Throwable {
-				cache.put(key, value, 0);
+				cache.put(key, value, 0, 0);
 			}
 			
 		};
@@ -279,7 +279,7 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertNull(cache.get(KEY, true));
 		task.start();
 		Thread.sleep(2000);
-		TestCase.assertFalse(cache.replace(KEY, VALUE, 0));
+		TestCase.assertFalse(cache.replace(KEY, VALUE, 0, 0));
 		tx.commit();
 		
 		Thread.sleep(1000);
@@ -294,20 +294,20 @@ public class TXCacheTest extends TestCase{
 			@Override
 			protected void execute(TXCache cache, String value, String key,
 					String value2) throws Throwable {
-				cache.put(key, value, 0);
+				cache.put(key, value, 0, 0);
 			}
 			
 		};
 		
 		CacheTransaction tx = cache.beginTransaction();
 		
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		
 		task.start();
 		Thread.sleep(2000);
 		
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
-		TestCase.assertTrue(cache.replace(KEY, VALUE2, 0));
+		TestCase.assertTrue(cache.replace(KEY, VALUE2, 0, 0));
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 		
 		tx.commit();
@@ -324,7 +324,7 @@ public class TXCacheTest extends TestCase{
 			@Override
 			protected void execute(TXCache cache, String value, String key,
 					String value2) throws Throwable {
-				cache.put(key, value, 0);
+				cache.put(key, value, 0, 0);
 			}
 			
 		};
@@ -335,7 +335,7 @@ public class TXCacheTest extends TestCase{
 		task.start();
 		Thread.sleep(2000);
 		
-		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0));
+		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0, 0));
 		tx.commit();
 		
 		Thread.sleep(1000);
@@ -350,19 +350,19 @@ public class TXCacheTest extends TestCase{
 			@Override
 			protected void execute(TXCache cache, String value, String key,
 					String value2) throws Throwable {
-				cache.put(key, value, 0);
+				cache.put(key, value, 0, 0);
 			}
 			
 		};
 		
 		CacheTransaction tx = cache.beginTransaction();
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		
 		task.start();
 		Thread.sleep(2000);
 		
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
-		TestCase.assertTrue(cache.replace(KEY, VALUE, VALUE2, 0));
+		TestCase.assertTrue(cache.replace(KEY, VALUE, VALUE2, 0, 0));
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 		tx.commit();
 		
@@ -380,7 +380,7 @@ public class TXCacheTest extends TestCase{
 			@Override
 			protected void execute(TXCache cache, String value, String key,
 					String value2) throws Throwable {
-				cache.put(key, value2, 0);
+				cache.put(key, value2, 0, 0);
 			}
 			
 		};
@@ -391,7 +391,7 @@ public class TXCacheTest extends TestCase{
 		task.start();
 		Thread.sleep(2000);
 		
-		TestCase.assertNull(cache.putIfAbsent(KEY, VALUE, 0));
+		TestCase.assertNull(cache.putIfAbsent(KEY, VALUE, 0, 0));
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		tx.commit();
 		
@@ -407,18 +407,18 @@ public class TXCacheTest extends TestCase{
 			@Override
 			protected void execute(TXCache cache, String value, String key,
 					String value2) throws Throwable {
-				cache.put(key, value2, 0);
+				cache.put(key, value2, 0, 0);
 			}
 			
 		};
 		
 		CacheTransaction tx = cache.beginTransaction();
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		
 		task.start();
 		Thread.sleep(2000);
 		
-		TestCase.assertEquals(VALUE, cache.putIfAbsent(KEY, VALUE2, 0));
+		TestCase.assertEquals(VALUE, cache.putIfAbsent(KEY, VALUE2, 0, 0));
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		tx.commit();
 		
@@ -436,14 +436,14 @@ public class TXCacheTest extends TestCase{
 			@Override
 			protected void execute(TXCache cache, String value, String key,
 					String value2) throws Throwable {
-				cache.put(key, value2, 0);
+				cache.put(key, value2, 0, 0);
 			}
 			
 		};
 		
 		CacheTransaction tx = cache.beginTransaction();
 		TestCase.assertNull((String)cache.get(KEY));
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		
 		task.start();
 		Thread.sleep(2000);
@@ -465,14 +465,14 @@ public class TXCacheTest extends TestCase{
 			@Override
 			protected void execute(TXCache cache, String value, String key,
 					String value2) throws Throwable {
-				cache.put(key, value2, 0);
+				cache.put(key, value2, 0, 0);
 			}
 			
 		};
 		
 		CacheTransaction tx = cache.beginTransaction();
 		TestCase.assertNull((String)cache.get(KEY));
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		
 		task.start();
 		Thread.sleep(2000);
@@ -492,20 +492,20 @@ public class TXCacheTest extends TestCase{
 			@Override
 			protected void execute(TXCache cache, String value, String key,
 					String value2) throws Throwable {
-				cache.put(key, value2, 0);
+				cache.put(key, value2, 0, 0);
 			}
 			
 		};
 		
 		CacheTransaction tx = cache.beginTransaction();
 		TestCase.assertNull((String)cache.get(KEY));
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 		
 		task.start();
 		Thread.sleep(2000);
 		
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
-		cache.put(KEY, VALUE2, 0);
+		cache.put(KEY, VALUE2, 0, 0);
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 		tx.commit();
 		
@@ -523,7 +523,7 @@ public class TXCacheTest extends TestCase{
 			@Override
 			protected void execute(TXCache cache, String value, String key,
 					String value2) throws Throwable {
-				cache.put(key, value2, 0);
+				cache.put(key, value2, 0, 0);
 			}
 			
 		};
@@ -532,7 +532,7 @@ public class TXCacheTest extends TestCase{
 		
 		TestCase.assertNull((String)cache.get(KEY));
 		TestCase.assertFalse(cache.remove(KEY, VALUE));
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 
 		task.start();
 		Thread.sleep(2000);
@@ -556,7 +556,7 @@ public class TXCacheTest extends TestCase{
 			@Override
 			protected void execute(TXCache cache, String value, String key,
 					String value2) throws Throwable {
-				cache.put(key, value2, 0);
+				cache.put(key, value2, 0, 0);
 			}
 			
 		};
@@ -565,7 +565,7 @@ public class TXCacheTest extends TestCase{
 		
 		TestCase.assertNull((String)cache.get(KEY));
 		TestCase.assertFalse(cache.remove(KEY));
-		cache.put(KEY, VALUE, 0);
+		cache.put(KEY, VALUE, 0, 0);
 
 		task.start();
 		Thread.sleep(2000);
