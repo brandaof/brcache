@@ -377,6 +377,88 @@ public abstract class StreamCache
             //Registra os dados no buffer de dados.
             this.putData(map, inputData);
             //Faz a indexação do item e retorna o índice atual, caso exista.
+            oldMap = this.dataMap.putIfAbsent(key, map);
+            
+            if(oldMap != null){
+            	this.remove(key, map);
+            	return false;
+            }
+            
+            this.countWrite++;
+            return true;
+        }
+        catch(Throwable e){
+        	try{
+        		this.releaseSegments(map);
+        	}
+        	catch(Throwable ex){
+        		e.printStackTrace();
+        	}
+            throw 
+            	e instanceof StorageException? 
+            		(StorageException)e : 
+            		new StorageException(e, CacheErrors.ERROR_1020);
+        }
+        
+    }
+    
+    /**
+     * Substitui o fluxo de bytes associado à chave somente se ele não existir.
+     * @param key chave associada ao valor.
+     * @param value valor para ser associado à chave.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
+     * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
+     */
+    protected boolean putIfAbsentStream(String key, long timeToLive, long timeToIdle, 
+    		InputStream inputData) throws StorageException{
+        
+    	if(timeToLive < 0)
+            throw new StorageException(CacheErrors.ERROR_1029);
+
+    	if(timeToIdle < 0)
+            throw new StorageException(CacheErrors.ERROR_1028);
+    	
+        if(key.length() > this.maxLengthKey)
+            throw new StorageException(CacheErrors.ERROR_1008);
+        
+        DataMap oldMap = null;
+        DataMap map    = new DataMap();
+        
+        try{
+        	//ItemCacheInputStream permite manipular além dos dados os metadados do item.
+            if(inputData instanceof ItemCacheInputStream){
+            	ItemCacheInputStream input = (ItemCacheInputStream)inputData;
+            	DataMap itemMetadata = input.getMap();
+            	
+                map.setCreationTime(itemMetadata.getCreationTime());
+                map.setMostRecentTime(itemMetadata.getMostRecentTime());
+                map.setTimeToIdle(itemMetadata.getTimeToIdle());
+                map.setTimeToLive(itemMetadata.getTimeToLive());
+                
+            	//o cache transacional pode tentar restaurar um item já expirado.
+                //Nesse caso, tem que remove-lo. 
+                //Somente será removido se o item ainda for o mesmo gerenciado pela transação.
+                if(map.isDead()){
+                	this.remove(key, map);
+                	return false;
+                }
+                
+            }
+            else{
+            	//Gera os metadados do item.
+	            map.setCreationTime(System.currentTimeMillis());
+	            map.setMostRecentTime(map.getCreationTime());
+	            map.setTimeToIdle(timeToIdle);
+	            map.setTimeToLive(timeToLive);
+            }
+            
+            //Toda item inserido tem que ter uma nova id. Mesmo que ele exista.
+            map.setId(this.modCount++);
+            //Registra os dados no buffer de dados.
+            this.putData(map, inputData);
+            //Faz a indexação do item e retorna o índice atual, caso exista.
             oldMap = this.dataMap.replace(key, map);
             
             if(oldMap == null){
@@ -405,19 +487,7 @@ public abstract class StreamCache
 	            this.countRemoved++;
 	    	}
         }
-    	/*
-    	synchronized(this.dataList){
-    		DataMap map = this.dataMap.get(key);
-    		if(map != null){
-    			return this.putStream(key, timeToLive, timeToIdle, inputData);
-    		}
-    		else{
-    			return false;
-    		}
-    	}
-        */
-    }
-    
+    }    
     /**
      * Obtém o fluxo de bytes do valor associado à chave.
      * @param key chave associada ao fluxo.

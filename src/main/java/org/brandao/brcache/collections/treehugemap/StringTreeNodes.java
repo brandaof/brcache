@@ -75,13 +75,19 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
     		T old = node.getValue(values);
     		if(old != null){
 	    		node.setValue(values, value);
-	    		return old;
     		}
-    		else{
-    			return null;
-    		}
+			return old;
     	}
-    	
+    }
+
+    public T putIfAbsentValue(List<T> values, TreeNode<T> node, T value){
+    	synchronized(values){
+    		T old = node.getValue(values);
+    		if(old == null){
+	    		node.setValue(values, value);
+    		}
+			return old;
+    	}
     }
     
     public T removeValue(List<T> values, TreeNode<T> node) {
