@@ -299,10 +299,10 @@ public class TXCache
 	 * @param maxAliveTime tempo máximo de vida do valor no cache.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
-	public void put(
+	public boolean put(
 			String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
 		try{
-			this.executeMethodInTX(put, 
+			return (Boolean)this.executeMethodInTX(put, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
 					key, value, timeToLive, timeToIdle, this.transactionTimeout);
@@ -325,11 +325,11 @@ public class TXCache
      * @param inputData fluxo de bytes do valor.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    public void putStream(
+    public boolean putStream(
     		String key, long timeToLive, long timeToIdle, InputStream inputData) 
     		throws StorageException {
 		try{
-			this.executeMethodInTX(putStream, 
+			return (Boolean)this.executeMethodInTX(putStream, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache, 
 		    		key, timeToLive, timeToIdle, inputData, this.transactionTimeout);

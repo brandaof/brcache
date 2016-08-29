@@ -28,10 +28,10 @@ interface CacheTransactionHandler
 	Object putIfAbsent(CacheTransactionManager manager, StreamCache cache,
 			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException;
 	
-	void put(CacheTransactionManager manager, StreamCache cache,
+	boolean put(CacheTransactionManager manager, StreamCache cache,
 			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException;
 	
-    void putStream(CacheTransactionManager manager, StreamCache cache, 
+    boolean putStream(CacheTransactionManager manager, StreamCache cache, 
     		String key, long timeToLive, long timeToIdle, InputStream inputData, long time) 
     		throws StorageException;
 	

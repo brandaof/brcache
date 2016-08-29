@@ -145,6 +145,17 @@ public class TreeMap<K,T>
         	return this.treeNodes.replaceValue(values, node, oldValue, value);
         }
     }
+
+    private T replace(TreeMapKey key, TreeNode<T> node, T value){
+        
+        if(!this.treeNodes.isEquals(key, node)){
+            TreeNode<T> next = this.treeNodes.getNext(this.nodes, key, node, false);
+            return this.replace(key, next, value);
+        }
+        else{
+        	return this.treeNodes.replaceValue(values, node, value);
+        }
+    }
     
     private T get(TreeMapKey key, TreeNode<T> node){
         
@@ -200,6 +211,12 @@ public class TreeMap<K,T>
     	TreeMapKey k = this.treeNodes.getKey(key);
         TreeNode<T> root = this.treeNodes.getFirst(this.nodes);
         return this.replace(k, root, oldElement, element);
+    }
+
+    public T replace(K key, T element){
+    	TreeMapKey k = this.treeNodes.getKey(key);
+        TreeNode<T> root = this.treeNodes.getFirst(this.nodes);
+        return this.replace(k, root, element);
     }
     
     public void setDeleteOnExit(boolean value){
