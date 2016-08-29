@@ -1,5 +1,7 @@
 package org.brandao.brcache;
 
+import org.brandao.brcache.tx.TXCache;
+
 public class TXCacheHelper {
 
 	public static abstract class ConcurrentTask extends Thread{

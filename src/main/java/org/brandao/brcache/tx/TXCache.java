@@ -15,17 +15,19 @@
  * limitations under the License.
  */
 
-package org.brandao.brcache;
+package org.brandao.brcache.tx;
 
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.brandao.brcache.tx.CacheTransaction;
-import org.brandao.brcache.tx.CacheTransactionHandler;
-import org.brandao.brcache.tx.CacheTransactionManager;
-import org.brandao.brcache.tx.CacheTransactionManagerImp;
+import org.brandao.brcache.Cache;
+import org.brandao.brcache.CacheErrors;
+import org.brandao.brcache.CacheException;
+import org.brandao.brcache.RecoverException;
+import org.brandao.brcache.StorageException;
+import org.brandao.brcache.StreamCache;
 
 /**
  * Provê suporte transacional a um cache.

@@ -2,6 +2,7 @@ package org.brandao.brcache;
 
 import org.brandao.brcache.TXCacheHelper.ConcurrentTask;
 import org.brandao.brcache.tx.CacheTransaction;
+import org.brandao.brcache.tx.TXCache;
 
 import junit.framework.TestCase;
 
