@@ -46,6 +46,8 @@ public interface TreeNodes<T> extends Serializable{
     
     T removeValue(List<T> values, TreeNode<T> node);
  
+    T putIfAbsentValue(List<T> values, TreeNode<T> node, T value);
+    
     boolean removeValue(List<T> values, TreeNode<T> node, T oldValue);
     
 }
