@@ -6,6 +6,9 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import org.brandao.brcache.tx.CacheTransactionManager;
+import org.brandao.brcache.tx.TXCache;
+
 /**
  * Provê as operações básicas de um cache.
  * 
@@ -87,6 +90,24 @@ public class BasicCache
     			dataSwapFactor, maxSizeEntry, maxSizeKey, dataPath, swaperType, quantitySwaperThread);
     }
     
+    /**
+     * Obtém o cache com suporte transacional.
+     * @return cache.
+     */
+    public TXCache getTXCache(){
+    	return new TXCache(this);
+    }
+
+    /**
+     * Obtém o cache com suporte transacional com um gestor transacional e tempo limite específicos.
+     * @param txManager gestor transacional.
+     * @param timeout tempo limite. É o tempo máximo que se espera, em milisegundos, para concluir uma operação
+     * no cache.
+     * @return cache com suporte transacional.
+     */
+    public TXCache getTXCache(CacheTransactionManager txManager, long timeout){
+    	return new TXCache(this, txManager, timeout);
+    }    
     /**
 	 * Associa o fluxo de bytes do valor à chave.
 	 * @param key chave associada ao fluxo.
@@ -228,5 +249,13 @@ public class BasicCache
     public boolean remove(String key) throws StorageException{
     	return super.removeStream(key);
     }
+
+	/**
+	 * Obtém a configuração do cache.
+	 * @return configuração.
+	 */
+	public BRCacheConfig getConfig() {
+		return config;
+	}
     
 }
