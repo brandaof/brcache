@@ -506,6 +506,7 @@ public abstract class StreamCache
         
     }
     
+    
     /**
      * Verifica se uma chave está associada a um valor.
      * @param key chave associada ao valor.

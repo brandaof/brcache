@@ -1,10 +1,5 @@
 package org.brandao.brcache;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import org.brandao.brcache.tx.CacheTransactionManager;
@@ -121,9 +116,9 @@ public class Cache
 		
 		Serializable refLock = this.locks.lock(key);
 		try{
-			Object o = this.get(key);
+			Object o = super.get(key);
 			if(o != null && o.equals(oldValue)){
-				this.put(key, newValue, timeToLive, timeToIdle);
+				super.put(key, newValue, timeToLive, timeToIdle);
 				return true;
 			}
 			else
@@ -156,9 +151,9 @@ public class Cache
 		
 		Serializable refLock = this.locks.lock(key);
 		try{
-			Object o = this.get(key);
+			Object o = super.get(key);
 			if(o == null){
-				this.put(key, value, timeToLive, timeToIdle);
+				super.put(key, value, timeToLive, timeToIdle);
 			}
 			
 			return o;
@@ -187,29 +182,9 @@ public class Cache
 	 */
 	public boolean put(String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
 		
-		ByteArrayOutputStream bout;
-		
-		try{
-			bout = new ByteArrayOutputStream();
-			ObjectOutputStream oout = new ObjectOutputStream(bout);
-			oout.writeObject(value);
-			oout.flush();
-		}
-		catch(Throwable e){
-			throw new StorageException(e, CacheErrors.ERROR_1020);
-		}
-		
-		
 		Serializable refLock = this.locks.lock(key);
 		try{
-			return this.putStream(key, timeToLive, timeToIdle, 
-					new ByteArrayInputStream(bout.toByteArray()));
-		}
-		catch(StorageException e){
-			throw e;
-		}
-		catch(Throwable e){
-			throw new StorageException(e, CacheErrors.ERROR_1020);
+			return super.put(key, value, timeToLive, timeToIdle);
 		}
 		finally{
 			if(refLock != null){
@@ -218,32 +193,6 @@ public class Cache
 		}
 	}
 	
-	/* métodos de coleta*/
-	
-	/**
-	 * Obtém o valor associado à chave.
-	 * @param key chave associada ao valor.
-     * @return valor associado à chave ou <code>null</code>.
-     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
-     * item.
-	 */
-	public Object get(String key) throws RecoverException {
-		try{
-			InputStream in = super.getStream(key);
-			if(in != null){
-					ObjectInputStream oin = new ObjectInputStream(in);
-					return oin.readObject();
-			}
-			else
-				return null;
-		}
-		catch(RecoverException e){
-			throw e;
-		}	
-		catch(Throwable e){
-			throw new StorageException(e, CacheErrors.ERROR_1021);
-		}
-	}
 
     /* métodos de remoção */
 
@@ -259,9 +208,9 @@ public class Cache
 		
 		Serializable refLock = this.locks.lock(key);
 		try{
-			Object o = this.get(key);
+			Object o = super.get(key);
 			if(o != null && o.equals(value)){
-				return this.remove(key);
+				return super.remove(key);
 			}
 			else
 				return false;
@@ -281,6 +230,25 @@ public class Cache
 			}
 		}
 	}
+	
+    /**
+     * Remove o valor associado à chave.
+     * @param key chave associada ao valor.
+     * @return <code>true</code> se o valor for removido. Caso contrário <code>false</code>.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
+     * item.
+     */
+    public boolean remove(String key) throws StorageException{
+		Serializable refLock = this.locks.lock(key);
+		try{
+			return super.remove(key);
+		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
+    }
 	
     /* métodos de manipulação*/
     
