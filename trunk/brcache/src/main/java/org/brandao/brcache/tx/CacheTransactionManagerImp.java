@@ -11,6 +11,11 @@ import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.StreamCache;
 import org.brandao.concurrent.NamedLock;
 
+/**
+ * Implementação padrão do gestor de transações.
+ * @author Brandao
+ *
+ */
 public class CacheTransactionManagerImp 
 	implements CacheTransactionManager{
 
