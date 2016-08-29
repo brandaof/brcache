@@ -3,7 +3,7 @@ package org.brandao.brcache.tx;
 import org.brandao.brcache.Configuration;
 import org.brandao.brcache.SwaperStrategy;
 
-public class BRCacheTransactionConfigWrapper extends BRCacheTransactionConfig{
+class BRCacheTransactionConfigWrapper extends BRCacheTransactionConfig{
 
 	private static final long serialVersionUID = -5763521134169834371L;
 

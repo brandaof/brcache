@@ -24,7 +24,7 @@ import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 
-public class TransactionInfo implements Serializable {
+class TransactionInfo implements Serializable {
 
 	private static final long serialVersionUID = 3758041685386590737L;
 

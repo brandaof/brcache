@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import org.brandao.brcache.tx.CacheTransactionManager;
+import org.brandao.brcache.tx.TXCache;
 import org.brandao.concurrent.NamedLock;
 
 /**

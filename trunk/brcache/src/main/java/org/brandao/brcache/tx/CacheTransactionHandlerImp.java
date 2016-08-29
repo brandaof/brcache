@@ -15,7 +15,7 @@ import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 import org.brandao.brcache.StreamCache;
 
-public class CacheTransactionHandlerImp
+class CacheTransactionHandlerImp
 	implements CacheTransactionHandler{
 
 	private static final String TRANSACTION_NAME = "{{name}}.tx";
