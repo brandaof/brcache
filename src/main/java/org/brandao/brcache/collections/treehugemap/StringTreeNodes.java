@@ -70,15 +70,15 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
     	
     }
 
-    public boolean replaceValue(List<T> values, TreeNode<T> node, T value){
+    public T replaceValue(List<T> values, TreeNode<T> node, T value){
     	synchronized(values){
     		T old = node.getValue(values);
     		if(old != null){
 	    		node.setValue(values, value);
-	    		return true;
+	    		return old;
     		}
     		else{
-    			return false;
+    			return null;
     		}
     	}
     	

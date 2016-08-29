@@ -244,9 +244,10 @@ public abstract class StreamCache
 	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
 	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
      * @param inputData fluxo de bytes do valor.
+     * @return <code>true</code> se o item for substituido. Caso contrário, <code>false</code>
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    public void putStream(String key, long timeToLive, long timeToIdle, 
+    public boolean putStream(String key, long timeToLive, long timeToIdle, 
     		InputStream inputData) throws StorageException{
         
     	if(timeToLive < 0)
@@ -277,7 +278,7 @@ public abstract class StreamCache
                 //Somente será removido se o item ainda for o mesmo gerenciado pela transação.
                 if(map.isDead()){
                 	this.remove(key, map);
-                	return;
+                	return false;
                 }
                 
             }
@@ -297,6 +298,7 @@ public abstract class StreamCache
             oldMap = this.dataMap.put(key, map);
             
             this.countWrite++;
+            return oldMap != null;
         }
         catch(Throwable e){
         	try{
@@ -318,6 +320,105 @@ public abstract class StreamCache
         }
     }
 
+    /**
+     * Substitui o valor associado à chave somente se ele existir.
+     * @param key chave associada ao valor.
+     * @param value valor para ser associado à chave.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
+     * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
+     */
+    public boolean replaceStream(String key, long timeToLive, long timeToIdle, 
+    		InputStream inputData) throws StorageException{
+        
+        
+    	if(timeToLive < 0)
+            throw new StorageException(CacheErrors.ERROR_1029);
+
+    	if(timeToIdle < 0)
+            throw new StorageException(CacheErrors.ERROR_1028);
+    	
+        if(key.length() > this.maxLengthKey)
+            throw new StorageException(CacheErrors.ERROR_1008);
+        
+        DataMap oldMap = null;
+        DataMap map    = new DataMap();
+        
+        try{
+        	//ItemCacheInputStream permite manipular além dos dados os metadados do item.
+            if(inputData instanceof ItemCacheInputStream){
+            	ItemCacheInputStream input = (ItemCacheInputStream)inputData;
+            	DataMap itemMetadata = input.getMap();
+            	
+                map.setCreationTime(itemMetadata.getCreationTime());
+                map.setMostRecentTime(itemMetadata.getMostRecentTime());
+                map.setTimeToIdle(itemMetadata.getTimeToIdle());
+                map.setTimeToLive(itemMetadata.getTimeToLive());
+                
+            	//o cache transacional pode tentar restaurar um item já expirado.
+                //Nesse caso, tem que remove-lo. 
+                //Somente será removido se o item ainda for o mesmo gerenciado pela transação.
+                if(map.isDead()){
+                	this.remove(key, map);
+                	return false;
+                }
+                
+            }
+            else{
+            	//Gera os metadados do item.
+	            map.setCreationTime(System.currentTimeMillis());
+	            map.setMostRecentTime(map.getCreationTime());
+	            map.setTimeToIdle(timeToIdle);
+	            map.setTimeToLive(timeToLive);
+            }
+            
+            //Toda item inserido tem que ter uma nova id. Mesmo que ele exista.
+            map.setId(this.modCount++);
+            //Registra os dados no buffer de dados.
+            this.putData(map, inputData);
+            //Faz a indexação do item e retorna o índice atual, caso exista.
+            oldMap = this.dataMap.replace(key, map);
+            
+            if(oldMap == null){
+            	this.remove(key, map);
+            	return false;
+            }
+            
+            this.countWrite++;
+            return true;
+        }
+        catch(Throwable e){
+        	try{
+        		this.releaseSegments(map);
+        	}
+        	catch(Throwable ex){
+        		e.printStackTrace();
+        	}
+            throw 
+            	e instanceof StorageException? 
+            		(StorageException)e : 
+            		new StorageException(e, CacheErrors.ERROR_1020);
+        }
+        finally{
+	    	if(oldMap != null){
+	    		this.releaseSegments(oldMap);
+	            this.countRemoved++;
+	    	}
+        }
+    	/*
+    	synchronized(this.dataList){
+    		DataMap map = this.dataMap.get(key);
+    		if(map != null){
+    			return this.putStream(key, timeToLive, timeToIdle, inputData);
+    		}
+    		else{
+    			return false;
+    		}
+    	}
+        */
+    }
+    
     /**
      * Obtém o fluxo de bytes do valor associado à chave.
      * @param key chave associada ao fluxo.
@@ -404,6 +505,15 @@ public abstract class StreamCache
             throw new StorageException(e, CacheErrors.ERROR_1022);
         }
         
+    }
+    
+    /**
+     * Verifica se uma chave está associada a um valor.
+     * @param key chave associada ao valor.
+     * @return <code>true</code> se a chave estiver associada a um valor. Caso contrário, <code>false</code>.
+     */
+    public boolean containsKey(String key){
+    	return this.dataMap.containsKey(key);
     }
     
     private void remove(String key, DataMap data){

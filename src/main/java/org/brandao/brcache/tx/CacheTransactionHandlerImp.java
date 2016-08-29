@@ -252,16 +252,16 @@ class CacheTransactionHandlerImp
 		return this.transactionInfo.putIfAbsent(manager, cache, key, value, timeToLive, timeToIdle, time);
 	}
 
-	public void put(CacheTransactionManager manager, StreamCache cache,
+	public boolean put(CacheTransactionManager manager, StreamCache cache,
 			String key, Object value, long timeToLive, long timeToIdle, long time)
 			throws StorageException {
-		this.transactionInfo.put(manager, cache, key, value, timeToLive, timeToIdle, time);
+		return this.transactionInfo.put(manager, cache, key, value, timeToLive, timeToIdle, time);
 	}
 
-	public void putStream(CacheTransactionManager manager, StreamCache cache,
+	public boolean putStream(CacheTransactionManager manager, StreamCache cache,
 			String key, long timeToLive, long timeToIdle, InputStream inputData, long time)
 			throws StorageException {
-		this.transactionInfo.putStream(manager, cache, key, timeToLive, timeToIdle, inputData, time);
+		return this.transactionInfo.putStream(manager, cache, key, timeToLive, timeToIdle, inputData, time);
 	}
 
 	public Object get(CacheTransactionManager manager, StreamCache cache,

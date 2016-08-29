@@ -241,15 +241,16 @@ public class Cache
 	 * @param value valor para ser associado à chave.
 	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
 	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
+     * @return <code>true</code> se o item for substituido. Caso contrário, <code>false</code>
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
-	public void put(String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
+	public boolean put(String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
 		try{
 			ByteArrayOutputStream bout = new ByteArrayOutputStream();
 			ObjectOutputStream oout = new ObjectOutputStream(bout);
 			oout.writeObject(value);
 			oout.flush();
-			this.putStream(key, timeToLive, timeToIdle, new ByteArrayInputStream(bout.toByteArray()));
+			return this.putStream(key, timeToLive, timeToIdle, new ByteArrayInputStream(bout.toByteArray()));
 		}
 		catch(StorageException e){
 			throw e;
