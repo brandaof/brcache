@@ -14,13 +14,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.brandao.brcache.BasicCache;
 import org.brandao.brcache.Cache;
 import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.CacheException;
 import org.brandao.brcache.CacheInputStream;
 import org.brandao.brcache.ItemCacheInputStream;
 import org.brandao.brcache.ItemCacheMetadata;
-import org.brandao.brcache.StreamCache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 
@@ -43,7 +43,7 @@ class TransactionInfo implements Serializable {
 	
 	private Map<String, ItemCacheMetadata> cacheItemMetadata;
 	
-	private StreamCache entities;
+	private BasicCache entities;
 	
 	private Set<String> saved;
 	
@@ -69,7 +69,7 @@ class TransactionInfo implements Serializable {
 	
 	/* métodos de armazenamento */
 	
-	public Object replace(CacheTransactionManager manager, StreamCache cache,
+	public Object replace(CacheTransactionManager manager, BasicCache cache,
 			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException {
 		
 		try{
@@ -89,7 +89,7 @@ class TransactionInfo implements Serializable {
 		}
 	}
 	
-	public boolean replace(CacheTransactionManager manager, StreamCache cache,
+	public boolean replace(CacheTransactionManager manager, BasicCache cache,
 			String key, Object oldValue, 
 			Object newValue, long timeToLive, long timeToIdle, long time) throws StorageException {
 		
@@ -110,7 +110,7 @@ class TransactionInfo implements Serializable {
 		}
 	}
 	
-	public Object putIfAbsent(CacheTransactionManager manager, StreamCache cache,
+	public Object putIfAbsent(CacheTransactionManager manager, BasicCache cache,
 			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException {
 		
 		try{
@@ -130,7 +130,7 @@ class TransactionInfo implements Serializable {
 		}
 	}
 	
-	public boolean put(CacheTransactionManager manager, StreamCache cache,
+	public boolean put(CacheTransactionManager manager, BasicCache cache,
 			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException {
 		try{
 			ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -150,7 +150,7 @@ class TransactionInfo implements Serializable {
 		}
 	}
 	
-    public boolean putStream(CacheTransactionManager manager, StreamCache cache, 
+    public boolean putStream(CacheTransactionManager manager, BasicCache cache, 
     		String key, long timeToLive, long timeToIdle, InputStream inputData, long time) 
     		throws StorageException {
 
@@ -180,7 +180,7 @@ class TransactionInfo implements Serializable {
 	
 	/* métodos de coleta*/
 	
-	public Object get(CacheTransactionManager manager, StreamCache cache,
+	public Object get(CacheTransactionManager manager, BasicCache cache,
 			String key, boolean forUpdate, long time) throws RecoverException {
 		try{
 			InputStream in = this.getStream(manager, cache, key, forUpdate, time);
@@ -199,7 +199,7 @@ class TransactionInfo implements Serializable {
 		}
 	}
     
-    public InputStream getStream(CacheTransactionManager manager, StreamCache cache, 
+    public InputStream getStream(CacheTransactionManager manager, BasicCache cache, 
     		String key, boolean forUpdate, long time) throws RecoverException {
     	
     	try{
@@ -219,7 +219,7 @@ class TransactionInfo implements Serializable {
 
     /* métodos de remoção */
     
-	public boolean remove(CacheTransactionManager manager, StreamCache cache,
+	public boolean remove(CacheTransactionManager manager, BasicCache cache,
 			String key, Object value, long time) throws StorageException {
 		
 		try{
@@ -238,7 +238,7 @@ class TransactionInfo implements Serializable {
 		}
 	}
 	
-    public boolean remove(CacheTransactionManager manager, StreamCache cache,
+    public boolean remove(CacheTransactionManager manager, BasicCache cache,
     		String key, long time) throws StorageException{       
     	try{
     		if(this.managed.contains(key)){
@@ -261,7 +261,7 @@ class TransactionInfo implements Serializable {
 	
     /* métodos de manipulação*/
     
-	public void savePoint(StreamCache cache) throws IOException, RecoverException{
+	public void savePoint(BasicCache cache) throws IOException, RecoverException{
 		saved.clear();
 
 		for(String key: this.updated){
@@ -281,7 +281,7 @@ class TransactionInfo implements Serializable {
 		
 	}
     
-	public void rollback(StreamCache cache) throws StorageException, RecoverException {
+	public void rollback(BasicCache cache) throws StorageException, RecoverException {
 		
 		for(String key: this.saved){
 			
@@ -300,7 +300,7 @@ class TransactionInfo implements Serializable {
 		
 	}
 	
-	public void commit(StreamCache cache) throws RecoverException, StorageException {
+	public void commit(BasicCache cache) throws RecoverException, StorageException {
 		if(!this.updated.isEmpty()){
 			for(String key: this.updated){
 				CacheInputStream entity = (CacheInputStream) this.entities.getStream(key);
@@ -346,7 +346,7 @@ class TransactionInfo implements Serializable {
 	
     /* métodos internos */
     
-    private InputStream getEntity(CacheTransactionManager manager, StreamCache cache,
+    private InputStream getEntity(CacheTransactionManager manager, BasicCache cache,
     		String key, boolean lock, long time) 
     		throws RecoverException, IOException, TransactionException{
     	
@@ -368,7 +368,7 @@ class TransactionInfo implements Serializable {
     	}
     }
     
-    private void manageItem(CacheTransactionManager manager, StreamCache cache, String key, long time){
+    private void manageItem(CacheTransactionManager manager, BasicCache cache, String key, long time){
     	
     	if(this.managed.contains(key)){
     		return;
@@ -385,10 +385,9 @@ class TransactionInfo implements Serializable {
     }
 
     
-    private InputStream getSharedEntity(CacheTransactionManager manager, StreamCache cache,
+    private InputStream getSharedEntity(CacheTransactionManager manager, BasicCache cache,
     		String key, boolean lock) 
     		throws IOException, TransactionException, RecoverException{
-    	
 		InputStream in = cache.getStream(key);
 		return in;
     }
