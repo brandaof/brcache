@@ -4,7 +4,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.brandao.brcache.BRCacheConfig;
-import org.brandao.brcache.StreamCache;
+import org.brandao.brcache.BasicCache;
 
 /**
  * Gestor das transações de um cache.
@@ -28,7 +28,7 @@ public interface CacheTransactionManager {
 	
 	void setConfiguration(BRCacheConfig config);
 	
-	CacheTransactionHandler begin(StreamCache cache);
+	CacheTransactionHandler begin(BasicCache cache);
 	
 	CacheTransactionHandler getCurrrent();
 
