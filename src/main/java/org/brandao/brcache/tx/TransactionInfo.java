@@ -382,16 +382,4 @@ public class TransactionInfo implements Serializable {
 		return in;
     }
     
-    private byte[] getBytes(InputStream in) throws IOException {
-    	ByteArrayOutputStream bout = new ByteArrayOutputStream(2048);
-    	int l = 0;
-    	byte[] buffer = new byte[2048];
-    	
-    	while((l = in.read(buffer, 0, buffer.length)) > 0){
-    		bout.write(buffer, 0, l);
-    	}
-    	bout.close();
-    	return bout.toByteArray();
-    }
-	
 }
