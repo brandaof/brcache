@@ -3,6 +3,11 @@ package org.brandao.brcache.tx;
 import org.brandao.brcache.CacheError;
 import org.brandao.brcache.CacheException;
 
+/**
+ * 
+ * @author cliente
+ *
+ */
 public class TransactionException 
 	extends CacheException{
 
