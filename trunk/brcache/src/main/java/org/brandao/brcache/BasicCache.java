@@ -219,17 +219,6 @@ public class BasicCache
     }
     
     /**
-     * Remove o fluxo de bytes associado à chave.
-     * @param key chave associada ao valor.
-     * @return <code>true</code> se o valor for removido. Caso contrário <code>false</code>.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
-     * item.
-     */
-    public boolean removeStream(String key) throws StorageException{
-    	return super.removeStream(key);
-    }
-
-    /**
      * Remove o valor associado à chave.
      * @param key chave associada ao valor.
      * @return <code>true</code> se o valor for removido. Caso contrário <code>false</code>.

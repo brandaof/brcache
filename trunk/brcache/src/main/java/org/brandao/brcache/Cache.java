@@ -32,20 +32,18 @@ import org.brandao.concurrent.NamedLock;
  *
  */
 public class Cache 
-	extends StreamCache {
+	extends BasicCache {
 	
 	private static final long serialVersionUID = -8558471389768293591L;
 
 	protected transient NamedLock locks;
-	
-	protected BRCacheConfig config;
 	
     /**
      * Cria um novo cache.
      * 
      */
     public Cache(){
-    	this(new BRCacheConfig(new Configuration()));
+    	super(new BRCacheConfig(new Configuration()));
     	/*
         this(
     		3L*1024L*1024L, 1024, 0.5, 
@@ -55,57 +53,12 @@ public class Cache
 		*/
     }
     
-    public Cache(BRCacheConfig config){
-    	this(
-    			config.getNodesBufferSize(), config.getNodesPageSize(), config.getNodesSwapFactor(),
-    			config.getIndexBufferSize(), config.getIndexPageSize(), config.getIndexSwapFactor(), 
-    			config.getDataBufferSize(), config.getDataPageSize(), config.getDataBlockSize(), config.getDataSwapFactor(), 
-    			config.getMaxSizeEntry(), config.getMaxSizeKey(), config.getDataPath(), config.getSwapper(), config.getSwapperThread());
-    	this.config = config;
-    }
-    
     /**
-     * Cria um novo cache.
-     * 
-     * @param nodeBufferSize Tamanho do buffer, em bytes, onde os nós ficarão armazenados. 
-     * @param nodePageSize Tamanho da página, em bytes, do buffer de nós.
-     * @param nodeSwapFactor Fator de permuta dos nós.
-     * @param indexBufferSize Tamanho do buffer, em bytes, onde os índices ficarão armazenados.
-     * @param indexPageSize Tamanho da página, em bytes, do buffer de índices.
-     * @param indexSwapFactor Fator de permuta dos índices.
-     * @param dataBufferSize Tamanho do buffer, em bytes, onde os dados ficarão armazenados. 
-     * @param dataPageSize Tamanho da página, em bytes, do buffer de dados.
-     * @param blockSize Tamanho do bloco, em bytes.
-     * @param dataSwapFactor Fator de permuta dos dados.
-     * @param maxSizeEntry Tamanho máximo de uma entrada no cache.
-     * @param maxSizeKey Tamanho máximo de uma chave.
-     * @param dataPath Pasta onde os dados do cache serão persistidos.
-     * @param swaperType Estratégia de armazenamento dos dados em disco.
-     * @param quantitySwaperThread Quantidade de processos usados para fazer a permuta.
+     * Cria um novo cache a partir de uma configuração específica.
+     * @param config configuração.
      */
-    private Cache(
-    		long nodeBufferSize,
-    		long nodePageSize,
-    		double nodeSwapFactor,
-    		
-    		long indexBufferSize,
-    		long indexPageSize,
-    		double indexSwapFactor,
-    		
-    		long dataBufferSize,
-    		long dataPageSize,
-    		long blockSize,
-    		double dataSwapFactor,
-    		
-    		long maxSizeEntry,
-    		int maxSizeKey,
-            String dataPath,
-            SwaperStrategy swaperType,
-            int quantitySwaperThread
-    		){	
-    	super(nodeBufferSize, nodePageSize, nodeSwapFactor, indexBufferSize, 
-    			indexPageSize, indexSwapFactor, dataBufferSize, dataPageSize, blockSize, 
-    			dataSwapFactor, maxSizeEntry, maxSizeKey, dataPath, swaperType, quantitySwaperThread);
+    public Cache(BRCacheConfig config){
+    	super(config);
     	this.locks = new NamedLock();
     }
     
