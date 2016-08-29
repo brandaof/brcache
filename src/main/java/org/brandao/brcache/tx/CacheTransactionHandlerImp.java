@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.util.UUID;
 
 import org.brandao.brcache.CacheErrors;
+import org.brandao.brcache.CacheException;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 import org.brandao.brcache.StreamCache;
@@ -133,6 +134,9 @@ class CacheTransactionHandlerImp
 		catch(TransactionException e){
 			throw e;
 		}
+		catch(CacheException e){
+			throw new TransactionException(e, e.getError(), e.getParams());
+		}
 		catch (Throwable e) {
 			throw new TransactionException(e, CacheErrors.ERROR_1018);
 		}
@@ -217,6 +221,12 @@ class CacheTransactionHandlerImp
 			this.commitInProgress = false;
 			this.commited         = true;
 			this.rolledBack       = false;
+		}
+		catch(TransactionException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new TransactionException(e, e.getError(), e.getParams());
 		}
 		catch(Throwable e){
 			throw new TransactionException(e, CacheErrors.ERROR_1019);
