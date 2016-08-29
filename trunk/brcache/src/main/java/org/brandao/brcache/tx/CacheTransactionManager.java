@@ -6,6 +6,12 @@ import java.util.concurrent.TimeUnit;
 import org.brandao.brcache.BRCacheConfig;
 import org.brandao.brcache.StreamCache;
 
+/**
+ * Gestor das transações de um cache.
+ * 
+ * @author Brandao.
+ *
+ */
 public interface CacheTransactionManager {
 
 	void lock(UUID transaction, String key) throws TransactionException;
