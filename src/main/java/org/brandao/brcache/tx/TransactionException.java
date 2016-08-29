@@ -4,8 +4,9 @@ import org.brandao.brcache.CacheError;
 import org.brandao.brcache.CacheException;
 
 /**
+ * Lançada se ocorrer alguma falha ao processar uma transação.
  * 
- * @author cliente
+ * @author Brandao
  *
  */
 public class TransactionException 
@@ -15,13 +16,11 @@ public class TransactionException
 
 	public TransactionException(CacheError error, Object... params) {
 		super(error, params);
-		// TODO Auto-generated constructor stub
 	}
 
 	public TransactionException(Throwable thrwbl, CacheError error,
 			Object... params) {
 		super(thrwbl, error, params);
-		// TODO Auto-generated constructor stub
 	}
 
 }
