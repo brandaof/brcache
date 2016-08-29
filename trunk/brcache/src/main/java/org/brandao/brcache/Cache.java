@@ -2,8 +2,6 @@ package org.brandao.brcache;
 
 import java.io.Serializable;
 
-import org.brandao.brcache.tx.CacheTransactionManager;
-import org.brandao.brcache.tx.TXCache;
 import org.brandao.concurrent.NamedLock;
 
 /**
@@ -55,25 +53,6 @@ public class Cache
     public Cache(BRCacheConfig config){
     	super(config);
     	this.locks = new NamedLock();
-    }
-    
-    /**
-     * Obtém o cache com suporte transacional.
-     * @return cache.
-     */
-    public TXCache getTXCache(){
-    	return new TXCache(this);
-    }
-
-    /**
-     * Obtém o cache com suporte transacional com um gestor transacional e tempo limite específicos.
-     * @param txManager gestor transacional.
-     * @param timeout tempo limite. É o tempo máximo que se espera, em milisegundos, para concluir uma operação
-     * no cache.
-     * @return cache com suporte transacional.
-     */
-    public TXCache getTXCache(CacheTransactionManager txManager, long timeout){
-    	return new TXCache(this, txManager, timeout);
     }
     
 	/* métodos de armazenamento */
@@ -277,14 +256,6 @@ public class Cache
 	 */
 	public boolean containsKey(String key) throws RecoverException {
 		return super.getStream(key) != null;
-	}
-
-	/**
-	 * Obtém a configuração do cache.
-	 * @return configuração.
-	 */
-	public BRCacheConfig getConfig() {
-		return config;
 	}
 	
 }

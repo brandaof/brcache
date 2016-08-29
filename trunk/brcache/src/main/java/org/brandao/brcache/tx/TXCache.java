@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.brandao.brcache.BasicCache;
 import org.brandao.brcache.Cache;
 import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.CacheException;
@@ -132,7 +133,7 @@ public class TXCache
 		}
 	}
 	
-	private Cache cache;
+	private BasicCache cache;
 	
 	private CacheTransactionManager transactionManager;
 
@@ -142,7 +143,7 @@ public class TXCache
 	 * Cria um cache transacional a partir de um cache.
 	 * @param cache cache não transacional.
 	 */
-    public TXCache(Cache cache){
+    public TXCache(BasicCache cache){
     	this(cache, new CacheTransactionManagerImp() , TIME_OUT);
     }
 	
@@ -151,7 +152,7 @@ public class TXCache
      * @param cache cache não transacional.
      * @param transactionManager gestor transacional.
      */
-    public TXCache(Cache cache, CacheTransactionManager transactionManager){
+    public TXCache(BasicCache cache, CacheTransactionManager transactionManager){
     	this(cache, transactionManager, TIME_OUT);
     }
 
@@ -162,7 +163,7 @@ public class TXCache
      * @param timeout tempo limite. É o tempo máximo que se espera, em milisegundos, para concluir uma operação
      * no cache.
      */
-    public TXCache(Cache cache, CacheTransactionManager transactionManager, long timeout){
+    public TXCache(BasicCache cache, CacheTransactionManager transactionManager, long timeout){
     	this.cache = cache;
     	this.transactionManager = transactionManager;
     	this.transactionTimeout = timeout;
