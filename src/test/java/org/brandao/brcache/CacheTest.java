@@ -108,5 +108,80 @@ public class CacheTest extends TestCase{
 		
 		TestCase.assertTrue(cache.remove(KEY));
 	}
+
+	/* timeToLive */
+	
+	public void testTimeToLive() throws InterruptedException{
+		Cache cache = new Cache();
+		cache.put(KEY, VALUE, 1000, 0);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(800);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(400);
+		assertNull(cache.get(KEY));
+	}
+
+	public void testTimeToLiveLessThanTimeToIdle() throws InterruptedException{
+		Cache cache = new Cache();
+		cache.put(KEY, VALUE, 1000, 5000);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(1200);
+		assertNull(cache.get(KEY));
+	}
+
+	public void testNegativeTimeToLive() throws InterruptedException{
+		try{
+			Cache cache = new Cache();
+			cache.put(KEY, VALUE, -1, 5000);
+			fail();
+		}
+		catch(StorageException e){
+			if(!e.getError().equals(CacheErrors.ERROR_1029)){
+				fail();
+			}
+				
+		}
+	}
+
+	/* TimeToIdle */
+	
+	public void testTimeToIdle() throws InterruptedException{
+		Cache cache = new Cache();
+		cache.put(KEY, VALUE, 0, 1000);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(800);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(800);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(1200);
+		assertNull(cache.get(KEY));
+		
+	}
+
+	public void testTimeToIdleLessThanTimeToLive() throws InterruptedException{
+		Cache cache = new Cache();
+		cache.put(KEY, VALUE, 20000, 1000);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(800);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(800);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(1200);
+		assertNull(cache.get(KEY));
+	}
+
+	public void testNegativeTimeToIdle() throws InterruptedException{
+		try{
+			Cache cache = new Cache();
+			cache.put(KEY, VALUE, 0, -1);
+			fail();
+		}
+		catch(StorageException e){
+			if(!e.getError().equals(CacheErrors.ERROR_1028)){
+				fail();
+			}
+				
+		}
+	}
 	
 }

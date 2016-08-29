@@ -96,5 +96,15 @@ public class CacheErrors {
 	 * ERROR 1027: Invalid current transaction
 	 */
 	public static final CacheError ERROR_1027 = new CacheError(1027, "Invalid current transaction");
+
+	/**
+	 * ERROR 1028: Invalid time to idle
+	 */
+	public static final CacheError ERROR_1028 = new CacheError(1028, "Invalid time to idle");
+
+	/**
+	 * ERROR 1029: Invalid time to live
+	 */
+	public static final CacheError ERROR_1029 = new CacheError(1029, "Invalid time to live");
 	
 }
