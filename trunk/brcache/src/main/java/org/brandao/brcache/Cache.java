@@ -37,6 +37,7 @@ public class Cache
      */
     public Cache(){
     	super(new BRCacheConfig(new Configuration()));
+    	this.locks = new NamedLock();
     	/*
         this(
     		3L*1024L*1024L, 1024, 0.5, 

@@ -28,7 +28,6 @@ import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.CacheException;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
-import org.brandao.brcache.StreamCache;
 
 /**
  * Provê suporte transacional a um cache.
@@ -83,39 +82,39 @@ public class TXCache
 		try{
 			replace = CacheTransactionHandler.class.getDeclaredMethod(
 					"replace",	CacheTransactionManager.class, 
-					StreamCache.class, String.class, Object.class, long.class, long.class, long.class);
+					BasicCache.class, String.class, Object.class, long.class, long.class, long.class);
 
 			replaceExact = CacheTransactionHandler.class.getDeclaredMethod(
-					"replace", CacheTransactionManager.class, StreamCache.class,
+					"replace", CacheTransactionManager.class, BasicCache.class,
 					String.class, Object.class, 
 					Object.class, long.class, long.class, long.class);
 
 			putIfAbsent = CacheTransactionHandler.class.getDeclaredMethod(
-					"putIfAbsent", CacheTransactionManager.class, StreamCache.class,
+					"putIfAbsent", CacheTransactionManager.class, BasicCache.class,
 					String.class, Object.class, long.class, long.class, long.class);
 
 			put = CacheTransactionHandler.class.getDeclaredMethod(
-					"put", CacheTransactionManager.class, StreamCache.class,
+					"put", CacheTransactionManager.class, BasicCache.class,
 					String.class, Object.class, long.class, long.class, long.class);
 
 			putStream = CacheTransactionHandler.class.getDeclaredMethod(
-					"putStream", CacheTransactionManager.class, StreamCache.class, 
+					"putStream", CacheTransactionManager.class, BasicCache.class, 
 		    		String.class, long.class, long.class, InputStream.class, long.class);
 
 			get = CacheTransactionHandler.class.getDeclaredMethod(
-					"get", CacheTransactionManager.class, StreamCache.class,
+					"get", CacheTransactionManager.class, BasicCache.class,
 					String.class, boolean.class, long.class);
 
 			getStream = CacheTransactionHandler.class.getDeclaredMethod(
-					"getStream", CacheTransactionManager.class, StreamCache.class, 
+					"getStream", CacheTransactionManager.class, BasicCache.class, 
 		    		String.class, boolean.class, long.class);
 
 			removeExact = CacheTransactionHandler.class.getDeclaredMethod(
-					"remove", CacheTransactionManager.class, StreamCache.class,
+					"remove", CacheTransactionManager.class, BasicCache.class,
 					String.class, Object.class, long.class);
 
 			remove = CacheTransactionHandler.class.getDeclaredMethod(
-					"remove", CacheTransactionManager.class, StreamCache.class,
+					"remove", CacheTransactionManager.class, BasicCache.class,
 		    		String.class, long.class);
 
 			replace.setAccessible(true);
