@@ -97,21 +97,7 @@ public class Cache
 		
 		Serializable refLock = this.locks.lock(key);
 		try{
-			ByteArrayOutputStream bout = new ByteArrayOutputStream();
-			ObjectOutputStream oout = new ObjectOutputStream(bout);
-			oout.writeObject(value);
-			oout.flush();
-			return this.replaceStream(key, timeToLive, timeToIdle, 
-					new ByteArrayInputStream(bout.toByteArray()));
-		}
-		catch(StorageException e){
-			throw e;
-		}
-		catch(RecoverException e){
-			throw new StorageException(e, e.getError(), e.getParams());
-		}
-		catch(Throwable e){
-			throw new StorageException(e, CacheErrors.ERROR_1020);
+			return super.replace(key, value, timeToLive, timeToIdle);
 		}
 		finally{
 			if(refLock != null){
