@@ -249,6 +249,12 @@ public abstract class StreamCache
     public void putStream(String key, long timeToLive, long timeToIdle, 
     		InputStream inputData) throws StorageException{
         
+    	if(timeToLive < 0)
+            throw new StorageException(CacheErrors.ERROR_1029);
+
+    	if(timeToIdle < 0)
+            throw new StorageException(CacheErrors.ERROR_1028);
+    	
         if(key.length() > this.maxLengthKey)
             throw new StorageException(CacheErrors.ERROR_1008);
         
