@@ -579,5 +579,80 @@ public class TXCacheTest extends TestCase{
 		Thread.sleep(1000);
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 	}
+
+	/* timeToLive */
+	
+	public void testTimeToLive() throws InterruptedException{
+		TXCache cache = new Cache().getTXCache();
+		cache.put(KEY, VALUE, 1000, 0);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(800);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(400);
+		assertNull(cache.get(KEY));
+	}
+
+	public void testTimeToLiveLessThanTimeToIdle() throws InterruptedException{
+		TXCache cache = new Cache().getTXCache();
+		cache.put(KEY, VALUE, 1000, 5000);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(1200);
+		assertNull(cache.get(KEY));
+	}
+
+	public void testNegativeTimeToLive() throws InterruptedException{
+		try{
+			TXCache cache = new Cache().getTXCache();
+			cache.put(KEY, VALUE, -1, 5000);
+			fail();
+		}
+		catch(StorageException e){
+			if(!e.getError().equals(CacheErrors.ERROR_1029)){
+				fail();
+			}
+				
+		}
+	}
+
+	/* TimeToIdle */
+	
+	public void testTimeToIdle() throws InterruptedException{
+		TXCache cache = new Cache().getTXCache();
+		cache.put(KEY, VALUE, 0, 1000);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(800);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(800);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(1200);
+		assertNull(cache.get(KEY));
+		
+	}
+
+	public void testTimeToIdleLessThanTimeToLive() throws InterruptedException{
+		TXCache cache = new Cache().getTXCache();
+		cache.put(KEY, VALUE, 20000, 1000);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(800);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(800);
+		assertEquals(cache.get(KEY), VALUE);
+		Thread.sleep(1200);
+		assertNull(cache.get(KEY));
+	}
+
+	public void testNegativeTimeToIdle() throws InterruptedException{
+		try{
+			TXCache cache = new Cache().getTXCache();
+			cache.put(KEY, VALUE, 0, -1);
+			fail();
+		}
+		catch(StorageException e){
+			if(!e.getError().equals(CacheErrors.ERROR_1028)){
+				fail();
+			}
+				
+		}
+	}
 	
 }

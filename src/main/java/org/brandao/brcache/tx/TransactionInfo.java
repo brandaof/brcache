@@ -285,7 +285,7 @@ class TransactionInfo implements Serializable {
 			else{
 				ItemCacheMetadata metadata = this.cacheItemMetadata.get(orgKey);
 				ItemCacheInputStream item  = new ItemCacheInputStream(metadata, in);
-				cache.putStream(key, -1, -1, item);
+				cache.putStream(key, 0, 0, item);
 			}
 		}
 		
@@ -301,10 +301,12 @@ class TransactionInfo implements Serializable {
 				}
 				else{
 					ItemCacheMetadata metadata = this.cacheItemMetadata.get(key);
+					/*
 					ItemCacheInputStream in = new ItemCacheInputStream(
 							-1, metadata.getTimeToLive(), metadata.getTimeToIdle(), 
 							-1, -1, entity.getFlag(), entity.getSize(), entity);
-					cache.putStream(key, -1, -1, in);
+					*/
+					cache.putStream(key, metadata.getTimeToLive(), metadata.getTimeToIdle(), entity);
 				}
 			}
 			
