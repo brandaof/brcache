@@ -7,8 +7,8 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.brandao.brcache.BRCacheConfig;
+import org.brandao.brcache.BasicCache;
 import org.brandao.brcache.CacheErrors;
-import org.brandao.brcache.StreamCache;
 import org.brandao.concurrent.NamedLock;
 
 /**
@@ -151,7 +151,7 @@ public class CacheTransactionManagerImp
 		return this.transactionPath;
 	}
 
-	public CacheTransactionHandler begin(StreamCache cache) {
+	public CacheTransactionHandler begin(BasicCache cache) {
 		CacheTransactionHandler txh = this.transactions.get();
 		
 		if(txh != null){
