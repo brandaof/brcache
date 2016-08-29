@@ -247,7 +247,7 @@ public abstract class StreamCache
      * @return <code>true</code> se o item for substituido. Caso contrário, <code>false</code>
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    public boolean putStream(String key, long timeToLive, long timeToIdle, 
+    protected boolean putStream(String key, long timeToLive, long timeToIdle, 
     		InputStream inputData) throws StorageException{
         
     	if(timeToLive < 0)
@@ -321,7 +321,7 @@ public abstract class StreamCache
     }
 
     /**
-     * Substitui o valor associado à chave somente se ele existir.
+     * Substitui o fluxo de bytes associado à chave somente se ele existir.
      * @param key chave associada ao valor.
      * @param value valor para ser associado à chave.
 	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
@@ -329,9 +329,8 @@ public abstract class StreamCache
      * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    public boolean replaceStream(String key, long timeToLive, long timeToIdle, 
+    protected boolean replaceStream(String key, long timeToLive, long timeToIdle, 
     		InputStream inputData) throws StorageException{
-        
         
     	if(timeToLive < 0)
             throw new StorageException(CacheErrors.ERROR_1029);
@@ -426,7 +425,7 @@ public abstract class StreamCache
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
      * item.
      */
-    public InputStream getStream(String key) throws RecoverException {
+    protected InputStream getStream(String key) throws RecoverException {
         
         try{
             countRead++;
@@ -489,7 +488,7 @@ public abstract class StreamCache
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
      * item.
      */
-    public boolean remove(String key) throws StorageException{
+    protected boolean removeStream(String key) throws StorageException{
         
         try{
         	DataMap data = this.dataMap.get(key);

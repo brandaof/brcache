@@ -144,19 +144,21 @@ public class Cache
 		
 		Serializable refLock = this.locks.lock(key);
 		try{
-			Object o = this.get(key);
-			if(o != null){
-				this.put(key, value, timeToLive, timeToIdle);
-				return true;
-			}
-			else
-				return false;
+			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+			ObjectOutputStream oout = new ObjectOutputStream(bout);
+			oout.writeObject(value);
+			oout.flush();
+			return this.replaceStream(key, timeToLive, timeToIdle, 
+					new ByteArrayInputStream(bout.toByteArray()));
 		}
 		catch(StorageException e){
 			throw e;
 		}
 		catch(RecoverException e){
 			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
 		finally{
 			if(refLock != null){
@@ -245,12 +247,24 @@ public class Cache
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
 	public boolean put(String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
+		
+		ByteArrayOutputStream bout;
+		
 		try{
-			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+			bout = new ByteArrayOutputStream();
 			ObjectOutputStream oout = new ObjectOutputStream(bout);
 			oout.writeObject(value);
 			oout.flush();
-			return this.putStream(key, timeToLive, timeToIdle, new ByteArrayInputStream(bout.toByteArray()));
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
+		
+		
+		Serializable refLock = this.locks.lock(key);
+		try{
+			return this.putStream(key, timeToLive, timeToIdle, 
+					new ByteArrayInputStream(bout.toByteArray()));
 		}
 		catch(StorageException e){
 			throw e;
@@ -258,8 +272,13 @@ public class Cache
 		catch(Throwable e){
 			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
 	}
-
+	
 	/* métodos de coleta*/
 	
 	/**
@@ -324,17 +343,6 @@ public class Cache
 		}
 	}
 	
-	/**
-	 * Remove o valor associado à chave.
-	 * @param key chave associada ao valor.
-	 * @return <code>true</code> se o valor for removido. Caso contrário, <code>false</code>.
-	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
-     * item.
-	 */
-	public boolean remove(String key) throws StorageException {
-		return super.remove(key);
-	}
-
     /* métodos de manipulação*/
     
 	/**
