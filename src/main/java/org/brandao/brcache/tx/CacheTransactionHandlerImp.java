@@ -235,54 +235,69 @@ class CacheTransactionHandlerImp
 	}
 
 	public Object replace(CacheTransactionManager manager, BasicCache cache,
-			String key, Object value, long timeToLive, long timeToIdle, long time)
-			throws StorageException {
+			String key, Object value, long timeToLive, long timeToIdle,
+			long time) throws StorageException {
 		return this.transactionInfo.replace(manager, cache, key, value, timeToLive, timeToIdle, time);
 	}
 
+	public boolean replaceStream(CacheTransactionManager manager,
+			BasicCache cache, String key, InputStream inputData,
+			long timeToLive, long timeToIdle, long time)
+			throws StorageException {
+		return this.transactionInfo.replaceStream(manager, cache, key, inputData, 
+				timeToLive, timeToIdle, time);
+	}
+
 	public boolean replace(CacheTransactionManager manager, BasicCache cache,
-			String key, Object oldValue, Object newValue, long timeToLive, long timeToIdle,
-			long time) throws StorageException {
-		return this.transactionInfo.replace(manager, cache, key, oldValue, newValue, timeToLive, timeToIdle, time);
+			String key, Object oldValue, Object newValue, long timeToLive,
+			long timeToIdle, long time) throws StorageException {
+		return this.replace(manager, cache, key, oldValue, newValue, timeToLive, timeToIdle, time);
 	}
 
 	public Object putIfAbsent(CacheTransactionManager manager,
-			BasicCache cache, String key, Object value, long timeToLive, long timeToIdle,
-			long time) throws StorageException {
-		return this.transactionInfo.putIfAbsent(manager, cache, key, value, timeToLive, timeToIdle, time);
+			BasicCache cache, String key, Object value, long timeToLive,
+			long timeToIdle, long time) throws StorageException {
+		return this.putIfAbsent(manager, cache, key, value, timeToLive, timeToIdle, time);
+	}
+
+	public InputStream putIfAbsentStream(CacheTransactionManager manager,
+			BasicCache cache, String key, InputStream inputData,
+			long timeToLive, long timeToIdle, long time)
+			throws StorageException {
+		return this.putIfAbsentStream(manager, cache, key, inputData, timeToLive, timeToIdle, time);
 	}
 
 	public boolean put(CacheTransactionManager manager, BasicCache cache,
-			String key, Object value, long timeToLive, long timeToIdle, long time)
-			throws StorageException {
-		return this.transactionInfo.put(manager, cache, key, value, timeToLive, timeToIdle, time);
+			String key, Object value, long timeToLive, long timeToIdle,
+			long time) throws StorageException {
+		return this.put(manager, cache, key, value, timeToLive, timeToIdle, time);
 	}
 
 	public boolean putStream(CacheTransactionManager manager, BasicCache cache,
-			String key, long timeToLive, long timeToIdle, InputStream inputData, long time)
-			throws StorageException {
-		return this.transactionInfo.putStream(manager, cache, key, timeToLive, timeToIdle, inputData, time);
+			String key, long timeToLive, long timeToIdle,
+			InputStream inputData, long time) throws StorageException {
+		return this.putStream(manager, cache, key, timeToLive, timeToIdle, inputData, time);
 	}
 
 	public Object get(CacheTransactionManager manager, BasicCache cache,
 			String key, boolean forUpdate, long time) throws RecoverException {
-		return this.transactionInfo.get(manager, cache, key, forUpdate, time);
+		return this.get(manager, cache, key, forUpdate, time);
 	}
 
 	public InputStream getStream(CacheTransactionManager manager,
 			BasicCache cache, String key, boolean forUpdate, long time)
 			throws RecoverException {
-		return this.transactionInfo.getStream(manager, cache, key, forUpdate, time);
+		return this.getStream(manager, cache, key, forUpdate, time);
 	}
 
 	public boolean remove(CacheTransactionManager manager, BasicCache cache,
 			String key, Object value, long time) throws StorageException {
-		return this.transactionInfo.remove(manager, cache, key, value, time);
+		return this.remove(manager, cache, key, value, time);
 	}
 
 	public boolean remove(CacheTransactionManager manager, BasicCache cache,
 			String key, long time) throws StorageException {
-		return this.transactionInfo.remove(manager, cache, key, time);
+		return this.remove(manager, cache, key, time);
 	}
 
 }
