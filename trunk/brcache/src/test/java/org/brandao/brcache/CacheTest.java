@@ -29,14 +29,14 @@ public class CacheTest extends TestCase{
 
 	public void testReplaceStream() throws StorageException, IOException{
 		Cache cache = new Cache();
-		TestCase.assertFalse(cache.replace(KEY, CacheTestHelper.toStream(VALUE), 0, 0));
+		TestCase.assertFalse(cache.replaceStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0));
 	}
 
 	public void testReplaceStreamSuccess() throws StorageException, RecoverException, IOException, ClassNotFoundException{
 		Cache cache = new Cache();
-		cache.put(KEY, CacheTestHelper.toStream(VALUE), 0, 0);
+		cache.putStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0);
 		TestCase.assertEquals(VALUE, (String)CacheTestHelper.toObject(cache.getStream(KEY)));
-		TestCase.assertTrue(cache.replace(KEY, CacheTestHelper.toStream(VALUE2), 0, 0));
+		TestCase.assertTrue(cache.replaceStream(KEY, CacheTestHelper.toStream(VALUE2), 0, 0));
 		TestCase.assertEquals(VALUE2, (String)CacheTestHelper.toObject(cache.getStream(KEY)));
 	}
 	
