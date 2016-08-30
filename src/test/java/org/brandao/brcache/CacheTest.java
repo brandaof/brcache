@@ -68,6 +68,19 @@ public class CacheTest extends TestCase{
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
+	public void testputIfAbsentStream() throws StorageException, RecoverException, IOException{
+		Cache cache = new Cache();
+		TestCase.assertNull(cache.putIfAbsentStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0));
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+	}
+
+	public void testputIfAbsentStreamExistValue() throws StorageException, RecoverException, IOException, ClassNotFoundException{
+		Cache cache = new Cache();
+		cache.putStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0);
+		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.putIfAbsentStream(KEY, CacheTestHelper.toStream(VALUE2), 0, 0)));
+		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.getStream(KEY)));
+	}
+	
 	/* put */
 	
 	public void testPut() throws StorageException, RecoverException{
