@@ -539,7 +539,7 @@ public class TXCacheTest extends TestCase{
 
 	public void testConcurrentTransactionPutIfAbsentStreamExistValue() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
-ss
+
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
 			@Override
@@ -551,17 +551,17 @@ ss
 		};
 		
 		CacheTransaction tx = cache.beginTransaction();
-		cache.put(KEY, VALUE, 0, 0);
+		cache.putStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0);
 		
 		task.start();
 		Thread.sleep(2000);
 		
-		TestCase.assertEquals(VALUE, cache.putIfAbsent(KEY, VALUE2, 0, 0));
-		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.putIfAbsentStream(KEY, CacheTestHelper.toStream(VALUE2), 0, 0)));
+		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.getStream(KEY)));
 		tx.commit();
 		
 		Thread.sleep(1000);
-		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+		TestCase.assertEquals(VALUE2, CacheTestHelper.toObject(cache.getStream(KEY)));
 	}	
 	/* put */
 	
