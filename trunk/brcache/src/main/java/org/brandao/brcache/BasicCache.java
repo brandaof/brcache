@@ -107,58 +107,10 @@ public class BasicCache
      */
     public TXCache getTXCache(CacheTransactionManager txManager, long timeout){
     	return new TXCache(this, txManager, timeout);
-    }    
-    /**
-	 * Associa o fluxo de bytes do valor à chave.
-	 * @param key chave associada ao fluxo.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @param inputData fluxo de bytes do valor.
-     * @return <code>true</code> se o item for substituido. Caso contrário, <code>false</code>
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-     */
-    public boolean putStream(String key, long timeToLive, long timeToIdle, 
-    		InputStream inputData) throws StorageException{
-    	return super.putStream(key, timeToLive, timeToIdle, inputData);
     }
-
-	/**
-	 * Associa o valor à chave.
-	 * @param key chave associada ao valor.
-	 * @param value valor para ser associado à chave.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @return <code>true</code> se o item for substituido. Caso contrário, <code>false</code>
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-	 */
-	public boolean put(String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
-		
-		ByteArrayOutputStream bout;
-		
-		try{
-			bout = new ByteArrayOutputStream();
-			ObjectOutputStream oout = new ObjectOutputStream(bout);
-			oout.writeObject(value);
-			oout.flush();
-		}
-		catch(Throwable e){
-			throw new StorageException(e, CacheErrors.ERROR_1020);
-		}
-		
-		try{
-			return this.putStream(key, timeToLive, timeToIdle, 
-					new ByteArrayInputStream(bout.toByteArray()));
-		}
-		catch(StorageException e){
-			throw e;
-		}
-		catch(Throwable e){
-			throw new StorageException(e, CacheErrors.ERROR_1020);
-		}
-	}
-	
+    
 	/* métodos de armazenamento */
-	
+    
     /**
      * Substitui o valor associado à chave somente se ele existir.
      * @param key chave associada ao valor.
@@ -184,8 +136,8 @@ public class BasicCache
 		}
 		
 		try{
-			return this.replaceStream(key, timeToLive, timeToIdle, 
-					new ByteArrayInputStream(bout.toByteArray()));
+			return super.replaceStream(key, new ByteArrayInputStream(bout.toByteArray()), 
+					timeToLive, timeToIdle);
 		}
 		catch(StorageException e){
 			throw e;
@@ -207,11 +159,11 @@ public class BasicCache
      * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    public boolean replaceStream(String key, long timeToLive, long timeToIdle, 
-    		InputStream inputData) throws StorageException{
-    	return super.replaceStream(key, timeToLive, timeToIdle, inputData);
+    public boolean replaceStream(String key, InputStream inputData, 
+    		long timeToLive, long timeToIdle) throws StorageException{
+    	return super.replaceStream(key, inputData, timeToLive, timeToIdle);
     }
-
+	
 	/**
 	 * Associa o valor à chave somente se a chave não estiver associada a um valor.
 	 * @param key chave associada ao valor.
@@ -237,8 +189,8 @@ public class BasicCache
 
 		try{
 			InputStream in =
-				super.putIfAbsentStream(key, timeToLive, timeToIdle,
-					new ByteArrayInputStream(bout.toByteArray()));
+				super.putIfAbsentStream(key, new ByteArrayInputStream(bout.toByteArray()),
+						timeToLive, timeToIdle);
 			
 			if(in != null){
 				ObjectInputStream oin = new ObjectInputStream(in);
@@ -264,11 +216,60 @@ public class BasicCache
      * @return fluxo associado à chave ou <code>null</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    public InputStream putIfAbsentStream(String key, long timeToLive, long timeToIdle, 
-    		InputStream inputData) throws StorageException{
-    	return super.putIfAbsentStream(key, timeToLive, timeToIdle, inputData);
+    public InputStream putIfAbsentStream(String key, InputStream inputData,
+    		long timeToLive, long timeToIdle) throws StorageException{
+    	return super.putIfAbsentStream(key, inputData, timeToLive, timeToIdle);
     }
     
+	/**
+	 * Associa o valor à chave.
+	 * @param key chave associada ao valor.
+	 * @param value valor para ser associado à chave.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
+     * @return <code>true</code> se o item for substituido. Caso contrário, <code>false</code>
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
+	 */
+	public boolean put(String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
+		
+		ByteArrayOutputStream bout;
+		
+		try{
+			bout = new ByteArrayOutputStream();
+			ObjectOutputStream oout = new ObjectOutputStream(bout);
+			oout.writeObject(value);
+			oout.flush();
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
+		
+		try{
+			return this.putStream(key, new ByteArrayInputStream(bout.toByteArray()), 
+					timeToLive, timeToIdle);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
+	}
+    
+    /**
+	 * Associa o fluxo de bytes do valor à chave.
+	 * @param key chave associada ao fluxo.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
+     * @param inputData fluxo de bytes do valor.
+     * @return <code>true</code> se o item for substituido. Caso contrário, <code>false</code>
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
+     */
+    public boolean putStream(String key, InputStream inputData, 
+    		long timeToLive, long timeToIdle) throws StorageException{
+    	return super.putStream(key, inputData, timeToLive, timeToIdle);
+    }
+	
 	/**
 	 * Obtém o valor associado à chave.
 	 * @param key chave associada ao valor.
