@@ -132,6 +132,7 @@ public class Cache
 		
 		Serializable refLock = this.locks.lock(key);
 		try{
+			return super.putIfAbsent(key, timeToLive, timeToIdle, value);
 			Object o = super.get(key);
 			if(o == null){
 				super.put(key, value, timeToLive, timeToIdle);
