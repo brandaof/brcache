@@ -82,6 +82,28 @@ public class Cache
 		}
 	}
 	
+    /**
+     * Substitui o fluxo de bytes associado à chave somente se ele existir.
+     * @param key chave associada ao valor.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
+     * @param inputData fluxo de bytes do valor.
+     * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
+     */
+    public boolean replaceStream(String key, long timeToLive, long timeToIdle, 
+    		InputStream inputData) throws StorageException{
+		Serializable refLock = this.locks.lock(key);
+		try{
+			return super.replaceStream(key, timeToLive, timeToIdle, inputData);
+		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
+    }
+	
 	/**
 	 * Substitui o valor associado à chave somente se ele for igual a um determinado valor.
 	 * @param key chave associada ao valor.
@@ -132,7 +154,7 @@ public class Cache
 		
 		Serializable refLock = this.locks.lock(key);
 		try{
-			return super.putIfAbsent(key, timeToLive, timeToIdle, value);
+			return super.putIfAbsent(key, value, timeToLive, timeToIdle);
 		}
 		finally{
 			if(refLock != null){
@@ -192,7 +214,46 @@ public class Cache
 		}
 	}
 	
+    /* métodos de coleta */
+	
+	/**
+	 * Obtém o valor associado à chave.
+	 * @param key chave associada ao valor.
+     * @return valor associado à chave ou <code>null</code>.
+     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
+     * item.
+	 */
+	public Object get(String key) throws RecoverException {
+		Serializable refLock = this.locks.lock(key);
+		try{
+			return super.get(key);
+		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
+	}
 
+    /**
+     * Obtém o fluxo de bytes do valor associado à chave.
+     * @param key chave associada ao fluxo.
+     * @return fluxo de bytes do valor ou <code>null</code>.
+     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
+     * item.
+     */
+    public InputStream getStream(String key) throws RecoverException {
+		Serializable refLock = this.locks.lock(key);
+		try{
+			return super.getStream(key);
+		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
+    }
+	
     /* métodos de remoção */
 
 	/**
