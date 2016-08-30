@@ -171,11 +171,19 @@ public class BasicCache
 	public boolean replace(String key, Object value, 
 			long timeToLive, long timeToIdle) throws StorageException {
 		
+		ByteArrayOutputStream bout;
+		
 		try{
-			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+			bout = new ByteArrayOutputStream();
 			ObjectOutputStream oout = new ObjectOutputStream(bout);
 			oout.writeObject(value);
 			oout.flush();
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
+		
+		try{
 			return this.replaceStream(key, timeToLive, timeToIdle, 
 					new ByteArrayInputStream(bout.toByteArray()));
 		}
@@ -204,16 +212,16 @@ public class BasicCache
     	return super.replaceStream(key, timeToLive, timeToIdle, inputData);
     }
 
-    /**
-     * Substitui o fluxo de bytes associado à chave somente se ele não existir.
-     * @param key chave associada ao valor.
-     * @param value valor para ser associado à chave.
+	/**
+	 * Associa o valor à chave somente se a chave não estiver associada a um valor.
+	 * @param key chave associada ao valor.
+	 * @param value valor para ser associado à chave.
 	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
 	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
+	 * @return valor anterior associado à chave.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-     */
-    public boolean putIfAbsent(String key, long timeToLive, long timeToIdle, 
+	 */
+    public Object putIfAbsent(String key, long timeToLive, long timeToIdle, 
     		Object value) throws StorageException{
 		ByteArrayOutputStream bout;
 		
@@ -226,10 +234,18 @@ public class BasicCache
 		catch(Throwable e){
 			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
-		
+
 		try{
-			return super.putIfAbsentStream(key, timeToLive, timeToIdle,
+			InputStream in =
+				super.putIfAbsentStream(key, timeToLive, timeToIdle,
 					new ByteArrayInputStream(bout.toByteArray()));
+			
+			if(in != null){
+				ObjectInputStream oin = new ObjectInputStream(in);
+				return oin.readObject();
+			}
+			else
+				return null;
 		}
 		catch(StorageException e){
 			throw e;
@@ -240,15 +256,15 @@ public class BasicCache
     }
     
     /**
-     * Substitui o fluxo de bytes associado à chave somente se ele não existir.
+     * Associa o fluxo de bytes do valor à chave somente se a chave não estiver associada a um valor.
      * @param key chave associada ao valor.
 	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
 	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
      * @param inputData fluxo de bytes do valor.
-     * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
+     * @return fluxo associado à chave ou <code>null</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    public boolean putIfAbsentStream(String key, long timeToLive, long timeToIdle, 
+    public InputStream putIfAbsentStream(String key, long timeToLive, long timeToIdle, 
     		InputStream inputData) throws StorageException{
     	return super.putIfAbsentStream(key, timeToLive, timeToIdle, inputData);
     }
