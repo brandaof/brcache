@@ -274,9 +274,8 @@ class CacheTransactionHandlerImp
 	}
 
 	public boolean putStream(CacheTransactionManager manager, BasicCache cache,
-			String key, long timeToLive, long timeToIdle,
-			InputStream inputData, long time) throws StorageException {
-		return this.putStream(manager, cache, key, timeToLive, timeToIdle, inputData, time);
+			String key,InputStream inputData, long timeToLive, long timeToIdle, long time) throws StorageException {
+		return this.putStream(manager, cache, key, inputData, timeToLive, timeToIdle, time);
 	}
 
 	public Object get(CacheTransactionManager manager, BasicCache cache,

@@ -37,7 +37,7 @@ interface CacheTransactionHandler
 			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException;
 	
     boolean putStream(CacheTransactionManager manager, BasicCache cache, 
-    		String key, long timeToLive, long timeToIdle, InputStream inputData, long time) 
+    		String key, InputStream inputData, long timeToLive, long timeToIdle, long time) 
     		throws StorageException;
 	
 	/* métodos de coleta*/

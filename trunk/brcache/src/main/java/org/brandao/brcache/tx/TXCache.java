@@ -102,7 +102,7 @@ public class TXCache
 					String.class, Object.class, long.class, long.class, long.class);
 
 			putIfAbsentStream = CacheTransactionHandler.class.getDeclaredMethod(
-					"putIfAbsent", CacheTransactionManager.class, BasicCache.class,
+					"putIfAbsentStream", CacheTransactionManager.class, BasicCache.class,
 					String.class, InputStream.class, long.class, long.class, long.class);
 			
 			put = CacheTransactionHandler.class.getDeclaredMethod(
