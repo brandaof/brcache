@@ -1,5 +1,6 @@
 package org.brandao.brcache;
 
+import java.io.InputStream;
 import java.io.Serializable;
 
 import org.brandao.concurrent.NamedLock;
@@ -126,7 +127,7 @@ public class Cache
 	 * @return valor anterior associado à chave.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
-	public Object putIfAbsent(String key, 
+	public Object putIfAbsent(String key,
 			Object value, long timeToLive, long timeToIdle) throws StorageException {
 		
 		Serializable refLock = this.locks.lock(key);
@@ -150,6 +151,39 @@ public class Cache
 			}
 		}
 	}
+	
+    /**
+     * Substitui o fluxo de bytes associado à chave somente se ele não existir.
+     * @param key chave associada ao valor.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
+     * @param inputData fluxo de bytes do valor.
+     * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
+     */
+    public InputStream putIfAbsentStream(String key, long timeToLive, long timeToIdle, 
+    		InputStream inputData) throws StorageException{
+    	
+		Serializable refLock = this.locks.lock(key);
+		try{
+			if(super.putIfAbsentStream(key, timeToLive, timeToIdle, inputData)){
+				return null;
+			}
+			else
+				return super.getStream(key);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(RecoverException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
+    }
 	
 	/**
 	 * Associa o valor à chave.

@@ -323,9 +323,9 @@ public abstract class StreamCache
     /**
      * Substitui o fluxo de bytes associado à chave somente se ele existir.
      * @param key chave associada ao valor.
-     * @param value valor para ser associado à chave.
 	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
 	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
+     * @param inputData fluxo de bytes do valor.
      * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
@@ -403,12 +403,12 @@ public abstract class StreamCache
     }
     
     /**
-     * Substitui o fluxo de bytes associado à chave somente se ele não existir.
+     * Associa o fluxo de bytes do valor à chave somente se ele não existir.
      * @param key chave associada ao valor.
-     * @param value valor para ser associado à chave.
 	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
 	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
+     * @param inputData fluxo de bytes do valor.
+     * @return <code>true</code> se o fluxo for associado à chave. Caso contrário, <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
     protected boolean putIfAbsentStream(String key, long timeToLive, long timeToIdle, 
@@ -459,9 +459,9 @@ public abstract class StreamCache
             //Registra os dados no buffer de dados.
             this.putData(map, inputData);
             //Faz a indexação do item e retorna o índice atual, caso exista.
-            oldMap = this.dataMap.replace(key, map);
+            oldMap = this.dataMap.putIfAbsent(key, map);
             
-            if(oldMap == null){
+            if(oldMap != null){
             	this.remove(key, map);
             	return false;
             }
