@@ -221,8 +221,8 @@ public class BasicCache
 	 * @return valor anterior associado à chave.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
-    public Object putIfAbsent(String key, long timeToLive, long timeToIdle, 
-    		Object value) throws StorageException{
+    public Object putIfAbsent(String key, Object value, 
+    		long timeToLive, long timeToIdle) throws StorageException{
 		ByteArrayOutputStream bout;
 		
 		try{
@@ -292,7 +292,8 @@ public class BasicCache
 		catch(Throwable e){
 			throw new StorageException(e, CacheErrors.ERROR_1021);
 		}
-	}    
+	}
+	
     /**
      * Obtém o fluxo de bytes do valor associado à chave.
      * @param key chave associada ao fluxo.
