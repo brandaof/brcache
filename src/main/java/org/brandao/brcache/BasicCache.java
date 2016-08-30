@@ -270,6 +270,8 @@ public class BasicCache
     	return super.putStream(key, inputData, timeToLive, timeToIdle);
     }
 	
+    /* métodos de coleta */
+    
 	/**
 	 * Obtém o valor associado à chave.
 	 * @param key chave associada ao valor.
@@ -305,6 +307,8 @@ public class BasicCache
     public InputStream getStream(String key) throws RecoverException {
     	return super.getStream(key);
     }
+    
+    /* métodos de remoção */
     
     /**
      * Remove o valor associado à chave.
