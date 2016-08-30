@@ -30,6 +30,9 @@ interface CacheTransactionHandler
 	Object putIfAbsent(CacheTransactionManager manager, BasicCache cache,
 			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException;
 	
+	InputStream putIfAbsentStream(CacheTransactionManager manager, BasicCache cache,
+			String key, InputStream inputData, long timeToLive, long timeToIdle, long time) throws StorageException;
+    		
 	boolean put(CacheTransactionManager manager, BasicCache cache,
 			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException;
 	
