@@ -133,18 +133,6 @@ public class Cache
 		Serializable refLock = this.locks.lock(key);
 		try{
 			return super.putIfAbsent(key, timeToLive, timeToIdle, value);
-			Object o = super.get(key);
-			if(o == null){
-				super.put(key, value, timeToLive, timeToIdle);
-			}
-			
-			return o;
-		}
-		catch(StorageException e){
-			throw e;
-		}
-		catch(RecoverException e){
-			throw new StorageException(e, e.getError(), e.getParams());
 		}
 		finally{
 			if(refLock != null){
@@ -154,15 +142,15 @@ public class Cache
 	}
 	
     /**
-     * Substitui o fluxo de bytes associado à chave somente se ele não existir.
+     * Associa o fluxo de bytes do valor à chave somente se a chave não estiver associada a um valor.
      * @param key chave associada ao valor.
 	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
 	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
      * @param inputData fluxo de bytes do valor.
-     * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
+     * @return fluxo associado à chave ou <code>null</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    public boolean putIfAbsentStream(String key, long timeToLive, long timeToIdle, 
+    public InputStream putIfAbsentStream(String key, long timeToLive, long timeToIdle, 
     		InputStream inputData) throws StorageException{
     	
 		Serializable refLock = this.locks.lock(key);
