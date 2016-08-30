@@ -418,12 +418,12 @@ public abstract class StreamCache
     }
     
     /**
-     * Associa o fluxo de bytes do valor à chave somente se ele não existir.
+     * Associa o fluxo de bytes do valor à chave somente se a chave não estiver associada a um valor.
      * @param key chave associada ao valor.
 	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
 	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
      * @param inputData fluxo de bytes do valor.
-     * @return <code>true</code> se o fluxo for associado à chave. Caso contrário, <code>false</code>.
+     * @return fluxo associado à chave ou <code>null</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
     protected InputStream putIfAbsentStream(String key, long timeToLive, long timeToIdle, 
