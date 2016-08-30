@@ -377,97 +377,14 @@ public abstract class StreamCache
             //Registra os dados no buffer de dados.
             this.putData(map, inputData);
             //Faz a indexação do item e retorna o índice atual, caso exista.
-            oldMap = this.dataMap.putIfAbsent(key, map);
+            oldMap = this.dataMap.replace(key, map);
             
             if(oldMap != null){
-            	this.remove(key, map);
+                this.countWrite++;
+            	return true;
+            }
+            else
             	return false;
-            }
-            
-            this.countWrite++;
-            return true;
-        }
-        catch(Throwable e){
-        	try{
-        		this.releaseSegments(map);
-        	}
-        	catch(Throwable ex){
-        		e.printStackTrace();
-        	}
-            throw 
-            	e instanceof StorageException? 
-            		(StorageException)e : 
-            		new StorageException(e, CacheErrors.ERROR_1020);
-        }
-        
-    }
-    
-    /**
-     * Associa o fluxo de bytes do valor à chave somente se ele não existir.
-     * @param key chave associada ao valor.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @param inputData fluxo de bytes do valor.
-     * @return <code>true</code> se o fluxo for associado à chave. Caso contrário, <code>false</code>.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-     */
-    protected boolean putIfAbsentStream(String key, long timeToLive, long timeToIdle, 
-    		InputStream inputData) throws StorageException{
-        
-    	if(timeToLive < 0)
-            throw new StorageException(CacheErrors.ERROR_1029);
-
-    	if(timeToIdle < 0)
-            throw new StorageException(CacheErrors.ERROR_1028);
-    	
-        if(key.length() > this.maxLengthKey)
-            throw new StorageException(CacheErrors.ERROR_1008);
-        
-        DataMap oldMap = null;
-        DataMap map    = new DataMap();
-        
-        try{
-        	//ItemCacheInputStream permite manipular além dos dados os metadados do item.
-            if(inputData instanceof ItemCacheInputStream){
-            	ItemCacheInputStream input = (ItemCacheInputStream)inputData;
-            	DataMap itemMetadata = input.getMap();
-            	
-                map.setCreationTime(itemMetadata.getCreationTime());
-                map.setMostRecentTime(itemMetadata.getMostRecentTime());
-                map.setTimeToIdle(itemMetadata.getTimeToIdle());
-                map.setTimeToLive(itemMetadata.getTimeToLive());
-                
-            	//o cache transacional pode tentar restaurar um item já expirado.
-                //Nesse caso, tem que remove-lo. 
-                //Somente será removido se o item ainda for o mesmo gerenciado pela transação.
-                if(map.isDead()){
-                	this.remove(key, map);
-                	return false;
-                }
-                
-            }
-            else{
-            	//Gera os metadados do item.
-	            map.setCreationTime(System.currentTimeMillis());
-	            map.setMostRecentTime(map.getCreationTime());
-	            map.setTimeToIdle(timeToIdle);
-	            map.setTimeToLive(timeToLive);
-            }
-            
-            //Toda item inserido tem que ter uma nova id. Mesmo que ele exista.
-            map.setId(this.modCount++);
-            //Registra os dados no buffer de dados.
-            this.putData(map, inputData);
-            //Faz a indexação do item e retorna o índice atual, caso exista.
-            oldMap = this.dataMap.putIfAbsent(key, map);
-            
-            if(oldMap != null){
-            	this.remove(key, map);
-            	return false;
-            }
-            
-            this.countWrite++;
-            return true;
         }
         catch(Throwable e){
         	try{
@@ -483,11 +400,93 @@ public abstract class StreamCache
         }
         finally{
 	    	if(oldMap != null){
-	    		this.releaseSegments(oldMap);
-	            this.countRemoved++;
+	    		//this.releaseSegments(oldMap);
+            	this.remove(key, oldMap);
 	    	}
         }
-    }    
+        
+    }
+    
+    /**
+     * Associa o fluxo de bytes do valor à chave somente se ele não existir.
+     * @param key chave associada ao valor.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
+     * @param inputData fluxo de bytes do valor.
+     * @return <code>true</code> se o fluxo for associado à chave. Caso contrário, <code>false</code>.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
+     */
+    protected InputStream putIfAbsentStream(String key, long timeToLive, long timeToIdle, 
+    		InputStream inputData) throws StorageException{
+        
+    	if(timeToLive < 0)
+            throw new StorageException(CacheErrors.ERROR_1029);
+
+    	if(timeToIdle < 0)
+            throw new StorageException(CacheErrors.ERROR_1028);
+    	
+        if(key.length() > this.maxLengthKey)
+            throw new StorageException(CacheErrors.ERROR_1008);
+        
+        DataMap oldMap = null;
+        DataMap map    = new DataMap();
+        InputStream in = null;
+        
+        try{
+            map.setCreationTime(System.currentTimeMillis());
+            map.setMostRecentTime(map.getCreationTime());
+            map.setTimeToIdle(timeToIdle);
+            map.setTimeToLive(timeToLive);
+            
+            //Toda item inserido tem que ter uma nova id. Mesmo que ele exista.
+            map.setId(this.modCount++);
+            //Registra os dados no buffer de dados.
+            this.putData(map, inputData);
+            //Faz a indexação do item e retorna o índice atual, caso exista.
+            oldMap = this.dataMap.putIfAbsent(key, map);
+            
+        	//se oldMap for diferente de null, significa que já existe um item no cache
+            if(oldMap != null){
+            	//remove os segmentos alocados para o item atual.
+            	this.remove(key, map);
+            	//tenta obter o stream do item no cache
+            	in = this.getStream(key, map);
+            }
+            else{
+            	this.countWrite++;
+            }
+            			
+        }
+        catch(Throwable e){
+        	try{
+            	this.remove(key, map);
+        		//this.releaseSegments(map);
+        	}
+        	catch(Throwable ex){
+        		e.printStackTrace();
+        	}
+            throw 
+            	e instanceof StorageException? 
+            		(StorageException)e : 
+            		new StorageException(e, CacheErrors.ERROR_1020);
+        }
+        
+        if(oldMap != null){
+	    	if(in == null){
+	    		//será lançada uma exceção se o item não existir
+	    		throw new StorageException(CacheErrors.ERROR_1030);
+	    	}
+	    	else{
+	    		//retorna o stream
+	    		return in;
+	    	}
+        }
+        else{
+        	return null;
+        }
+        
+    }
+    
     /**
      * Obtém o fluxo de bytes do valor associado à chave.
      * @param key chave associada ao fluxo.
@@ -495,13 +494,17 @@ public abstract class StreamCache
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
      * item.
      */
+    
     protected InputStream getStream(String key) throws RecoverException {
+        DataMap map = this.dataMap.get(key);
+    	return this.getStream(key, map);
+    }
+    
+    private InputStream getStream(String key, DataMap map) throws RecoverException {
         
         try{
             countRead++;
 
-            DataMap map = this.dataMap.get(key);
-            
             if(map != null){
             	
             	//Verifica se o item já expirou

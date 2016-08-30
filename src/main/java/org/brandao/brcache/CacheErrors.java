@@ -106,5 +106,10 @@ public class CacheErrors {
 	 * ERROR 1029: Invalid time to live
 	 */
 	public static final CacheError ERROR_1029 = new CacheError(1029, "Invalid time to live");
+
+	/**
+	 * ERROR 1030: Expired Item
+	 */
+	public static final CacheError ERROR_1030 = new CacheError(1029, "Expired Item");
 	
 }
