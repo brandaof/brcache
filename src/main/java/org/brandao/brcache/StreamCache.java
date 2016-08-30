@@ -492,7 +492,7 @@ public abstract class StreamCache
     		this.releaseSegments(map);
     		
         	//tenta obter o stream do item no cache
-        	in = this.getStream(key, map);
+        	in = this.getStream(key, oldMap);
         }
         
     	this.countWrite++;
