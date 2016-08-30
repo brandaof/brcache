@@ -262,55 +262,69 @@ public abstract class StreamCache
         DataMap oldMap  = null;
         DataMap map     = new DataMap();
         
-        try{
-        	//ItemCacheInputStream permite manipular além dos dados os metadados do item.
-            if(inputData instanceof ItemCacheInputStream){
-            	ItemCacheInputStream input = (ItemCacheInputStream)inputData;
-            	DataMap itemMetadata = input.getMap();
-            	
-                map.setCreationTime(itemMetadata.getCreationTime());
-                map.setMostRecentTime(itemMetadata.getMostRecentTime());
-                map.setTimeToIdle(itemMetadata.getTimeToIdle());
-                map.setTimeToLive(itemMetadata.getTimeToLive());
-                
-            	//o cache transacional pode tentar restaurar um item já expirado.
-                //Nesse caso, tem que remove-lo. 
-                //Somente será removido se o item ainda for o mesmo gerenciado pela transação.
-                if(map.isDead()){
-                	this.remove(key, map);
-                	return false;
-                }
-                
-            }
-            else{
-            	//Gera os metadados do item.
-	            map.setCreationTime(System.currentTimeMillis());
-	            map.setMostRecentTime(map.getCreationTime());
-	            map.setTimeToIdle(timeToIdle);
-	            map.setTimeToLive(timeToLive);
+    	//ItemCacheInputStream permite manipular além dos dados os metadados do item.
+        if(inputData instanceof ItemCacheInputStream){
+        	ItemCacheInputStream input = (ItemCacheInputStream)inputData;
+        	DataMap itemMetadata = input.getMap();
+        	
+            map.setCreationTime(itemMetadata.getCreationTime());
+            map.setMostRecentTime(itemMetadata.getMostRecentTime());
+            map.setTimeToIdle(itemMetadata.getTimeToIdle());
+            map.setTimeToLive(itemMetadata.getTimeToLive());
+            
+        	//o cache transacional pode tentar restaurar um item já expirado.
+            //Nesse caso, tem que remove-lo. 
+            //Somente será removido se o item ainda for o mesmo gerenciado pela transação.
+            if(map.isDead()){
+            	this.remove(key, map);
+            	return false;
             }
             
-            //Toda item inserido tem que ter uma nova id. Mesmo que ele exista.
-            map.setId(this.modCount++);
+        }
+        else{
+        	//Gera os metadados do item.
+            map.setCreationTime(System.currentTimeMillis());
+            map.setMostRecentTime(map.getCreationTime());
+            map.setTimeToIdle(timeToIdle);
+            map.setTimeToLive(timeToLive);
+        }
+        
+        //Toda item inserido tem que ter uma nova id. Mesmo que ele exista.
+        map.setId(this.modCount++);
+
+        try{
             //Registra os dados no buffer de dados.
             this.putData(map, inputData);
-            //Faz a indexação do item e retorna o índice atual, caso exista.
-            oldMap = this.dataMap.put(key, map);
-            
-            this.countWrite++;
-            return oldMap != null;
         }
         catch(Throwable e){
         	try{
         		this.releaseSegments(map);
         	}
         	catch(Throwable ex){
-        		e.printStackTrace();
+        		ex.printStackTrace();
         	}
+        	
             throw 
-            	e instanceof StorageException? 
-            		(StorageException)e : 
-            		new StorageException(e, CacheErrors.ERROR_1020);
+        	e instanceof StorageException? 
+        		(StorageException)e : 
+        		new StorageException(e, CacheErrors.ERROR_1020);
+        	
+        }
+
+        try{
+            //Faz a indexação do item e retorna o índice atual, caso exista.
+            oldMap = this.dataMap.put(key, map);
+        }
+        catch(Throwable e){
+        	try{
+    	    	this.releaseSegments(map);
+            	this.dataMap.remove(key, map);
+        	}
+        	catch(Throwable ex){
+        		ex.printStackTrace();
+        	}
+        	
+        	throw new StorageException(e, CacheErrors.ERROR_1020);
         }
         finally{
 	    	if(oldMap != null){
@@ -318,6 +332,9 @@ public abstract class StreamCache
 	            this.countRemoved++;
 	    	}
         }
+        
+        this.countWrite++;
+        return oldMap != null;
     }
 
     /**
