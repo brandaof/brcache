@@ -399,7 +399,7 @@ public class TXCache
 			return (Boolean)this.executeMethodInTX(putStream, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache, 
-		    		key, timeToLive, timeToIdle, inputData, this.transactionTimeout);
+		    		key, inputData, timeToLive, timeToIdle, this.transactionTimeout);
 		}
 		catch(StorageException e){
 			throw e;
