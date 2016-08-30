@@ -322,8 +322,8 @@ public class TXCacheTest extends TestCase{
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
 			@Override
-			protected void execute(TXCache cache, String value, String key,
-					String value2) throws Throwable {
+			protected void execute(TXCache cache, String key, Object value,
+					Object value2) throws Throwable {
 				cache.put(key, value, 0, 0);
 			}
 			
@@ -349,64 +349,65 @@ public class TXCacheTest extends TestCase{
 	public void testConcurrentTransactionReplaceStream() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 
-		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
+		ConcurrentTask task = new ConcurrentTask(cache, KEY, CacheTestHelper.toStream(VALUE), CacheTestHelper.toStream(VALUE2)){
 
 			@Override
-			protected void execute(TXCache cache, String value, String key,
-					String value2) throws Throwable {
-				cache.put(key, value, 0, 0);
+			protected void execute(TXCache cache, String key, Object value,
+					Object value2) throws Throwable {
+				cache.putStream(key, (InputStream)value, 0, 0);
 			}
 			
 		};
 		
 		CacheTransaction tx = cache.beginTransaction();
-		TestCase.assertNull(cache.get(KEY, true));
+		TestCase.assertNull(cache.getStream(KEY, true));
 		task.start();
 		Thread.sleep(2000);
-		TestCase.assertFalse(cache.replace(KEY, VALUE, 0, 0));
+		TestCase.assertFalse(cache.replaceStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0));
 		tx.commit();
 		
 		Thread.sleep(1000);
-		TestCase.assertEquals(VALUE, cache.get(KEY));
+		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.getStream(KEY)));
 	}
 
-	public void testConcurrentTransactionReplaceSuccess() throws Throwable{
+	public void testConcurrentTransactionReplaceStreamSuccess() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 
-		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
+		ConcurrentTask task = new ConcurrentTask(cache, KEY, CacheTestHelper.toStream(VALUE), CacheTestHelper.toStream(VALUE2)){
 
 			@Override
-			protected void execute(TXCache cache, String value, String key,
-					String value2) throws Throwable {
-				cache.put(key, value, 0, 0);
+			protected void execute(TXCache cache, String key, Object value,
+					Object value2) throws Throwable {
+				cache.putStream(key, (InputStream)value, 0, 0);
 			}
 			
 		};
 		
 		CacheTransaction tx = cache.beginTransaction();
 		
-		cache.put(KEY, VALUE, 0, 0);
+		cache.putStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0);
 		
 		task.start();
 		Thread.sleep(2000);
 		
-		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
-		TestCase.assertTrue(cache.replace(KEY, VALUE2, 0, 0));
-		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.getStream(KEY)));
+		TestCase.assertTrue(cache.replaceStream(KEY, CacheTestHelper.toStream(VALUE2), 0, 0));
+		TestCase.assertEquals(VALUE2, CacheTestHelper.toObject(cache.getStream(KEY)));
 		
 		tx.commit();
 		
 		Thread.sleep(1000);
-		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
-	}	
+		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.getStream(KEY)));
+	}
+	
 	public void testConcurrentTransactionReplaceExact() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
 			@Override
-			protected void execute(TXCache cache, String value, String key,
-					String value2) throws Throwable {
+			protected void execute(TXCache cache, String key, Object value,
+					Object value2) throws Throwable {
 				cache.put(key, value, 0, 0);
 			}
 			
@@ -431,8 +432,8 @@ public class TXCacheTest extends TestCase{
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
 			@Override
-			protected void execute(TXCache cache, String value, String key,
-					String value2) throws Throwable {
+			protected void execute(TXCache cache, String key, Object value,
+					Object value2) throws Throwable {
 				cache.put(key, value, 0, 0);
 			}
 			
@@ -461,9 +462,9 @@ public class TXCacheTest extends TestCase{
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
 			@Override
-			protected void execute(TXCache cache, String value, String key,
-					String value2) throws Throwable {
-				cache.put(key, value2, 0, 0);
+			protected void execute(TXCache cache, String key, Object value,
+					Object value2) throws Throwable {
+				cache.put(key, value, 0, 0);
 			}
 			
 		};
@@ -488,9 +489,9 @@ public class TXCacheTest extends TestCase{
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
 			@Override
-			protected void execute(TXCache cache, String value, String key,
-					String value2) throws Throwable {
-				cache.put(key, value2, 0, 0);
+			protected void execute(TXCache cache, String key, Object value,
+					Object value2) throws Throwable {
+				cache.put(key, value, 0, 0);
 			}
 			
 		};
@@ -509,6 +510,59 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 	}
 
+	public void testConcurrentTransactionPutIfAbsentStream() throws Throwable{
+		TXCache cache = new Cache().getTXCache();
+
+		ConcurrentTask task = new ConcurrentTask(cache, KEY, CacheTestHelper.toStream(VALUE), CacheTestHelper.toStream(VALUE2)){
+
+			@Override
+			protected void execute(TXCache cache, String key, Object value,
+					Object value2) throws Throwable {
+				cache.putStream(key, (InputStream)value, 0, 0);
+			}
+			
+		};
+		
+		CacheTransaction tx = cache.beginTransaction();
+		cache.getStream(KEY, true);
+		
+		task.start();
+		Thread.sleep(2000);
+		
+		TestCase.assertNull(cache.putIfAbsentStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0));
+		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.getStream(KEY)));
+		tx.commit();
+		
+		Thread.sleep(1000);
+		TestCase.assertEquals(VALUE2, CacheTestHelper.toObject(cache.getStream(KEY)));
+	}
+
+	public void testConcurrentTransactionPutIfAbsentStreamExistValue() throws Throwable{
+		TXCache cache = new Cache().getTXCache();
+ss
+		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
+
+			@Override
+			protected void execute(TXCache cache, String key, Object value,
+					Object value2) throws Throwable {
+				cache.put(key, value, 0, 0);
+			}
+			
+		};
+		
+		CacheTransaction tx = cache.beginTransaction();
+		cache.put(KEY, VALUE, 0, 0);
+		
+		task.start();
+		Thread.sleep(2000);
+		
+		TestCase.assertEquals(VALUE, cache.putIfAbsent(KEY, VALUE2, 0, 0));
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		tx.commit();
+		
+		Thread.sleep(1000);
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+	}	
 	/* put */
 	
 	public void testConcurrentTransactionPut() throws Throwable{
@@ -517,9 +571,9 @@ public class TXCacheTest extends TestCase{
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
 			@Override
-			protected void execute(TXCache cache, String value, String key,
-					String value2) throws Throwable {
-				cache.put(key, value2, 0, 0);
+			protected void execute(TXCache cache, String key, Object value,
+					Object value2) throws Throwable {
+				cache.put(key, value, 0, 0);
 			}
 			
 		};
@@ -546,9 +600,9 @@ public class TXCacheTest extends TestCase{
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
 			@Override
-			protected void execute(TXCache cache, String value, String key,
-					String value2) throws Throwable {
-				cache.put(key, value2, 0, 0);
+			protected void execute(TXCache cache, String key, Object value,
+					Object value2) throws Throwable {
+				cache.put(key, value, 0, 0);
 			}
 			
 		};
@@ -573,9 +627,9 @@ public class TXCacheTest extends TestCase{
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
 			@Override
-			protected void execute(TXCache cache, String value, String key,
-					String value2) throws Throwable {
-				cache.put(key, value2, 0, 0);
+			protected void execute(TXCache cache, String key, Object value,
+					Object value2) throws Throwable {
+				cache.put(key, value, 0, 0);
 			}
 			
 		};
@@ -604,9 +658,9 @@ public class TXCacheTest extends TestCase{
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
 			@Override
-			protected void execute(TXCache cache, String value, String key,
-					String value2) throws Throwable {
-				cache.put(key, value2, 0, 0);
+			protected void execute(TXCache cache, String key, Object value,
+					Object value2) throws Throwable {
+				cache.put(key, value, 0, 0);
 			}
 			
 		};
@@ -637,9 +691,9 @@ public class TXCacheTest extends TestCase{
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
 			@Override
-			protected void execute(TXCache cache, String value, String key,
-					String value2) throws Throwable {
-				cache.put(key, value2, 0, 0);
+			protected void execute(TXCache cache, String key, Object value,
+					Object value2) throws Throwable {
+				cache.put(key, value, 0, 0);
 			}
 			
 		};
