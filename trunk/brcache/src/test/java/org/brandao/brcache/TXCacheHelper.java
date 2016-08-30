@@ -10,14 +10,14 @@ public class TXCacheHelper {
 		
 		private TXCache cache;
 		
-		private String value;
+		private Object value;
 		
 		private String key;
 		
-		private String value2;
+		private Object value2;
 		
-		public ConcurrentTask(TXCache cache, String value, String key,
-				String value2) {
+		public ConcurrentTask(TXCache cache, String key,
+				Object value, Object value2) {
 			this.cache = cache;
 			this.value = value;
 			this.key = key;
@@ -33,8 +33,8 @@ public class TXCacheHelper {
 			}
 		}
 
-		protected abstract void execute(TXCache cache, String value, String key,
-				String value2) throws Throwable;
+		protected abstract void execute(TXCache cache, String key, Object value,
+				Object value2) throws Throwable;
 		
 		public Throwable getError() {
 			return error;

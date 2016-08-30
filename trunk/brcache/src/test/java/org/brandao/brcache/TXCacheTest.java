@@ -1,6 +1,7 @@
 package org.brandao.brcache;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.brandao.brcache.TXCacheHelper.ConcurrentTask;
 import org.brandao.brcache.tx.CacheTransaction;
@@ -294,6 +295,60 @@ public class TXCacheTest extends TestCase{
 	public void testConcurrentTransactionReplace() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 
+		ConcurrentTask task = new ConcurrentTask(cache, KEY, CacheTestHelper.toStream(VALUE), CacheTestHelper.toStream(VALUE2)){
+
+			@Override
+			protected void execute(TXCache cache, String key, Object value,
+					Object value2) throws Throwable {
+				cache.putStream(key, (InputStream)value, 0, 0);
+			}
+			
+		};
+		
+		CacheTransaction tx = cache.beginTransaction();
+		TestCase.assertNull(cache.get(KEY, true));
+		task.start();
+		Thread.sleep(2000);
+		TestCase.assertFalse(cache.replace(KEY, VALUE, 0, 0));
+		tx.commit();
+		
+		Thread.sleep(1000);
+		TestCase.assertEquals(VALUE, cache.get(KEY));
+	}
+
+	public void testConcurrentTransactionReplaceSuccess() throws Throwable{
+		TXCache cache = new Cache().getTXCache();
+
+		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
+
+			@Override
+			protected void execute(TXCache cache, String value, String key,
+					String value2) throws Throwable {
+				cache.put(key, value, 0, 0);
+			}
+			
+		};
+		
+		CacheTransaction tx = cache.beginTransaction();
+		
+		cache.put(KEY, VALUE, 0, 0);
+		
+		task.start();
+		Thread.sleep(2000);
+		
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+		TestCase.assertTrue(cache.replace(KEY, VALUE2, 0, 0));
+		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
+		
+		tx.commit();
+		
+		Thread.sleep(1000);
+		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
+	}
+
+	public void testConcurrentTransactionReplaceStream() throws Throwable{
+		TXCache cache = new Cache().getTXCache();
+
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
 			@Override
@@ -343,8 +398,7 @@ public class TXCacheTest extends TestCase{
 		
 		Thread.sleep(1000);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
-	}
-
+	}	
 	public void testConcurrentTransactionReplaceExact() throws Throwable{
 		TXCache cache = new Cache().getTXCache();
 
