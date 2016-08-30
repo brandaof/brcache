@@ -1,5 +1,7 @@
 package org.brandao.brcache;
 
+import java.io.IOException;
+
 import org.brandao.brcache.TXCacheHelper.ConcurrentTask;
 import org.brandao.brcache.tx.CacheTransaction;
 import org.brandao.brcache.tx.TXCache;
@@ -29,6 +31,19 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 	}
 
+	public void testReplaceStream() throws StorageException, IOException{
+		TXCache cache = new Cache().getTXCache();
+		TestCase.assertFalse(cache.replaceStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0));
+	}
+
+	public void testReplaceStreamSuccess() throws StorageException, RecoverException, IOException, ClassNotFoundException{
+		TXCache cache = new Cache().getTXCache();
+		cache.putStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0);
+		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.getStream(KEY)));
+		TestCase.assertTrue(cache.replaceStream(KEY, CacheTestHelper.toStream(VALUE2), 0, 0));
+		TestCase.assertEquals(VALUE2, CacheTestHelper.toObject(cache.getStream(KEY)));
+	}
+	
 	public void testReplaceExact() throws StorageException{
 		TXCache cache = new Cache().getTXCache();
 		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0, 0));
@@ -57,6 +72,19 @@ public class TXCacheTest extends TestCase{
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
+	public void testputIfAbsentStream() throws StorageException, RecoverException, IOException, ClassNotFoundException{
+		TXCache cache = new Cache().getTXCache();
+		TestCase.assertNull(cache.putIfAbsentStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0));
+		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.getStream(KEY)));
+	}
+
+	public void testputIfAbsentStreamExistValue() throws StorageException, RecoverException, IOException, ClassNotFoundException{
+		TXCache cache = new Cache().getTXCache();
+		cache.putStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0);
+		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.putIfAbsentStream(KEY, CacheTestHelper.toStream(VALUE2), 0, 0)));
+		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.getStream(KEY)));
+	}
+	
 	/* put */
 	
 	public void testPut() throws StorageException, RecoverException{
