@@ -247,8 +247,7 @@ public abstract class StreamCache
      * @return <code>true</code> se o item for substituido. Caso contrário, <code>false</code>
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    protected boolean putStream(String key, long timeToLive, long timeToIdle, 
-    		InputStream inputData) throws StorageException{
+    protected boolean putStream(String key, InputStream inputData, long timeToLive, long timeToIdle) throws StorageException{
         
     	if(timeToLive < 0)
             throw new StorageException(CacheErrors.ERROR_1029);
@@ -346,8 +345,8 @@ public abstract class StreamCache
      * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    protected boolean replaceStream(String key, long timeToLive, long timeToIdle, 
-    		InputStream inputData) throws StorageException{
+    protected boolean replaceStream(String key, InputStream inputData, 
+    		long timeToLive, long timeToIdle) throws StorageException{
         
     	if(timeToLive < 0)
             throw new StorageException(CacheErrors.ERROR_1029);
@@ -426,8 +425,8 @@ public abstract class StreamCache
      * @return fluxo associado à chave ou <code>null</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    protected InputStream putIfAbsentStream(String key, long timeToLive, long timeToIdle, 
-    		InputStream inputData) throws StorageException{
+    protected InputStream putIfAbsentStream(String key, InputStream inputData, 
+    		long timeToLive, long timeToIdle) throws StorageException{
         
     	if(timeToLive < 0)
             throw new StorageException(CacheErrors.ERROR_1029);

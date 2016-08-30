@@ -62,10 +62,14 @@ public class TXCache
 	
 	private static final Method replace;
 
+	private static final Method replaceStream;
+	
 	private static final Method replaceExact;
 
 	private static final Method putIfAbsent;
 
+	private static final Method putIfAbsentStream;
+	
 	private static final Method put;
 
 	private static final Method putStream;
@@ -84,6 +88,10 @@ public class TXCache
 					"replace",	CacheTransactionManager.class, 
 					BasicCache.class, String.class, Object.class, long.class, long.class, long.class);
 
+			replaceStream = CacheTransactionHandler.class.getDeclaredMethod(
+					"replaceStream", CacheTransactionManager.class, 
+					BasicCache.class, String.class, InputStream.class, long.class, long.class, long.class);
+			
 			replaceExact = CacheTransactionHandler.class.getDeclaredMethod(
 					"replace", CacheTransactionManager.class, BasicCache.class,
 					String.class, Object.class, 
@@ -93,13 +101,17 @@ public class TXCache
 					"putIfAbsent", CacheTransactionManager.class, BasicCache.class,
 					String.class, Object.class, long.class, long.class, long.class);
 
+			putIfAbsentStream = CacheTransactionHandler.class.getDeclaredMethod(
+					"putIfAbsent", CacheTransactionManager.class, BasicCache.class,
+					String.class, InputStream.class, long.class, long.class, long.class);
+			
 			put = CacheTransactionHandler.class.getDeclaredMethod(
 					"put", CacheTransactionManager.class, BasicCache.class,
 					String.class, Object.class, long.class, long.class, long.class);
 
 			putStream = CacheTransactionHandler.class.getDeclaredMethod(
 					"putStream", CacheTransactionManager.class, BasicCache.class, 
-		    		String.class, long.class, long.class, InputStream.class, long.class);
+		    		String.class, InputStream.class, long.class, long.class, long.class);
 
 			get = CacheTransactionHandler.class.getDeclaredMethod(
 					"get", CacheTransactionManager.class, BasicCache.class,
@@ -232,6 +244,34 @@ public class TXCache
 		}
 	}
 	
+    /**
+     * Substitui o fluxo de bytes associado à chave somente se ele existir.
+     * @param key chave associada ao valor.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
+     * @param inputData fluxo de bytes do valor.
+     * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
+     */
+    public boolean replaceStream(String key, InputStream inputData, 
+    		long timeToLive, long timeToIdle) throws StorageException{
+		try{
+			return (Boolean)this.executeMethodInTX(replaceStream, 
+					this.transactionManager.getCurrrent(false), 
+					this.transactionManager, this.cache,
+					key, inputData, timeToLive, timeToIdle, this.transactionTimeout);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
+    }
+    
 	/**
 	 * Substitui o valor associado à chave somente se ele for igual a um determinado valor.
 	 * @param key chave associada ao valor.
@@ -280,6 +320,34 @@ public class TXCache
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
 					key, value, timeToLive, timeToIdle, this.transactionTimeout);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
+	}
+	
+    /**
+     * Associa o fluxo de bytes do valor à chave somente se a chave não estiver associada a um valor.
+     * @param key chave associada ao valor.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
+     * @param inputData fluxo de bytes do valor.
+     * @return fluxo associado à chave ou <code>null</code>.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
+     */
+    public InputStream putIfAbsentStream(String key, 
+    		InputStream inputData, long timeToLive, long timeToIdle) throws StorageException{
+		try{
+			return (InputStream)this.executeMethodInTX(putIfAbsentStream, 
+					this.transactionManager.getCurrrent(false), 
+					this.transactionManager, this.cache,
+					key, inputData, timeToLive, timeToIdle, this.transactionTimeout);
 		}
 		catch(StorageException e){
 			throw e;

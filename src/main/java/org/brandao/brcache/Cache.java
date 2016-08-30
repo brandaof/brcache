@@ -91,11 +91,10 @@ public class Cache
      * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    public boolean replaceStream(String key, long timeToLive, long timeToIdle, 
-    		InputStream inputData) throws StorageException{
+    public boolean replaceStream(String key, InputStream inputData, long timeToLive, long timeToIdle) throws StorageException{
 		Serializable refLock = this.locks.lock(key);
 		try{
-			return super.replaceStream(key, timeToLive, timeToIdle, inputData);
+			return super.replaceStream(key, inputData, timeToLive, timeToIdle);
 		}
 		finally{
 			if(refLock != null){
@@ -172,12 +171,11 @@ public class Cache
      * @return fluxo associado à chave ou <code>null</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    public InputStream putIfAbsentStream(String key, long timeToLive, long timeToIdle, 
-    		InputStream inputData) throws StorageException{
+    public InputStream putIfAbsentStream(String key, InputStream inputData, long timeToLive, long timeToIdle) throws StorageException{
     	
 		Serializable refLock = this.locks.lock(key);
 		try{
-			return super.putIfAbsentStream(key, timeToLive, timeToIdle, inputData);
+			return super.putIfAbsentStream(key, inputData, timeToLive, timeToIdle);
 		}
 		catch(StorageException e){
 			throw e;
