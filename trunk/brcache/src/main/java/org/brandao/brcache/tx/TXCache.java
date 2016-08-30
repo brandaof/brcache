@@ -282,8 +282,7 @@ public class TXCache
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
 	public boolean replace(
-			String key, Object oldValue, 
-			Object newValue, long timeToLive, long timeToIdle) throws StorageException {
+			String key, Object oldValue, Object newValue, long timeToLive, long timeToIdle) throws StorageException {
 		
 		try{
 			return (Boolean)this.executeMethodInTX(replaceExact, 
