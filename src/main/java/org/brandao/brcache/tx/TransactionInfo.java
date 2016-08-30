@@ -151,6 +151,27 @@ class TransactionInfo implements Serializable {
 		}
 	}
 	
+	public InputStream putIfAbsentStream(CacheTransactionManager manager, BasicCache cache,
+			String key, InputStream inputData, long timeToLive, long timeToIdle, long time) throws StorageException{
+		
+		try{
+			InputStream o = this.getStream(manager, cache, key, true, time);
+			
+			if(o == null){
+				this.putStream(manager, cache, key, timeToLive, timeToIdle, inputData, time);
+			}
+			
+			return o;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}		
+	}
+	
+	
 	public boolean put(CacheTransactionManager manager, BasicCache cache,
 			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException {
 		try{
@@ -178,7 +199,7 @@ class TransactionInfo implements Serializable {
     	try{
     		if(!this.managed.contains(key)){
         		this.manageItem(manager, cache, key, time);
-    			this.entities.putStream(key, 0, 0, inputData);
+    			this.entities.putStream(key, inputData, 0, 0);
     			this.updated.add(key);
     			this.cacheItemMetadata.put(key, new ItemCacheMetadata
     					(-1, timeToLive, timeToIdle, -1, -1, -1, -1, (short)-1, -1));
@@ -188,7 +209,7 @@ class TransactionInfo implements Serializable {
 				this.updated.add(key);
 				this.cacheItemMetadata.put(key, new ItemCacheMetadata
 						(-1, timeToLive, timeToIdle, -1, -1, -1, -1, (short)-1, -1));
-				return this.entities.putStream(key, 0, 0, inputData);
+				return this.entities.putStream(key, inputData, 0, 0);
     		}
     	}
 		catch(CacheException e){
@@ -291,7 +312,7 @@ class TransactionInfo implements Serializable {
 			if(in != null){
 				String orgKey = ORIGIN_PREFIX + key;
 				//Se for usar o cache raiz tem que colocar o tempo do timeout da transação.
-				this.entities.putStream(orgKey, 0, 0, in); 
+				this.entities.putStream(orgKey, in, 0, 0); 
 				this.cacheItemMetadata.put(orgKey, new ItemCacheMetadata(in));
 				saved.add(key);
 			}
@@ -315,7 +336,7 @@ class TransactionInfo implements Serializable {
 			else{
 				ItemCacheMetadata metadata = this.cacheItemMetadata.get(orgKey);
 				ItemCacheInputStream item  = new ItemCacheInputStream(metadata, in);
-				cache.putStream(key, 0, 0, item);
+				cache.putStream(key, item, 0, 0);
 			}
 		}
 		
@@ -336,7 +357,7 @@ class TransactionInfo implements Serializable {
 							-1, metadata.getTimeToLive(), metadata.getTimeToIdle(), 
 							-1, -1, entity.getFlag(), entity.getSize(), entity);
 					*/
-					cache.putStream(key, metadata.getTimeToLive(), metadata.getTimeToIdle(), entity);
+					cache.putStream(key, entity, metadata.getTimeToLive(), metadata.getTimeToIdle());
 				}
 			}
 			
@@ -380,7 +401,7 @@ class TransactionInfo implements Serializable {
     		CacheInputStream dta = (CacheInputStream) this.getSharedEntity(manager, cache, key, lock);
 			
 			if(dta != null){
-				this.entities.putStream(key, 0, 0, dta);
+				this.entities.putStream(key, dta, 0, 0);
 				this.cacheItemMetadata.put(key, new ItemCacheMetadata(dta));
 				return this.entities.getStream(key);
 			}
