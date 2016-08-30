@@ -21,9 +21,11 @@ interface CacheTransactionHandler
 	Object replace(CacheTransactionManager manager, BasicCache cache,
 			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException;
 	
+	boolean replaceStream(CacheTransactionManager manager, BasicCache cache,
+			String key, InputStream inputData, long timeToLive, long timeToIdle, long time) throws StorageException;
+	
 	boolean replace(CacheTransactionManager manager, BasicCache cache,
-			String key, Object oldValue, 
-			Object newValue, long timeToLive, long timeToIdle, long time) throws StorageException;
+			String key, Object oldValue, Object newValue, long timeToLive, long timeToIdle, long time) throws StorageException;
 	
 	Object putIfAbsent(CacheTransactionManager manager, BasicCache cache,
 			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException;
