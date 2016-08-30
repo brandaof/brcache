@@ -95,7 +95,7 @@ class TransactionInfo implements Serializable {
 		try{
 			Object o = this.getStream(manager, cache, key, true, time);
 			if(o != null){
-				this.putStream(manager, cache, key, timeToLive, timeToIdle, inputData, time);
+				this.putStream(manager, cache, key, inputData, timeToLive, timeToIdle, time);
 				return true;
 			}
 			else
@@ -158,7 +158,7 @@ class TransactionInfo implements Serializable {
 			InputStream o = this.getStream(manager, cache, key, true, time);
 			
 			if(o == null){
-				this.putStream(manager, cache, key, timeToLive, timeToIdle, inputData, time);
+				this.putStream(manager, cache, key, inputData, timeToLive, timeToIdle, time);
 			}
 			
 			return o;
@@ -181,8 +181,8 @@ class TransactionInfo implements Serializable {
 			oout.flush();
 			oout.close();
 			return this.putStream(
-				manager, cache, key, timeToLive, timeToIdle, 
-				new ByteArrayInputStream(bout.toByteArray()), time);
+				manager, cache, key, new ByteArrayInputStream(bout.toByteArray()), 
+				timeToLive, timeToIdle, time);
 		}
 		catch(CacheException e){
 			throw new StorageException(e, e.getError(), e.getParams());
@@ -193,7 +193,7 @@ class TransactionInfo implements Serializable {
 	}
 	
     public boolean putStream(CacheTransactionManager manager, BasicCache cache, 
-    		String key, long timeToLive, long timeToIdle, InputStream inputData, long time) 
+    		String key, InputStream inputData, long timeToLive, long timeToIdle, long time) 
     		throws StorageException {
 
     	try{
