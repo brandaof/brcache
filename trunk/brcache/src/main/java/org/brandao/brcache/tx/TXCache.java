@@ -394,7 +394,7 @@ public class TXCache
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
     public boolean putStream(
-    		String key, long timeToLive, long timeToIdle, InputStream inputData) 
+    		String key, InputStream inputData, long timeToLive, long timeToIdle) 
     		throws StorageException {
 		try{
 			return (Boolean)this.executeMethodInTX(putStream, 

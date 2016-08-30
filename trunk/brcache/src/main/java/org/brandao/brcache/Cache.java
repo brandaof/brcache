@@ -212,6 +212,28 @@ public class Cache
 		}
 	}
 	
+    /**
+	 * Associa o fluxo de bytes do valor à chave.
+	 * @param key chave associada ao fluxo.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
+     * @param inputData fluxo de bytes do valor.
+     * @return <code>true</code> se o item for substituido. Caso contrário, <code>false</code>
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
+     */
+    public boolean putStream(String key, InputStream inputData, 
+    		long timeToLive, long timeToIdle) throws StorageException{
+		Serializable refLock = this.locks.lock(key);
+		try{
+			return super.putStream(key, inputData, timeToLive, timeToIdle);
+		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
+    }
+	
     /* métodos de coleta */
 	
 	/**
@@ -222,15 +244,17 @@ public class Cache
      * item.
 	 */
 	public Object get(String key) throws RecoverException {
-		Serializable refLock = this.locks.lock(key);
-		try{
+		/* Deixar sem bloqueio */
+		
+		//Serializable refLock = this.locks.lock(key);
+		//try{
 			return super.get(key);
-		}
-		finally{
-			if(refLock != null){
-				this.locks.unlock(refLock, key);
-			}
-		}
+		//}
+		//finally{
+		//	if(refLock != null){
+		//		this.locks.unlock(refLock, key);
+		//	}
+		//}
 	}
 
     /**
@@ -241,15 +265,17 @@ public class Cache
      * item.
      */
     public InputStream getStream(String key) throws RecoverException {
-		Serializable refLock = this.locks.lock(key);
-		try{
+		/* Deixar sem bloqueio */
+    	
+		//Serializable refLock = this.locks.lock(key);
+		//try{
 			return super.getStream(key);
-		}
-		finally{
-			if(refLock != null){
-				this.locks.unlock(refLock, key);
-			}
-		}
+		//}
+		//finally{
+		//	if(refLock != null){
+		//		this.locks.unlock(refLock, key);
+		//	}
+		//}
     }
 	
     /* métodos de remoção */
