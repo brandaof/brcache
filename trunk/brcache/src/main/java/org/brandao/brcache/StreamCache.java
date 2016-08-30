@@ -344,37 +344,47 @@ public abstract class StreamCache
         DataMap oldMap = null;
         DataMap map    = new DataMap();
         
+        map.setCreationTime(System.currentTimeMillis());
+        map.setMostRecentTime(map.getCreationTime());
+        map.setTimeToIdle(timeToIdle);
+        map.setTimeToLive(timeToLive);
+        
+        //Toda item inserido tem que ter uma nova id. Mesmo que ele exista.
+        map.setId(this.modCount++);
+
         try{
-            map.setCreationTime(System.currentTimeMillis());
-            map.setMostRecentTime(map.getCreationTime());
-            map.setTimeToIdle(timeToIdle);
-            map.setTimeToLive(timeToLive);
-            
-            //Toda item inserido tem que ter uma nova id. Mesmo que ele exista.
-            map.setId(this.modCount++);
             //Registra os dados no buffer de dados.
             this.putData(map, inputData);
-            //Faz a indexação do item e retorna o índice atual, caso exista.
-            oldMap = this.dataMap.replace(key, map);
-            
-            if(oldMap != null){
-                this.countWrite++;
-            	return true;
-            }
-            else
-            	return false;
         }
         catch(Throwable e){
         	try{
         		this.releaseSegments(map);
         	}
         	catch(Throwable ex){
-        		e.printStackTrace();
+        		ex.printStackTrace();
         	}
+        	
             throw 
-            	e instanceof StorageException? 
-            		(StorageException)e : 
-            		new StorageException(e, CacheErrors.ERROR_1020);
+        	e instanceof StorageException? 
+        		(StorageException)e : 
+        		new StorageException(e, CacheErrors.ERROR_1020);
+        	
+        }
+
+        try{
+            //Faz a indexação do item e retorna o índice atual, caso exista.
+            oldMap = this.dataMap.replace(key, map);
+        }
+        catch(Throwable e){
+        	try{
+    	    	this.releaseSegments(map);
+            	this.dataMap.remove(key, map);
+        	}
+        	catch(Throwable ex){
+        		ex.printStackTrace();
+        	}
+        	
+        	throw new StorageException(e, CacheErrors.ERROR_1020);
         }
         finally{
 	    	if(oldMap != null){
@@ -382,6 +392,12 @@ public abstract class StreamCache
 	    	}
         }
         
+        if(oldMap != null){
+            this.countWrite++;
+        	return true;
+        }
+        else
+        	return false;
     }
     
     /**
@@ -408,51 +424,62 @@ public abstract class StreamCache
         DataMap oldMap = null;
         DataMap map    = new DataMap();
         InputStream in = null;
+
+        map.setCreationTime(System.currentTimeMillis());
+        map.setMostRecentTime(map.getCreationTime());
+        map.setTimeToIdle(timeToIdle);
+        map.setTimeToLive(timeToLive);
         
+        //Toda item inserido tem que ter uma nova id. Mesmo que ele exista.
+        map.setId(this.modCount++);
+
         try{
-            map.setCreationTime(System.currentTimeMillis());
-            map.setMostRecentTime(map.getCreationTime());
-            map.setTimeToIdle(timeToIdle);
-            map.setTimeToLive(timeToLive);
-            
-            //Toda item inserido tem que ter uma nova id. Mesmo que ele exista.
-            map.setId(this.modCount++);
-            
             //Registra os dados no buffer de dados.
             this.putData(map, inputData);
-            
-            //Faz a indexação do item e retorna o índice atual, caso exista.
-            oldMap = this.dataMap.putIfAbsent(key, map);
-            
-        	//se oldMap for diferente de null, significa que já existe um item no cache
-            if(oldMap != null){
-            	//remove os segmentos alocados para o item atual.
-            	//se oldMap for diferente de null, map não foi registrado
-            	//somente precisa liberar os segmentos alocados
-        		this.releaseSegments(map);
-        		
-            	//tenta obter o stream do item no cache
-            	in = this.getStream(key, map);
-            }
-            else{
-            	this.countWrite++;
-            }
-            			
         }
         catch(Throwable e){
         	try{
         		this.releaseSegments(map);
-        		this.dataMap.remove(key, map);
         	}
         	catch(Throwable ex){
-        		e.printStackTrace();
+        		ex.printStackTrace();
         	}
         	
             throw 
-            	e instanceof StorageException? 
-            		(StorageException)e : 
-            		new StorageException(e, CacheErrors.ERROR_1020);
+        	e instanceof StorageException? 
+        		(StorageException)e : 
+        		new StorageException(e, CacheErrors.ERROR_1020);
+        	
         }
+
+        try{
+            //Faz a indexação do item e retorna o índice atual, caso exista.
+            oldMap = this.dataMap.putIfAbsent(key, map);
+        }
+        catch(Throwable e){
+        	try{
+    	    	this.releaseSegments(map);
+            	this.dataMap.remove(key, map);
+        	}
+        	catch(Throwable ex){
+        		ex.printStackTrace();
+        	}
+        	
+        	throw new StorageException(e, CacheErrors.ERROR_1020);
+        }
+        
+    	//se oldMap for diferente de null, significa que já existe um item no cache
+        if(oldMap != null){
+        	//remove os segmentos alocados para o item atual.
+        	//se oldMap for diferente de null, map não foi registrado
+        	//somente precisa liberar os segmentos alocados
+    		this.releaseSegments(map);
+    		
+        	//tenta obter o stream do item no cache
+        	in = this.getStream(key, map);
+        }
+        
+    	this.countWrite++;
         
         if(oldMap != null){
 	    	if(in == null){
