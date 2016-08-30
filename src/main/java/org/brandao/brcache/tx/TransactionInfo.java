@@ -69,7 +69,7 @@ class TransactionInfo implements Serializable {
 	
 	/* métodos de armazenamento */
 	
-	public Object replace(CacheTransactionManager manager, BasicCache cache,
+	public boolean replace(CacheTransactionManager manager, BasicCache cache,
 			String key, Object value, long timeToLive, long timeToIdle, long time) throws StorageException {
 		
 		try{
@@ -87,6 +87,27 @@ class TransactionInfo implements Serializable {
 		catch(Throwable e){
 			throw new StorageException(e, CacheErrors.ERROR_1020);
 		}
+	}
+	
+	public boolean replaceStream(CacheTransactionManager manager, BasicCache cache,
+			String key, InputStream inputData, long timeToLive, long timeToIdle, long time) throws StorageException{
+
+		try{
+			Object o = this.getStream(manager, cache, key, true, time);
+			if(o != null){
+				this.putStream(manager, cache, key, timeToLive, timeToIdle, inputData, time);
+				return true;
+			}
+			else
+				return false;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
+		
 	}
 	
 	public boolean replace(CacheTransactionManager manager, BasicCache cache,
