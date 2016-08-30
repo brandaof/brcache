@@ -1,5 +1,7 @@
 package org.brandao.brcache;
 
+import java.io.IOException;
+
 import junit.framework.TestCase;
 
 public class CacheTest extends TestCase{
@@ -25,6 +27,19 @@ public class CacheTest extends TestCase{
 		TestCase.assertEquals(VALUE2, (String)cache.get(KEY));
 	}
 
+	public void testReplaceStream() throws StorageException, IOException{
+		Cache cache = new Cache();
+		TestCase.assertFalse(cache.replace(KEY, CacheTestHelper.toStream(VALUE), 0, 0));
+	}
+
+	public void testReplaceStreamSuccess() throws StorageException, RecoverException, IOException, ClassNotFoundException{
+		Cache cache = new Cache();
+		cache.put(KEY, CacheTestHelper.toStream(VALUE), 0, 0);
+		TestCase.assertEquals(VALUE, (String)CacheTestHelper.toObject(cache.getStream(KEY)));
+		TestCase.assertTrue(cache.replace(KEY, CacheTestHelper.toStream(VALUE2), 0, 0));
+		TestCase.assertEquals(VALUE2, (String)CacheTestHelper.toObject(cache.getStream(KEY)));
+	}
+	
 	public void testReplaceExact() throws StorageException{
 		Cache cache = new Cache();
 		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0, 0));
