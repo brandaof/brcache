@@ -161,16 +161,12 @@ public class Cache
      * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    public InputStream putIfAbsentStream(String key, long timeToLive, long timeToIdle, 
+    public boolean putIfAbsentStream(String key, long timeToLive, long timeToIdle, 
     		InputStream inputData) throws StorageException{
     	
 		Serializable refLock = this.locks.lock(key);
 		try{
-			if(super.putIfAbsentStream(key, timeToLive, timeToIdle, inputData)){
-				return null;
-			}
-			else
-				return super.getStream(key);
+			return super.putIfAbsentStream(key, timeToLive, timeToIdle, inputData);
 		}
 		catch(StorageException e){
 			throw e;
