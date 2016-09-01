@@ -8,7 +8,7 @@
     <packaging>jar</packaging>
 
     <name>brcache</name>
-    <description>The BRCache is a general-purpose caching system written in Java. It is free and open-source software.</description>
+    <description>The BRCache is a general-purpose caching system with transaction support.</description>
     <url>http://brcache.brandao.org/</url>
 
     <licenses>
