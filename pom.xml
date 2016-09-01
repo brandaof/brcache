@@ -8,7 +8,7 @@
     <packaging>jar</packaging>
 
     <name>brcache</name>
-    <description>A simple, fast, cache developed in Java.</description>
+    <description>The BRCache is a general-purpose caching system written in Java. It is free and open-source software.</description>
     <url>http://brcache.brandao.org/</url>
 
     <licenses>
@@ -20,11 +20,11 @@
     </licenses>
         
     <scm>
-        <connection>scm:svn:http://brcache.brandao.org/svn/brcache</connection>
-        <developerConnection>scm:svn:http://brcache.brandao.org/svn/brcache</developerConnection>
-        <url>http://brcache.brandao.org/svn/brcache</url>
-    </scm>
-    
+		<connection>scm:svn:http://www.brandao.org/svn/brcache</connection>
+		<developerConnection>scm:svn:http://www.brandao.org/svn/brcache/trunk</developerConnection>
+		<url>http://www.brandao.org/svn/brcache</url>
+	</scm>
+        
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
@@ -41,7 +41,7 @@
             <name>Afonso Brandao</name>
             <email>afonso.rbn@gmail.com</email>
             <organization>Brandao</organization>
-            <organizationUrl>http://brandao.org/</organizationUrl>
+            <organizationUrl>http://www.brandao.org/</organizationUrl>
         </developer>
     </developers>
 
