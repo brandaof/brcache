@@ -63,6 +63,7 @@ public class BRCacheConfig implements Serializable{
      * @param config metadados.
      */
     public void setConfiguration(Configuration config){
+
     	this.configuration       = config;
         this.nodesBufferSize     = config.getLong("nodes_buffer_size",		"1m");
         this.nodesPageSize       = config.getLong("nodes_page_size",		"1k");
