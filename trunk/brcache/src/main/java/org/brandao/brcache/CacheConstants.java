@@ -76,7 +76,7 @@ public interface CacheConstants {
     
     /**
      * Quantidade de processos que irão fazer a troca dos dados
-     * entre a memória e o disco ou outro dispositivo.
+     * entre a memória e outro dispositivo, por exemplo, disco.
      */
     public static final String SWAPPER_THREAD 		= "swapper_thread";
     
