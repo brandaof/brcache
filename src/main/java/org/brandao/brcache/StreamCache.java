@@ -494,8 +494,9 @@ public abstract class StreamCache
         	//tenta obter o stream do item no cache
         	in = this.getStream(key, oldMap);
         }
-        
-    	this.countWrite++;
+        else{
+        	this.countWrite++;
+        }
         
         if(oldMap != null){
 	    	if(in == null){
