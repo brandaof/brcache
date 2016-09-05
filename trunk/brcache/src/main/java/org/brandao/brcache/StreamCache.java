@@ -60,9 +60,9 @@ public abstract class StreamCache
 
     private static final int ENTRY_BINARY_SIZE = 48;
     
-    private static final int NODE_BINARY_SIZE = /*528*/ CharNode.DATA_SIZE + ENTRY_BINARY_SIZE;
+    private static final int NODE_BINARY_SIZE = CharNode.DATA_SIZE + ENTRY_BINARY_SIZE;
 
-    private static final int INDEX_BINARY_SIZE = 34 + ENTRY_BINARY_SIZE;
+    private static final int INDEX_BINARY_SIZE = 58 + ENTRY_BINARY_SIZE;
     
     private final StringTreeMap<DataMap> dataMap;
 
@@ -423,7 +423,8 @@ public abstract class StreamCache
 	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
      * @param inputData fluxo de bytes do valor.
      * @return fluxo associado à chave ou <code>null</code>.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item ou se o item atual 
+     * expirar no momento da execução do método.
      */
     protected InputStream putIfAbsentStream(String key, InputStream inputData, 
     		long timeToLive, long timeToIdle) throws StorageException{
