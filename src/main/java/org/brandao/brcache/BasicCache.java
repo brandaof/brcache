@@ -171,7 +171,8 @@ public class BasicCache
 	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
 	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
 	 * @return valor anterior associado à chave.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item ou se o item atual 
+     * expirar no momento da execução do método.
 	 */
     public Object putIfAbsent(String key, Object value, 
     		long timeToLive, long timeToIdle) throws StorageException{
