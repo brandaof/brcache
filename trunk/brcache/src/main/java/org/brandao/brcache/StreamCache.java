@@ -645,12 +645,14 @@ public abstract class StreamCache
             	byte[] data = new byte[read];
         		System.arraycopy(buffer, 0, data, 0, read);
         		
-                synchronized(this.dataList){
+                //synchronized(this.dataList){
                 	Block block = new Block(map.getId(), index++, data, read);
                     Integer segment = this.freeSegments.poll();
                     if(segment == null){
-                        segment = this.dataList.size();
-                        this.dataList.add(block);
+                    	synchronized(this.dataList){
+	                        segment = this.dataList.size();
+	                        this.dataList.add(block);
+                    	}
                     }
                     else
                         this.dataList.set(segment, block);
@@ -664,7 +666,7 @@ public abstract class StreamCache
                     
                 	lastBlock   = block;
                     lastSegment = segment;
-                }
+                //}
                
             }
             
