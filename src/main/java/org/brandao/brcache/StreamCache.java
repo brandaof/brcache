@@ -626,25 +626,18 @@ public abstract class StreamCache
     private void putData(DataMap map, InputStream inputData) throws StorageException{
         
         int writeData = 0;
-        RegionMemory buffer = null;
+        byte[] buffer = null;
         try{
             int index = 0;
-            buffer    = Memory.alloc(this.segmentSize);
+            buffer    = new byte[this.segmentSize];
             int read;
             Block lastBlock = null;
             int lastSegment = -1;
             
-            while((read = buffer.read(inputData, 0, buffer.length())) != -1){
+            while((read = inputData.read(buffer, 0, buffer.length)) != -1){
 
-            	RegionMemory data = Memory.alloc(read);
-            	if(read < this.segmentSize){
-            		data = Memory.alloc(read);
-                	data.write(0, buffer, 0, read);
-            	}
-            	else
-            		data = buffer;
-            	
-            	buffer = Memory.alloc(this.segmentSize);
+            	byte[] data = new byte[read];
+        		System.arraycopy(buffer, 0, data, 0, data.length);
             	
             	writeData += read;
             	
@@ -689,12 +682,7 @@ public abstract class StreamCache
             this.releaseSegments(map);
             throw new StorageException(e, CacheErrors.ERROR_1014);
         }
-        /*finally{
-        	if(buffer != null){
-        		Memory.release(buffer);
-        	}
-        }*/
-    }
+    }    
     
     private void releaseSegments(DataMap map){
     	int segmentId = map.getFirstSegment();

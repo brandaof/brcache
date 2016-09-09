@@ -14,9 +14,9 @@ class Block
     
     public int nextBlock;
     
-    public RegionMemory buffer;
+    public byte[] buffer;
     
-    public Block(long id, int segment, RegionMemory data, int length){
+    public Block(long id, int segment, byte[] data, int length){
         this.id        = id;
         this.segment   = segment;
         this.buffer    = data;
