@@ -64,6 +64,8 @@ public abstract class StreamCache
 
     private static final int INDEX_BINARY_SIZE = 58 + ENTRY_BINARY_SIZE;
     
+    private static final Class<?> ITEM_CACHE_INPUTSTREAM_CLASS = ItemCacheInputStream.class;
+    
     private final StringTreeMap<DataMap> dataMap;
 
     private final HugeArrayList<Block> dataList;
@@ -262,7 +264,7 @@ public abstract class StreamCache
         DataMap map     = new DataMap();
         
     	//ItemCacheInputStream permite manipular além dos dados os metadados do item.
-        if(inputData instanceof ItemCacheInputStream){
+        if(ITEM_CACHE_INPUTSTREAM_CLASS.isAssignableFrom(inputData.getClass())){
         	ItemCacheInputStream input = (ItemCacheInputStream)inputData;
         	DataMap itemMetadata = input.getMap();
         	
@@ -625,25 +627,24 @@ public abstract class StreamCache
     
     private void putData(DataMap map, InputStream inputData) throws StorageException{
         
-        int writeData = 0;
-        byte[] buffer = null;
+        int writeData   = 0;
+        byte[] buffer   = new byte[this.segmentSize];
+        int index       = 0;
+        Block lastBlock = null;
+        int lastSegment = -1;
+        int read;
+        
         try{
-            int index = 0;
-            buffer    = new byte[this.segmentSize];
-            int read;
-            Block lastBlock = null;
-            int lastSegment = -1;
-            
-            while((read = inputData.read(buffer, 0, buffer.length)) != -1){
-
-            	byte[] data = new byte[read];
-        		System.arraycopy(buffer, 0, data, 0, data.length);
+            while((read = inputData.read(buffer, 0, this.segmentSize)) != -1){
 
             	writeData += read;
             	
         		if(writeData > this.maxBytesToStorageEntry)
                     throw new StorageException(CacheErrors.ERROR_1007);
-               
+
+            	byte[] data = new byte[read];
+        		System.arraycopy(buffer, 0, data, 0, read);
+        		
                 synchronized(this.dataList){
                 	Block block = new Block(map.getId(), index++, data, read);
                     Integer segment = this.freeSegments.poll();
