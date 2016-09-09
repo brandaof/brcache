@@ -638,7 +638,7 @@ public abstract class StreamCache
 
             	byte[] data = new byte[read];
         		System.arraycopy(buffer, 0, data, 0, data.length);
-            	
+
             	writeData += read;
             	
         		if(writeData > this.maxBytesToStorageEntry)
