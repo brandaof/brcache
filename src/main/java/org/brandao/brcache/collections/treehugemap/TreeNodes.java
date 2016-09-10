@@ -18,7 +18,8 @@
 package org.brandao.brcache.collections.treehugemap;
 
 import java.io.Serializable;
-import java.util.List;
+
+import org.brandao.brcache.collections.ReferenceCollection;
 
 /**
  *
@@ -26,28 +27,28 @@ import java.util.List;
  */
 public interface TreeNodes<T> extends Serializable{
 
-    void init(List<TreeNode<T>> nodes);
+    void init(ReferenceCollection<TreeNode<T>> nodes);
     
     TreeMapKey getKey(Object key);
     
     boolean isEquals(TreeMapKey key, TreeNode<T> node);
     
-    TreeNode<T> getNext(List<TreeNode<T>> nodes, TreeMapKey key, TreeNode<T> node, boolean read);
+    TreeNode<T> getNext(ReferenceCollection<TreeNode<T>> nodes, TreeMapKey key, TreeNode<T> node, boolean read);
 
-    TreeNode<T> getFirst(List<TreeNode<T>> nodes);
+    TreeNode<T> getFirst(ReferenceCollection<TreeNode<T>> nodes);
     
-    T getValue(List<T> values, TreeNode<T> node);
+    T getValue(ReferenceCollection<T> values, TreeNode<T> node);
     
-    T setValue(List<T> values, TreeNode<T> node, T value);
+    T setValue(ReferenceCollection<T> values, TreeNode<T> node, T value);
 
-    boolean replaceValue(List<T> values, TreeNode<T> node, T oldValue, T value);
+    boolean replaceValue(ReferenceCollection<T> values, TreeNode<T> node, T oldValue, T value);
 
-    T replaceValue(List<T> values, TreeNode<T> node, T value);
+    T replaceValue(ReferenceCollection<T> values, TreeNode<T> node, T value);
     
-    T removeValue(List<T> values, TreeNode<T> node);
+    T removeValue(ReferenceCollection<T> values, TreeNode<T> node);
  
-    T putIfAbsentValue(List<T> values, TreeNode<T> node, T value);
+    T putIfAbsentValue(ReferenceCollection<T> values, TreeNode<T> node, T value);
     
-    boolean removeValue(List<T> values, TreeNode<T> node, T oldValue);
+    boolean removeValue(ReferenceCollection<T> values, TreeNode<T> node, T oldValue);
     
 }

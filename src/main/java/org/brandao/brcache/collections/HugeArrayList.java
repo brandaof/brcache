@@ -193,12 +193,7 @@ public class HugeArrayList<T>
     }
 
     public boolean addAll(int index, Collection<? extends T> c) {
-        int i = 0;
-        for (T type : c){
-            if(i++>=index)
-                this.add(type);
-        }
-        return true;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public boolean removeAll(Collection<?> c) {

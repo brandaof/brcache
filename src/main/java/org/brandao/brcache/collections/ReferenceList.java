@@ -1,15 +1,8 @@
 package org.brandao.brcache.collections;
 
-import java.io.Serializable;
+import java.util.List;
 
-public interface ReferenceList<T> extends Serializable{
+public interface ReferenceList<T> 
+	extends List<T>, ReferenceCollection<T>{
 
-	long add(T e);
-
-	void set(long reference, T e);
-	
-	T get(long reference);
-	
-	boolean remove(long reference);
-	
 }

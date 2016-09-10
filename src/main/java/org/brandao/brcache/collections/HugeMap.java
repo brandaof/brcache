@@ -18,13 +18,25 @@
 package org.brandao.brcache.collections;
 
 import java.io.Serializable;
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  *
  * @author Brandao
  */
 public interface HugeMap<K,T> 
-    extends Map<K,T>, Serializable{
+	extends ConcurrentMap<K,T>, Serializable{
+    
+    void setDeleteOnExit(boolean value);
+
+    boolean isDeleteOnExit();
+    
+    void destroy();
+    
+    void flush();
+    
+    void setReadOnly(boolean value);
+    
+    boolean isReadOnly();
     
 }
