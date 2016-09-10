@@ -24,7 +24,7 @@ import java.util.List;
  * @author Brandao
  */
 public interface HugeList<T> 
-	extends List<T>,HugeCollection<T>{
+	extends List<T>, HugeCollection<T>{
 
     void flush();
     
