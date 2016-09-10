@@ -8,5 +8,11 @@ public interface HugeReferenceList<T>
     void setReadOnly(boolean value);
     
     boolean isReadOnly();
-	
+
+    void setDeleteOnExit(boolean value);
+    
+    boolean isDeleteOnExit();
+    
+    void destroy();
+    
 }

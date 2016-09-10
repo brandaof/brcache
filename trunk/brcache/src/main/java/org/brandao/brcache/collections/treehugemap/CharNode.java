@@ -2,6 +2,8 @@ package org.brandao.brcache.collections.treehugemap;
 
 import java.util.List;
 
+import org.brandao.brcache.collections.ReferenceCollection;
+
 public class CharNode<T> implements TreeNode<T>{
 
 	private static final long serialVersionUID 	= 480902938041176366L;
@@ -45,7 +47,7 @@ public class CharNode<T> implements TreeNode<T>{
                 this.nextNodes[i] = -1;
     }
 
-    public void setNext(List<TreeNode<T>> nodes, Object key, TreeNode<T> node){
+    public void setNext(ReferenceCollection<TreeNode<T>> nodes, Object key, TreeNode<T> node){
     	char c = (Character)key;
         int index = c/* & 0xff*/;
 
@@ -67,7 +69,7 @@ public class CharNode<T> implements TreeNode<T>{
         nodes.set((int)this.id, this);
     }
 
-    public TreeNode<T> getNext(List<TreeNode<T>> nodes, Object key) {
+    public TreeNode<T> getNext(ReferenceCollection<TreeNode<T>> nodes, Object key) {
     	char c = (Character)key;
         int index = c/* & 0xff*/;
 
@@ -106,7 +108,23 @@ public class CharNode<T> implements TreeNode<T>{
         return valueId;
     }
 
-    public void setValue(List<T> values, T value) {
+    public T setValue(ReferenceCollection<T> values, T value) {
+    	if(this.valueId == -1){
+    		long ref = values.insert(value);
+    		boolean remove = false;
+    		synchronized(values){
+    			if(this.valueId == -1){
+    				this.valueId = ref;
+    			}
+    			else{
+    				remove = true;
+    			}
+    		}
+    		
+    		if()
+    	}
+    	
+    	
         if(this.valueId == -1){
             if(this.valueId == -1){
                 values.add(value);

@@ -17,7 +17,7 @@
 
 package org.brandao.brcache.collections.treehugemap;
 
-import java.util.List;
+import org.brandao.brcache.collections.ReferenceCollection;
 
 /**
  *
@@ -42,75 +42,35 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
         return k.pos == k.limit;
     }
 
-    public T getValue(List<T> values, TreeNode<T> node){
-    	synchronized(values){
-    		return node.getValue(values);
-    	}
+    public T getValue(ReferenceCollection<T> values, TreeNode<T> node){
+		return node.getValue(values);
     }
     
-    public T setValue(List<T> values, TreeNode<T> node, T value){
-    	synchronized(values){
-    		T old = node.getValue(values);
-    		node.setValue(values, value);
-    		return old;
-    	}
+    public T setValue(ReferenceCollection<T> values, TreeNode<T> node, T value){
+		return node.setValue(values, value);
     }
     
-    public boolean replaceValue(List<T> values, TreeNode<T> node, T oldValue, T value){
-    	synchronized(values){
-    		T old = node.getValue(values);
-    		if(old != null && old.equals(value)){
-	    		node.setValue(values, value);
-	    		return true;
-    		}
-    		else{
-    			return false;
-    		}
-    	}
-    	
+    public boolean replaceValue(ReferenceCollection<T> values, TreeNode<T> node, T oldValue, T value){
+    	return node.replaceValue(values, oldValue, value);
     }
 
-    public T replaceValue(List<T> values, TreeNode<T> node, T value){
-    	synchronized(values){
-    		T old = node.getValue(values);
-    		if(old != null){
-	    		node.setValue(values, value);
-    		}
-			return old;
-    	}
+    public T replaceValue(ReferenceCollection<T> values, TreeNode<T> node, T value){
+    	return node.replaceValue(values, value);
     }
 
-    public T putIfAbsentValue(List<T> values, TreeNode<T> node, T value){
-    	synchronized(values){
-    		T old = node.getValue(values);
-    		if(old == null){
-	    		node.setValue(values, value);
-    		}
-			return old;
-    	}
+    public T putIfAbsentValue(ReferenceCollection<T> values, TreeNode<T> node, T value){
+    	return node.putIfAbsentValue(values, value);
     }
     
-    public T removeValue(List<T> values, TreeNode<T> node) {
-    	synchronized(values){
-    		T old = node.getValue(values);
-    		node.removeValue(values);
-    		return old;
-    	}
+    public T removeValue(ReferenceCollection<T> values, TreeNode<T> node) {
+    	return node.removeValue(values);
     }
 
-    public boolean removeValue(List<T> values, TreeNode<T> node, T oldValue) {
-    	synchronized(values){
-    		T old = node.getValue(values);
-    		if(old != null && old.equals(oldValue)){
-        		node.removeValue(values);
-        		return true;
-    		}
-    		else
-    			return false;
-    	}
+    public boolean removeValue(ReferenceCollection<T> values, TreeNode<T> node, T oldValue) {
+    	return node.removeValue(values, oldValue);
     }
     
-    public TreeNode<T> getNext(List<TreeNode<T>> nodes, TreeMapKey key, TreeNode<T> node, boolean read) {
+    public TreeNode<T> getNext(ReferenceCollection<TreeNode<T>> nodes, TreeMapKey key, TreeNode<T> node, boolean read) {
         StringTreeMapKey k = (StringTreeMapKey)key;
         
         char i = k.index[k.pos++];
@@ -137,11 +97,11 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
         return next;
     }
 
-    public TreeNode<T> getFirst(List<TreeNode<T>> nodes) {
+    public TreeNode<T> getFirst(ReferenceCollection<TreeNode<T>> nodes) {
         return nodes.isEmpty()? null : nodes.get(0);
     }
 
-    public void init(List<TreeNode<T>> nodes) {
+    public void init(ReferenceCollection<TreeNode<T>> nodes) {
         if(!nodes.isEmpty())
             throw new IllegalStateException();
         

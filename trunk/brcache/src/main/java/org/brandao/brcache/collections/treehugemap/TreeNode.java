@@ -18,7 +18,8 @@
 package org.brandao.brcache.collections.treehugemap;
 
 import java.io.Serializable;
-import java.util.List;
+
+import org.brandao.brcache.collections.ReferenceCollection;
 
 /**
  *
@@ -30,14 +31,22 @@ public interface TreeNode<T> extends Serializable{
     
     long getValueId();
     
-    void setNext(List<TreeNode<T>> nodes, Object key, TreeNode<T> node);
+    void setNext(ReferenceCollection<TreeNode<T>> nodes, Object key, TreeNode<T> node);
 
-    TreeNode<T> getNext(List<TreeNode<T>> nodes, Object key);
+    TreeNode<T> getNext(ReferenceCollection<TreeNode<T>> nodes, Object key);
 
-    void setValue(List<T> values, T value);
+    T setValue(ReferenceCollection<T> values, T value);
 
-    void removeValue(List<T> values);
+    boolean replaceValue(ReferenceCollection<T> values, T oldValue, T value);
     
-    T getValue(List<T> values);
+    T replaceValue(ReferenceCollection<T> values, T value);
+    
+    T putIfAbsentValue(ReferenceCollection<T> values, T value);
+    
+    T removeValue(ReferenceCollection<T> values);
+
+    boolean removeValue(ReferenceCollection<T> values, T oldValue);
+    
+    T getValue(ReferenceCollection<T> values);
     
 }
