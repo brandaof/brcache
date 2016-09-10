@@ -30,7 +30,7 @@ import java.util.Set;
  * @author Brandao
  */
 public class TreeMap<K,T> 
-    implements Map<K,T>, Serializable{
+    implements HugeMap<K,T>, Serializable{
 
     private static final long serialVersionUID                  = 4577949145861315961L;
 
@@ -46,9 +46,9 @@ public class TreeMap<K,T>
     
     public static final float DEFAULT_FRAGMENT_FACTOR_ELEMENT	= 0.03F;
     
-    private HugeArrayList<T> values;
+    private HugeReferenceList<T> values;
     
-    private HugeArrayList<TreeNode<T>> nodes;
+    private HugeReferenceList<TreeNode<T>> nodes;
     
     private TreeNodes<T> treeNodes;
     
@@ -69,7 +69,8 @@ public class TreeMap<K,T>
             DEFAULT_FRAGMENT_FACTOR_ELEMENT,
             null,
             1,
-            null);
+            null,
+            1);
     }
 
     public TreeMap(
@@ -84,25 +85,27 @@ public class TreeMap<K,T>
             double fragmentFactorElements,
             Swapper swapElements,
             int quantitySwaperThreadElements,
-            TreeNodes<T> treeNodes){
+            TreeNodes<T> treeNodes, int subLists){
         
         this.values = 
-            new HugeArrayList<T>(
+            new HugeArrayReferenceList<T>(
                 id == null? null : id + "Values", 
                 maxCapacityElements, 
                 clearFactorElements, 
                 fragmentFactorElements,
                 swapElements,
-                quantitySwaperThreadElements);
+                quantitySwaperThreadElements,
+                subLists);
         
         this.nodes = 
-            new HugeArrayList<TreeNode<T>>(
+            new HugeArrayReferenceList<TreeNode<T>>(
                 id == null? null : id + "Nodes", 
                 maxCapacityNodes, 
                 clearFactorNodes, 
                 fragmentFactorNodes,
                 swapNodes,
-                quantitySwaperThreadNodes);
+                quantitySwaperThreadNodes,
+                subLists);
 
         this.treeNodes = treeNodes;
         this.treeNodes.init(this.nodes);
@@ -263,13 +266,14 @@ public class TreeMap<K,T>
             return this.remove(k, root);
     }
 
-    public boolean remove(Object key, T oldValue) {
+    @SuppressWarnings("unchecked")
+	public boolean remove(Object key, Object oldValue) {
     	TreeMapKey k = this.treeNodes.getKey(key);
         TreeNode<T> root = this.treeNodes.getFirst(this.nodes);
         if(root == null)
             return false;
         else
-            return this.remove(k, root, oldValue);
+            return this.remove(k, root, (T)oldValue);
     }
     
     public void putAll(Map<? extends K, ? extends T> m) {
@@ -296,12 +300,12 @@ public class TreeMap<K,T>
         throw new UnsupportedOperationException("not implemented yet");
     }
 
+	public Set<java.util.Map.Entry<K, T>> entrySet() {
+        throw new UnsupportedOperationException("not implemented yet");
+	}
+    
     public Collection<T> values() {
         return this.values;
-    }
-
-    public Set<Entry<K, T>> entrySet() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void setReadOnly(boolean value){

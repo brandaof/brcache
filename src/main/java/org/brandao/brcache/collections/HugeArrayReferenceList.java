@@ -75,7 +75,7 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 		return reference;
 	}
 
-	public void set(long reference, T e) {
+	public T set(long reference, T e) {
 		long off = reference & 0xffffffff00L;
 		long seg  = reference & 0xffL;
 
@@ -84,7 +84,9 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 		HugeArrayList<T> list = this.lists[(int)seg];
 		
 		synchronized (list) {
+			T old = list.get((int)off);
 			list.set((int)off, e);
+			return old;
 		}
 		
 	}
@@ -110,6 +112,72 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 		
 		synchronized (list) {
 			return list.remove(off);
+		}
+	}
+	
+	public boolean replace(long reference, T oldValue, T value) {
+		long off = reference & 0xffffffff00L;
+		long seg  = reference & 0xffL;
+
+		off = off >> 8;
+		
+		HugeArrayList<T> list = this.lists[(int)seg];
+		synchronized(list){
+    		T old = list.get((int)off);
+    		if(old != null && old.equals(oldValue)){
+	    		list.set((int)off, value);
+	    		return true;
+    		}
+			return false;
+		}
+	}
+
+	public T replace(long reference, T value) {
+		long off = reference & 0xffffffff00L;
+		long seg  = reference & 0xffL;
+
+		off = off >> 8;
+		
+		HugeArrayList<T> list = this.lists[(int)seg];
+		synchronized(list){
+    		T old = list.get((int)off);
+    		if(old != null){
+	    		list.set((int)off, value);
+    		}
+			return old;
+		}
+	}
+
+	public T putIfAbsentValue(long reference, T value) {
+		long off = reference & 0xffffffff00L;
+		long seg  = reference & 0xffL;
+
+		off = off >> 8;
+		
+		HugeArrayList<T> list = this.lists[(int)seg];
+		synchronized(list){
+    		T old = list.get((int)off);
+    		if(old == null){
+	    		list.set((int)off, value);
+    		}
+			return old;
+		}
+	}
+
+	public boolean remove(long reference, T oldValue) {
+		long off = reference & 0xffffffff00L;
+		long seg  = reference & 0xffL;
+
+		off = off >> 8;
+		
+		HugeArrayList<T> list = this.lists[(int)seg];
+		synchronized(list){
+    		T old = list.get((int)off);
+    		if(old != null && old.equals(oldValue)){
+	    		list.remove((int)off);
+	    		return true;
+    		}
+			return false;
 		}
 	}
 	
