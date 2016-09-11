@@ -64,13 +64,14 @@ public class TreeMap<K,T>
             DEFAULT_FRAGMENT_FACTOR_NODE,
             null,
             1,
+            1,
             DEFAULT_MAX_CAPACITY_ELEMENT, 
             DEFAULT_CLEAR_FACTOR_ELEMENT, 
             DEFAULT_FRAGMENT_FACTOR_ELEMENT,
             null,
             1,
-            null,
-            1);
+            1,
+            null);
     }
 
     public TreeMap(
@@ -79,13 +80,15 @@ public class TreeMap<K,T>
             double clearFactorNodes, 
             double fragmentFactorNodes,
             Swapper swapNodes,
-            int quantitySwaperThreadNodes,            
+            int quantitySwaperThreadNodes,   
+            int subListsNodes,
             int maxCapacityElements,
             double clearFactorElements, 
             double fragmentFactorElements,
             Swapper swapElements,
             int quantitySwaperThreadElements,
-            TreeNodes<T> treeNodes, int subLists){
+            int subListsElements,
+            TreeNodes<T> treeNodes){
         
         this.values = 
             new HugeArrayReferenceList<T>(
@@ -95,7 +98,7 @@ public class TreeMap<K,T>
                 fragmentFactorElements,
                 swapElements,
                 quantitySwaperThreadElements,
-                subLists);
+                subListsElements);
         
         this.nodes = 
             new HugeArrayReferenceList<TreeNode<T>>(
@@ -105,7 +108,7 @@ public class TreeMap<K,T>
                 fragmentFactorNodes,
                 swapNodes,
                 quantitySwaperThreadNodes,
-                subLists);
+                subListsNodes);
 
         this.treeNodes = treeNodes;
         this.treeNodes.init(this.nodes);

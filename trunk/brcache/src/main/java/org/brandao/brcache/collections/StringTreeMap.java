@@ -34,16 +34,17 @@ public class StringTreeMap<T> extends TreeMap<String, T> {
             double fragmentFactorNodes,
             Swapper swapNodes,
             int quantitySwaperThreadNodes,
+            int subListsNodes,
             int maxCapacityElements,
             double clearFactorElements, 
             double fragmentFactorElements,
             Swapper swapElements,
             int quantitySwaperThreadElements,
-            int subLists){
+            int subListsElements){
         super(id, maxCapacityNodes, clearFactorNodes, fragmentFactorNodes, 
-                swapNodes, quantitySwaperThreadNodes, 
+                swapNodes, quantitySwaperThreadNodes, subListsNodes,
                 maxCapacityElements, clearFactorElements, fragmentFactorElements, 
-                swapElements, quantitySwaperThreadElements, 
-                new StringTreeNodes<T>(), subLists);
+                swapElements, quantitySwaperThreadElements, subListsElements, 
+                new StringTreeNodes<T>());
     }    
 }

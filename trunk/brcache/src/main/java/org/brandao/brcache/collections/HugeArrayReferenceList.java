@@ -32,7 +32,8 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
             double clearFactorElements, 
             double fragmentFactorElements,
             Swapper swap,
-            int quantityClearThread, int lists) {
+            int quantityClearThread, 
+            int lists) {
     
     	this.segment = 0;
     	this.lists   = new HugeArrayList[lists];

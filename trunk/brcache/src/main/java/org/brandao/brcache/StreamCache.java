@@ -28,7 +28,7 @@ import org.brandao.brcache.HugeListCalculator.HugeListInfo;
 import org.brandao.brcache.collections.Collections;
 import org.brandao.brcache.collections.DiskSwapper;
 import org.brandao.brcache.collections.FileSwaper;
-import org.brandao.brcache.collections.HugeArrayList;
+import org.brandao.brcache.collections.HugeArrayReferenceList;
 import org.brandao.brcache.collections.StringTreeMap;
 import org.brandao.brcache.collections.Swapper;
 import org.brandao.brcache.collections.treehugemap.CharNode;
@@ -68,11 +68,11 @@ public abstract class StreamCache
     
     private final StringTreeMap<DataMap> dataMap;
 
-    private final HugeArrayList<Block> dataList;
+    private final HugeArrayReferenceList<Block> dataList;
     
     private final int segmentSize;
     
-    private final BlockingQueue<Integer> freeSegments;
+    private final BlockingQueue<Long> freeSegments;
 
     private final long maxBytesToStorageEntry;
     
@@ -148,7 +148,7 @@ public abstract class StreamCache
 
         this.modCount               = 0;
         this.dataPath               = dataPath;
-        this.freeSegments           = new LinkedBlockingQueue<Integer>();
+        this.freeSegments           = new LinkedBlockingQueue<Long>();
         this.segmentSize            = (int)blockSize;
         this.maxBytesToStorageEntry = maxSizeEntry;
         this.maxLengthKey           = maxSizeKey;
@@ -165,13 +165,14 @@ public abstract class StreamCache
 		    			HugeListCalculator
 		    				.calculate(dataBufferSize, dataPageSize, blockSize, dataSwapFactor);
 		        this.dataList =
-		                new HugeArrayList<Block>(
+		                new HugeArrayReferenceList<Block>(
 		                "data",
 		                dataInfo.getMaxCapacityElements(),
 		                dataInfo.getClearFactorElements(),
 		                dataInfo.getFragmentFactorElements(),
 		                this.getSwaper(swaperType),
-		                quantitySwaperThread
+		                quantitySwaperThread,
+		                dataInfo.getSubLists()
 		                );
 		        this.dataList.setDeleteOnExit(false);
 	    	}
@@ -210,11 +211,13 @@ public abstract class StreamCache
 	                    nodeInfo.getFragmentFactorElements(),
 	                    this.getSwaper(swaperType),
 	                    quantitySwaperThread,
+	                    nodeInfo.getSubLists(),
 	                    indexInfo.getMaxCapacityElements(),
 	                    indexInfo.getClearFactorElements(),
 	                    indexInfo.getFragmentFactorElements(),
 	                    this.getSwaper(swaperType),
-	                    quantitySwaperThread
+	                    quantitySwaperThread,
+	                    indexInfo.getSubLists()
 	                    );
 		        this.dataMap.setDeleteOnExit(false);
 	    	}
@@ -627,11 +630,11 @@ public abstract class StreamCache
     
     private void putData(DataMap map, InputStream inputData) throws StorageException{
         
-        int writeData   = 0;
-        byte[] buffer   = new byte[this.segmentSize];
-        int index       = 0;
-        Block lastBlock = null;
-        int lastSegment = -1;
+        int writeData    = 0;
+        byte[] buffer    = new byte[this.segmentSize];
+        int index        = 0;
+        Block lastBlock  = null;
+        long lastSegment = -1;
         int read;
         
         try{
@@ -645,28 +648,23 @@ public abstract class StreamCache
             	byte[] data = new byte[read];
         		System.arraycopy(buffer, 0, data, 0, read);
         		
-                //synchronized(this.dataList){
-                	Block block = new Block(map.getId(), index++, data, read);
-                    Integer segment = this.freeSegments.poll();
-                    if(segment == null){
-                    	synchronized(this.dataList){
-	                        segment = this.dataList.size();
-	                        this.dataList.add(block);
-                    	}
-                    }
-                    else
-                        this.dataList.set(segment, block);
-                    
-                    if(lastBlock != null){
-                    	lastBlock.nextBlock = segment;
-                    	this.dataList.set(lastSegment, lastBlock);
-                    }
-                    else
-                    	map.setFirstSegment(segment);
-                    
-                	lastBlock   = block;
-                    lastSegment = segment;
-                //}
+            	Block block = new Block(map.getId(), index++, data, read);
+                Long segment = this.freeSegments.poll();
+                if(segment == null){
+                    segment = this.dataList.insert(block);
+                }
+                else
+                    this.dataList.set(segment, block);
+                
+                if(lastBlock != null){
+                	lastBlock.nextBlock = segment;
+                	this.dataList.set(lastSegment, lastBlock);
+                }
+                else
+                	map.setFirstSegment(segment);
+                
+            	lastBlock   = block;
+                lastSegment = segment;
                
             }
             
@@ -688,12 +686,12 @@ public abstract class StreamCache
     }    
     
     private void releaseSegments(DataMap map){
-    	int segmentId = map.getFirstSegment();
+    	long segmentId = map.getFirstSegment();
     	
     	if(segmentId == -1)
     		return;
     	
-    	synchronized(this.dataList){
+    	//synchronized(this.dataList){
 	        Block current = this.dataList.get(segmentId);
 	        
 	        int i=0;
@@ -706,7 +704,7 @@ public abstract class StreamCache
 	        	current = segmentId < 0? null : this.dataList.get(segmentId);
 	        	i++;
 	        }
-    	}
+    	//}
     	
     	map.setFirstSegment(-1);
     }
