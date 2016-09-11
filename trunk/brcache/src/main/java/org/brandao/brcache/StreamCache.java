@@ -164,6 +164,7 @@ public abstract class StreamCache
 		    	dataInfo = 
 		    			HugeListCalculator
 		    				.calculate(dataBufferSize, dataPageSize, blockSize, dataSwapFactor);
+		    	System.out.println("data: " + dataInfo);
 		        this.dataList =
 		                new HugeArrayReferenceList<Block>(
 		                "data",
@@ -187,6 +188,7 @@ public abstract class StreamCache
 		    				.calculate(
 		    						nodeBufferSize, nodePageSize, 
 		    						NODE_BINARY_SIZE, nodeSwapFactor);
+		    	System.out.println("node: " + nodeInfo);
 	    	}
 	    	catch(IllegalArgumentException e){
 	    		throw new IllegalArgumentException("fail create nodes buffer", e);
@@ -197,6 +199,7 @@ public abstract class StreamCache
 		    			HugeListCalculator
 		    				.calculate(indexBufferSize, indexPageSize, 
 		    						INDEX_BINARY_SIZE, indexSwapFactor);
+		    	System.out.println("index-info: " + indexInfo);
 	    	}
 	    	catch(IllegalArgumentException e){
 	    		throw new IllegalArgumentException("fail create index buffer", e);

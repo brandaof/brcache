@@ -23,6 +23,12 @@ class HugeListCalculator {
     	if(blockSize > dataPageSize)
     		throw new IllegalArgumentException("block size > slab size");
     	
+    	double subLists       = (dataBufferSize / SUBLIST_DATA_SIZE);
+    	subLists              = subLists > 8? 8 : subLists;
+    	subLists              = subLists == 0? 1 : subLists;
+    	
+    	dataBufferSize        = (long)(dataBufferSize / subLists);
+    	
     	//Quantidade de blocos na memória.
     	double blocksLength   = dataBufferSize/blockSize;
     	blocksLength          = dataBufferSize%blockSize > 0? blocksLength + 1 : blocksLength;
@@ -46,12 +52,8 @@ class HugeListCalculator {
         
     	if(swapBlocks <= 0)
     		throw new IllegalArgumentException("swap factor is very little");
-        
-    	int subLists = (int)(dataBufferSize / SUBLIST_DATA_SIZE);
-    	subLists = subLists > 5? 5 :  subLists;
-    	subLists = subLists == 0? 1 : subLists;
-    	
-        return new HugeListInfo((int)blocksLength, swapFactor, pageFactor, subLists);    			
+
+        return new HugeListInfo((int)blocksLength, swapFactor, pageFactor, (int)subLists);    			
 	}
 	
 	public static class HugeListInfo{
@@ -102,6 +104,14 @@ class HugeListCalculator {
 
 		public void setFragmentFactorElements(double fragmentFactorElements) {
 			this.fragmentFactorElements = fragmentFactorElements;
+		}
+
+		@Override
+		public String toString() {
+			return "HugeListInfo [maxCapacityElements=" + maxCapacityElements
+					+ ", clearFactorElements=" + clearFactorElements
+					+ ", fragmentFactorElements=" + fragmentFactorElements
+					+ ", subLists=" + subLists + "]";
 		}
         
 	}
