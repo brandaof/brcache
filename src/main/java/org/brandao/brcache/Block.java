@@ -12,7 +12,7 @@ class Block
     
     public int length;
     
-    public int nextBlock;
+    public long nextBlock;
     
     public byte[] buffer;
     

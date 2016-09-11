@@ -37,7 +37,7 @@ class DataMap implements Serializable{
     
     private short flag;
     
-    private int firstSegment;
+    private long firstSegment;
     
     private int segments;
     
@@ -136,11 +136,11 @@ class DataMap implements Serializable{
 		this.flag = flag;
 	}
 
-	public int getFirstSegment() {
+	public long getFirstSegment() {
 		return firstSegment;
 	}
 
-	public void setFirstSegment(int firstSegment) {
+	public void setFirstSegment(long firstSegment) {
 		this.firstSegment = firstSegment;
 	}
 

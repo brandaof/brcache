@@ -2,6 +2,8 @@ package org.brandao.brcache;
 
 class HugeListCalculator {
 
+	private static final long SUBLIST_DATA_SIZE = 512*1024*1024L;
+	
 	public static HugeListInfo calculate(
 			long dataBufferSize, long dataPageSize, 
 			long blockSize, double dataSwapFactor){
@@ -26,11 +28,11 @@ class HugeListCalculator {
     	blocksLength          = dataBufferSize%blockSize > 0? blocksLength + 1 : blocksLength;
     	
     	//Quantidade de blocos em uma página
-    	double blocksPerSlab  = dataPageSize/blockSize;
-    	blocksPerSlab         = dataPageSize%blockSize > 0? blocksPerSlab + 1 : blocksPerSlab;
+    	double blocksPerPage  = dataPageSize/blockSize;
+    	blocksPerPage         = dataPageSize%blockSize > 0? blocksPerPage + 1 : blocksPerPage;
     	
     	//Fator de páginas. Usado para definir o fator de fragmentação da lista.
-    	double slabFactor     = blocksPerSlab/blocksLength;
+    	double pageFactor     = blocksPerPage/blocksLength;
     	//Quantidade de páginas na memória.
     	//double slabs          = blocksLength/blocksPerSlab;
     	
@@ -45,7 +47,10 @@ class HugeListCalculator {
     	if(swapBlocks <= 0)
     		throw new IllegalArgumentException("swap factor is very little");
         
-        return new HugeListInfo((int)blocksLength, swapFactor, slabFactor);    			
+    	int subLists = (int)(dataBufferSize / SUBLIST_DATA_SIZE);
+    	subLists = subLists > 5? 5 :  subLists;
+    	
+        return new HugeListInfo((int)blocksLength, swapFactor, pageFactor, subLists);    			
 	}
 	
 	public static class HugeListInfo{
@@ -56,11 +61,22 @@ class HugeListCalculator {
         
 		private double fragmentFactorElements;
 
+		private int subLists;
+		
 		public HugeListInfo(int maxCapacityElements,
-				double clearFactorElements, double fragmentFactorElements) {
+				double clearFactorElements, double fragmentFactorElements, int subLists) {
 			this.maxCapacityElements = maxCapacityElements;
 			this.clearFactorElements = clearFactorElements;
 			this.fragmentFactorElements = fragmentFactorElements;
+			this.subLists = subLists;
+		}
+
+		public int getSubLists() {
+			return subLists;
+		}
+
+		public void setSubLists(int subLists) {
+			this.subLists = subLists;
 		}
 
 		public int getMaxCapacityElements() {

@@ -94,7 +94,7 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
         
         if(next == null && !read){
         	
-        	Object currentLock = locks[i % locks.length];
+        	Object currentLock = locks[(int)(node.getId() % locks.length)];
         	
         	synchronized (currentLock) {
                 node = nodes.get(node.getId());
