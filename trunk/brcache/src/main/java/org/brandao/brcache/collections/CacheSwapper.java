@@ -114,4 +114,13 @@ public class CacheSwapper
 	public void destroy() {
 	}
     
+	public Swapper clone(){
+		try{
+			return (Swapper) super.clone();
+		}
+		catch(Throwable e){
+			return null;
+		}
+	}
+	
 }

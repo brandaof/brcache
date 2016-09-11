@@ -228,5 +228,13 @@ public class FileSwaper implements DiskSwapper {
     	}
 	}
     
-    
+	public Swapper clone(){
+		try{
+			return (Swapper) super.clone();
+		}
+		catch(Throwable e){
+			return null;
+		}
+	}
+
 }

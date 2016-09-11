@@ -185,5 +185,13 @@ public class TreeFileSwaper implements DiskSwapper {
             Collections.deleteDir(rootPath);
 	}
     
+	public Swapper clone(){
+		try{
+			return (Swapper) super.clone();
+		}
+		catch(Throwable e){
+			return null;
+		}
+	}
     
 }

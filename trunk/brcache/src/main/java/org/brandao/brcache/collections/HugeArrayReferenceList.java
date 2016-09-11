@@ -47,7 +47,7 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
                         maxCapacityElements, 
                         clearFactorElements, 
                         fragmentFactorElements,
-                        swap,
+                        swap.clone(),
                         quantityClearThread);
     		
     	}
@@ -62,7 +62,8 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 	public long insert(T e) {
 		int currentSegment;
 		synchronized (this) {
-			currentSegment = segment++ % this.lists.length;
+			currentSegment = segment % this.lists.length;
+			segment++;
 		}
 		int offset = 0;
 		HugeArrayList<T> list = this.lists[currentSegment];
