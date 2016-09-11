@@ -65,13 +65,13 @@ public class BRCacheConfig implements Serializable{
     public void setConfiguration(Configuration config){
 
     	this.configuration       = config;
-        this.nodesBufferSize     = config.getLong(CacheConstants.NODES_BUFFER_SIZE,		"2024m");
+        this.nodesBufferSize     = config.getLong(CacheConstants.NODES_BUFFER_SIZE,		"1m");
         this.nodesPageSize       = config.getLong(CacheConstants.NODES_PAGE_SIZE,		"1k");
         this.nodesSwapFactor     = config.getDouble(CacheConstants.NODES_SWAP_FACTOR,	"0.5");
-        this.indexBufferSize     = config.getLong(CacheConstants.INDEX_BUFFER_SIZE,		"512m");
+        this.indexBufferSize     = config.getLong(CacheConstants.INDEX_BUFFER_SIZE,		"1m");
         this.indexPageSize       = config.getLong(CacheConstants.INDEX_PAGE_SIZE,		"1k");
         this.indexSwapFactor     = config.getDouble(CacheConstants.INDEX_SWAP_FACTOR,	"0.5");
-        this.dataBufferSize      = config.getLong(CacheConstants.DATA_BUFFER_SIZE,		"5000m");
+        this.dataBufferSize      = config.getLong(CacheConstants.DATA_BUFFER_SIZE,		"64m");
         this.dataBlockSize       = config.getLong(CacheConstants.DATA_BLOCK_SIZE,		"1k");
         this.dataPageSize        = config.getLong(CacheConstants.DATA_PAGE_SIZE,		"8k");
         this.dataSwapFactor      = config.getDouble(CacheConstants.DATA_SWAP_FACTOR,	"0.5");
