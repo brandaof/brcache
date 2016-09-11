@@ -12,7 +12,7 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 
 	private HugeArrayList<T>[] lists;
 
-	private int segment;
+	private volatile int segment;
 	
     public HugeArrayReferenceList() {
         this(
@@ -38,7 +38,7 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
     	this.segment = 0;
     	this.lists   = new HugeArrayList[lists];
     	
-    	maxCapacityElements = maxCapacityElements / lists;
+    	//maxCapacityElements = maxCapacityElements / lists;
     	
     	for(int i=0;i<this.lists.length;i++){
             this.lists[i] = 
@@ -60,15 +60,14 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 	}
 	
 	public long insert(T e) {
-		int currentSegment;
-		synchronized (this) {
-			currentSegment = segment % this.lists.length;
-			segment++;
-		}
-		int offset = 0;
+		
+		int currentSegment = this.segment++;
+		currentSegment     = currentSegment % this.lists.length;
+		int offset         = 0;
+		
 		HugeArrayList<T> list = this.lists[currentSegment];
 		
-		synchronized (list) {
+		synchronized(list){
 			offset = list.size();
 			list.add(e);
 		}
@@ -82,7 +81,7 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 
 	public T set(long reference, T e) {
 		long off = reference & 0xffffffff00L;
-		long seg  = reference & 0xffL;
+		long seg = reference & 0xffL;
 
 		off = off >> 8;
 		
