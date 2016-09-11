@@ -189,6 +189,7 @@ public class CharNode<T> implements TreeNode<T>{
                 return values.putIfAbsent(this.valueId, value);
             }
             else{
+            	this.valueId = values.insert(value);
             	return null;
             }
     	}
