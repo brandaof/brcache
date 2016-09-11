@@ -27,7 +27,7 @@ import org.brandao.brcache.Cache;
  * 
  * @author Brandao
  */
-public interface Swapper extends Serializable{
+public interface Swapper extends Serializable, Cloneable {
     
     /**
      * Define a identificação do agrupamento de entidades.
@@ -59,5 +59,7 @@ public interface Swapper extends Serializable{
      * {@link Cache} associado a ele é destruido. 
      */
     void destroy();
+
+    Swapper clone();
     
 }

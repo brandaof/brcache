@@ -20,6 +20,7 @@ package org.brandao.brcache.collections.treehugemap;
 import java.io.Serializable;
 
 import org.brandao.brcache.collections.ReferenceCollection;
+import org.brandao.concurrent.NamedLock;
 
 /**
  *
@@ -27,19 +28,7 @@ import org.brandao.brcache.collections.ReferenceCollection;
  */
 public class StringTreeNodes<T> implements TreeNodes<T>{
 
-	private static final Serializable[] locks = new Serializable[]{
-		new Integer(0),
-		new Integer(1),
-		new Integer(2),
-		new Integer(3),
-		new Integer(4),
-		new Integer(5),
-		new Integer(6),
-		new Integer(7),
-		new Integer(8),
-		new Integer(9),
-		new Integer(10),
-	};
+	private static final NamedLock namedLock = new NamedLock();
 	
 	private static final long serialVersionUID = -8387188156629418047L;
 
@@ -93,10 +82,10 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
         TreeNode<T> next = node.getNext(nodes, i);
         
         if(next == null && !read){
+        	String lockName = Long.toString(node.getId());
+        	Serializable refLock = namedLock.lock(lockName);
         	
-        	Object currentLock = locks[(int)(node.getId() % locks.length)];
-        	
-        	synchronized (currentLock) {
+        	try{
                 node = nodes.get(node.getId());
                 next = node.getNext(nodes, i);
                 
@@ -112,6 +101,10 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
                 
                 node.setNext(nodes, i, nextNode);
         	}
+        	finally{
+        		namedLock.unlock(refLock, lockName);
+        	}
+        	
         }
         
         return next;
