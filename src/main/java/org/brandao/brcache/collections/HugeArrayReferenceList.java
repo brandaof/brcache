@@ -148,7 +148,7 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 		}
 	}
 
-	public T putIfAbsentValue(long reference, T value) {
+	public T putIfAbsent(long reference, T value) {
 		long off = reference & 0xffffffff00L;
 		long seg  = reference & 0xffL;
 

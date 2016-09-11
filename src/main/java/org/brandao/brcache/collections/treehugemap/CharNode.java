@@ -1,6 +1,6 @@
 package org.brandao.brcache.collections.treehugemap;
 
-import java.util.List;
+import java.io.Serializable;
 
 import org.brandao.brcache.collections.ReferenceCollection;
 
@@ -8,6 +8,20 @@ public class CharNode<T> implements TreeNode<T>{
 
 	private static final long serialVersionUID 	= 480902938041176366L;
 
+	private static final Serializable[] locks = new Serializable[]{
+		new Integer(0),
+		new Integer(1),
+		new Integer(2),
+		new Integer(3),
+		new Integer(4),
+		new Integer(5),
+		new Integer(6),
+		new Integer(7),
+		new Integer(8),
+		new Integer(9),
+		new Integer(10),
+	};
+	
 	public static int MIN_CHARGROUP    			= 0x5b;
 
     public static int MAX_CHARGROUP    			= 0x7d;
@@ -66,7 +80,7 @@ public class CharNode<T> implements TreeNode<T>{
 			index = LEN_NUMBERGROUP + LEN_CHARGROUP + (index - MIN_CHAR2GROUP);
 		
         this.nextNodes[index] = node.getId();
-        nodes.set((int)this.id, this);
+        nodes.set(this.id, this);
     }
 
     public TreeNode<T> getNext(ReferenceCollection<TreeNode<T>> nodes, Object key) {
@@ -90,7 +104,7 @@ public class CharNode<T> implements TreeNode<T>{
 		long nexNode = this.nextNodes[index];
 
         if(nexNode != -1){
-            return nodes.get((int)nexNode);
+            return nodes.get(nexNode);
         }
         else
             return null;
@@ -109,45 +123,87 @@ public class CharNode<T> implements TreeNode<T>{
     }
 
     public T setValue(ReferenceCollection<T> values, T value) {
-    	if(this.valueId == -1){
-    		long ref = values.insert(value);
-    		boolean remove = false;
-    		synchronized(values){
-    			if(this.valueId == -1){
-    				this.valueId = ref;
-    			}
-    			else{
-    				remove = true;
-    			}
-    		}
-    		
-    		if()
-    	}
-    	
-    	
-        if(this.valueId == -1){
+    	Object currentLock = locks[(int)(this.id % locks.length)];
+    	synchronized (currentLock) {
             if(this.valueId == -1){
-                values.add(value);
-                this.valueId = values.size() - 1;
+            	this.valueId = values.insert(value);
+                return null;
             }
-            else
-                values.set((int)this.valueId, value);
-        }
-        else
-            values.set((int)this.valueId, value);
+            else{
+        		T old = values.get(valueId); 
+                values.set(this.valueId, value);
+                return old;
+            }
+			
+		}
     }
 
-    public void removeValue(List<T> values) {
-        if(this.valueId != -1){
-            values.set((int)this.valueId, null);
-        }
+    public T removeValue(ReferenceCollection<T> values) {
+    	Object currentLock = locks[(int)(this.id % locks.length)];
+    	synchronized (currentLock) {
+            if(this.valueId != -1){
+                return values.set(this.valueId, null);
+            }
+            else{
+            	return null;
+            }
+    	}
     }
 
-    public T getValue(List<T> values) {
+    public T getValue(ReferenceCollection<T> values) {
         if(this.valueId != -1)
-            return values.get((int)this.valueId);
+            return values.get(this.valueId);
         else
             return null;
     }
+
+	public boolean replaceValue(ReferenceCollection<T> values, T oldValue,
+			T value) {
+    	Object currentLock = locks[(int)(this.id % locks.length)];
+    	synchronized (currentLock) {
+            if(this.valueId != -1){
+                return values.replace(this.valueId, oldValue, value);
+            }
+            else{
+            	return false;
+            }
+    	}
+	}
+
+	public T replaceValue(ReferenceCollection<T> values, T value) {
+    	Object currentLock = locks[(int)(this.id % locks.length)];
+    	synchronized (currentLock) {
+            if(this.valueId != -1){
+                return values.replace(this.valueId, value);
+            }
+            else{
+            	return null;
+            }
+    	}
+	}
+
+	public T putIfAbsentValue(ReferenceCollection<T> values, T value) {
+    	Object currentLock = locks[(int)(this.id % locks.length)];
+    	synchronized (currentLock) {
+            if(this.valueId != -1){
+                return values.putIfAbsent(this.valueId, value);
+            }
+            else{
+            	return null;
+            }
+    	}
+	}
+
+	public boolean removeValue(ReferenceCollection<T> values, T oldValue) {
+    	Object currentLock = locks[(int)(this.id % locks.length)];
+    	synchronized (currentLock) {
+            if(this.valueId != -1){
+                return values.remove(this.valueId, oldValue);
+            }
+            else{
+            	return false;
+            }
+    	}
+	}
 
 }

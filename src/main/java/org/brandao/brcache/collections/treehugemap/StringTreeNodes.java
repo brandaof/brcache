@@ -17,6 +17,8 @@
 
 package org.brandao.brcache.collections.treehugemap;
 
+import java.io.Serializable;
+
 import org.brandao.brcache.collections.ReferenceCollection;
 
 /**
@@ -25,6 +27,20 @@ import org.brandao.brcache.collections.ReferenceCollection;
  */
 public class StringTreeNodes<T> implements TreeNodes<T>{
 
+	private static final Serializable[] locks = new Serializable[]{
+		new Integer(0),
+		new Integer(1),
+		new Integer(2),
+		new Integer(3),
+		new Integer(4),
+		new Integer(5),
+		new Integer(6),
+		new Integer(7),
+		new Integer(8),
+		new Integer(9),
+		new Integer(10),
+	};
+	
 	private static final long serialVersionUID = -8387188156629418047L;
 
 	public TreeMapKey getKey(Object key) {
@@ -77,21 +93,25 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
         TreeNode<T> next = node.getNext(nodes, i);
         
         if(next == null && !read){
-            synchronized(nodes){
-                node = nodes.get((int)node.getId());
-                
+        	
+        	Object currentLock = locks[i % locks.length];
+        	
+        	synchronized (currentLock) {
+                node = nodes.get(node.getId());
                 next = node.getNext(nodes, i);
                 
                 if(next != null)
                     return next;
                 
                 CharNode<T> nextNode = new CharNode<T>();
-                nodes.add(nextNode);
-                nextNode.setId(nodes.size() - 1);
+                
+                long id = nodes.insert(nextNode);
+                
+                nextNode.setId(id);
                 next = nextNode;
                 
                 node.setNext(nodes, i, nextNode);
-            }
+        	}
         }
         
         return next;

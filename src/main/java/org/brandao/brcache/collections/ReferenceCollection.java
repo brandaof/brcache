@@ -20,7 +20,7 @@ public interface ReferenceCollection<T>
 
     T replace(long reference, T value);
     
-    T putIfAbsentValue(long reference, T value);
+    T putIfAbsent(long reference, T value);
     
     boolean remove(long reference, T oldValue);
 	
