@@ -49,6 +49,7 @@ class HugeListCalculator {
         
     	int subLists = (int)(dataBufferSize / SUBLIST_DATA_SIZE);
     	subLists = subLists > 5? 5 :  subLists;
+    	subLists = subLists == 0? 1 : subLists;
     	
         return new HugeListInfo((int)blocksLength, swapFactor, pageFactor, subLists);    			
 	}

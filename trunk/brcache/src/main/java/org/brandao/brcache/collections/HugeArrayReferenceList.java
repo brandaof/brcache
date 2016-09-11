@@ -60,16 +60,19 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 	}
 	
 	public long insert(T e) {
-		segment    = segment++ % this.lists.length;
+		int currentSegment;
+		synchronized (this) {
+			currentSegment = segment++ % this.lists.length;
+		}
 		int offset = 0;
-		HugeArrayList<T> list = this.lists[segment];
+		HugeArrayList<T> list = this.lists[currentSegment];
 		
 		synchronized (list) {
 			offset = list.size();
 			list.add(e);
 		}
 		
-		int seg  = segment & 0xff;
+		int seg  = currentSegment & 0xff;
 		long off = offset & 0xffffffffL;
 		
 		long reference = (off << 8) | seg;
