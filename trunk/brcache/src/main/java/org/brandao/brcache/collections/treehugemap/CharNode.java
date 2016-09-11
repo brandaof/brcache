@@ -3,13 +3,23 @@ package org.brandao.brcache.collections.treehugemap;
 import java.io.Serializable;
 
 import org.brandao.brcache.collections.ReferenceCollection;
-import org.brandao.concurrent.NamedLock;
 
 public class CharNode<T> implements TreeNode<T>{
 
 	private static final long serialVersionUID 	= 480902938041176366L;
 
-	private static final NamedLock namedLock = new NamedLock();
+	private static final Serializable[] locks = new Serializable[]{
+		new Integer(0),
+		new Integer(1),
+		new Integer(2),
+		new Integer(3),
+		new Integer(4),
+		new Integer(5),
+		new Integer(6),
+		new Integer(7),
+		new Integer(8),
+		new Integer(9),
+	};
 	
 	public static int MIN_CHARGROUP    			= 0x5b;
 
@@ -112,9 +122,7 @@ public class CharNode<T> implements TreeNode<T>{
     }
 
     public T setValue(ReferenceCollection<T> values, T value) {
-    	String lockName = Long.toString(this.getId());
-    	Serializable refLock = namedLock.lock(lockName);
-    	try{
+    	synchronized(locks[(int)(this.id % locks.length)]){
             if(this.valueId == -1){
             	this.valueId = values.insert(value);
                 return null;
@@ -126,24 +134,16 @@ public class CharNode<T> implements TreeNode<T>{
             }
 			
 		}
-    	finally{
-    		namedLock.unlock(refLock, lockName);
-    	}
     }
 
     public T removeValue(ReferenceCollection<T> values) {
-    	String lockName = Long.toString(this.getId());
-    	Serializable refLock = namedLock.lock(lockName);
-    	try{
+    	synchronized(locks[(int)(this.id % locks.length)]){
             if(this.valueId != -1){
                 return values.set(this.valueId, null);
             }
             else{
             	return null;
             }
-    	}
-    	finally{
-    		namedLock.unlock(refLock, lockName);
     	}
     }
 
@@ -156,9 +156,7 @@ public class CharNode<T> implements TreeNode<T>{
 
 	public boolean replaceValue(ReferenceCollection<T> values, T oldValue,
 			T value) {
-    	String lockName = Long.toString(this.getId());
-    	Serializable refLock = namedLock.lock(lockName);
-    	try{
+    	synchronized(locks[(int)(this.id % locks.length)]){
             if(this.valueId != -1){
                 return values.replace(this.valueId, oldValue, value);
             }
@@ -166,15 +164,10 @@ public class CharNode<T> implements TreeNode<T>{
             	return false;
             }
     	}
-    	finally{
-    		namedLock.unlock(refLock, lockName);
-    	}
 	}
 
 	public T replaceValue(ReferenceCollection<T> values, T value) {
-    	String lockName = Long.toString(this.getId());
-    	Serializable refLock = namedLock.lock(lockName);
-    	try{
+    	synchronized(locks[(int)(this.id % locks.length)]){
             if(this.valueId != -1){
                 return values.replace(this.valueId, value);
             }
@@ -182,15 +175,10 @@ public class CharNode<T> implements TreeNode<T>{
             	return null;
             }
     	}
-    	finally{
-    		namedLock.unlock(refLock, lockName);
-    	}
 	}
 
 	public T putIfAbsentValue(ReferenceCollection<T> values, T value) {
-    	String lockName = Long.toString(this.getId());
-    	Serializable refLock = namedLock.lock(lockName);
-    	try{
+    	synchronized(locks[(int)(this.id % locks.length)]){
             if(this.valueId != -1){
                 return values.putIfAbsent(this.valueId, value);
             }
@@ -199,24 +187,16 @@ public class CharNode<T> implements TreeNode<T>{
             	return null;
             }
     	}
-    	finally{
-    		namedLock.unlock(refLock, lockName);
-    	}
 	}
 
 	public boolean removeValue(ReferenceCollection<T> values, T oldValue) {
-    	String lockName = Long.toString(this.getId());
-    	Serializable refLock = namedLock.lock(lockName);
-    	try{
+    	synchronized(locks[(int)(this.id % locks.length)]){
             if(this.valueId != -1){
                 return values.remove(this.valueId, oldValue);
             }
             else{
             	return false;
             }
-    	}
-    	finally{
-    		namedLock.unlock(refLock, lockName);
     	}
 	}
 
