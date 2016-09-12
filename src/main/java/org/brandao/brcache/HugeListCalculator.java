@@ -2,8 +2,6 @@ package org.brandao.brcache;
 
 class HugeListCalculator {
 
-	private static final long SUBLIST_DATA_SIZE = 512*1024*1024L;
-	
 	public static HugeListInfo calculate(
 			long dataBufferSize, long dataPageSize, 
 			long blockSize, double dataSwapFactor){
@@ -23,8 +21,8 @@ class HugeListCalculator {
     	if(blockSize > dataPageSize)
     		throw new IllegalArgumentException("block size > slab size");
     	
-    	double subLists       = (dataBufferSize / SUBLIST_DATA_SIZE);
-    	subLists              = subLists > 8? 8 : subLists;
+    	double subLists       = (dataBufferSize / (blockSize*2048L)/*SUBLIST_DATA_SIZE*/);
+    	subLists              = subLists > 12? 12 : subLists;
     	subLists              = subLists == 0? 1 : subLists;
     	
     	dataBufferSize        = (long)(dataBufferSize / subLists);
