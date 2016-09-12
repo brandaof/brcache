@@ -644,21 +644,8 @@ public abstract class StreamCache
         		if(writeData > this.maxBytesToStorageEntry)
                     throw new StorageException(CacheErrors.ERROR_1007);
 
-        		/*
-            	byte[] data;
-            	
-            	if(read == this.segmentSize){
-            		data = buffer;
-            		buffer = new byte[this.segmentSize];
-            	}
-            	else{
-            		data = new byte[read];
-            		System.arraycopy(buffer, 0, data, 0, read);
-            	}
-        		*/
-        		
         		byte[] data = buffer;
-        		buffer = new byte[this.segmentSize];
+        		buffer      = new byte[this.segmentSize];
         		
             	Block block = new Block(map.getId(), index++, data, read);
                 Long segment = this.freeSegments.poll();
@@ -695,7 +682,7 @@ public abstract class StreamCache
             this.releaseSegments(map);
             throw new StorageException(e, CacheErrors.ERROR_1014);
         }
-    }    
+    }
     
     private void releaseSegments(DataMap map){
     	long segmentId = map.getFirstSegment();
