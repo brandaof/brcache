@@ -226,7 +226,6 @@ public abstract class StreamCache
 	    	}
 	    	
         }
-    	
     }
     
     /**
@@ -628,7 +627,7 @@ public abstract class StreamCache
     	}
     }
     
-    private void putData(DataMap map, InputStream inputData) throws StorageException{
+    private void putData(DataMap map, InputStream inputData) throws StorageException, InterruptedException{
         
         int writeData    = 0;
         byte[] buffer    = new byte[this.segmentSize];
@@ -831,5 +830,5 @@ public abstract class StreamCache
     		super.finalize();
     	}
     }
-    
+
 }
