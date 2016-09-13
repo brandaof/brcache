@@ -29,7 +29,7 @@ public class Entry<T> implements Serializable {
 	private static final long serialVersionUID = -9181909539502614706L;
 
 	private long index;
-    
+
     private T item;
     
     private Entry<T> next;
