@@ -9,7 +9,7 @@ public class CharNode<T> implements TreeNode<T>{
 
 	private static final long serialVersionUID 	= 480902938041176366L;
 
-	private static final RouletteLock locks = new RouletteLock(20);
+	private static final RouletteLock locks = new RouletteLock(50);
 	
 	public static int MIN_CHARGROUP    			= 0x5b;
 

@@ -33,7 +33,7 @@ abstract class AbstractCollectionSegment<I,T>
     
 	private static final long serialVersionUID = 7817500681111470845L;
 
-	private RouletteLock locks = new RouletteLock(20);
+	private RouletteLock locks;
 	
     protected Map<Long, Entry<T>> segments;
     
@@ -85,6 +85,7 @@ abstract class AbstractCollectionSegment<I,T>
         this.swap                = swap;
         this.forceSwap           = true;
         this.live                = true;
+        this.locks               = new RouletteLock(50);
         this.swap.setId(this.id);
 
         swapperThreads = new Thread[quantitySwaperThread];
