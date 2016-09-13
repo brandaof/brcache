@@ -85,7 +85,7 @@ abstract class AbstractCollectionSegment<I,T>
         this.swap                = swap;
         this.forceSwap           = true;
         this.live                = true;
-        this.locks               = new RouletteLock(50);
+        this.locks               = new RouletteLock(100);
         this.swap.setId(this.id);
 
         swapperThreads = new Thread[quantitySwaperThread];
