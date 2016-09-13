@@ -28,7 +28,7 @@ import org.brandao.brcache.collections.RouletteLock;
  */
 public class StringTreeNodes<T> implements TreeNodes<T>{
 
-	private static final RouletteLock locks = new RouletteLock(20);
+	private static final RouletteLock locks = new RouletteLock(50);
 	
 	private static final long serialVersionUID = -8387188156629418047L;
 
