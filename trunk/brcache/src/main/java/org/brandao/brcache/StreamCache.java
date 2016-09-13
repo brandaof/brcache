@@ -155,6 +155,7 @@ public abstract class StreamCache
         this.deleteOnExit           = true;
     	
         synchronized(Collections.class){
+        	Swapper swapper = this.getSwaper(swaperType);
         	//Collections.setPath(dataPath);
 	    	HugeListInfo nodeInfo;
 	    	HugeListInfo indexInfo;
@@ -170,7 +171,7 @@ public abstract class StreamCache
 		                dataInfo.getMaxCapacityElements(),
 		                dataInfo.getClearFactorElements(),
 		                dataInfo.getFragmentFactorElements(),
-		                this.getSwaper(swaperType),
+		                swapper.clone(),
 		                quantitySwaperThread,
 		                dataInfo.getSubLists()
 		                );
@@ -209,13 +210,13 @@ public abstract class StreamCache
 	                    nodeInfo.getMaxCapacityElements(),
 	                    nodeInfo.getClearFactorElements(),
 	                    nodeInfo.getFragmentFactorElements(),
-	                    this.getSwaper(swaperType),
+	                    swapper.clone(),
 	                    quantitySwaperThread,
 	                    nodeInfo.getSubLists(),
 	                    indexInfo.getMaxCapacityElements(),
 	                    indexInfo.getClearFactorElements(),
 	                    indexInfo.getFragmentFactorElements(),
-	                    this.getSwaper(swaperType),
+	                    swapper.clone(),
 	                    quantitySwaperThread,
 	                    indexInfo.getSubLists()
 	                    );
