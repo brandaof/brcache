@@ -43,7 +43,7 @@ class CollectionSegmentImp<I>
                 clearFactor, fragmentFactor, swap, 
                 quantitySwaperThread);
         
-        this.locks = new RouletteLock(20);
+        this.locks = new RouletteLock(100);
     }
     
     public I getEntity(long segment, int index) {
