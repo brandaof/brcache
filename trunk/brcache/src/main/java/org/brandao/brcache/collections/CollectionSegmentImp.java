@@ -18,6 +18,7 @@
 package org.brandao.brcache.collections;
 
 import java.io.Serializable;
+import java.util.concurrent.locks.Lock;
 
 /**
  *
@@ -29,6 +30,8 @@ class CollectionSegmentImp<I>
 
 	private static final long serialVersionUID = 239844470898102007L;
 
+	private RouletteLock locks;
+
 	public CollectionSegmentImp(
             String id, 
             int maxCapacity, 
@@ -39,21 +42,27 @@ class CollectionSegmentImp<I>
         super(id, maxCapacity, 
                 clearFactor, fragmentFactor, swap, 
                 quantitySwaperThread);
+        
+        this.locks = new RouletteLock(20);
     }
     
     public I getEntity(long segment, int index) {
         
-    	Object lock = this.getLock(segment);
-    	synchronized(lock){
-	        Entry<ArraySegment<I>> entry = this.getEntry(segment);
-	        
-	        if (entry == null)
-	            return null;
-	        else{
-	            //entry = this.reload(entry);
+        Entry<ArraySegment<I>> entry = this.getEntry(segment);
+        
+        if (entry == null)
+            return null;
+        else{
+        	Lock lock = this.locks.getLock(segment);
+        	lock.lock();
+        	try{
+	            entry = this.reload(entry);
 	            return entry.getItem().get(index);
-	        }
-    	}
+        	}
+        	finally{
+        		lock.unlock();
+        	}
+        }
     }
 
     public int putEntity(long segment, int index, I value) {
@@ -61,10 +70,9 @@ class CollectionSegmentImp<I>
         if(this.readOnly)
             throw new IllegalStateException();
         
-    	Object lock = this.getLock(segment);
-    	
-        synchronized(lock){
-        	
+    	Lock lock = this.locks.getLock(segment);
+    	lock.lock();
+    	try{
 	        Entry<ArraySegment<I>> entry = super.getEntry(segment);
 	        ArraySegment<I> seg;
 		
@@ -80,47 +88,17 @@ class CollectionSegmentImp<I>
 	            return idx;
 	        } 
 	        else{
-                seg  = entry.getItem();
-                entry.setNeedUpdate(true);
-                return index != -1? seg.set(index, value) : seg.add(value);
+	            seg  = entry.getItem();
+	            entry.setNeedUpdate(true);
+	            return index != -1? seg.set(index, value) : seg.add(value);
 	        }
-        }
+    	}
+    	finally{
+    		lock.unlock();
+    	}
         
     }    
-    /*
-    public int putEntity(long segment, int index, I value) {
-        
-        if(this.readOnly)
-            throw new IllegalStateException();
-        
-    	Object lock = this.getLock(segment);
-    	
-        synchronized(lock){
-        	
-	        Entry<ArraySegment<I>> entry = super.getEntry(segment);
-	        ArraySegment<I> seg;
-		
-	        if(entry == null){
-	
-	            if(index != -1)
-	                throw new IllegalStateException("index");
-	
-	            seg = new ArraySegment<I>(segment, (int) getFragmentSize());
-	            entry = new Entry<ArraySegment<I>>(segment, seg);
-	            int idx = seg.add(value);
-	        	addEntry(segment, entry);
-	            return idx;
-	        } 
-	        else{
-                entry = this.reload(entry);
-                seg  = entry.getItem();
-                entry.setNeedUpdate(true);
-                return index != -1? seg.set(index, value) : seg.add(value);
-	        }
-        }
-        
-    }
-    */
+
     public I removeEntity(long segment, int index){
         throw new UnsupportedOperationException();
     }
