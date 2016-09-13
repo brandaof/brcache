@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
 
 /**
  * @author Brandao
@@ -32,8 +33,8 @@ abstract class AbstractCollectionSegment<I,T>
     
 	private static final long serialVersionUID = 7817500681111470845L;
 
-	private int globalID = 0;
-    
+	private RouletteLock locks = new RouletteLock(20);
+	
     protected Map<Long, Entry<T>> segments;
     
     private transient File path;
@@ -101,7 +102,7 @@ abstract class AbstractCollectionSegment<I,T>
     public void run(){
         while(this.live){
             try{
-                Thread.sleep(1000);
+                Thread.sleep(10000);
             	clearLimit();
             }
             catch(Exception e){
@@ -114,13 +115,8 @@ abstract class AbstractCollectionSegment<I,T>
 		return live;
 	}
 
-	protected synchronized int getNextKey() {
-        return globalID++;
-    }
-    
-    protected Object getLock(long segment){
-        //return this.locks[segment % this.locks.length];
-    	return this;
+    protected Lock getLock(long segment){
+    	return this.locks.getLock(segment);
     }
 
     protected synchronized void clearLimit() {
@@ -141,19 +137,6 @@ abstract class AbstractCollectionSegment<I,T>
         }
         
     }
-    
-    /*
-    protected synchronized void clearLimit() {
-        double limit = maxSegmentCapacity - (maxSegmentCapacity * clearFactor);
-        if (maxSegmentCapacity > 0 && segments.size() > limit) {
-            while(segments.size() > limit){
-                Entry<T> item = this.firstItem;
-                if(item != null)
-                    this.swapOnDisk(item);
-            }
-        }
-    }
-    */
     
     protected void clearLimitLength() {
         if (maxSegmentCapacity > 0 && segments.size() > maxSegmentCapacity) {
@@ -192,18 +175,6 @@ abstract class AbstractCollectionSegment<I,T>
         this.lastSegment = key;
     }
 
-    /*
-    protected void addEntry(long key, Entry<T> item) {
-        
-    	Object lock = this.getLock(key);
-    	
-        synchronized(lock){
-            this.registry(item);
-            this.lastSegment = key;
-        }
-        
-    }
-    */
     private void registry(Entry<T> item){
         
         if(forceSwap)
@@ -227,9 +198,9 @@ abstract class AbstractCollectionSegment<I,T>
     
     public void swapOnDisk(Entry<T> item){
     	
-    	Object lock = this.getLock(item.getIndex());
-    	
-        synchronized(lock){
+    	Lock lock = this.getLock(item.getIndex());
+    	lock.lock();
+        try{
         	
             if(item.isNeedReload())
                 return;
@@ -242,6 +213,9 @@ abstract class AbstractCollectionSegment<I,T>
             if(item != removedItem)
                 throw new IllegalStateException();
         }
+        finally{
+        	lock.unlock();
+        }
         
     }
 
@@ -251,10 +225,9 @@ abstract class AbstractCollectionSegment<I,T>
     	if(key > this.lastSegment)
             return null;
         
-    	Object lock = this.getLock(key);
-    	
-        synchronized(lock){
-            
+    	Lock lock = this.getLock(key);
+    	lock.lock();
+        try{
             Entry<T> onMemoryEntity = this.segments.get(key);
 
             if(onMemoryEntity != null)
@@ -272,6 +245,9 @@ abstract class AbstractCollectionSegment<I,T>
 
             return entity;
         }
+        finally{
+        	lock.unlock();
+        }
     }
     
     protected Entry<T> getEntry(long index) {
@@ -286,26 +262,6 @@ abstract class AbstractCollectionSegment<I,T>
         }
     }
 
-    /*
-    protected Entry<T> getEntry(long index) {
-        
-        Entry<T> e = segments.get(index);
-        
-    	Object lock = this.getLock(index);
-    	
-        synchronized(lock){
-            if(e == null)
-                return swapOnMemory(index);
-            else{
-                e = this.reload(e);
-            	realocItemListedOnMemory(e);
-            	return e;
-            }
-        }
-        
-    }
-    */
-    
     public Map<Long, Entry<T>> getSegments() {
         return segments;
     }
@@ -474,5 +430,6 @@ abstract class AbstractCollectionSegment<I,T>
     		
     	}
     	
-    }    
+    }
+    
 }

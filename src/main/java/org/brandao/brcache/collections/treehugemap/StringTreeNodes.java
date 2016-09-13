@@ -17,9 +17,10 @@
 
 package org.brandao.brcache.collections.treehugemap;
 
-import java.io.Serializable;
+import java.util.concurrent.locks.Lock;
 
 import org.brandao.brcache.collections.ReferenceCollection;
+import org.brandao.brcache.collections.RouletteLock;
 
 /**
  *
@@ -27,18 +28,7 @@ import org.brandao.brcache.collections.ReferenceCollection;
  */
 public class StringTreeNodes<T> implements TreeNodes<T>{
 
-	private static final Serializable[] locks = new Serializable[]{
-			new Integer(0),
-			new Integer(1),
-			new Integer(2),
-			new Integer(3),
-			new Integer(4),
-			new Integer(5),
-			new Integer(6),
-			new Integer(7),
-			new Integer(8),
-			new Integer(9),
-	};
+	private static final RouletteLock locks = new RouletteLock(20);
 	
 	private static final long serialVersionUID = -8387188156629418047L;
 
@@ -92,7 +82,9 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
         TreeNode<T> next = node.getNext(nodes, i);
         
         if(next == null && !read){
-        	synchronized(locks[i % locks.length]){
+        	Lock lock = locks.getLock(node.getId());
+        	lock.lock();
+        	try{
                 node = nodes.get(node.getId());
                 next = node.getNext(nodes, i);
                 
@@ -107,6 +99,9 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
                 next = nextNode;
                 
                 node.setNext(nodes, i, nextNode);
+        	}
+        	finally{
+        		lock.unlock();
         	}
         	
         }
