@@ -85,7 +85,7 @@ abstract class AbstractCollectionSegment<I,T>
         this.swap                = swap;
         this.forceSwap           = true;
         this.live                = true;
-        this.locks               = new RouletteLock(100);
+        this.locks               = new RouletteLock(1);
         this.swap.setId(this.id);
 
         swapperThreads = new Thread[quantitySwaperThread];
@@ -399,6 +399,10 @@ abstract class AbstractCollectionSegment<I,T>
     }
 
     private synchronized void realocItemListedOnMemory(Entry<T> item){
+    	
+    	if(item.getBefore() == null && item.getNext() == null)
+    		return;
+    	
         if(this.firstItem != null && this.firstItem.getBefore() != item){
             this.removeItemListedOnMemory(item);
             this.addListedItemOnMemory(item);
