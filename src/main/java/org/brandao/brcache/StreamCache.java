@@ -21,8 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import org.brandao.brcache.HugeListCalculator.HugeListInfo;
 import org.brandao.brcache.collections.Collections;
@@ -72,7 +70,9 @@ public abstract class StreamCache
     
     private final int segmentSize;
     
-    private final BlockingQueue<Long> freeSegments;
+    //private final BlockingQueue<Long> freeSegments;
+    
+    private volatile FreeBlockLink firstItem;
 
     private final long maxBytesToStorageEntry;
     
@@ -148,7 +148,8 @@ public abstract class StreamCache
 
         this.modCount               = 0;
         this.dataPath               = dataPath;
-        this.freeSegments           = new LinkedBlockingQueue<Long>();
+        //this.freeSegments           = new LinkedBlockingQueue<Long>();
+        this.firstItem              = null;
         this.segmentSize            = (int)blockSize;
         this.maxBytesToStorageEntry = maxSizeEntry;
         this.maxLengthKey           = maxSizeKey;
@@ -648,7 +649,7 @@ public abstract class StreamCache
         		buffer      = new byte[this.segmentSize];
         		
             	Block block = new Block(map.getId(), index++, data, read);
-                Long segment = this.freeSegments.poll();
+                Long segment = this.getFree();
                 
                 if(segment == null){
                     segment = this.dataList.insert(block);
@@ -696,7 +697,7 @@ public abstract class StreamCache
 	        int i=0;
 	        while(current != null){
 				if(current.id == map.getId() && current.segment == i){
-					this.freeSegments.add(segmentId);
+					this.free(segmentId);
 				}
 	            
 				segmentId = current.nextBlock;
@@ -794,7 +795,8 @@ public abstract class StreamCache
 		this.countWriteData 	= 0;
 		this.dataList.clear();
 		this.dataMap.clear();
-		this.freeSegments.clear();
+		//this.freeSegments.clear();
+		this.firstItem = null;
 	}
 	
 	/**
@@ -804,7 +806,8 @@ public abstract class StreamCache
 	public void destroy(){
 		this.dataList.destroy();
 		this.dataMap.destroy();
-		this.freeSegments.clear();
+		//this.freeSegments.clear();
+		this.firstItem = null;
 		this.deleteDir(new File(dataPath));
 	}
 	
@@ -832,4 +835,58 @@ public abstract class StreamCache
     	}
     }
 
+    private synchronized void free(long freeBlock){
+        
+    	FreeBlockLink node = new FreeBlockLink();
+    	node.index = freeBlock;
+    	
+        if(firstItem == null){
+            firstItem = node;
+            firstItem.next = firstItem;
+            firstItem.before = firstItem;
+        }
+        else{
+        	FreeBlockLink lastItem = firstItem.before;
+
+        	node.next   = this.firstItem;
+        	node.before = lastItem;
+
+            this.firstItem.before = node;
+            lastItem.next = node;
+        }
+    }
+
+    private synchronized Long getFree(){
+    	if(this.firstItem == null)
+    		return null;
+    	
+    	FreeBlockLink before = firstItem.before;
+    	FreeBlockLink next   = firstItem.next;
+    	
+    	long l = firstItem.index;
+    	
+        if(firstItem == firstItem.next){
+        	this.firstItem = null;
+        }
+        else{
+			this.firstItem = next;
+			before.next    = next;
+			next.before    = before;
+        }
+        
+        return l;
+    }
+    
+    private class FreeBlockLink implements Serializable{
+
+		private static final long serialVersionUID = -7872710625034712824L;
+
+		public Long index;
+
+        public FreeBlockLink next;
+
+        public FreeBlockLink before;
+        
+    }
+    
 }
