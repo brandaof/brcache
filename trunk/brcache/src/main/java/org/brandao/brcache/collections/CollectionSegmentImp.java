@@ -99,6 +99,48 @@ class CollectionSegmentImp<I>
         
     }    
 
+    public I setEntity(long segment, int index, I value) {
+        
+        if(this.readOnly)
+            throw new IllegalStateException();
+        
+        if(segment < 0)
+        	throw new IllegalStateException("segment");
+
+        if(index < 0)
+    		throw new IllegalStateException("index");
+        
+    	Lock lock = this.locks.getLock(segment);
+    	lock.lock();
+    	try{
+	        Entry<ArraySegment<I>> entry = super.getEntry(segment);
+	        ArraySegment<I> seg;
+		
+	        if(entry == null){
+	
+	            if(index != -1)
+	                throw new IllegalStateException("index");
+	
+	            seg = new ArraySegment<I>(segment, (int) getFragmentSize());
+	            entry = new Entry<ArraySegment<I>>(segment, seg);
+	            seg.set(index, value);
+	        	addEntry(segment, entry);
+	            return null;
+	        } 
+	        else{
+	            seg  = entry.getItem();
+	            entry.setNeedUpdate(true);
+	            I old = seg.get(index);
+	            seg.set(index, value);
+	            return old;
+	        }
+    	}
+    	finally{
+    		lock.unlock();
+    	}
+        
+    }    
+    
     public I removeEntity(long segment, int index){
         throw new UnsupportedOperationException();
     }

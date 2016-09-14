@@ -5,14 +5,20 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 
 	private static final long serialVersionUID = 1406571295066759006L;
 
-	private HugeArrayList<T>[] lists;
+	private BlockingQueue<Long> freeAddress;
+	
+	private CollectionSegmentImp<T>[] lists;
 
-	private volatile int segment;
+	private volatile long lastPos;
+	
+    private boolean deleteOnExit;
 	
     public HugeArrayReferenceList() {
         this(
@@ -35,14 +41,16 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
             int quantityClearThread, 
             int lists) {
     
-    	this.segment = 0;
-    	this.lists   = new HugeArrayList[lists];
-    	
-    	//maxCapacityElements = maxCapacityElements / lists;
+    	this.freeAddress  = new LinkedBlockingQueue<Long>();
+    	this.lastPos      = 0;
+    	this.lists        = new CollectionSegmentImp[lists];
+        this.deleteOnExit = true;
+        id                = id == null? Collections.getNextId() : id;
+        swap              = swap == null? new TreeFileSwaper() : swap;
     	
     	for(int i=0;i<this.lists.length;i++){
             this.lists[i] = 
-                    new HugeArrayList<T>(
+                    new CollectionSegmentImp<T>(
                         id == null? null : id + "list_" + i, 
                         maxCapacityElements, 
                         clearFactorElements, 
@@ -61,62 +69,88 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 	
 	public long insert(T e) {
 		
-		int currentSegment = this.segment++;
-		currentSegment     = currentSegment % this.lists.length;
-		int offset         = 0;
+		Long address = this.freeAddress.poll();
 		
-		HugeArrayList<T> list = this.lists[currentSegment];
-		
-		synchronized(list){
-			offset = list.size();
-			list.add(e);
+		if(address == null){
+			long currentPos      = this.lastPos++;
+			long collectionIndex = currentPos % this.lists.length;
+			long index           = currentPos / this.lists.length;
+			
+			
+			CollectionSegmentImp<T> collection = this.lists[(int)collectionIndex];
+			long segment    = (long)(index / collection.getFragmentSize());
+			long offset     = (long)(index % collection.getFragmentSize());
+	
+			int seg         = (int)(collectionIndex & 0xff);
+			long off        = index & 0xffffffffL;
+			
+			address = (off << 8) | seg;
+			
+			try{
+				collection.putEntity(segment, (int)offset, e);
+			}
+			catch(Throwable ex){
+				this.freeAddress.add(address);
+			}
+			
+		}
+		else{
+			long collectionIndex = address & 0xffL;
+			long index           = address & 0xffffffff00L;
+
+			CollectionSegmentImp<T> collection = this.lists[(int)collectionIndex];
+			
+			long segment    = (long)(index / collection.getFragmentSize());
+			long offset     = (long)(index % collection.getFragmentSize());
+			
+			try{
+				collection.putEntity(segment, (int)offset, e);
+			}
+			catch(Throwable ex){
+				this.freeAddress.add(address);
+			}
+			
 		}
 		
-		int seg  = currentSegment & 0xff;
-		long off = offset & 0xffffffffL;
-		
-		long reference = (off << 8) | seg;
-		return reference;
+		return address;
 	}
 
 	public T set(long reference, T e) {
-		long off = reference & 0xffffffff00L;
-		long seg = reference & 0xffL;
+		
+		long collectionIndex = reference & 0xffL;
+		long index           = reference & 0xffffffff00L;
 
-		off = off >> 8;
+		CollectionSegmentImp<T> collection = this.lists[(int)collectionIndex];
 		
-		HugeArrayList<T> list = this.lists[(int)seg];
+		long segment    = (long)(index / collection.getFragmentSize());
+		long offset     = (long)(index % collection.getFragmentSize());
 		
-		synchronized (list) {
-			T old = list.get((int)off);
-			list.set((int)off, e);
-			return old;
-		}
-		
+		return collection.setEntity(segment, (int)offset, e);
 	}
 
 	public T get(long reference) {
-		long off = reference & 0xffffffff00L;
-		long seg  = reference & 0xffL;
+		long collectionIndex = reference & 0xffL;
+		long index           = reference & 0xffffffff00L;
 
-		off = off >> 8;
+		CollectionSegmentImp<T> collection = this.lists[(int)collectionIndex];
 		
-		HugeArrayList<T> list = this.lists[(int)seg];
+		long segment    = (long)(index / collection.getFragmentSize());
+		long offset     = (long)(index % collection.getFragmentSize());
 		
-		return list.get((int)off);
+		return collection.getEntity(segment, (int)offset);
 	}
 
 	public boolean remove(long reference) {
-		long off = reference & 0xffffffff00L;
-		long seg  = reference & 0xffL;
+		
+		long collectionIndex = reference & 0xffL;
+		long index           = reference & 0xffffffff00L;
 
-		off = off >> 8;
+		CollectionSegmentImp<T> collection = this.lists[(int)collectionIndex];
 		
-		HugeArrayList<T> list = this.lists[(int)seg];
+		long segment    = (long)(index / collection.getFragmentSize());
+		long offset     = (long)(index % collection.getFragmentSize());
 		
-		synchronized (list) {
-			return list.remove(off);
-		}
+		return collection.setEntity(segment, (int)offset, null) != null;
 	}
 	
 	public boolean replace(long reference, T oldValue, T value) {
