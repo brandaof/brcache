@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.Lock;
 
 /**
  * @author Brandao
@@ -33,7 +32,18 @@ abstract class AbstractCollectionSegment<I,T>
     
 	private static final long serialVersionUID = 7817500681111470845L;
 
-	private RouletteLock locks;
+	private final Serializable[] locks = new Serializable[]{
+		new Integer(0),
+		new Integer(1),
+		new Integer(2),
+		new Integer(3),
+		new Integer(4),
+		new Integer(5),
+		new Integer(6),
+		new Integer(7),
+		new Integer(8),
+		new Integer(9)
+	};
 	
     protected Map<Long, Entry<T>> segments;
     
@@ -85,7 +95,6 @@ abstract class AbstractCollectionSegment<I,T>
         this.swap                = swap;
         this.forceSwap           = true;
         this.live                = true;
-        this.locks               = new RouletteLock(1);
         this.swap.setId(this.id);
 
         swapperThreads = new Thread[quantitySwaperThread];
@@ -116,10 +125,6 @@ abstract class AbstractCollectionSegment<I,T>
 		return live;
 	}
 
-    protected Lock getLock(long segment){
-    	return this.locks.getLock(segment);
-    }
-
     protected synchronized void clearLimit() {
     	double i = maxSegmentCapacity * clearFactor;
         double limit = maxSegmentCapacity - i;
@@ -146,6 +151,17 @@ abstract class AbstractCollectionSegment<I,T>
         }
     }
 
+    protected boolean needSwap(){
+    	return maxSegmentCapacity > 0 && segments.size() > maxSegmentCapacity - 2;    	
+    }
+    
+    protected void removeFirst() {
+    	Entry<T> item = this.firstItem;
+        if(item != null){
+            this.swapOnDisk(item);
+        }
+    }
+    
     private void clearSegments(double quantity){
         int count = 0;
         while(count < quantity){
@@ -199,10 +215,7 @@ abstract class AbstractCollectionSegment<I,T>
     
     public void swapOnDisk(Entry<T> item){
     	
-    	Lock lock = this.getLock(item.getIndex());
-    	lock.lock();
-        try{
-        	
+        synchronized(this.locks[(int)(item.getIndex() % this.locks.length)]){
             if(item.isNeedReload())
                 return;
         	
@@ -214,9 +227,6 @@ abstract class AbstractCollectionSegment<I,T>
             if(item != removedItem)
                 throw new IllegalStateException();
         }
-        finally{
-        	lock.unlock();
-        }
         
     }
 
@@ -226,16 +236,14 @@ abstract class AbstractCollectionSegment<I,T>
     	if(key > this.lastSegment)
             return null;
         
-    	Lock lock = this.getLock(key);
-    	lock.lock();
-        try{
+        synchronized(this.locks[(int)(key % this.locks.length)]){
             Entry<T> onMemoryEntity = this.segments.get(key);
 
             if(onMemoryEntity != null)
                 return onMemoryEntity;
 
-            if(forceSwap)
-                this.clearLimitLength();
+            if(forceSwap && this.needSwap())
+                this.removeFirst();
             
             Entry<T> entity = (Entry<T>)this.swap.getItem(key);
 
@@ -245,9 +253,6 @@ abstract class AbstractCollectionSegment<I,T>
             }
 
             return entity;
-        }
-        finally{
-        	lock.unlock();
         }
     }
     
