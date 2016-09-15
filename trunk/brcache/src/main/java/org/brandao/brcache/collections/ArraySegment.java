@@ -59,6 +59,7 @@ class ArraySegment<K>
         this.data = data;
     }
 
+    /*
     public int add(K value) {
         if (data == null) {
             data = new Object[segmentSize];
@@ -72,13 +73,17 @@ class ArraySegment<K>
         size++;
         return index;
     }
-
+    */
+    
     public int set(int index, K value) {
         if (data == null) {
             data = new Object[segmentSize];
         }
 
-        if (index >= size)
+        //if (index >= size)
+        //    throw new IndexOutOfBoundsException(index + " >= " + size);
+
+        if (index >= this.data.length)
             throw new IndexOutOfBoundsException(index + " >= " + size);
         
         data[index] = value;
@@ -88,25 +93,25 @@ class ArraySegment<K>
     @SuppressWarnings("unchecked")
     public K remove(int index) {
 
-        if (index < 0 || index >= size) {
+        if (index < 0 || index >= this.data.length) {
             throw new IndexOutOfBoundsException();
         }
 
         K oldValue = (K) data[index];
-        int moved = size - index - 1;
+        //int moved = size - index - 1;
 
-        if (moved > 0) {
-            System.arraycopy(data, index + 1, data, index, moved);
-        }
+        //if (moved > 0) {
+        //    System.arraycopy(data, index + 1, data, index, moved);
+        //}
 
-        data[--size] = null;
-        
+        //data[--size] = null;
+        data[index] = null;
         return oldValue;
     }
 
     @SuppressWarnings("unchecked")
     public K get(int index) {
-        if (index >= size) {
+        if (index >= this.data.length) {
             throw new IndexOutOfBoundsException(index + " >= " + size);
         }
 

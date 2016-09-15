@@ -21,6 +21,8 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -45,7 +47,7 @@ abstract class AbstractCollectionSegment<I,T>
 		new Integer(9)
 	};
 	
-    protected Map<Long, Entry<T>> segments;
+    protected ConcurrentMap<Long, Entry<T>> segments;
     
     private transient File path;
     
@@ -88,7 +90,7 @@ abstract class AbstractCollectionSegment<I,T>
         this.maxCapacity         = maxCapacity;
         this.clearFactor         = clearFactor;
         this.maxSegmentCapacity  = (int)(maxCapacity/fragmentSize);
-        this.segments            = new HashMap<Long, Entry<T>>(maxCapacity);
+        this.segments            = new ConcurrentHashMap<Long, Entry<T>>(maxCapacity);
         this.swapCandidates      = new LinkedBlockingQueue<Entry<T>>();
         this.readOnly            = false;
         this.lastSegment         = -1;

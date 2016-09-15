@@ -68,7 +68,13 @@ class CollectionSegmentImp<I>
     public int putEntity(long segment, int index, I value) {
         
         if(this.readOnly)
-            throw new IllegalStateException();
+            throw new IllegalStateException("readOnly");
+
+        if(segment < 0)
+            throw new IllegalStateException("segment");
+
+        if(index < 0)
+            throw new IllegalStateException("index");
         
     	Lock lock = this.locks.getLock(segment);
     	lock.lock();
@@ -77,20 +83,16 @@ class CollectionSegmentImp<I>
 	        ArraySegment<I> seg;
 		
 	        if(entry == null){
-	
-	            if(index != -1)
-	                throw new IllegalStateException("index");
-	
 	            seg = new ArraySegment<I>(segment, (int) getFragmentSize());
 	            entry = new Entry<ArraySegment<I>>(segment, seg);
-	            int idx = seg.add(value);
-	        	addEntry(segment, entry);
-	            return idx;
+            	seg.set(index, value); //int idx = seg.add(value);
+            	addEntry(segment, entry);
+	            return index;
 	        } 
 	        else{
 	            seg  = entry.getItem();
 	            entry.setNeedUpdate(true);
-	            return index != -1? seg.set(index, value) : seg.add(value);
+	            return seg.set(index, value);
 	        }
     	}
     	finally{
@@ -140,7 +142,112 @@ class CollectionSegmentImp<I>
     	}
         
     }    
+
+    public boolean replaceEntity(long segment, int index, I oldValue, I value) {
+        
+        if(this.readOnly)
+            throw new IllegalStateException();
+        
+        if(segment < 0)
+        	throw new IllegalStateException("segment");
+
+        if(index < 0)
+    		throw new IllegalStateException("index");
+        
+    	Lock lock = this.locks.getLock(segment);
+    	lock.lock();
+    	try{
+	        Entry<ArraySegment<I>> entry = super.getEntry(segment);
+	        ArraySegment<I> seg;
+		
+	        if(entry != null){
+	            seg  = entry.getItem();
+	            I old = seg.get(index);
+	            if(old != null && old.equals(value)){
+	            	seg.set(index, value);
+		            entry.setNeedUpdate(true);
+	            	return true;
+	            }
+	            return false;
+	        }
+	        else
+	        	throw new IllegalStateException("segment");
+    	}
+    	finally{
+    		lock.unlock();
+    	}
+        
+    }    
     
+    public I replaceEntity(long segment, int index, I value) {
+        
+        if(this.readOnly)
+            throw new IllegalStateException();
+        
+        if(segment < 0)
+        	throw new IllegalStateException("segment");
+
+        if(index < 0)
+    		throw new IllegalStateException("index");
+        
+    	Lock lock = this.locks.getLock(segment);
+    	lock.lock();
+    	try{
+	        Entry<ArraySegment<I>> entry = super.getEntry(segment);
+	        ArraySegment<I> seg;
+		
+	        if(entry != null){
+	            seg  = entry.getItem();
+	            I old = seg.get(index);
+	            if(old != null){
+	            	seg.set(index, value);
+		            entry.setNeedUpdate(true);
+	            }
+	            return old;
+	        }
+	        else
+	        	throw new IllegalStateException("segment");
+    	}
+    	finally{
+    		lock.unlock();
+    	}
+        
+    }
+    
+    public I putIfAbsentEntity(long segment, int index, I value) {
+        
+        if(this.readOnly)
+            throw new IllegalStateException();
+        
+        if(segment < 0)
+        	throw new IllegalStateException("segment");
+
+        if(index < 0)
+    		throw new IllegalStateException("index");
+        
+    	Lock lock = this.locks.getLock(segment);
+    	lock.lock();
+    	try{
+	        Entry<ArraySegment<I>> entry = super.getEntry(segment);
+	        ArraySegment<I> seg;
+		
+	        if(entry != null){
+	            seg  = entry.getItem();
+	            I old = seg.get(index);
+	            if(old == null){
+	            	seg.set(index, value);
+		            entry.setNeedUpdate(true);
+	            }
+	            return old;
+	        }
+	        else
+	        	throw new IllegalStateException("segment");
+    	}
+    	finally{
+    		lock.unlock();
+    	}
+        
+    }     
     public I removeEntity(long segment, int index){
         throw new UnsupportedOperationException();
     }
