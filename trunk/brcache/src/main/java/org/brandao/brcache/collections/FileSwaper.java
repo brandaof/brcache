@@ -102,7 +102,8 @@ public class FileSwaper implements DiskSwapper {
             long reference = this.index.get(idx, this.indexFile);
 
             if(reference == -1)
-            	throw new IllegalStateException(String.valueOf(index));
+            	return null;
+            //	throw new IllegalStateException(String.valueOf(index));
             
             ObjectInputStream iIn = null;
             try {

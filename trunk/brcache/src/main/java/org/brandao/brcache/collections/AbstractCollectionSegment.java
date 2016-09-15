@@ -35,7 +35,7 @@ abstract class AbstractCollectionSegment<I,T>
 	private static final long serialVersionUID = 7817500681111470845L;
 
 	private final Serializable[] locks = new Serializable[]{
-		new Integer(0),
+		new Integer(0)/*,
 		new Integer(1),
 		new Integer(2),
 		new Integer(3),
@@ -44,7 +44,7 @@ abstract class AbstractCollectionSegment<I,T>
 		new Integer(6),
 		new Integer(7),
 		new Integer(8),
-		new Integer(9)
+		new Integer(9)*/
 	};
 	
     protected ConcurrentMap<Long, Entry<T>> segments;
@@ -121,6 +121,10 @@ abstract class AbstractCollectionSegment<I,T>
                 e.printStackTrace();
             }
         }
+    }
+    
+    protected Object getLock(long value){
+    	return this.locks[(int)(value % this.locks.length)];
     }
     
     public boolean isLive() {
@@ -217,7 +221,7 @@ abstract class AbstractCollectionSegment<I,T>
     
     public void swapOnDisk(Entry<T> item){
     	
-        synchronized(this.locks[(int)(item.getIndex() % this.locks.length)]){
+        synchronized(this.getLock(item.getIndex())){
             if(item.isNeedReload())
                 return;
         	
@@ -238,7 +242,7 @@ abstract class AbstractCollectionSegment<I,T>
     	if(key > this.lastSegment)
             return null;
         
-        synchronized(this.locks[(int)(key % this.locks.length)]){
+        synchronized(this.getLock(key)){
             Entry<T> onMemoryEntity = this.segments.get(key);
 
             if(onMemoryEntity != null)

@@ -70,7 +70,7 @@ public class HugeArrayReferenceList<T>
 		return true;
 	}
 	
-	public long insert(T e) {
+	public synchronized long insert(T e) {
 		
 		Long address = this.freeAddress.poll();
 		
@@ -88,6 +88,10 @@ public class HugeArrayReferenceList<T>
 			
 			address = (off << 8) | seg;
 			
+			if(address < 0){
+				System.out.println(address);
+			}
+			
 			try{
 				collection.putEntity(segment, (int)offset, e);
 			}
@@ -98,13 +102,16 @@ public class HugeArrayReferenceList<T>
 		}
 		else{
 			long collectionIndex = address & 0xffL;
-			long index           = address & 0xffffffff00L;
-			index                = index >> 8;
+			long index           = address >> 8;
 
 			CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
 			
 			long segment    = (long)(index / collection.getFragmentSize());
 			long offset     = (long)(index % collection.getFragmentSize());
+			
+			if(address < 0){
+				System.out.println(address);
+			}
 			
 			try{
 				collection.putEntity(segment, (int)offset, e);
@@ -114,8 +121,8 @@ public class HugeArrayReferenceList<T>
 			}
 			
 		}
-		
-		System.out.println(address);
+			
+		//System.out.println(address+"x");
 		return address;
 	}
 
@@ -123,8 +130,7 @@ public class HugeArrayReferenceList<T>
 	public T set(long reference, T e) {
 		
 		long collectionIndex = reference & 0xffL;
-		long index           = reference & 0xffffffff00L;
-		index                = index >> 8;
+		long index           = reference >> 8;
 			
 		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
 		
@@ -137,8 +143,7 @@ public class HugeArrayReferenceList<T>
 	@SuppressWarnings("unchecked")
 	public T get(long reference) {
 		long collectionIndex = reference & 0xffL;
-		long index           = reference & 0xffffffff00L;
-		index                = index >> 8;
+		long index           = reference >> 8;
 
 		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
 		
@@ -151,8 +156,7 @@ public class HugeArrayReferenceList<T>
 	public boolean remove(long reference) {
 		
 		long collectionIndex = reference & 0xffL;
-		long index           = reference & 0xffffffff00L;
-		index                = index >> 8;
+		long index           = reference >> 8;
 
 		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
 		
@@ -171,8 +175,7 @@ public class HugeArrayReferenceList<T>
 	public boolean replace(long reference, T oldValue, T value) {
 		
 		long collectionIndex = reference & 0xffL;
-		long index           = reference & 0xffffffff00L;
-		index                = index >> 8;
+		long index           = reference >> 8;
 
 		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
 		
@@ -186,8 +189,7 @@ public class HugeArrayReferenceList<T>
 	public T replace(long reference, T value) {
 		
 		long collectionIndex = reference & 0xffL;
-		long index           = reference & 0xffffffff00L;
-		index                = index >> 8;
+		long index           = reference >> 8;
 
 		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
 		
@@ -201,8 +203,7 @@ public class HugeArrayReferenceList<T>
 	public T putIfAbsent(long reference, T value) {
 		
 		long collectionIndex = reference & 0xffL;
-		long index           = reference & 0xffffffff00L;
-		index                = index >> 8;
+		long index           = reference >> 8;
 
 		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
 		
@@ -215,8 +216,7 @@ public class HugeArrayReferenceList<T>
 	public boolean remove(long reference, T oldValue) {
 		
 		long collectionIndex = reference & 0xffL;
-		long index           = reference & 0xffffffff00L;
-		index                = index >> 8;
+		long index           = reference >> 8;
 
 		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
 		

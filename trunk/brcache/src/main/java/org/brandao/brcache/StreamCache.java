@@ -580,7 +580,7 @@ public abstract class StreamCache
                 return null;
         }
         catch(CorruptedDataException e){
-            e.printStackTrace();
+            //e.printStackTrace();
             return null;
         }
         catch(Throwable e){
