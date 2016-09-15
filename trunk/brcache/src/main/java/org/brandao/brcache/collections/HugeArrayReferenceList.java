@@ -70,12 +70,16 @@ public class HugeArrayReferenceList<T>
 		return true;
 	}
 	
-	public synchronized long insert(T e) {
+	private synchronized long getNextPointer(){
+		return this.lastPos++;
+	}
+	
+	public long insert(T e) {
 		
 		Long address = this.freeAddress.poll();
 		
 		if(address == null){
-			long currentPos      = this.lastPos++;
+			long currentPos      = this.getNextPointer();
 			long collectionIndex = currentPos % this.lists.length;
 			long index           = currentPos / this.lists.length;
 			
@@ -122,7 +126,6 @@ public class HugeArrayReferenceList<T>
 			
 		}
 			
-		//System.out.println(address+"x");
 		return address;
 	}
 

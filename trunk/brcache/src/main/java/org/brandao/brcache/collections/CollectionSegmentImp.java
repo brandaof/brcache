@@ -43,7 +43,7 @@ class CollectionSegmentImp<I>
                 clearFactor, fragmentFactor, swap, 
                 quantitySwaperThread);
         
-        this.locks = new RouletteLock(1);
+        this.locks = new RouletteLock(1000);
     }
     
     public I getEntity(long segment, int index) {
@@ -56,8 +56,10 @@ class CollectionSegmentImp<I>
 	        if (entry == null)
 	            return null;
 	        else{
-	            entry = this.reload(entry);
-	            return entry.getItem().get(index);
+	        	synchronized(super.getLock(segment)){
+		            entry = this.reload(entry);
+		            return entry.getItem().get(index);
+	        	}
 	        }
     	}
     	finally{

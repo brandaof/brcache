@@ -18,7 +18,6 @@
 package org.brandao.brcache.collections;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -200,8 +199,8 @@ abstract class AbstractCollectionSegment<I,T>
 
     private void registry(Entry<T> item){
         
-        if(forceSwap)
-            this.clearLimitLength();
+        if(forceSwap && this.needSwap())
+            this.removeFirst();
         
         segments.put(item.getIndex(), item);
         this.addListedItemOnMemory(item);
