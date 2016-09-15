@@ -1,6 +1,6 @@
 package org.brandao.brcache.collections;
 
-import java.util.Arrays;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -8,13 +8,16 @@ import java.util.ListIterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
+public class HugeArrayReferenceList<T> 
+	implements HugeReferenceList<T>{
 
 	private static final long serialVersionUID = 1406571295066759006L;
 
+	private static final Empty EMPTY = new Empty();
+	
 	private BlockingQueue<Long> freeAddress;
 	
-	private CollectionSegmentImp<T>[] lists;
+	private CollectionSegmentImp<Object>[] lists;
 
 	private volatile long lastPos;
 	
@@ -50,7 +53,7 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
     	
     	for(int i=0;i<this.lists.length;i++){
             this.lists[i] = 
-                    new CollectionSegmentImp<T>(
+                    new CollectionSegmentImp<Object>(
                         id == null? null : id + "list_" + i, 
                         maxCapacityElements, 
                         clearFactorElements, 
@@ -76,8 +79,7 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 			long collectionIndex = currentPos % this.lists.length;
 			long index           = currentPos / this.lists.length;
 			
-			
-			CollectionSegmentImp<T> collection = this.lists[(int)collectionIndex];
+			CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
 			long segment    = (long)(index / collection.getFragmentSize());
 			long offset     = (long)(index % collection.getFragmentSize());
 	
@@ -97,8 +99,9 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 		else{
 			long collectionIndex = address & 0xffL;
 			long index           = address & 0xffffffff00L;
+			index                = index >> 8;
 
-			CollectionSegmentImp<T> collection = this.lists[(int)collectionIndex];
+			CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
 			
 			long segment    = (long)(index / collection.getFragmentSize());
 			long offset     = (long)(index % collection.getFragmentSize());
@@ -112,121 +115,129 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 			
 		}
 		
+		System.out.println(address);
 		return address;
 	}
 
+	@SuppressWarnings("unchecked")
 	public T set(long reference, T e) {
 		
 		long collectionIndex = reference & 0xffL;
 		long index           = reference & 0xffffffff00L;
-
-		CollectionSegmentImp<T> collection = this.lists[(int)collectionIndex];
+		index                = index >> 8;
+			
+		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
 		
 		long segment    = (long)(index / collection.getFragmentSize());
 		long offset     = (long)(index % collection.getFragmentSize());
 		
-		return collection.setEntity(segment, (int)offset, e);
+		return (T)collection.setEntity(segment, (int)offset, (T)e);
 	}
 
+	@SuppressWarnings("unchecked")
 	public T get(long reference) {
 		long collectionIndex = reference & 0xffL;
 		long index           = reference & 0xffffffff00L;
+		index                = index >> 8;
 
-		CollectionSegmentImp<T> collection = this.lists[(int)collectionIndex];
+		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
 		
 		long segment    = (long)(index / collection.getFragmentSize());
 		long offset     = (long)(index % collection.getFragmentSize());
 		
-		return collection.getEntity(segment, (int)offset);
+		return (T)collection.getEntity(segment, (int)offset);
 	}
 
 	public boolean remove(long reference) {
 		
 		long collectionIndex = reference & 0xffL;
 		long index           = reference & 0xffffffff00L;
+		index                = index >> 8;
 
-		CollectionSegmentImp<T> collection = this.lists[(int)collectionIndex];
+		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
 		
 		long segment    = (long)(index / collection.getFragmentSize());
 		long offset     = (long)(index % collection.getFragmentSize());
 		
-		return collection.setEntity(segment, (int)offset, null) != null;
-	}
-	
-	public boolean replace(long reference, T oldValue, T value) {
-		long off = reference & 0xffffffff00L;
-		long seg  = reference & 0xffL;
-
-		off = off >> 8;
-		
-		HugeArrayList<T> list = this.lists[(int)seg];
-		synchronized(list){
-    		T old = list.get((int)off);
-    		if(old != null && old.equals(oldValue)){
-	    		list.set((int)off, value);
-	    		return true;
-    		}
+		if(!EMPTY.equals(collection.replaceEntity(segment, (int)offset, EMPTY))){
+			this.freeAddress.add(reference);
+			return true;
+		}
+		else{
 			return false;
 		}
 	}
-
-	public T replace(long reference, T value) {
-		long off = reference & 0xffffffff00L;
-		long seg  = reference & 0xffL;
-
-		off = off >> 8;
+	
+	public boolean replace(long reference, T oldValue, T value) {
 		
-		HugeArrayList<T> list = this.lists[(int)seg];
-		synchronized(list){
-    		T old = list.get((int)off);
-    		if(old != null){
-	    		list.set((int)off, value);
-    		}
-			return old;
-		}
+		long collectionIndex = reference & 0xffL;
+		long index           = reference & 0xffffffff00L;
+		index                = index >> 8;
+
+		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
+		
+		long segment    = (long)(index / collection.getFragmentSize());
+		long offset     = (long)(index % collection.getFragmentSize());
+		
+		return collection.replaceEntity(segment, (int)offset, oldValue, value);
 	}
 
-	public T putIfAbsent(long reference, T value) {
-		long off = reference & 0xffffffff00L;
-		long seg  = reference & 0xffL;
-
-		off = off >> 8;
+	@SuppressWarnings("unchecked")
+	public T replace(long reference, T value) {
 		
-		HugeArrayList<T> list = this.lists[(int)seg];
-		synchronized(list){
-    		T old = list.get((int)off);
-    		if(old == null){
-	    		list.set((int)off, value);
-    		}
-			return old;
-		}
+		long collectionIndex = reference & 0xffL;
+		long index           = reference & 0xffffffff00L;
+		index                = index >> 8;
+
+		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
+		
+		long segment    = (long)(index / collection.getFragmentSize());
+		long offset     = (long)(index % collection.getFragmentSize());
+		
+		return (T)collection.replaceEntity(segment, (int)offset, value);
+	}
+
+	@SuppressWarnings("unchecked")
+	public T putIfAbsent(long reference, T value) {
+		
+		long collectionIndex = reference & 0xffL;
+		long index           = reference & 0xffffffff00L;
+		index                = index >> 8;
+
+		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
+		
+		long segment    = (long)(index / collection.getFragmentSize());
+		long offset     = (long)(index % collection.getFragmentSize());
+		
+		return (T)collection.putIfAbsentEntity(segment, (int)offset, value);
 	}
 
 	public boolean remove(long reference, T oldValue) {
-		long off = reference & 0xffffffff00L;
-		long seg  = reference & 0xffL;
-
-		off = off >> 8;
 		
-		HugeArrayList<T> list = this.lists[(int)seg];
-		synchronized(list){
-    		T old = list.get((int)off);
-    		if(old != null && old.equals(oldValue)){
-	    		list.remove((int)off);
-	    		return true;
-    		}
+		long collectionIndex = reference & 0xffL;
+		long index           = reference & 0xffffffff00L;
+		index                = index >> 8;
+
+		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
+		
+		long segment    = (long)(index / collection.getFragmentSize());
+		long offset     = (long)(index % collection.getFragmentSize());
+		
+		if(!EMPTY.equals(collection.replaceEntity(segment, (int)offset, oldValue, EMPTY))){
+			this.freeAddress.add(reference);
+			return true;
+		}
+		else{
 			return false;
 		}
 	}
 	
     public void setDeleteOnExit(boolean value){
-    	for(HugeArrayList<T> l: this.lists){
-    		l.setDeleteOnExit(value);
-    	}
+    	this.deleteOnExit = value;
     }
 
     public boolean isDeleteOnExit(){
-    	return this.lists[0].isDeleteOnExit();
+    	return this.deleteOnExit;
     }
 	
     public int size(){
@@ -234,12 +245,7 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
     }
     
     public long length(){
-    	long size = 0;
-    	for(HugeArrayList<T> l: this.lists){
-    		size += l.size();
-    	}
-    	
-    	return size;
+    	return this.lastPos;
     }
 
     public boolean isEmpty(){
@@ -247,79 +253,50 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
     }
     
     public boolean contains(Object value) {
-    	
-    	for(HugeArrayList<T> l: this.lists){
-    		if(l.contains(value))
-    			return true;
-    	}
-    	
-    	return false;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void clear() {
-    	for(HugeArrayList<T> l: this.lists){
+    	for(CollectionSegmentImp<Object> l: this.lists){
     		l.clear();
     	}
     }
 
     public void destroy(){
-    	for(HugeArrayList<T> l: this.lists){
+    	for(CollectionSegmentImp<Object> l: this.lists){
     		l.destroy();
     	}
     }
     
     public void flush(){
-    	for(HugeArrayList<T> l: this.lists){
+    	for(CollectionSegmentImp<Object> l: this.lists){
     		l.flush();
     	}
     	
     }
 
 	public Iterator<T> iterator() {
-		return new HugeIterator<T>(this);
+        throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	public Object[] toArray() {
-        return toArray(new Object[]{});
+        throw new UnsupportedOperationException("Not supported yet.");
 	}
 
-	@SuppressWarnings("unchecked")
 	public <K> K[] toArray(K[] a) {
-        K[] result = Arrays.copyOf(a, this.size());
-		for(int i=0;i<result.length;i++){
-			result[i] = (K)this.get(i);
-		}
-		return result;
+        throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	public boolean remove(Object o) {
-        int index = -1;
-        
-        for(int i=0;i<this.length();i++){
-            if(o.equals(get(i))){
-                index = i;
-                break;
-            }
-        }
-        
-        if(index != -1)
-            return this.remove(index) != null;
-        else
-            return false;
+        throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	public boolean containsAll(Collection<?> c) {
-        for(Object entity: c)
-            if(!this.contains(entity))
-                return false;
-        return true;
+        throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	public boolean addAll(Collection<? extends T> c) {
-        for(T o: c){
-        	this.insert(o);
-        }
-		return true;
+        throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	public boolean addAll(int index, Collection<? extends T> c) {
@@ -327,15 +304,7 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 	}
 
 	public boolean removeAll(Collection<?> c) {
-		boolean result = false;
-		
-        for(Object o: c){
-        	for(HugeArrayList<T> l: this.lists){
-        		result |= l.remove(o);
-        	}
-        }
-        
-        return result;
+        throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	public boolean retainAll(Collection<?> c) {
@@ -343,27 +312,19 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 	}
 
 	public T get(int index) {
-		int list = index % this.lists.length;
-		int off  = index / this.lists.length;
-		return this.lists[list].get(off);
+        throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	public T set(int index, T element) {
-		int list = index % this.lists.length;
-		int off  = index / this.lists.length;
-		return this.lists[list].set(off, element);
+        throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	public void add(int index, T element) {
-		int list = index % this.lists.length;
-		int off  = index / this.lists.length;
-		this.lists[list].add(off, element);
+        throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	public T remove(int index) {
-		int list = index % this.lists.length;
-		int off  = index / this.lists.length;
-		return this.lists[list].remove(off);
+        throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	public int indexOf(Object o) {
@@ -387,7 +348,7 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 	}
 
 	public void setReadOnly(boolean value) {
-    	for(HugeArrayList<T> l: this.lists){
+    	for(CollectionSegmentImp<Object> l: this.lists){
     		l.setReadOnly(value);
     	}
 	}
@@ -395,5 +356,19 @@ public class HugeArrayReferenceList<T> implements HugeReferenceList<T>{
 	public boolean isReadOnly() {
     	return this.lists[0].isReadOnly();
 	}
+
+	private static class Empty implements Serializable{
+		
+		private static final long serialVersionUID = -881123035360397425L;
+
+		public int hashCode(){
+			return 1;
+		}
+		
+		public boolean equals(Object x){
+			return x instanceof Empty;
+		}
+	};
+	
 	
 }
