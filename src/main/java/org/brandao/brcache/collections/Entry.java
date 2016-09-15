@@ -46,6 +46,7 @@ public class Entry<T> implements Serializable {
         this.index 		= -1;
         this.item 		= null;
         this.needUpdate = false;
+        this.needReload = false;
     }
     
     /**
@@ -57,9 +58,10 @@ public class Entry<T> implements Serializable {
      * @param item Entidade.
      */
     public Entry(long index, boolean update, T item) {
-        this.index = index;
-        this.item = item;
+        this.index      = index;
+        this.item       = item;
         this.needUpdate = update;
+        this.needReload = false;
     }
     
     /**
@@ -69,9 +71,10 @@ public class Entry<T> implements Serializable {
      * @param item Entidade.
      */
     public Entry(long index, T item) {
-        this.index = index;
-        this.item = item;
+        this.index      = index;
+        this.item       = item;
         this.needUpdate = true;
+        this.needReload = false;
     }
 
     /**
