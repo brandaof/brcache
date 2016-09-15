@@ -43,26 +43,27 @@ class CollectionSegmentImp<I>
                 clearFactor, fragmentFactor, swap, 
                 quantitySwaperThread);
         
-        this.locks = new RouletteLock(100);
+        this.locks = new RouletteLock(1);
     }
     
     public I getEntity(long segment, int index) {
         
-        Entry<ArraySegment<I>> entry = this.getEntry(segment);
-        
-        if (entry == null)
-            return null;
-        else{
-        	Lock lock = this.locks.getLock(segment);
-        	lock.lock();
-        	try{
+    	Lock lock = this.locks.getLock(segment);
+    	lock.lock();
+    	try{
+	        Entry<ArraySegment<I>> entry = this.getEntry(segment);
+	        
+	        if (entry == null)
+	            return null;
+	        else{
 	            entry = this.reload(entry);
 	            return entry.getItem().get(index);
-        	}
-        	finally{
-        		lock.unlock();
-        	}
-        }
+	        }
+    	}
+    	finally{
+    		lock.unlock();
+    	}
+    	
     }
 
     public int putEntity(long segment, int index, I value) {
@@ -90,9 +91,12 @@ class CollectionSegmentImp<I>
 	            return index;
 	        } 
 	        else{
-	            seg  = entry.getItem();
-	            entry.setNeedUpdate(true);
-	            return seg.set(index, value);
+	        	synchronized(super.getLock(segment)){
+	        		entry = super.reload(entry);
+		            seg  = entry.getItem();
+		            entry.setNeedUpdate(true);
+		            return seg.set(index, value);
+	        	}
 	        }
     	}
     	finally{
@@ -130,11 +134,14 @@ class CollectionSegmentImp<I>
 	            return null;
 	        } 
 	        else{
-	            seg  = entry.getItem();
-	            entry.setNeedUpdate(true);
-	            I old = seg.get(index);
-	            seg.set(index, value);
-	            return old;
+	        	synchronized(super.getLock(segment)){
+	        		entry = super.reload(entry);
+		            seg  = entry.getItem();
+		            entry.setNeedUpdate(true);
+		            I old = seg.get(index);
+		            seg.set(index, value);
+		            return old;
+	        	}
 	        }
     	}
     	finally{
@@ -161,14 +168,17 @@ class CollectionSegmentImp<I>
 	        ArraySegment<I> seg;
 		
 	        if(entry != null){
-	            seg  = entry.getItem();
-	            I old = seg.get(index);
-	            if(old != null && old.equals(value)){
-	            	seg.set(index, value);
-		            entry.setNeedUpdate(true);
-	            	return true;
-	            }
-	            return false;
+	        	synchronized(super.getLock(segment)){
+	        		entry = super.reload(entry);
+		            seg  = entry.getItem();
+		            I old = seg.get(index);
+		            if(old != null && old.equals(value)){
+		            	seg.set(index, value);
+			            entry.setNeedUpdate(true);
+		            	return true;
+		            }
+		            return false;
+	        	}
 	        }
 	        else
 	        	throw new IllegalStateException("segment");
@@ -197,13 +207,17 @@ class CollectionSegmentImp<I>
 	        ArraySegment<I> seg;
 		
 	        if(entry != null){
-	            seg  = entry.getItem();
-	            I old = seg.get(index);
-	            if(old != null){
-	            	seg.set(index, value);
-		            entry.setNeedUpdate(true);
-	            }
-	            return old;
+	        	synchronized(super.getLock(segment)){
+	        		entry = super.reload(entry);
+		        	
+		            seg  = entry.getItem();
+		            I old = seg.get(index);
+		            if(old != null){
+		            	seg.set(index, value);
+			            entry.setNeedUpdate(true);
+		            }
+		            return old;
+	        	}
 	        }
 	        else
 	        	throw new IllegalStateException("segment");
@@ -232,13 +246,16 @@ class CollectionSegmentImp<I>
 	        ArraySegment<I> seg;
 		
 	        if(entry != null){
-	            seg  = entry.getItem();
-	            I old = seg.get(index);
-	            if(old == null){
-	            	seg.set(index, value);
-		            entry.setNeedUpdate(true);
-	            }
-	            return old;
+	        	synchronized(super.getLock(segment)){
+	        		entry = super.reload(entry);
+		            seg  = entry.getItem();
+		            I old = seg.get(index);
+		            if(old == null){
+		            	seg.set(index, value);
+			            entry.setNeedUpdate(true);
+		            }
+		            return old;
+	        	}
 	        }
 	        else
 	        	throw new IllegalStateException("segment");
