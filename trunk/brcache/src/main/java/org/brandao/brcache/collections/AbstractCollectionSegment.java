@@ -33,7 +33,7 @@ abstract class AbstractCollectionSegment<I,T>
     
 	private static final long serialVersionUID = 7817500681111470845L;
 
-    protected ConcurrentMap<Long, Entry<T>> segments;
+    protected ConcurrentMap<Long, Entry<T>>[] segments;
     
     private transient File path;
     
@@ -65,6 +65,8 @@ abstract class AbstractCollectionSegment<I,T>
     
     private boolean live;
     
+    private volatile long onMemory;
+    
     public AbstractCollectionSegment(
             String id, int maxCapacity, double clearFactor,
             double fragmentFactor,
@@ -76,13 +78,18 @@ abstract class AbstractCollectionSegment<I,T>
         this.maxCapacity         = maxCapacity;
         this.clearFactor         = clearFactor;
         this.maxSegmentCapacity  = (int)(maxCapacity/fragmentSize);
-        this.segments            = new ConcurrentHashMap<Long, Entry<T>>(maxCapacity);
         this.swapCandidates      = new LinkedBlockingQueue<Entry<T>>();
         this.readOnly            = false;
         this.lastSegment         = -1;
         this.swap                = swap;
         this.forceSwap           = true;
         this.live                = true;
+        this.segments            = new ConcurrentHashMap[maxCapacity/1000 > 0? maxCapacity/1000 : 1];//new ConcurrentHashMap<Long, Entry<T>>(maxCapacity);
+        this.onMemory            = 0;
+        for(int i=0;i<this.segments.length;i++){
+        	this.segments[i] = new ConcurrentHashMap<Long, Entry<T>>();
+        }
+        
         this.swap.setId(this.id);
 
         swapperThreads = new Thread[quantitySwaperThread];
@@ -108,9 +115,13 @@ abstract class AbstractCollectionSegment<I,T>
             }
         }
     }
-    
+
     protected Object getLock(long value){
-    	return this;
+    	return this.segments[(int)(value % this.segments.length)];
+    }
+    
+    protected ConcurrentMap<Long, Entry<T>> getSegment(long value){
+    	return this.segments[(int)(value % this.segments.length)];
     }
     
     public boolean isLive() {
@@ -121,7 +132,7 @@ abstract class AbstractCollectionSegment<I,T>
     	double i = maxSegmentCapacity * clearFactor;
         double limit = maxSegmentCapacity - i;
         
-        if (maxSegmentCapacity > 0 && segments.size() > limit) {
+        if (maxSegmentCapacity > 0 && onMemory > limit) {
         	int count = 0;
         	Entry<T> item = this.firstItem;
             do{
@@ -137,14 +148,14 @@ abstract class AbstractCollectionSegment<I,T>
     }
     
     protected void clearLimitLength() {
-        if (maxSegmentCapacity > 0 && segments.size() > maxSegmentCapacity) {
+        if (maxSegmentCapacity > 0 && onMemory > maxSegmentCapacity) {
             double quantity = maxSegmentCapacity * clearFactor;
             clearSegments(quantity);
         }
     }
 
     protected boolean needSwap(){
-    	return maxSegmentCapacity > 0 && segments.size() > maxSegmentCapacity - 2;    	
+    	return maxSegmentCapacity > 0 && onMemory > maxSegmentCapacity - 2;    	
     }
     
     protected void removeFirst() {
@@ -189,19 +200,19 @@ abstract class AbstractCollectionSegment<I,T>
         if(forceSwap && this.needSwap())
             this.removeFirst();
         
-        segments.put(item.getIndex(), item);
+        this.getSegment(item.getIndex()).put(item.getIndex(), item);
         this.addListedItemOnMemory(item);
-        
+        this.onMemory++;
     }
 
     private Entry<T> remove(Entry<T> item){
-        Entry<T> e = segments.remove(item.getIndex());
+        Entry<T> e = this.getSegment(item.getIndex()).remove(item.getIndex());
         this.removeItemListedOnMemory(item);
         
         item.setItem(null);
         item.setNeedUpdate(false);
         item.setNeedReload(true);
-        
+        this.onMemory--;
         return e;
     }
     
@@ -229,7 +240,7 @@ abstract class AbstractCollectionSegment<I,T>
             return null;
         
         synchronized(this.getLock(key)){
-            Entry<T> onMemoryEntity = this.segments.get(key);
+            Entry<T> onMemoryEntity = this.getSegment(key).get(key);
 
             if(onMemoryEntity != null)
                 return onMemoryEntity;
@@ -240,7 +251,7 @@ abstract class AbstractCollectionSegment<I,T>
             Entry<T> entity = (Entry<T>)this.swap.getItem(key);
 
             if(entity != null){
-                segments.put(key, entity);
+            	this.getSegment(key).put(key, entity);
                 this.addListedItemOnMemory(entity);
             }
 
@@ -250,7 +261,7 @@ abstract class AbstractCollectionSegment<I,T>
     
     protected Entry<T> getEntry(long index) {
         
-        Entry<T> e = segments.get(index);
+        Entry<T> e = this.getSegment(index).get(index);
         
         if(e == null)
             return swapOnMemory(index);
@@ -261,7 +272,7 @@ abstract class AbstractCollectionSegment<I,T>
     }
 
     public Map<Long, Entry<T>> getSegments() {
-        return segments;
+        throw new UnsupportedOperationException();
     }
 
     public File getPath() {
@@ -338,7 +349,9 @@ abstract class AbstractCollectionSegment<I,T>
 
     public void clear(){
     	this.firstItem = null;
-    	this.segments.clear();
+    	for(ConcurrentMap<Long, Entry<T>> seg: this.segments){
+    		seg.clear();
+    	}
     	this.swapCandidates.clear();
         this.swap.clear();
     }
@@ -351,9 +364,12 @@ abstract class AbstractCollectionSegment<I,T>
     	
     	this.live      = false;
     	this.firstItem = null;
-    	this.segments.clear();
     	this.swapCandidates.clear();
         this.swap.destroy();
+    	
+    	for(ConcurrentMap<Long, Entry<T>> seg: this.segments){
+    		seg.clear();
+    	}
     }
     
     private synchronized void addListedItemOnMemory(Entry<T> item){

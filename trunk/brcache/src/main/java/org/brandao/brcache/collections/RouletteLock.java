@@ -6,6 +6,10 @@ import java.util.concurrent.locks.ReentrantLock;
 public class RouletteLock {
 
 	private Lock[] locks;
+
+	public RouletteLock(){
+		this(50);
+	}
 	
 	public RouletteLock(int size){
 		this.locks = new Lock[size];
