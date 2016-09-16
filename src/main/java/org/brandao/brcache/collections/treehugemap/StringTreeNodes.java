@@ -17,10 +17,10 @@
 
 package org.brandao.brcache.collections.treehugemap;
 
-import java.io.Serializable;
+import java.util.concurrent.locks.Lock;
 
 import org.brandao.brcache.collections.ReferenceCollection;
-import org.brandao.concurrent.NamedLock;
+import org.brandao.brcache.collections.RouletteLock;
 
 /**
  *
@@ -30,10 +30,10 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
 
 	private static final long serialVersionUID = -8387188156629418047L;
 
-	private NamedLock locks;
+	private RouletteLock locks;
 	
 	public StringTreeNodes(){
-		this.locks = new NamedLock();
+		this.locks = new RouletteLock();
 	}
 	
 	public TreeMapKey getKey(Object key) {
@@ -56,68 +56,68 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
     }
     
     public T setValue(ReferenceCollection<T> values, TreeNode<T> node, T value){
-    	String lockName   = Long.toString(node.getId());
-    	Serializable lock = this.locks.lock(lockName);
+    	Lock lock = this.locks.getLock(node.getId());
+    	lock.lock();
     	try{
     		return node.setValue(values, value);
     	}
     	finally{
-    		this.locks.unlock(lock, lockName);
+    		lock.unlock();
     	}
     }
     
     public boolean replaceValue(ReferenceCollection<T> values, TreeNode<T> node, T oldValue, T value){
-    	String lockName   = Long.toString(node.getId());
-    	Serializable lock = this.locks.lock(lockName);
+    	Lock lock = this.locks.getLock(node.getId());
+    	lock.lock();
     	try{
     		return node.replaceValue(values, oldValue, value);
     	}
     	finally{
-    		this.locks.unlock(lock, lockName);
+    		lock.unlock();
     	}
     }
 
     public T replaceValue(ReferenceCollection<T> values, TreeNode<T> node, T value){
-    	String lockName   = Long.toString(node.getId());
-    	Serializable lock = this.locks.lock(lockName);
+    	Lock lock = this.locks.getLock(node.getId());
+    	lock.lock();
     	try{
     		return node.replaceValue(values, value);
     	}
     	finally{
-    		this.locks.unlock(lock, lockName);
+    		lock.unlock();
     	}
     }
 
     public T putIfAbsentValue(ReferenceCollection<T> values, TreeNode<T> node, T value){
-    	String lockName   = Long.toString(node.getId());
-    	Serializable lock = this.locks.lock(lockName);
+    	Lock lock = this.locks.getLock(node.getId());
+    	lock.lock();
     	try{
     		return node.putIfAbsentValue(values, value);
     	}
     	finally{
-    		this.locks.unlock(lock, lockName);
+    		lock.unlock();
     	}
     }
     
     public T removeValue(ReferenceCollection<T> values, TreeNode<T> node) {
-    	String lockName   = Long.toString(node.getId());
-    	Serializable lock = this.locks.lock(lockName);
+    	Lock lock = this.locks.getLock(node.getId());
+    	lock.lock();
     	try{
 			return node.removeValue(values);
     	}
     	finally{
-    		this.locks.unlock(lock, lockName);
+    		lock.unlock();
     	}
     }
 
     public boolean removeValue(ReferenceCollection<T> values, TreeNode<T> node, T oldValue) {
-    	String lockName   = Long.toString(node.getId());
-    	Serializable lock = this.locks.lock(lockName);
+    	Lock lock = this.locks.getLock(node.getId());
+    	lock.lock();
     	try{
     		return node.removeValue(values, oldValue);
     	}
     	finally{
-    		this.locks.unlock(lock, lockName);
+    		lock.unlock();
     	}
     }
     
@@ -128,8 +128,8 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
         TreeNode<T> next = node.getNext(nodes, i);
         
         if(next == null && !read){
-        	String lockName   = Long.toString(node.getId());
-        	Serializable lock = this.locks.lock(lockName);
+        	Lock lock = this.locks.getLock(node.getId());
+        	lock.lock();
         	try{
                 node = nodes.get(node.getId());
                 next = node.getNext(nodes, i);
@@ -147,7 +147,7 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
                 node.setNext(nodes, i, nextNode);
         	}
         	finally{
-        		this.locks.unlock(lock, lockName);
+        		lock.unlock();
         	}
         	
         }
