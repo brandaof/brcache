@@ -1,16 +1,11 @@
 package org.brandao.brcache.collections.treehugemap;
 
-import java.util.concurrent.locks.Lock;
-
 import org.brandao.brcache.collections.ReferenceCollection;
-import org.brandao.brcache.collections.RouletteLock;
 
 public class CharNode<T> implements TreeNode<T>{
 
 	private static final long serialVersionUID 	= 480902938041176366L;
 
-	private static final RouletteLock locks = new RouletteLock(2000);
-	
 	public static int MIN_CHARGROUP    			= 0x5b;
 
     public static int MAX_CHARGROUP    			= 0x7d;
@@ -112,111 +107,70 @@ public class CharNode<T> implements TreeNode<T>{
     }
 
     public T setValue(ReferenceCollection<T> values, T value) {
-    	Lock lock = locks.getLock(this.id);
-    	lock.lock();
-    	try{
-            if(this.valueId == -1){
-            	this.valueId = values.insert(value);
-                return null;
-            }
-            else{
-        		T old = values.get(valueId); 
-                values.set(this.valueId, value);
-                return old;
-            }
-		}
-    	finally{
-    		lock.unlock();
-    	}
+        if(this.valueId == -1){
+        	this.valueId = values.insert(value);
+            return null;
+        }
+        else{
+    		T old = values.get(valueId); 
+            values.set(this.valueId, value);
+            return old;
+        }
     }
 
     public T removeValue(ReferenceCollection<T> values) {
-    	Lock lock = locks.getLock(this.id);
-    	lock.lock();
-    	try{
-            if(this.valueId != -1){
-                return values.set(this.valueId, null);
-            }
-            else{
-            	return null;
-            }
-    	}
-    	finally{
-    		lock.unlock();
-    	}
+        if(this.valueId != -1){
+            return values.set(this.valueId, null);
+        }
+        else{
+        	return null;
+        }
     }
 
     public T getValue(ReferenceCollection<T> values) {
-        if(this.valueId != -1)
-            return values.get(this.valueId);
+    	long id = this.valueId;
+        if(id != -1)
+            return values.get(id);
         else
             return null;
     }
 
 	public boolean replaceValue(ReferenceCollection<T> values, T oldValue,
 			T value) {
-    	Lock lock = locks.getLock(this.id);
-    	lock.lock();
-    	try{
-            if(this.valueId != -1){
-                return values.replace(this.valueId, oldValue, value);
-            }
-            else{
-            	return false;
-            }
-    	}
-    	finally{
-    		lock.unlock();
-    	}
+        if(this.valueId != -1){
+            return values.replace(this.valueId, oldValue, value);
+        }
+        else{
+        	return false;
+        }
 	}
 
 	public T replaceValue(ReferenceCollection<T> values, T value) {
-    	Lock lock = locks.getLock(this.id);
-    	lock.lock();
-    	try{
-            if(this.valueId != -1){
-                return values.replace(this.valueId, value);
-            }
-            else{
-            	return null;
-            }
-    	}
-    	finally{
-    		lock.unlock();
-    	}
+        if(this.valueId != -1){
+            return values.replace(this.valueId, value);
+        }
+        else{
+        	return null;
+        }
 	}
 
 	public T putIfAbsentValue(ReferenceCollection<T> values, T value) {
-    	Lock lock = locks.getLock(this.id);
-    	lock.lock();
-    	try{
-            if(this.valueId != -1){
-                return values.putIfAbsent(this.valueId, value);
-            }
-            else{
-            	this.valueId = values.insert(value);
-            	return null;
-            }
-    	}
-    	finally{
-    		lock.unlock();
-    	}
+        if(this.valueId != -1){
+            return values.putIfAbsent(this.valueId, value);
+        }
+        else{
+        	this.valueId = values.insert(value);
+        	return null;
+        }
 	}
 
 	public boolean removeValue(ReferenceCollection<T> values, T oldValue) {
-    	Lock lock = locks.getLock(this.id);
-    	lock.lock();
-    	try{
-            if(this.valueId != -1){
-                return values.remove(this.valueId, oldValue);
-            }
-            else{
-            	return false;
-            }
-    	}
-    	finally{
-    		lock.unlock();
-    	}
+        if(this.valueId != -1){
+            return values.remove(this.valueId, oldValue);
+        }
+        else{
+        	return false;
+        }
 	}
 
 }

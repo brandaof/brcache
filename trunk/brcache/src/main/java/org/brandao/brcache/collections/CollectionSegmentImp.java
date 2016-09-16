@@ -18,7 +18,8 @@
 package org.brandao.brcache.collections;
 
 import java.io.Serializable;
-import java.util.concurrent.locks.Lock;
+
+import org.brandao.concurrent.NamedLock;
 
 /**
  *
@@ -30,7 +31,7 @@ class CollectionSegmentImp<I>
 
 	private static final long serialVersionUID = 239844470898102007L;
 
-	private RouletteLock locks;
+	private NamedLock locks;
 
 	public CollectionSegmentImp(
             String id, 
@@ -43,13 +44,13 @@ class CollectionSegmentImp<I>
                 clearFactor, fragmentFactor, swap, 
                 quantitySwaperThread);
         
-        this.locks = new RouletteLock(1000);
+        this.locks = new NamedLock();
     }
     
     public I getEntity(long segment, int index) {
         
-    	Lock lock = this.locks.getLock(segment);
-    	lock.lock();
+    	String lockName   = Long.toString(segment);
+    	Serializable lock = this.locks.lock(lockName);
     	try{
 	        Entry<ArraySegment<I>> entry = this.getEntry(segment);
 	        
@@ -63,7 +64,7 @@ class CollectionSegmentImp<I>
 	        }
     	}
     	finally{
-    		lock.unlock();
+    		this.locks.unlock(lock, lockName);
     	}
     	
     }
@@ -79,8 +80,8 @@ class CollectionSegmentImp<I>
         if(index < 0)
             throw new IllegalStateException("index");
         
-    	Lock lock = this.locks.getLock(segment);
-    	lock.lock();
+    	String lockName   = Long.toString(segment);
+    	Serializable lock = this.locks.lock(lockName);
     	try{
 	        Entry<ArraySegment<I>> entry = super.getEntry(segment);
 	        ArraySegment<I> seg;
@@ -102,7 +103,7 @@ class CollectionSegmentImp<I>
 	        }
     	}
     	finally{
-    		lock.unlock();
+    		this.locks.unlock(lock, lockName);
     	}
         
     }    
@@ -118,8 +119,8 @@ class CollectionSegmentImp<I>
         if(index < 0)
     		throw new IllegalStateException("index");
         
-    	Lock lock = this.locks.getLock(segment);
-    	lock.lock();
+    	String lockName   = Long.toString(segment);
+    	Serializable lock = this.locks.lock(lockName);
     	try{
 	        Entry<ArraySegment<I>> entry = super.getEntry(segment);
 	        ArraySegment<I> seg;
@@ -147,7 +148,7 @@ class CollectionSegmentImp<I>
 	        }
     	}
     	finally{
-    		lock.unlock();
+    		this.locks.unlock(lock, lockName);
     	}
         
     }    
@@ -163,8 +164,8 @@ class CollectionSegmentImp<I>
         if(index < 0)
     		throw new IllegalStateException("index");
         
-    	Lock lock = this.locks.getLock(segment);
-    	lock.lock();
+    	String lockName   = Long.toString(segment);
+    	Serializable lock = this.locks.lock(lockName);
     	try{
 	        Entry<ArraySegment<I>> entry = super.getEntry(segment);
 	        ArraySegment<I> seg;
@@ -186,7 +187,7 @@ class CollectionSegmentImp<I>
 	        	throw new IllegalStateException("segment");
     	}
     	finally{
-    		lock.unlock();
+    		this.locks.unlock(lock, lockName);
     	}
         
     }    
@@ -202,8 +203,8 @@ class CollectionSegmentImp<I>
         if(index < 0)
     		throw new IllegalStateException("index");
         
-    	Lock lock = this.locks.getLock(segment);
-    	lock.lock();
+    	String lockName   = Long.toString(segment);
+    	Serializable lock = this.locks.lock(lockName);
     	try{
 	        Entry<ArraySegment<I>> entry = super.getEntry(segment);
 	        ArraySegment<I> seg;
@@ -225,7 +226,7 @@ class CollectionSegmentImp<I>
 	        	throw new IllegalStateException("segment");
     	}
     	finally{
-    		lock.unlock();
+    		this.locks.unlock(lock, lockName);
     	}
         
     }
@@ -241,8 +242,8 @@ class CollectionSegmentImp<I>
         if(index < 0)
     		throw new IllegalStateException("index");
         
-    	Lock lock = this.locks.getLock(segment);
-    	lock.lock();
+    	String lockName   = Long.toString(segment);
+    	Serializable lock = this.locks.lock(lockName);
     	try{
 	        Entry<ArraySegment<I>> entry = super.getEntry(segment);
 	        ArraySegment<I> seg;
@@ -263,7 +264,7 @@ class CollectionSegmentImp<I>
 	        	throw new IllegalStateException("segment");
     	}
     	finally{
-    		lock.unlock();
+    		this.locks.unlock(lock, lockName);
     	}
         
     }     

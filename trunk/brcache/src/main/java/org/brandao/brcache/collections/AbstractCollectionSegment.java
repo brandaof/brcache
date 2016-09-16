@@ -33,19 +33,6 @@ abstract class AbstractCollectionSegment<I,T>
     
 	private static final long serialVersionUID = 7817500681111470845L;
 
-	private final Serializable[] locks = new Serializable[]{
-		new Integer(0)/*,
-		new Integer(1),
-		new Integer(2),
-		new Integer(3),
-		new Integer(4),
-		new Integer(5),
-		new Integer(6),
-		new Integer(7),
-		new Integer(8),
-		new Integer(9)*/
-	};
-	
     protected ConcurrentMap<Long, Entry<T>> segments;
     
     private transient File path;
@@ -123,7 +110,7 @@ abstract class AbstractCollectionSegment<I,T>
     }
     
     protected Object getLock(long value){
-    	return this.locks[(int)(value % this.locks.length)];
+    	return this;
     }
     
     public boolean isLive() {

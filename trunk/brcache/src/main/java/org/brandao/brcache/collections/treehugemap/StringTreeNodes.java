@@ -17,10 +17,10 @@
 
 package org.brandao.brcache.collections.treehugemap;
 
-import java.util.concurrent.locks.Lock;
+import java.io.Serializable;
 
 import org.brandao.brcache.collections.ReferenceCollection;
-import org.brandao.brcache.collections.RouletteLock;
+import org.brandao.concurrent.NamedLock;
 
 /**
  *
@@ -28,10 +28,14 @@ import org.brandao.brcache.collections.RouletteLock;
  */
 public class StringTreeNodes<T> implements TreeNodes<T>{
 
-	private static final RouletteLock locks = new RouletteLock(2000);
-	
 	private static final long serialVersionUID = -8387188156629418047L;
 
+	private NamedLock locks = new NamedLock();
+	
+	public StringTreeNodes(){
+		
+	}
+	
 	public TreeMapKey getKey(Object key) {
     	String strKey = (String)key;
     	strKey = strKey.toLowerCase();
@@ -52,27 +56,69 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
     }
     
     public T setValue(ReferenceCollection<T> values, TreeNode<T> node, T value){
-		return node.setValue(values, value);
+    	String lockName   = Long.toString(node.getId());
+    	Serializable lock = this.locks.lock(lockName);
+    	try{
+    		return node.setValue(values, value);
+    	}
+    	finally{
+    		this.locks.unlock(lock, lockName);
+    	}
     }
     
     public boolean replaceValue(ReferenceCollection<T> values, TreeNode<T> node, T oldValue, T value){
-    	return node.replaceValue(values, oldValue, value);
+    	String lockName   = Long.toString(node.getId());
+    	Serializable lock = this.locks.lock(lockName);
+    	try{
+    		return node.replaceValue(values, oldValue, value);
+    	}
+    	finally{
+    		this.locks.unlock(lock, lockName);
+    	}
     }
 
     public T replaceValue(ReferenceCollection<T> values, TreeNode<T> node, T value){
-    	return node.replaceValue(values, value);
+    	String lockName   = Long.toString(node.getId());
+    	Serializable lock = this.locks.lock(lockName);
+    	try{
+    		return node.replaceValue(values, value);
+    	}
+    	finally{
+    		this.locks.unlock(lock, lockName);
+    	}
     }
 
     public T putIfAbsentValue(ReferenceCollection<T> values, TreeNode<T> node, T value){
-    	return node.putIfAbsentValue(values, value);
+    	String lockName   = Long.toString(node.getId());
+    	Serializable lock = this.locks.lock(lockName);
+    	try{
+    		return node.putIfAbsentValue(values, value);
+    	}
+    	finally{
+    		this.locks.unlock(lock, lockName);
+    	}
     }
     
     public T removeValue(ReferenceCollection<T> values, TreeNode<T> node) {
-    	return node.removeValue(values);
+    	String lockName   = Long.toString(node.getId());
+    	Serializable lock = this.locks.lock(lockName);
+    	try{
+			return node.removeValue(values);
+    	}
+    	finally{
+    		this.locks.unlock(lock, lockName);
+    	}
     }
 
     public boolean removeValue(ReferenceCollection<T> values, TreeNode<T> node, T oldValue) {
-    	return node.removeValue(values, oldValue);
+    	String lockName   = Long.toString(node.getId());
+    	Serializable lock = this.locks.lock(lockName);
+    	try{
+    		return node.removeValue(values, oldValue);
+    	}
+    	finally{
+    		this.locks.unlock(lock, lockName);
+    	}
     }
     
     public TreeNode<T> getNext(ReferenceCollection<TreeNode<T>> nodes, TreeMapKey key, TreeNode<T> node, boolean read) {
@@ -82,8 +128,8 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
         TreeNode<T> next = node.getNext(nodes, i);
         
         if(next == null && !read){
-        	Lock lock = locks.getLock(node.getId());
-        	lock.lock();
+        	String lockName   = Long.toString(node.getId());
+        	Serializable lock = this.locks.lock(lockName);
         	try{
                 node = nodes.get(node.getId());
                 next = node.getNext(nodes, i);
@@ -101,7 +147,7 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
                 node.setNext(nodes, i, nextNode);
         	}
         	finally{
-        		lock.unlock();
+        		this.locks.unlock(lock, lockName);
         	}
         	
         }
