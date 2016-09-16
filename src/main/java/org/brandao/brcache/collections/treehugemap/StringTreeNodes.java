@@ -30,10 +30,10 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
 
 	private static final long serialVersionUID = -8387188156629418047L;
 
-	private NamedLock locks = new NamedLock();
+	private NamedLock locks;
 	
 	public StringTreeNodes(){
-		
+		this.locks = new NamedLock();
 	}
 	
 	public TreeMapKey getKey(Object key) {
