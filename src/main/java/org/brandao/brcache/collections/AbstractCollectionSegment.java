@@ -31,7 +31,7 @@ abstract class AbstractCollectionSegment<I,T>
     
 	private static final long serialVersionUID = 7817500681111470845L;
 
-	private static final int MAX_ITENS_PER_SEGMENT = 100;
+	private static final int MAX_ITENS_PER_SEGMENT = 6000;
 	
     protected Segment<T>[] segments;
 
@@ -80,7 +80,7 @@ abstract class AbstractCollectionSegment<I,T>
         this.swap                = swap;
         this.forceSwap           = true;
         this.live                = true;
-        this.segments            = new Segment[MAX_ITENS_PER_SEGMENT/100 + (maxCapacity % MAX_ITENS_PER_SEGMENT != 0? 1 : 0)];
+        this.segments            = new Segment[maxCapacity/MAX_ITENS_PER_SEGMENT + (maxCapacity % MAX_ITENS_PER_SEGMENT != 0? 1 : 0)];
         this.onMemory            = 0;
         swapperThreads           = new Thread[quantitySwaperThread];
         this.swap.setId(this.id);
