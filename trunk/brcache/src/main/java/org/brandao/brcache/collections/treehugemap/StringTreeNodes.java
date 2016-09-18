@@ -32,8 +32,11 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
 
 	private RouletteLock locks;
 	
+	private long firstNodeId;
+	
 	public StringTreeNodes(){
-		this.locks = new RouletteLock();
+		this.locks       = new RouletteLock();
+		this.firstNodeId = -1;
 	}
 	
 	public TreeMapKey getKey(Object key) {
@@ -156,7 +159,7 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
     }
 
     public TreeNode<T> getFirst(ReferenceCollection<TreeNode<T>> nodes) {
-        return nodes.isEmpty()? null : nodes.get(0);
+        return nodes.isEmpty()? null : nodes.get(this.firstNodeId);
     }
 
     public void init(ReferenceCollection<TreeNode<T>> nodes) {
@@ -164,8 +167,9 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
             throw new IllegalStateException();
         
         CharNode<T> node = new CharNode<T>();
-        node.setId(0);
-        nodes.add(node);
+        node.setId(nodes.insert(node));
+        nodes.set(node.getId(), node);
+        this.firstNodeId = node.getId();
     }
     
     private static class StringTreeMapKey implements TreeMapKey{
