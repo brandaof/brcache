@@ -70,8 +70,6 @@ public abstract class StreamCache
     
     private final int segmentSize;
     
-    //private final BlockingQueue<Long> freeSegments;
-    
     private final long maxBytesToStorageEntry;
     
     private final int maxLengthKey;
@@ -261,8 +259,8 @@ public abstract class StreamCache
         if(key.length() > this.maxLengthKey)
             throw new StorageException(CacheErrors.ERROR_1008);
         
-        DataMap oldMap  = null;
-        DataMap map     = new DataMap();
+        DataMap oldMap = null;
+        DataMap map    = new DataMap();
         
     	//ItemCacheInputStream permite manipular além dos dados os metadados do item.
         if(ITEM_CACHE_INPUTSTREAM_CLASS.isAssignableFrom(inputData.getClass())){
@@ -291,7 +289,7 @@ public abstract class StreamCache
             map.setTimeToLive(timeToLive);
         }
         
-        //Toda item inserido tem que ter uma nova id. Mesmo que ele exista.
+        //Todo item inserido tem que ter uma nova id. Mesmo que ela exista.
         map.setId(this.modCount++);
 
         try{
@@ -819,5 +817,5 @@ public abstract class StreamCache
     		super.finalize();
     	}
     }
-    
+
 }
