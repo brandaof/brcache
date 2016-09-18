@@ -68,8 +68,8 @@ public class ArrayCollectionReference<T> {
 			}
 			
 			
-			long segment    = (long)(index / collection.getFragmentSize());
-			long offset     = (long)(index % collection.getFragmentSize());
+			long segment = (long)(index / collection.getFragmentSize());
+			long offset  = (long)(index % collection.getFragmentSize());
 	
 			try{
 				collection.putEntity(segment, (int)offset, e);
@@ -80,8 +80,8 @@ public class ArrayCollectionReference<T> {
 			
 		}
 		else{
-			long segment    = (long)(index / collection.getFragmentSize());
-			long offset     = (long)(index % collection.getFragmentSize());
+			long segment = (long)(index / collection.getFragmentSize());
+			long offset  = (long)(index % collection.getFragmentSize());
 			
 			try{
 				collection.putEntity(segment, (int)offset, e);
