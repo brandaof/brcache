@@ -159,7 +159,7 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
     }
 
     public TreeNode<T> getFirst(ReferenceCollection<TreeNode<T>> nodes) {
-        return nodes.isEmpty()? null : nodes.get(this.firstNodeId);
+        return this.firstNodeId == -1? null : nodes.get(this.firstNodeId);
     }
 
     public void init(ReferenceCollection<TreeNode<T>> nodes) {
