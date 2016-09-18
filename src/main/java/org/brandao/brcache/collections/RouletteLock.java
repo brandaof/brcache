@@ -8,7 +8,7 @@ public class RouletteLock {
 	private Lock[] locks;
 
 	public RouletteLock(){
-		this(50);
+		this(10);
 	}
 	
 	public RouletteLock(int size){
