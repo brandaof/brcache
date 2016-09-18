@@ -1,26 +1,17 @@
 package org.brandao.brcache.collections;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class HugeArrayReferenceList<T> 
 	implements HugeReferenceList<T>{
 
 	private static final long serialVersionUID = 1406571295066759006L;
 
-	private static final Empty EMPTY = new Empty();
-	
-	private BlockingQueue<Long> freeAddress;
-	
-	private CollectionSegmentImp<Object>[] lists;
+	private ArrayCollectionReference<T>[] lists;
 
-	private volatile long lastPos;
-	
     private boolean deleteOnExit;
 	
     public HugeArrayReferenceList() {
@@ -44,16 +35,14 @@ public class HugeArrayReferenceList<T>
             int quantityClearThread, 
             int lists) {
     
-    	this.freeAddress  = new LinkedBlockingQueue<Long>();
-    	this.lastPos      = 0;
-    	this.lists        = new CollectionSegmentImp[lists];
+    	this.lists        = new ArrayCollectionReference[lists];
         this.deleteOnExit = true;
         id                = id == null? Collections.getNextId() : id;
         swap              = swap == null? new TreeFileSwaper() : swap;
     	
     	for(int i=0;i<this.lists.length;i++){
             this.lists[i] = 
-                    new CollectionSegmentImp<Object>(
+                    new ArrayCollectionReference<T>(
                         id == null? null : id + "list_" + i, 
                         maxCapacityElements, 
                         clearFactorElements, 
@@ -70,169 +59,57 @@ public class HugeArrayReferenceList<T>
 		return true;
 	}
 	
-	private synchronized long getNextPointer(){
-		return this.lastPos++;
-	}
-	
 	public long insert(T e) {
+		long threadReference = Thread.currentThread().getId() % this.lists.length;
+		long index           = this.lists[(int)threadReference].insert(e);
 		
-		Long address = this.freeAddress.poll();
+		threadReference = threadReference & 0xff;
+		index           = index & 0xffffffffL;
 		
-		if(address == null){
-			long currentPos      = this.getNextPointer();
-			long collectionIndex = currentPos % this.lists.length;
-			long index           = currentPos / this.lists.length;
-			
-			CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
-			long segment    = (long)(index / collection.getFragmentSize());
-			long offset     = (long)(index % collection.getFragmentSize());
-	
-			int seg         = (int)(collectionIndex & 0xff);
-			long off        = index & 0xffffffffL;
-			
-			address = (off << 8) | seg;
-			
-			if(address < 0){
-				System.out.println(address);
-			}
-			
-			try{
-				collection.putEntity(segment, (int)offset, e);
-			}
-			catch(Throwable ex){
-				this.freeAddress.add(address);
-			}
-			
-		}
-		else{
-			long collectionIndex = address & 0xffL;
-			long index           = address >> 8;
-
-			CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
-			
-			long segment    = (long)(index / collection.getFragmentSize());
-			long offset     = (long)(index % collection.getFragmentSize());
-			
-			if(address < 0){
-				System.out.println(address);
-			}
-			
-			try{
-				collection.putEntity(segment, (int)offset, e);
-			}
-			catch(Throwable ex){
-				this.freeAddress.add(address);
-			}
-			
-		}
-			
+		long address = (index << 8) | threadReference;
 		return address;
 	}
 
-	@SuppressWarnings("unchecked")
 	public T set(long reference, T e) {
-		
-		long collectionIndex = reference & 0xffL;
+		long threadReference = reference & 0xff;
 		long index           = reference >> 8;
-			
-		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
-		
-		long segment    = (long)(index / collection.getFragmentSize());
-		long offset     = (long)(index % collection.getFragmentSize());
-		
-		return (T)collection.setEntity(segment, (int)offset, (T)e);
+		return this.lists[(int)threadReference].set(index, e);
 	}
 
-	@SuppressWarnings("unchecked")
 	public T get(long reference) {
-		long collectionIndex = reference & 0xffL;
+		long threadReference = reference & 0xff;
 		long index           = reference >> 8;
-
-		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
-		
-		long segment    = (long)(index / collection.getFragmentSize());
-		long offset     = (long)(index % collection.getFragmentSize());
-		
-		return (T)collection.getEntity(segment, (int)offset);
+		return this.lists[(int)threadReference].get(index);
 	}
 
 	public boolean remove(long reference) {
-		
-		long collectionIndex = reference & 0xffL;
+		long threadReference = reference & 0xff;
 		long index           = reference >> 8;
-
-		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
-		
-		long segment    = (long)(index / collection.getFragmentSize());
-		long offset     = (long)(index % collection.getFragmentSize());
-		
-		if(!EMPTY.equals(collection.replaceEntity(segment, (int)offset, EMPTY))){
-			this.freeAddress.add(reference);
-			return true;
-		}
-		else{
-			return false;
-		}
+		return this.lists[(int)threadReference].remove(index);
 	}
 	
 	public boolean replace(long reference, T oldValue, T value) {
-		
-		long collectionIndex = reference & 0xffL;
+		long threadReference = reference & 0xff;
 		long index           = reference >> 8;
-
-		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
-		
-		long segment    = (long)(index / collection.getFragmentSize());
-		long offset     = (long)(index % collection.getFragmentSize());
-		
-		return collection.replaceEntity(segment, (int)offset, oldValue, value);
+		return this.lists[(int)threadReference].replace(index, oldValue, value);
 	}
 
-	@SuppressWarnings("unchecked")
 	public T replace(long reference, T value) {
-		
-		long collectionIndex = reference & 0xffL;
+		long threadReference = reference & 0xff;
 		long index           = reference >> 8;
-
-		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
-		
-		long segment    = (long)(index / collection.getFragmentSize());
-		long offset     = (long)(index % collection.getFragmentSize());
-		
-		return (T)collection.replaceEntity(segment, (int)offset, value);
+		return this.lists[(int)threadReference].replace(index, value);
 	}
 
-	@SuppressWarnings("unchecked")
 	public T putIfAbsent(long reference, T value) {
-		
-		long collectionIndex = reference & 0xffL;
+		long threadReference = reference & 0xff;
 		long index           = reference >> 8;
-
-		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
-		
-		long segment    = (long)(index / collection.getFragmentSize());
-		long offset     = (long)(index % collection.getFragmentSize());
-		
-		return (T)collection.putIfAbsentEntity(segment, (int)offset, value);
+		return this.lists[(int)threadReference].putIfAbsent(index, value);
 	}
 
 	public boolean remove(long reference, T oldValue) {
-		
-		long collectionIndex = reference & 0xffL;
+		long threadReference = reference & 0xff;
 		long index           = reference >> 8;
-
-		CollectionSegmentImp<Object> collection = this.lists[(int)collectionIndex];
-		
-		long segment    = (long)(index / collection.getFragmentSize());
-		long offset     = (long)(index % collection.getFragmentSize());
-		
-		if(!EMPTY.equals(collection.replaceEntity(segment, (int)offset, oldValue, EMPTY))){
-			this.freeAddress.add(reference);
-			return true;
-		}
-		else{
-			return false;
-		}
+		return this.lists[(int)threadReference].remove(index, oldValue);
 	}
 	
     public void setDeleteOnExit(boolean value){
@@ -248,7 +125,11 @@ public class HugeArrayReferenceList<T>
     }
     
     public long length(){
-    	return this.lastPos;
+    	long size = 0;
+    	for(ArrayCollectionReference<T> l: this.lists){
+    		size += l.length();
+    	}
+    	return size;
     }
 
     public boolean isEmpty(){
@@ -260,19 +141,19 @@ public class HugeArrayReferenceList<T>
     }
 
     public void clear() {
-    	for(CollectionSegmentImp<Object> l: this.lists){
+    	for(ArrayCollectionReference<T> l: this.lists){
     		l.clear();
     	}
     }
 
     public void destroy(){
-    	for(CollectionSegmentImp<Object> l: this.lists){
+    	for(ArrayCollectionReference<T> l: this.lists){
     		l.destroy();
     	}
     }
     
     public void flush(){
-    	for(CollectionSegmentImp<Object> l: this.lists){
+    	for(ArrayCollectionReference<T> l: this.lists){
     		l.flush();
     	}
     	
@@ -351,7 +232,7 @@ public class HugeArrayReferenceList<T>
 	}
 
 	public void setReadOnly(boolean value) {
-    	for(CollectionSegmentImp<Object> l: this.lists){
+    	for(ArrayCollectionReference<T> l: this.lists){
     		l.setReadOnly(value);
     	}
 	}
@@ -360,18 +241,4 @@ public class HugeArrayReferenceList<T>
     	return this.lists[0].isReadOnly();
 	}
 
-	private static class Empty implements Serializable{
-		
-		private static final long serialVersionUID = -881123035360397425L;
-
-		public int hashCode(){
-			return 1;
-		}
-		
-		public boolean equals(Object x){
-			return x instanceof Empty;
-		}
-	};
-	
-	
 }

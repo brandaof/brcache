@@ -202,7 +202,7 @@ public class HugeArrayList<T>
         return true;
     }
 
-    public boolean retainAll(Collection<?> c) {
+    public boolean retainAll(ArrayCollectionReference<?> c) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -229,6 +229,10 @@ public class HugeArrayList<T>
     public void flush(){
         this.elements.flush();
     }
+    
+	public boolean retainAll(Collection<?> c) {
+        throw new UnsupportedOperationException("Not supported yet.");
+	}
     
     public int lastIndexOf(Object o) {
         throw new UnsupportedOperationException("Not supported yet.");
