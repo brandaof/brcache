@@ -72,8 +72,6 @@ public abstract class StreamCache
     
     //private final BlockingQueue<Long> freeSegments;
     
-    private volatile FreeBlockLink firstItem;
-
     private final long maxBytesToStorageEntry;
     
     private final int maxLengthKey;
@@ -149,7 +147,6 @@ public abstract class StreamCache
         this.modCount               = 0;
         this.dataPath               = dataPath;
         //this.freeSegments           = new LinkedBlockingQueue<Long>();
-        this.firstItem              = null;
         this.segmentSize            = (int)blockSize;
         this.maxBytesToStorageEntry = maxSizeEntry;
         this.maxLengthKey           = maxSizeKey;
@@ -649,13 +646,7 @@ public abstract class StreamCache
         		buffer      = new byte[this.segmentSize];
         		
             	Block block = new Block(map.getId(), index++, data, read);
-                Long segment = this.getFree();
-                
-                if(segment == null){
-                    segment = this.dataList.insert(block);
-                }
-                else
-                    this.dataList.set(segment, block);
+                Long segment = this.dataList.insert(block);
                 
                 if(lastBlock != null){
                 	lastBlock.nextBlock = segment;
@@ -684,27 +675,25 @@ public abstract class StreamCache
             throw new StorageException(e, CacheErrors.ERROR_1014);
         }
     }
-    
+
     private void releaseSegments(DataMap map){
     	long segmentId = map.getFirstSegment();
     	
     	if(segmentId == -1)
     		return;
     	
-    	//synchronized(this.dataList){
-	        Block current = this.dataList.get(segmentId);
-	        
-	        int i=0;
-	        while(current != null){
-				if(current.id == map.getId() && current.segment == i){
-					this.free(segmentId);
-				}
-	            
-				segmentId = current.nextBlock;
-	        	current = segmentId < 0? null : this.dataList.get(segmentId);
-	        	i++;
-	        }
-    	//}
+        Block current = this.dataList.get(segmentId);
+        
+        int i=0;
+        while(current != null){
+			if(current.id == map.getId() && current.segment == i){
+				this.dataList.remove(segmentId, current);
+			}
+            
+			segmentId = current.nextBlock;
+        	current = segmentId < 0? null : this.dataList.get(segmentId);
+        	i++;
+        }
     	
     	map.setFirstSegment(-1);
     }
@@ -795,8 +784,6 @@ public abstract class StreamCache
 		this.countWriteData 	= 0;
 		this.dataList.clear();
 		this.dataMap.clear();
-		//this.freeSegments.clear();
-		this.firstItem = null;
 	}
 	
 	/**
@@ -806,8 +793,6 @@ public abstract class StreamCache
 	public void destroy(){
 		this.dataList.destroy();
 		this.dataMap.destroy();
-		//this.freeSegments.clear();
-		this.firstItem = null;
 		this.deleteDir(new File(dataPath));
 	}
 	
@@ -833,60 +818,6 @@ public abstract class StreamCache
     	finally{
     		super.finalize();
     	}
-    }
-
-    private synchronized void free(long freeBlock){
-        
-    	FreeBlockLink node = new FreeBlockLink();
-    	node.index = freeBlock;
-    	
-        if(firstItem == null){
-            firstItem = node;
-            firstItem.next = firstItem;
-            firstItem.before = firstItem;
-        }
-        else{
-        	FreeBlockLink lastItem = firstItem.before;
-
-        	node.next   = this.firstItem;
-        	node.before = lastItem;
-
-            this.firstItem.before = node;
-            lastItem.next = node;
-        }
-    }
-
-    private synchronized Long getFree(){
-    	if(this.firstItem == null)
-    		return null;
-    	
-    	FreeBlockLink before = firstItem.before;
-    	FreeBlockLink next   = firstItem.next;
-    	
-    	long l = firstItem.index;
-    	
-        if(firstItem == firstItem.next){
-        	this.firstItem = null;
-        }
-        else{
-			this.firstItem = next;
-			before.next    = next;
-			next.before    = before;
-        }
-        
-        return l;
-    }
-    
-    private class FreeBlockLink implements Serializable{
-
-		private static final long serialVersionUID = -7872710625034712824L;
-
-		public Long index;
-
-        public FreeBlockLink next;
-
-        public FreeBlockLink before;
-        
     }
     
 }
