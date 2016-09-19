@@ -1,85 +1,88 @@
 package org.brandao.brcache.memory;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 
-class RegionMemory implements Serializable{
+public class RegionMemory implements Serializable{
+
+	private static final long serialVersionUID = 5941866368711530651L;
 
 	Long address;
 
 	long length;
 	
+	long off;
+	
 	public RegionMemory(long address, Long length) {
 		this.address = address;
-		this.length = length;
+		this.length  = length;
+		this.off     = 0;
 	}
 
+	public void reset(){
+		this.off = 0;
+	}
+	
 	public long length(){
 		return this.length;
 	}
 	
-	public int read(int thisOff, byte[] buf, long off, long len){
-		return -1;
+	public long read(byte[] buf, long off, long len){
+		long trans = Math.min(this.length - this.off, len);
+		long buffAdress = Memory.getAddress(buf);
+		Memory.arrayCopy(this.address, this.off, buffAdress, off, trans);
+		this.off += trans;
+		return trans;
 	}
 	
-	public int read(int thisOff, RegionMemory buf, long off, long len){
-		return -1;
-	}
-
-	public int write(InputStream stream, long off, long len) throws IOException{
-		
-		if(off >= length)
-			throw new IndexOutOfBoundsException("off: " + off + ">=" + this.length);
-
-		byte[] buffer   = new byte[2048];
-		long bufferAddr = Memory.getAddress(buffer);
-		int read        = 0;
-		len             = off + len > this.length? this.length - off : len;
-		
-		while(len > 0){
-			
-			int r = stream.read(buffer, 0, buffer.length);
-			
-			if(r < 0){
-				return -1;
-			}
-			
-			//Memory.copy(bufferAddr, 0, address, off, r);
-			read += r;
-			len  -= r;
-		}
-		return read;
+	public long read(RegionMemory buf, long off, long len){
+		long trans = Math.min(this.length - this.off, len);
+		Memory.arrayCopy(this.address, this.off, buf.address, off, trans);
+		this.off += trans;
+		return trans;
 	}
 	
-	public void write(int thisOff, byte[] buf, long off, long len){
-		if(thisOff >= length)
-			throw new IndexOutOfBoundsException("thisOff: " + thisOff + ">=" + this.length);
-		
-		if(off >= buf.length)
-			throw new IndexOutOfBoundsException("thisOff: " + off + ">=" + buf.length);
-		
-		//int maxRead = thisOff + len > this.length?
+	public void write(byte[] buf, long off, long len){
+		long buffAdress = Memory.getAddress(buf);
+		long trans = Math.min(this.length - this.off, len);
+		Memory.arrayCopy(buffAdress, off, this.address, this.off, trans);
+		this.off += trans;
 	}
 
-	public void write(OutputStream stream, long off, long len) throws IOException{
-	}
-
-	public void write(int thisOff, RegionMemory buf, long off, int len){
+	public void write(RegionMemory buf, long off, long len){
+		long trans = Math.min(this.length - this.off, len);
+		Memory.arrayCopy(buf.address, off, this.address, this.off, trans);
+		this.off += trans;
 	}
 	
 	private void writeObject(ObjectOutputStream stream) throws IOException {
 		stream.writeLong(this.length);
-		this.write(stream, 0, this.length);
+		long len;
+		byte[] b = new byte[9024];
+		while((len = this.read(b, 0, b.length)) > 0){
+			stream.write(b, 0, (int)len);
+		}
     }
 
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-    	long length = stream.readLong();
+    	this.length = stream.readLong();
+    	this.off    = 0;
 		Memory.alloc(length, this);
-		this.write(stream, 0, length);
+		long len;
+		byte[] b = new byte[9024];
+		while(this.off < this.length){
+			int maxLen = (int)Math.min(b.length, this.length - this.off);
+			len = stream.read(b, 0, maxLen);
+			this.write(b, 0, len);
+			if(len == 0){
+				break;
+			}
+				
+		}
+		
+		this.reset();
     }
 	
     protected void finalize() throws Throwable{
