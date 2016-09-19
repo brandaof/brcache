@@ -68,6 +68,10 @@ class Memory {
 	static void arrayCopy(byte[] origin, long originOff, byte[] dest, long destOff, long len){
 		UNSAFE.copyMemory(origin, BYTE_ARRAY_OFFSET + originOff, dest, BYTE_ARRAY_OFFSET + destOff, len);
 	}
+
+	static void arrayCopy(long origin, long originOff, long dest, long destOff, long len){
+		UNSAFE.copyMemory(origin + originOff, dest + destOff, len);
+	}
 	
 	static long getAddress(Object obj) {
 	    Object[] array = new Object[] {obj};
@@ -81,26 +85,17 @@ class Memory {
 	}	
 	
 	public static void main(String[] a){
-		byte[] o = new byte[1*1024*1024];
-		byte[] d = new byte[1*1024*1024];
+		RegionMemory buf = Memory.alloc(1024);
+		RegionMemory buf2 = Memory.alloc(1024);
 		
+		byte[] b  = new byte[(int)buf.length()];
+		byte[] b2 = new byte[(int)buf.length()];
 		Random r = new Random();
-		r.nextBytes(o);
-		
-		long start = System.currentTimeMillis();
-		for(int i=0;i<100000;i++){
-			arrayCopy(o, 0, d, 0, d.length);
-		}
-		long end = System.currentTimeMillis();
-		System.out.println(end-start);
-		
-		start = System.currentTimeMillis();
-		for(int i=0;i<100000;i++){
-			System.arraycopy(o, 0, d, 0, o.length);
-		}
-		end = System.currentTimeMillis();
-		System.out.println(end-start);
-		
+		r.nextBytes(b);
+		buf.write(b, 0, b.length);
+		buf2.write(buf, 0, buf.length);
+		buf2.reset();
+		buf2.read(b2, 0, b2.length);
 	}
 	
 }
