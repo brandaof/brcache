@@ -34,6 +34,7 @@ public class RegionMemory implements Serializable{
 		long buffAdress = Memory.getAddress(buf);
 		Memory.arrayCopy(this.address, this.off, buffAdress, off, trans);
 		this.off += trans;
+		
 		return trans;
 	}
 	

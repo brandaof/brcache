@@ -70,15 +70,52 @@ class Memory {
 	}
 
 	static void arrayCopy(long origin, long originOff, long dest, long destOff, long len){
-		UNSAFE.copyMemory(origin + originOff, dest + destOff, len);
+		UNSAFE.copyMemory(null, origin + originOff, null, dest + destOff, len);
 	}
 	
+	/*
 	static long getAddress(Object obj) {
 	    Object[] array = new Object[] {obj};
 	    long baseOffset = UNSAFE.arrayBaseOffset(Object[].class);
 	    return UNSAFE.getLong(array, baseOffset);
 	}
+	*/
 	
+	static long getAddress(Object o) {
+	   Object[] array = new Object[] {o};
+       long baseOffset = UNSAFE.arrayBaseOffset(Object[].class);
+       int addressSize = UNSAFE.addressSize();
+       switch (addressSize){
+           case 4:
+               return normalize(UNSAFE.getInt(array, baseOffset));
+           case 8:
+               return UNSAFE.getLong(array, baseOffset);
+           default:
+               throw new Error("unsupported address size: " + addressSize);
+       }       
+	}
+
+	static long getAddress(byte[] o) {
+		   Object[] array = new Object[] {o};
+	       long baseOffset      = UNSAFE.arrayBaseOffset(Object[].class);
+	       long arrayBaseOffset = UNSAFE.arrayBaseOffset(byte[].class);
+	       int addressSize      = UNSAFE.addressSize();
+	       switch (addressSize){
+	           case 4:
+	               return normalize(UNSAFE.getInt(array, baseOffset)) + arrayBaseOffset;
+	           case 8:
+	               return UNSAFE.getLong(array, baseOffset) + arrayBaseOffset;
+	           default:
+	               throw new Error("unsupported address size: " + addressSize);
+	       }       
+		}
+	
+	static Object getObject(long address) {
+	    Object[] array = new Object[] {null};
+	    long baseOffset = UNSAFE.arrayBaseOffset(Object[].class);
+	    UNSAFE.putLong(array, baseOffset, address);
+	    return array[0];
+	}	
 	private static long normalize(int value) {
 	    if(value >= 0) return value;
 	    return (~0L >>> 32) & value;
