@@ -9,7 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author Brandao
  *
  */
-class Memory {
+class HeapMemory {
 
 	/**
 	 * Blocos de dados.
@@ -27,7 +27,7 @@ class Memory {
 	 * @param size Quantidade.
 	 * @return Região da memória.
 	 */
-	public static RegionMemory alloc(int size){
+	public static HeapRegionMemory alloc(int size){
 		int quantity = (int)(size / segmentSize);
 		
 		if((size % segmentSize) > 0)
@@ -40,7 +40,7 @@ class Memory {
 			allocSegs[i] = seg;
 		}
 		
-		return new RegionMemory(allocSegs, (int)segmentSize, size);
+		return new HeapRegionMemory(allocSegs, (int)segmentSize, size);
 	}
 
 	/**
@@ -49,7 +49,7 @@ class Memory {
 	 * @param size Quantidade.
 	 * @return Região da memória.
 	 */
-	public static void alloc(int size, RegionMemory region){
+	public static void alloc(int size, HeapRegionMemory region){
 		if(region.segments != null)
 			throw new IllegalStateException();
 		allocSegments(size, region);
@@ -61,7 +61,7 @@ class Memory {
 	 * @param size Quantidade.
 	 * @return Região da memória.
 	 */
-	public static void release(RegionMemory region){
+	public static void release(HeapRegionMemory region){
 		if(region.segments == null)
 			return;
 		
@@ -73,7 +73,7 @@ class Memory {
 		region.segments = null;
  	}
 	
-	private static RegionMemory allocSegments(int size, RegionMemory region){
+	private static HeapRegionMemory allocSegments(int size, HeapRegionMemory region){
 		int quantity = (int)(size / segmentSize);
 		
 		if((size % segmentSize) > 0)

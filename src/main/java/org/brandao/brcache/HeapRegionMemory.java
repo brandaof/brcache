@@ -7,7 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 
-class RegionMemory implements Serializable{
+class HeapRegionMemory implements Serializable{
 
 	private static final long serialVersionUID = -8225524015808420667L;
 
@@ -17,7 +17,7 @@ class RegionMemory implements Serializable{
 	
 	int length;
 	
-	public RegionMemory(byte[][] segments, int segmentSize, int length){
+	public HeapRegionMemory(byte[][] segments, int segmentSize, int length){
 		this.segments    = segments;
 		this.segmentSize = segmentSize;
 		this.length      = length;
@@ -131,7 +131,7 @@ class RegionMemory implements Serializable{
     	return totalRead;
 	}
 	
-	public int read(int thisOff, RegionMemory buf, int off, int len){
+	public int read(int thisOff, HeapRegionMemory buf, int off, int len){
 		
 		if(thisOff >= this.length)
 			return -1;
@@ -317,7 +317,7 @@ class RegionMemory implements Serializable{
     	
 	}
 
-	public void write(int thisOff, RegionMemory buf, int off, int len){
+	public void write(int thisOff, HeapRegionMemory buf, int off, int len){
 		
 		if(len == 0)
 			return;
@@ -388,13 +388,13 @@ class RegionMemory implements Serializable{
 
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
     	int length = stream.readInt();
-		Memory.alloc(length, this);
+		HeapMemory.alloc(length, this);
 		this.read(stream, 0, length);
     }
 	
     protected void finalize() throws Throwable{
     	try{
-    		Memory.release(this);
+    		HeapMemory.release(this);
     	}
     	finally{
     		super.finalize();
