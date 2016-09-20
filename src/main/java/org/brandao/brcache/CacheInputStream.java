@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.brandao.brcache.memory.RegionMemory;
+
 /**
  * Representa o fluxo de bytes de um item de um cache.
  * 
@@ -98,7 +100,7 @@ public class CacheInputStream extends InputStream{
             return -1;
         
         Block block = arrayDataList[this.currentSegmentIndex];
-        byte[] origin  = block.buffer;
+        RegionMemory origin  = block.buffer;
         
         int read = 0;
         
@@ -108,7 +110,11 @@ public class CacheInputStream extends InputStream{
                 
                 int lenRead = block.length - this.currentDataindex;
                 
-                System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
+                origin.setOffset(this.currentDataindex);
+                origin.read(dest, destPos, lenRead);
+                
+                //System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
+                
                 cache.countReadData 	+= lenRead;
                 length 					-= lenRead;
                 read 					+= lenRead;
@@ -125,7 +131,11 @@ public class CacheInputStream extends InputStream{
             }
             else{
                 int lenRead = length;
-                System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
+                
+                origin.setOffset(this.currentDataindex);
+                origin.read(dest, destPos, lenRead);
+                
+                //System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
                 
                 cache.countReadData 	+= lenRead;
                 destPos 				+= lenRead;
@@ -139,9 +149,11 @@ public class CacheInputStream extends InputStream{
     }
     
     public void writeTo(OutputStream out) throws IOException{
+    	
     	for(int i=0;i<this.arrayDataList.length;i++){
     		Block block = this.arrayDataList[i];
-    		byte[] b    = block.buffer;
+        	byte[] b = new byte[block.length];
+        	block.buffer.read(b, 0, b.length);
     		out.write(b, 0, b.length);
     	}
     }

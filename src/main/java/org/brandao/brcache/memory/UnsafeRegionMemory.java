@@ -29,13 +29,13 @@ public class UnsafeRegionMemory
 		return this.length;
 	}
 	
-	public long read(byte[] buf, long off, long len){
+	public int read(byte[] buf, int off, int len){
 		long trans = Math.min(this.length - this.off, len);
 		long buffAdress = UnsafeMemoryUtil.getAddress(buf);
 		UnsafeMemoryUtil.arrayCopy(this.address, this.off, buffAdress, off, trans);
 		this.off += trans;
 		
-		return trans;
+		return (int)trans;
 	}
 	
 	public long read(RegionMemory buf, long off, long len){
@@ -45,7 +45,7 @@ public class UnsafeRegionMemory
 		return trans;
 	}
 	
-	public void write(byte[] buf, long off, long len){
+	public void write(byte[] buf, int off, int len){
 		long buffAdress = UnsafeMemoryUtil.getAddress(buf);
 		long trans = Math.min(this.length - this.off, len);
 		UnsafeMemoryUtil.arrayCopy(buffAdress, off, this.address, this.off, trans);
@@ -71,7 +71,7 @@ public class UnsafeRegionMemory
     	this.length  = stream.readLong();
     	this.off     = 0;
     	this.address = UnsafeMemoryUtil.alloc(length);
-		long len;
+		int len;
 		byte[] b = new byte[9024];
 		while(this.off < this.length){
 			int maxLen = (int)Math.min(b.length, this.length - this.off);
@@ -94,5 +94,9 @@ public class UnsafeRegionMemory
     		super.finalize();
     	}
     }
+
+	public void setOffset(long value) {
+		this.off = value;
+	}
 
 }

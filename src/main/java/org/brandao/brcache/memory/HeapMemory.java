@@ -1,25 +1,12 @@
 package org.brandao.brcache.memory;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-
 /**
  * Gerencia a memória usada no cache.
  * 
  * @author Brandao
  *
  */
-class HeapMemory {
-
-	/**
-	 * Blocos de dados.
-	 */
-	private static int segmentSize = 64;
-	
-	/**
-	 * Blocos alocados e livres.
-	 */
-	private static BlockingQueue<byte[]> segments = new LinkedBlockingQueue<byte[]>();
+public class HeapMemory implements Memory{
 
 	/**
 	 * Aloca uma quantidade específica de memória.
@@ -27,20 +14,9 @@ class HeapMemory {
 	 * @param size Quantidade.
 	 * @return Região da memória.
 	 */
-	public static HeapRegionMemory alloc(int size){
-		int quantity = (int)(size / segmentSize);
-		
-		if((size % segmentSize) > 0)
-			quantity++;
-		
-		byte[][] allocSegs = new byte[quantity][];
-		
-		for(int i=0;i<quantity;i++){
-			byte[] seg = allocSegment();
-			allocSegs[i] = seg;
-		}
-		
-		return new HeapRegionMemory(allocSegs, (int)segmentSize, size);
+	public RegionMemory alloc(long size) {
+		byte[][] segs = HeapMemoryUtil.alloc(size);
+		return new HeapRegionMemory(segs, (int)HeapMemoryUtil.segmentSize, (int)size);
 	}
 
 	/**
@@ -49,10 +25,11 @@ class HeapMemory {
 	 * @param size Quantidade.
 	 * @return Região da memória.
 	 */
-	public static void alloc(int size, HeapRegionMemory region){
-		if(region.segments != null)
+	public void alloc(long size, RegionMemory region) {
+		HeapRegionMemory r = (HeapRegionMemory)region;
+		if(r.segments != null)
 			throw new IllegalStateException();
-		allocSegments(size, region);
+		allocSegments(size, r);
 	}
 	
 	/**
@@ -61,42 +38,22 @@ class HeapMemory {
 	 * @param size Quantidade.
 	 * @return Região da memória.
 	 */
-	public static void release(HeapRegionMemory region){
-		if(region.segments == null)
+	public void release(RegionMemory region){
+		HeapRegionMemory r = (HeapRegionMemory)region;
+		if(r.segments == null)
 			return;
 		
-		byte[][] allocSegs = region.getSegments();
-		for(int i=0;i<allocSegs.length;i++){
-			segments.add(allocSegs[i]);
-		}
-		
-		region.segments = null;
+		HeapMemoryUtil.free(r.segments);
+		r.segments = null;
  	}
 	
-	private static HeapRegionMemory allocSegments(int size, HeapRegionMemory region){
-		int quantity = (int)(size / segmentSize);
-		
-		if((size % segmentSize) > 0)
-			quantity++;
-		
-		byte[][] allocSegs = new byte[quantity][];
-		
-		for(int i=0;i<quantity;i++){
-			byte[] seg = allocSegment();
-			allocSegs[i] = seg;
-		}
-		
+	private HeapRegionMemory allocSegments(long size, HeapRegionMemory region){
+		byte[][] allocSegs = HeapMemoryUtil.alloc(size);
 		region.length      = size;
 		region.segments    = allocSegs;
-		region.segmentSize = segmentSize;
+		region.segmentSize = HeapMemoryUtil.segmentSize;
 		return region;
 	}
 	
-	private static byte[] allocSegment(){
-		byte[] seg = segments.poll();
-		if(seg == null)
-			return new byte[segmentSize];
-		else
-			return seg;
-	}
+
 }

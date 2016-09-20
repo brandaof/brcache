@@ -2,6 +2,8 @@ package org.brandao.brcache;
 
 import java.io.Serializable;
 
+import org.brandao.brcache.memory.RegionMemory;
+
 @SuppressWarnings("serial")
 class Block 
     implements Serializable{
@@ -14,9 +16,9 @@ class Block
     
     public long nextBlock;
     
-    public byte[] buffer;
+    public RegionMemory buffer;
     
-    public Block(long id, int segment, byte[] data, int length){
+    public Block(long id, int segment, RegionMemory data, int length){
         this.id        = id;
         this.segment   = segment;
         this.buffer    = data;

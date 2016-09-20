@@ -30,6 +30,10 @@ import org.brandao.brcache.collections.HugeArrayReferenceList;
 import org.brandao.brcache.collections.StringTreeMap;
 import org.brandao.brcache.collections.Swapper;
 import org.brandao.brcache.collections.treehugemap.CharNode;
+import org.brandao.brcache.memory.Memory;
+import org.brandao.brcache.memory.RegionMemory;
+import org.brandao.brcache.memory.UnsafeMemory;
+import org.brandao.brcache.memory.UnsafeRegionMemory;
 
 /**
  * É a base para um cache. Ele faz o mapeamento chave-fluxo de 
@@ -63,6 +67,8 @@ public abstract class StreamCache
     private static final int INDEX_BINARY_SIZE = 58 + ENTRY_BINARY_SIZE;
     
     private static final Class<?> ITEM_CACHE_INPUTSTREAM_CLASS = ItemCacheInputStream.class;
+    
+    private Memory memory = new UnsafeMemory();
     
     private final StringTreeMap<DataMap> dataMap;
 
@@ -640,8 +646,8 @@ public abstract class StreamCache
         		if(writeData > this.maxBytesToStorageEntry)
                     throw new StorageException(CacheErrors.ERROR_1007);
 
-        		byte[] data = buffer;
-        		buffer      = new byte[this.segmentSize];
+        		RegionMemory data = this.memory.alloc(this.segmentSize);
+        		data.write(buffer, 0, read);
         		
             	Block block = new Block(map.getId(), index++, data, read);
                 Long segment = this.dataList.insert(block);
