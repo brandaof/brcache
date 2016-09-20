@@ -1,4 +1,4 @@
-package org.brandao.brcache;
+package org.brandao.brcache.memory;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;

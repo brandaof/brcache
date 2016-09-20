@@ -1,4 +1,4 @@
-package org.brandao.brcache;
+package org.brandao.brcache.memory;
 
 import java.io.IOException;
 import java.io.InputStream;
