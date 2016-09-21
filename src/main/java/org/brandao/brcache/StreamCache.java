@@ -30,10 +30,10 @@ import org.brandao.brcache.collections.HugeArrayReferenceList;
 import org.brandao.brcache.collections.StringTreeMap;
 import org.brandao.brcache.collections.Swapper;
 import org.brandao.brcache.collections.treehugemap.CharNode;
+import org.brandao.brcache.memory.HeapMemory;
 import org.brandao.brcache.memory.Memory;
 import org.brandao.brcache.memory.RegionMemory;
 import org.brandao.brcache.memory.UnsafeMemory;
-import org.brandao.brcache.memory.UnsafeRegionMemory;
 
 /**
  * É a base para um cache. Ele faz o mapeamento chave-fluxo de 
@@ -647,7 +647,7 @@ public abstract class StreamCache
                     throw new StorageException(CacheErrors.ERROR_1007);
 
         		RegionMemory data = this.memory.alloc(this.segmentSize);
-        		data.write(buffer, 0, read);
+        		data.write(0, buffer, 0, read);
         		
             	Block block = new Block(map.getId(), index++, data, read);
                 Long segment = this.dataList.insert(block);

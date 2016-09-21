@@ -110,8 +110,7 @@ public class CacheInputStream extends InputStream{
                 
                 int lenRead = block.length - this.currentDataindex;
                 
-                origin.setOffset(this.currentDataindex);
-                origin.read(dest, destPos, lenRead);
+                origin.read(this.currentDataindex, dest, destPos, lenRead);
                 
                 //System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
                 
@@ -132,8 +131,7 @@ public class CacheInputStream extends InputStream{
             else{
                 int lenRead = length;
                 
-                origin.setOffset(this.currentDataindex);
-                origin.read(dest, destPos, lenRead);
+                origin.read(this.currentDataindex, dest, destPos, lenRead);
                 
                 //System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
                 
@@ -153,7 +151,7 @@ public class CacheInputStream extends InputStream{
     	for(int i=0;i<this.arrayDataList.length;i++){
     		Block block = this.arrayDataList[i];
         	byte[] b = new byte[block.length];
-        	block.buffer.read(b, 0, b.length);
+        	block.buffer.read(0, b, 0, b.length);
     		out.write(b, 0, b.length);
     	}
     }
