@@ -42,7 +42,7 @@ class UnsafeMemoryUtil {
 		
 		switch (addressSize){
 			case 4:
-				return normalize(UNSAFE.getInt(array, baseOffset)) + dataBaseOffset;
+				return UNSAFE.getInt(array, baseOffset) + dataBaseOffset;
 			case 8:
 				return UNSAFE.getLong(array, baseOffset) + dataBaseOffset;
 			default:

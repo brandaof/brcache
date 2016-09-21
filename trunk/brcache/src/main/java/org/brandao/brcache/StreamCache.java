@@ -691,7 +691,10 @@ public abstract class StreamCache
         int i=0;
         while(current != null){
 			if(current.id == map.getId() && current.segment == i){
+				current.id      = -1;
+				current.segment = -1;
 				this.dataList.remove(segmentId, current);
+				this.memory.release(current.buffer);
 			}
             
 			segmentId = current.nextBlock;

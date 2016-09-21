@@ -41,10 +41,13 @@ public class UnsafeMemory implements Memory{
 	 * @return Região da memória.
 	 */
 	public void release(RegionMemory region){
-		UnsafeRegionMemory r = (UnsafeRegionMemory)region;
-		if(r.address == null)
-			return;
-		UnsafeMemoryUtil.free(r.address);
+		synchronized(region){
+			UnsafeRegionMemory r = (UnsafeRegionMemory)region;
+			if(r.address == null)
+				return;
+			UnsafeMemoryUtil.free(r.address);
+			r.address = null;
+		}
  	}
 	
 }
