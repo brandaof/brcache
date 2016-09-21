@@ -13,77 +13,78 @@ public class UnsafeRegionMemory
 
 	long length;
 	
-	long off;
-	
 	public UnsafeRegionMemory(long address, Long length) {
 		this.address = address;
 		this.length  = length;
-		this.off     = 0;
 	}
 
-	public void reset(){
-		this.off = 0;
-	}
-	
 	public long size(){
 		return this.length;
 	}
 	
-	public int read(byte[] buf, int off, int len){
-		long trans = Math.min(this.length - this.off, len);
+	public int read(long thisOff, byte[] buf, int off, int len){
+		long trans = Math.min(this.length - thisOff, len);
 		long buffAdress = UnsafeMemoryUtil.getAddress(buf);
-		UnsafeMemoryUtil.arrayCopy(this.address, this.off, buffAdress, off, trans);
-		this.off += trans;
-		
+		UnsafeMemoryUtil.arrayCopy(this.address, thisOff, buffAdress, off, trans);
 		return (int)trans;
 	}
 	
-	public long read(RegionMemory buf, long off, long len){
-		long trans = Math.min(this.length - this.off, len);
-		UnsafeMemoryUtil.arrayCopy(this.address, this.off, ((UnsafeRegionMemory)buf).address, off, trans);
-		this.off += trans;
+	public long read(long thisOff, RegionMemory buf, long off, long len){
+		long trans = Math.min(this.length - thisOff, len);
+		UnsafeMemoryUtil.arrayCopy(this.address, thisOff, ((UnsafeRegionMemory)buf).address, off, trans);
 		return trans;
 	}
 	
-	public void write(byte[] buf, int off, int len){
+	public void write(long thisOff, byte[] buf, int off, int len){
+		
+		if(thisOff + len > this.length)
+			throw new IndexOutOfBoundsException(thisOff + len + " > " + this.length);
+		
 		long buffAdress = UnsafeMemoryUtil.getAddress(buf);
-		long trans = Math.min(this.length - this.off, len);
-		UnsafeMemoryUtil.arrayCopy(buffAdress, off, this.address, this.off, trans);
-		this.off += trans;
+		long trans = Math.min(this.length - thisOff, len);
+		UnsafeMemoryUtil.arrayCopy(buffAdress, off, this.address, thisOff, trans);
 	}
 
-	public void write(RegionMemory buf, long off, long len){
-		long trans = Math.min(this.length - this.off, len);
-		UnsafeMemoryUtil.arrayCopy(((UnsafeRegionMemory)buf).address, off, this.address, this.off, trans);
-		this.off += trans;
+	public void write(long thisOff, RegionMemory buf, long off, long len){
+		
+		if(thisOff + len > this.length)
+			throw new IndexOutOfBoundsException("this:" + thisOff + len + " > " + this.length);
+
+		if(off + len > buf.size())
+			throw new IndexOutOfBoundsException("buf:" + off + len + " > " + buf.size());
+		
+		long trans = Math.min(this.length - thisOff, len);
+		UnsafeMemoryUtil.arrayCopy(((UnsafeRegionMemory)buf).address, off, this.address, thisOff, trans);
 	}
 	
 	private void writeObject(ObjectOutputStream stream) throws IOException {
 		stream.writeLong(this.length);
 		long len;
 		byte[] b = new byte[9024];
-		while((len = this.read(b, 0, b.length)) > 0){
+		int off = 0;
+		while((len = this.read(off, b, 0, b.length)) > 0){
 			stream.write(b, 0, (int)len);
+			off += len;
 		}
+		
     }
 
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
     	this.length  = stream.readLong();
-    	this.off     = 0;
     	this.address = UnsafeMemoryUtil.alloc(length);
 		int len;
+		int thisOff = 0;
 		byte[] b = new byte[9024];
-		while(this.off < this.length){
-			int maxLen = (int)Math.min(b.length, this.length - this.off);
+		while(thisOff < this.length){
+			int maxLen = (int)Math.min(b.length, this.length - thisOff);
 			len = stream.read(b, 0, maxLen);
-			this.write(b, 0, len);
+			this.write(thisOff, b, 0, len);
+			thisOff += len;
 			if(len == 0){
 				break;
 			}
 				
 		}
-		
-		this.reset();
     }
 	
     protected void finalize() throws Throwable{
@@ -94,9 +95,5 @@ public class UnsafeRegionMemory
     		super.finalize();
     	}
     }
-
-	public void setOffset(long value) {
-		this.off = value;
-	}
 
 }

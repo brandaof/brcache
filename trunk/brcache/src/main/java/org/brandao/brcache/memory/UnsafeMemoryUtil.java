@@ -30,12 +30,8 @@ class UnsafeMemoryUtil {
 		UNSAFE.freeMemory(address);		
 	}
 	
-	public static void arrayCopy(byte[] origin, long originOff, byte[] dest, long destOff, long len){
-		UNSAFE.copyMemory(origin, BYTE_ARRAY_OFFSET + originOff, dest, BYTE_ARRAY_OFFSET + destOff, len);
-	}
-
 	public static void arrayCopy(long origin, long originOff, long dest, long destOff, long len){
-		UNSAFE.copyMemory(null, origin + originOff, null, dest + destOff, len);
+		UNSAFE.copyMemory(origin + originOff, dest + destOff, len);
 	}
 	
 	public static long getAddress(Object o) {

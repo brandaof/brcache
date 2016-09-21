@@ -8,8 +8,6 @@ public class HeapRegionMemory implements RegionMemory{
 
 	private static final long serialVersionUID = -8225524015808420667L;
 
-	long thisOff;
-	
 	byte[][] segments;
 
 	int segmentSize;
@@ -20,7 +18,6 @@ public class HeapRegionMemory implements RegionMemory{
 		this.segments    = segments;
 		this.segmentSize = segmentSize;
 		this.length      = length;
-		this.thisOff     = 0;
 	}
 	
 	byte[][] getSegments(){
@@ -31,7 +28,7 @@ public class HeapRegionMemory implements RegionMemory{
 		return this.length;
 	}
 	
-	public int read(byte[] buf, int off, int len){
+	public int read(long thisOff, byte[] buf, int off, int len){
 
 		if(thisOff >= this.length)
 			return -1;
@@ -82,7 +79,7 @@ public class HeapRegionMemory implements RegionMemory{
     	return totalRead;
 	}
 	
-	public long read(RegionMemory b, long off, long len){
+	public long read(long thisOff, RegionMemory b, long off, long len){
 		HeapRegionMemory buf = (HeapRegionMemory)b; 
 		if(thisOff >= this.length)
 			return -1;
@@ -178,7 +175,7 @@ public class HeapRegionMemory implements RegionMemory{
     	return totalRead;
 	}
 	
-	public void write(byte[] buf, int off, int len){
+	public void write(long thisOff, byte[] buf, int off, int len){
 
 		if(len == 0)
 			return;
@@ -225,7 +222,7 @@ public class HeapRegionMemory implements RegionMemory{
     	}
 	}
 
-	public void write(RegionMemory b, long off, long len){
+	public void write(long thisOff, RegionMemory b, long off, long len){
 		HeapRegionMemory buf = (HeapRegionMemory)b; 
 		
 		if(len == 0)
@@ -291,28 +288,30 @@ public class HeapRegionMemory implements RegionMemory{
 	private void writeObject(ObjectOutputStream stream) throws IOException {
 		stream.writeLong(this.length);
 		stream.writeInt(this.segmentSize);
-		stream.writeInt(this.segments.length);
 		for(byte[] b: this.segments){
 			stream.write(b);
 		}
     }
 
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-    	this.thisOff     = 0;
 		this.length      = stream.readLong();
 		this.segments    = HeapMemoryUtil.alloc(length);
 		this.segmentSize = HeapMemoryUtil.segmentSize;
+		int segmentSize  = stream.readInt();
 		
-		stream.readInt();
-		stream.readInt();
+		int len;
+		int thisOff = 0;
+		byte[] b    = new byte[segmentSize];
 		
-		long len        = this.length;
-		byte[] b        = new byte[1024];
-		int r;
-		while(len > 0){
-			r = stream.read(b);
-			this.write(b, 0, r);
-			len -= r;
+		while(thisOff < this.length){
+			len = stream.read(b, 0, b.length);
+			int maxLen = (int)Math.min(b.length, this.length - thisOff);
+			this.write(thisOff, b, 0, maxLen);
+			thisOff += len;
+			if(len == 0){
+				break;
+			}
+				
 		}
     }
 	
@@ -325,13 +324,4 @@ public class HeapRegionMemory implements RegionMemory{
     	}
     }
 
-	public void setOffset(long value) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void reset() {
-		// TODO Auto-generated method stub
-		
-	}
 }
