@@ -7,20 +7,24 @@ import sun.misc.Unsafe;
 @SuppressWarnings("restriction")
 class UnsafeMemoryUtil {
 
-	static final Unsafe UNSAFE;
+	private static final Unsafe UNSAFE;
 	
-    static final long BYTE_ARRAY_OFFSET;
+	private static final long UNSAFE_COPY_THRESHOLD;
 
+    private static final long arrayBaseOffset;
+	
     static {
-        try {
+        try{
             Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
             theUnsafe.setAccessible(true);
             UNSAFE = (Unsafe) theUnsafe.get(null);
-    		BYTE_ARRAY_OFFSET = UNSAFE.arrayBaseOffset(byte[].class);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             throw new RuntimeException(e);
         }
         
+        UNSAFE_COPY_THRESHOLD = 1024L * 1024L;
+        arrayBaseOffset       = (long)UNSAFE.arrayBaseOffset(byte[].class);
     }
 
 	public static long alloc(long size){
@@ -35,6 +39,34 @@ class UnsafeMemoryUtil {
 		UNSAFE.copyMemory(origin + originOff, dest + destOff, len);
 	}
 	
+    public static void arrayCopy(byte[] src, long srcPos, long dstAddr, long dstPos, long length){
+		
+    	srcPos  += arrayBaseOffset;
+		dstAddr += dstPos;
+		
+		while (length > 0) {
+			long size = (length > UNSAFE_COPY_THRESHOLD) ? UNSAFE_COPY_THRESHOLD : length;
+			UNSAFE.copyMemory(src, srcPos, null, dstAddr, size);
+			length  -= size;
+			srcPos  += size;
+			dstAddr += size;
+		}
+    }
+
+    public static void arrayCopy(long srcAddr, long srcPos, byte[] dst, long dstPos, long length){
+    	
+    	dstPos  += arrayBaseOffset;
+    	srcAddr += srcPos;
+		
+		while (length > 0) {
+			long size = (length > UNSAFE_COPY_THRESHOLD) ? UNSAFE_COPY_THRESHOLD : length;
+			UNSAFE.copyMemory(null, srcAddr, dst, dstPos, size);
+			length  -= size;
+			dstPos  += size;
+			srcAddr += size;
+		}
+    }
+    
 	public static long getAddress(Object o) {
 		Object[] array = new Object[] {o};
 		long baseOffset     = UNSAFE.arrayBaseOffset(Object[].class);
@@ -44,7 +76,7 @@ class UnsafeMemoryUtil {
 		long address;
 		switch (addressSize){
 			case 4:
-				address = UNSAFE.getInt(array, baseOffset) + dataBaseOffset;
+				address = normalize(UNSAFE.getInt(array, baseOffset)) + dataBaseOffset;
 				break;
 			case 8:
 				address = UNSAFE.getLong(array, baseOffset) + dataBaseOffset;

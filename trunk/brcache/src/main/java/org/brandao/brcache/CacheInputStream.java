@@ -19,7 +19,6 @@ package org.brandao.brcache;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import org.brandao.brcache.memory.RegionMemory;
 
@@ -144,16 +143,6 @@ public class CacheInputStream extends InputStream{
         }
         
         return read;
-    }
-    
-    public void writeTo(OutputStream out) throws IOException{
-    	
-    	for(int i=0;i<this.arrayDataList.length;i++){
-    		Block block = this.arrayDataList[i];
-        	byte[] b = new byte[block.length];
-        	block.buffer.read(0, b, 0, b.length);
-    		out.write(b, 0, b.length);
-    	}
     }
     
     public long getId(){

@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.ByteBuffer;
 
 import org.brandao.brcache.tx.CacheTransactionManager;
 import org.brandao.brcache.tx.TXCache;
@@ -35,7 +36,8 @@ public class BasicCache
     			config.getNodesBufferSize(), config.getNodesPageSize(), config.getNodesSwapFactor(),
     			config.getIndexBufferSize(), config.getIndexPageSize(), config.getIndexSwapFactor(), 
     			config.getDataBufferSize(), config.getDataPageSize(), config.getDataBlockSize(), config.getDataSwapFactor(), 
-    			config.getMaxSizeEntry(), config.getMaxSizeKey(), config.getDataPath(), config.getSwapper(), config.getSwapperThread());
+    			config.getMaxSizeEntry(), config.getMaxSizeKey(), config.getDataPath(), 
+    			config.getSwapper(), config.getSwapperThread(), config.getMemoryAccessStrategy());
     	this.config = config;
     }
     
@@ -76,11 +78,12 @@ public class BasicCache
     		int maxSizeKey,
             String dataPath,
             SwaperStrategy swaperType,
-            int quantitySwaperThread
+            int quantitySwaperThread,
+            MemoryAccessStrategy memoryAccessStrategy
     		){	
     	super(nodeBufferSize, nodePageSize, nodeSwapFactor, indexBufferSize, 
     			indexPageSize, indexSwapFactor, dataBufferSize, dataPageSize, blockSize, 
-    			dataSwapFactor, maxSizeEntry, maxSizeKey, dataPath, swaperType, quantitySwaperThread);
+    			dataSwapFactor, maxSizeEntry, maxSizeKey, dataPath, swaperType, quantitySwaperThread, memoryAccessStrategy);
     }
     
     /**

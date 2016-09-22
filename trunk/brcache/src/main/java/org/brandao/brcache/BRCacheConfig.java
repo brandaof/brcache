@@ -47,6 +47,8 @@ public class BRCacheConfig implements Serializable{
     
     protected SwaperStrategy swapper;
     
+    protected MemoryAccessStrategy memoryAccessStrategy;
+    
     protected String dataPath;
     
     protected Configuration configuration;
@@ -324,6 +326,22 @@ public class BRCacheConfig implements Serializable{
 	 */
 	public SwaperStrategy getSwapper() {
 		return swapper;
+	}
+
+	/**
+	 * Obtém a estratégia de acesso a memória.
+	 * @return estratégia.
+	 */
+	public MemoryAccessStrategy getMemoryAccessStrategy() {
+		return memoryAccessStrategy;
+	}
+
+	/**
+	 * Define a estratégia de acesso a memória.
+	 * @param memoryAccessStrategy estratégia.
+	 */
+	public void setMemoryAccessStrategy(MemoryAccessStrategy memoryAccessStrategy) {
+		this.memoryAccessStrategy = memoryAccessStrategy;
 	}
 
 	/**

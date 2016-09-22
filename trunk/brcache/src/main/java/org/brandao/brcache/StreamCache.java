@@ -32,7 +32,6 @@ import org.brandao.brcache.collections.Swapper;
 import org.brandao.brcache.collections.treehugemap.CharNode;
 import org.brandao.brcache.memory.Memory;
 import org.brandao.brcache.memory.RegionMemory;
-import org.brandao.brcache.memory.UnsafeMemory;
 
 /**
  * É a base para um cache. Ele faz o mapeamento chave-fluxo de 
@@ -67,7 +66,7 @@ public abstract class StreamCache
     
     private static final Class<?> ITEM_CACHE_INPUTSTREAM_CLASS = ItemCacheInputStream.class;
     
-    private Memory memory = new UnsafeMemory();
+    private Memory memory;
     
     private final StringTreeMap<DataMap> dataMap;
 
@@ -144,12 +143,13 @@ public abstract class StreamCache
     		int maxSizeKey,
             String dataPath,
             SwaperStrategy swaperType,
-            int quantitySwaperThread
+            int quantitySwaperThread,
+            MemoryAccessStrategy memoryAccessStrategy
     		){
 
+    	this.memory                 = memory;
         this.modCount               = 0;
         this.dataPath               = dataPath;
-        //this.freeSegments           = new LinkedBlockingQueue<Long>();
         this.segmentSize            = (int)blockSize;
         this.maxBytesToStorageEntry = maxSizeEntry;
         this.maxLengthKey           = maxSizeKey;
@@ -157,7 +157,6 @@ public abstract class StreamCache
     	
         synchronized(Collections.class){
         	Swapper swapper = this.getSwaper(swaperType);
-        	//Collections.setPath(dataPath);
 	    	HugeListInfo nodeInfo;
 	    	HugeListInfo indexInfo;
 	    	HugeListInfo dataInfo; 
@@ -228,6 +227,10 @@ public abstract class StreamCache
 	    	}
 	    	
         }
+    }
+    
+    protected Memory getMemoryAccessStrategy(){
+    	return null;
     }
     
     /**
