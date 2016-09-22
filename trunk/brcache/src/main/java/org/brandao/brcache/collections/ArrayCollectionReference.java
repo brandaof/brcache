@@ -6,6 +6,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.brandao.brcache.collections.swapper.TreeFileSwaper;
+
 public class ArrayCollectionReference<T> {
 
 	private static final Empty EMPTY = new Empty();

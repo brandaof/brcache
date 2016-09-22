@@ -20,6 +20,8 @@ package org.brandao.brcache.collections;
 import java.io.Serializable;
 import java.util.*;
 
+import org.brandao.brcache.collections.swapper.TreeFileSwaper;
+
 /**
  *
  * @author Brandao

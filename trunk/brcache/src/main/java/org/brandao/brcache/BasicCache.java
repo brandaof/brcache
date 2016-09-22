@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.nio.ByteBuffer;
 
 import org.brandao.brcache.tx.CacheTransactionManager;
 import org.brandao.brcache.tx.TXCache;

@@ -24,8 +24,6 @@ import java.io.Serializable;
 
 import org.brandao.brcache.HugeListCalculator.HugeListInfo;
 import org.brandao.brcache.collections.Collections;
-import org.brandao.brcache.collections.DiskSwapper;
-import org.brandao.brcache.collections.FileSwaper;
 import org.brandao.brcache.collections.HugeArrayReferenceList;
 import org.brandao.brcache.collections.StringTreeMap;
 import org.brandao.brcache.collections.Swapper;
@@ -77,6 +75,8 @@ public abstract class StreamCache
     private final long maxBytesToStorageEntry;
     
     private final int maxLengthKey;
+    
+    private Swapper swapper;
     
     private volatile long modCount;
     
@@ -142,12 +142,12 @@ public abstract class StreamCache
     		long maxSizeEntry,
     		int maxSizeKey,
             String dataPath,
-            SwaperStrategy swaperType,
+            Swapper Swapper,
             int quantitySwaperThread,
             MemoryAccessStrategy memoryAccessStrategy
     		){
 
-    	this.memory                 = memory;
+    	this.memory                 = this.getMemoryAccessStrategy();
         this.modCount               = 0;
         this.dataPath               = dataPath;
         this.segmentSize            = (int)blockSize;
@@ -156,7 +156,6 @@ public abstract class StreamCache
         this.deleteOnExit           = true;
     	
         synchronized(Collections.class){
-        	Swapper swapper = this.getSwaper(swaperType);
 	    	HugeListInfo nodeInfo;
 	    	HugeListInfo indexInfo;
 	    	HugeListInfo dataInfo; 
@@ -233,12 +232,13 @@ public abstract class StreamCache
     	return null;
     }
     
-    /**
+    /*
      * Obtém a estratégia de swap dos dados do cache.
      * 
      * @param strategy Tipo da estratégia.
      * @return Estratégia.
      */
+    /*
     protected Swapper getSwaper(SwaperStrategy strategy){
         Swapper swapper = new FileSwaper();
         if(swapper instanceof DiskSwapper)
@@ -246,6 +246,7 @@ public abstract class StreamCache
         
         return swapper;
     }
+    */
     
     /**
 	 * Associa o fluxo de bytes do valor à chave.

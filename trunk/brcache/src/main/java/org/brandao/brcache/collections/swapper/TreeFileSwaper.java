@@ -16,7 +16,7 @@
  */
 
 
-package org.brandao.brcache.collections;
+package org.brandao.brcache.collections.swapper;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,6 +25,11 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+
+import org.brandao.brcache.collections.Collections;
+import org.brandao.brcache.collections.DiskSwapper;
+import org.brandao.brcache.collections.Entry;
+import org.brandao.brcache.collections.Swapper;
 
 /**
  * As entidades são enviadas para o disco e armazenadas 
