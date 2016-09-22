@@ -30,7 +30,6 @@ import org.brandao.brcache.collections.HugeArrayReferenceList;
 import org.brandao.brcache.collections.StringTreeMap;
 import org.brandao.brcache.collections.Swapper;
 import org.brandao.brcache.collections.treehugemap.CharNode;
-import org.brandao.brcache.memory.HeapMemory;
 import org.brandao.brcache.memory.Memory;
 import org.brandao.brcache.memory.RegionMemory;
 import org.brandao.brcache.memory.UnsafeMemory;

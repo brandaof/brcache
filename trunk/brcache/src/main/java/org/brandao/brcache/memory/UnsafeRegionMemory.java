@@ -3,7 +3,6 @@ package org.brandao.brcache.memory;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Arrays;
 
 public class UnsafeRegionMemory 
 	implements RegionMemory{
@@ -39,20 +38,11 @@ public class UnsafeRegionMemory
 	public void write(long thisOff, byte[] buf, int off, int len){
 		
 		if(thisOff + len > this.length)
-			throw new IndexOutOfBoundsException(thisOff + len + " > " + thisOff + this.length);
+			throw new IndexOutOfBoundsException(thisOff + len + " >= " + this.length);
 		
 		long buffAdress = UnsafeMemoryUtil.getAddress(buf);
 		long trans = Math.min(this.length - thisOff, len);
 		UnsafeMemoryUtil.arrayCopy(buffAdress, off, this.address, thisOff, trans);
-		
-		byte[] tmp  = new byte[(int)trans];
-		byte[] tmp2 = new byte[(int)trans];
-		this.read(thisOff, tmp, off, (int)trans);
-		System.arraycopy(buf, off, tmp2, 0, (int)trans);
-		
-		if(!Arrays.equals(tmp, tmp2)){
-			throw new IllegalStateException();
-		}
 	}
 
 	public void write(long thisOff, RegionMemory buf, long off, long len){
@@ -65,16 +55,6 @@ public class UnsafeRegionMemory
 		
 		long trans = Math.min(this.length - thisOff, len);
 		UnsafeMemoryUtil.arrayCopy(((UnsafeRegionMemory)buf).address, off, this.address, thisOff, trans);
-		
-		byte[] tmp  = new byte[(int)trans];
-		byte[] tmp2 = new byte[(int)trans];
-		this.read(thisOff, tmp, (int)off, (int)trans);
-		System.arraycopy(buf, (int)off, tmp2, 0, (int)trans);
-		
-		if(!Arrays.equals(tmp, tmp2)){
-			throw new IllegalStateException();
-		}
-		
 	}
 	
 	private void writeObject(ObjectOutputStream stream) throws IOException {
