@@ -2,6 +2,7 @@ package org.brandao.brcache;
 
 import java.io.Serializable;
 
+import org.brandao.brcache.collections.DiskSwapper;
 import org.brandao.brcache.collections.Swapper;
 import org.brandao.brcache.memory.Memory;
 
@@ -94,10 +95,15 @@ public class BRCacheConfig implements Serializable{
         this.dataPath        = config.getString(CacheConstants.DATA_PATH,			"/mnt/brcache");
         this.swapper         = this.createSwapper(config.getString(CacheConstants.SWAPPER_TYPE,"file"), classLoader);
         this.memory          = this.createMemory(config.getString(CacheConstants.MEMORY_ACCESS_TYPE,"heap"), classLoader);
+        
+        if(this.swapper instanceof DiskSwapper){
+        	((DiskSwapper)this.swapper).setRootPath(this.dataPath);
+        }
+        
     }
     
     @SuppressWarnings("unchecked")
-	private Swapper createSwapper(String name, ClassLoader classLoader){
+	protected Swapper createSwapper(String name, ClassLoader classLoader){
     	try{
         	String className = 
         			SWAPPER_PREFIX + 
@@ -113,7 +119,7 @@ public class BRCacheConfig implements Serializable{
     }
 
     @SuppressWarnings("unchecked")
-	private Memory createMemory(String name, ClassLoader classLoader){
+    protected Memory createMemory(String name, ClassLoader classLoader){
     	try{
         	String className = 
         			MEMORY_PREFIX + 
@@ -384,7 +390,7 @@ public class BRCacheConfig implements Serializable{
 	 * Define a estratégia de acesso a memória.
 	 * @param memoryAccessStrategy estratégia.
 	 */
-	public void setMemoryAccessStrategy(Memory memory) {
+	public void setMemory(Memory memory) {
 		this.memory = memory;
 	}
 
