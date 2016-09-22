@@ -17,7 +17,6 @@
 
 package org.brandao.brcache;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -92,8 +91,6 @@ public abstract class StreamCache
 
     volatile long countRemovedData;
     
-    private String dataPath;
-    
     private boolean deleteOnExit;
     
     /*
@@ -121,9 +118,9 @@ public abstract class StreamCache
      * @param dataSwapFactor Fator de permuta dos dados.
      * @param maxSizeEntry Tamanho máximo de uma entrada no cache.
      * @param maxSizeKey Tamanho máximo de uma chave.
-     * @param dataPath Pasta onde os dados do cache serão persistidos.
-     * @param swaperType Estratégia de armazenamento dos dados em disco.
+     * @param swapper Estratégia de troca dos dados entre a memória e outro dispositivo.
      * @param quantitySwaperThread Quantidade de processos usados para fazer a permuta.
+     * @param memory Acesso à memória.
      */
     public StreamCache(
     		long nodeBufferSize,
@@ -141,19 +138,18 @@ public abstract class StreamCache
     		
     		long maxSizeEntry,
     		int maxSizeKey,
-            String dataPath,
-            Swapper Swapper,
+            Swapper swapper,
             int quantitySwaperThread,
-            MemoryAccessStrategy memoryAccessStrategy
+            Memory memory
     		){
 
-    	this.memory                 = this.getMemoryAccessStrategy();
+    	this.memory                 = memory;
         this.modCount               = 0;
-        this.dataPath               = dataPath;
         this.segmentSize            = (int)blockSize;
         this.maxBytesToStorageEntry = maxSizeEntry;
         this.maxLengthKey           = maxSizeKey;
         this.deleteOnExit           = true;
+    	this.swapper                = swapper;
     	
         synchronized(Collections.class){
 	    	HugeListInfo nodeInfo;
@@ -170,7 +166,7 @@ public abstract class StreamCache
 		                dataInfo.getMaxCapacityElements(),
 		                dataInfo.getClearFactorElements(),
 		                dataInfo.getFragmentFactorElements(),
-		                swapper.clone(),
+		                this.swapper.clone(),
 		                quantitySwaperThread,
 		                dataInfo.getSubLists()
 		                );
@@ -209,13 +205,13 @@ public abstract class StreamCache
 	                    nodeInfo.getMaxCapacityElements(),
 	                    nodeInfo.getClearFactorElements(),
 	                    nodeInfo.getFragmentFactorElements(),
-	                    swapper.clone(),
+	                    this.swapper.clone(),
 	                    quantitySwaperThread,
 	                    nodeInfo.getSubLists(),
 	                    indexInfo.getMaxCapacityElements(),
 	                    indexInfo.getClearFactorElements(),
 	                    indexInfo.getFragmentFactorElements(),
-	                    swapper.clone(),
+	                    this.swapper.clone(),
 	                    quantitySwaperThread,
 	                    indexInfo.getSubLists()
 	                    );
@@ -803,9 +799,11 @@ public abstract class StreamCache
 	public void destroy(){
 		this.dataList.destroy();
 		this.dataMap.destroy();
-		this.deleteDir(new File(dataPath));
+		this.swapper.destroy();
+		//this.deleteDir(new File(this.swapper));
 	}
 	
+	/*
 	private boolean deleteDir(File dir) {
         if (dir.isDirectory()) {
             String[] children = dir.list();
@@ -818,7 +816,8 @@ public abstract class StreamCache
         }
         return dir.delete();
     }
-    
+    */
+	
     protected void finalize() throws Throwable{
     	try{
     		if(this.deleteOnExit){
