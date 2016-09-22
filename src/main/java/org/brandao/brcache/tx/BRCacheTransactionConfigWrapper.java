@@ -1,7 +1,8 @@
 package org.brandao.brcache.tx;
 
 import org.brandao.brcache.Configuration;
-import org.brandao.brcache.SwaperStrategy;
+import org.brandao.brcache.collections.Swapper;
+import org.brandao.brcache.memory.Memory;
 
 class BRCacheTransactionConfigWrapper extends BRCacheTransactionConfig{
 
@@ -131,12 +132,20 @@ class BRCacheTransactionConfigWrapper extends BRCacheTransactionConfig{
 		wrapper.setSwapperThread(swapperThread);
 	}
 
-	public SwaperStrategy getSwapper() {
+	public Swapper getSwapper() {
 		return wrapper.getSwapper();
 	}
 
-	public void setSwapper(SwaperStrategy swapper) {
+	public void setSwapper(Swapper swapper) {
 		wrapper.setSwapper(swapper);
+	}
+
+	public Memory getMemory() {
+		return wrapper.getMemory();
+	}
+
+	public void setMemory(Memory memory) {
+		this.wrapper.setMemory(memory);
 	}
 	
 }
