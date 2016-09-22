@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.brandao.brcache.collections;
+package org.brandao.brcache.collections.swapper;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,6 +23,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import org.brandao.brcache.collections.Collections;
+import org.brandao.brcache.collections.DiskSwapper;
+import org.brandao.brcache.collections.Entry;
+import org.brandao.brcache.collections.Swapper;
 import org.brandao.brcache.collections.fileswapper.DataBlockEntityFile;
 import org.brandao.brcache.collections.fileswapper.DataBlockInputStream;
 import org.brandao.brcache.collections.fileswapper.DataBlockOutputStream;
