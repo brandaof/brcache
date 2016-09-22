@@ -40,7 +40,7 @@ import org.brandao.brcache.collections.fileswapper.SimpleIndexEntityFile;
  * 
  * @author Brandao
  */
-public class FileSwaper implements DiskSwapper {
+public class FileSwapper implements DiskSwapper {
     
 	private static final long serialVersionUID = -9192895825998099336L;
 
@@ -58,7 +58,7 @@ public class FileSwaper implements DiskSwapper {
     
     private volatile boolean hasCreatePath;
     
-    public FileSwaper(){
+    public FileSwapper(){
         this.index = new SimpleIndex();
     }
     
