@@ -24,8 +24,7 @@ public class UnsafeRegionMemory
 	
 	public int read(long thisOff, byte[] buf, int off, int len){
 		long trans = Math.min(this.length - thisOff, len);
-		long buffAdress = UnsafeMemoryUtil.getAddress(buf);
-		UnsafeMemoryUtil.arrayCopy(this.address, thisOff, buffAdress, off, trans);
+		UnsafeMemoryUtil.arrayCopy(this.address, thisOff, buf, off, trans);
 		return (int)trans;
 	}
 	
@@ -40,9 +39,8 @@ public class UnsafeRegionMemory
 		if(thisOff + len > this.length)
 			throw new IndexOutOfBoundsException(thisOff + len + " >= " + this.length);
 		
-		long buffAdress = UnsafeMemoryUtil.getAddress(buf);
 		long trans = Math.min(this.length - thisOff, len);
-		UnsafeMemoryUtil.arrayCopy(buffAdress, off, this.address, thisOff, trans);
+		UnsafeMemoryUtil.arrayCopy(buf, off, this.address, thisOff, trans);
 	}
 
 	public void write(long thisOff, RegionMemory buf, long off, long len){

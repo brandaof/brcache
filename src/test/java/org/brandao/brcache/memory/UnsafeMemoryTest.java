@@ -38,10 +38,10 @@ public class UnsafeMemoryTest extends TestCase{
 		byte[] b = new byte[1024];
 		Random random = new Random();
 		random.nextBytes(b);
-		r.write(10, b, 10, b.length);
+		r.write(10, b, 10, b.length-10);
 		
 		byte[] b2 = new byte[1024];
-		r.read(10, b2, 10, b2.length);
+		r.read(10, b2, 10, b2.length-10);
 		
 		for(int i= 0;i<10;i++){
 			b[i] = 0;
