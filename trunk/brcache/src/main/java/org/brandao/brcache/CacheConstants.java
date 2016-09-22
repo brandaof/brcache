@@ -85,4 +85,9 @@ public interface CacheConstants {
      */
     public static final String SWAPPER_TYPE 		= "swapper_type";
     
+    /**
+     * Estratégia de acesso a memória.
+     */
+    public static final String MEMORY_ACCESS_TYPE 	= "memory_access_type";
+
 }

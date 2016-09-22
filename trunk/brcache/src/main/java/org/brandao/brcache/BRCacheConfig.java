@@ -2,7 +2,8 @@ package org.brandao.brcache;
 
 import java.io.Serializable;
 
-import org.brandao.brcache.SwaperStrategy;
+import org.brandao.brcache.collections.Swapper;
+import org.brandao.brcache.memory.Memory;
 
 /**
  * Configuração de um cache.
@@ -19,6 +20,14 @@ public class BRCacheConfig implements Serializable{
 
 	private static final long serialVersionUID = 9065603898804344980L;
 
+	private static final String SWAPPER_PREFIX = "org.brandao.brcache.collections.swapper.";
+
+	private static final String SWAPPER_SUFFIX = "Swapper";
+
+	private static final String MEMORY_PREFIX = "org.brandao.brcache.memory.";
+
+	private static final String MEMORY_SUFFIX = "Memory";
+	
 	protected long nodesBufferSize;
     
 	protected long nodesPageSize;
@@ -45,9 +54,9 @@ public class BRCacheConfig implements Serializable{
     
     protected int swapperThread;
     
-    protected SwaperStrategy swapper;
+    protected Swapper swapper;
     
-    protected MemoryAccessStrategy memoryAccessStrategy;
+    protected Memory memory;
     
     protected String dataPath;
     
@@ -65,23 +74,58 @@ public class BRCacheConfig implements Serializable{
      * @param config metadados.
      */
     public void setConfiguration(Configuration config){
+    	
+    	ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    	
+    	this.configuration   = config;
+        this.nodesBufferSize = config.getLong(CacheConstants.NODES_BUFFER_SIZE,		"1m");
+        this.nodesPageSize   = config.getLong(CacheConstants.NODES_PAGE_SIZE,		"1k");
+        this.nodesSwapFactor = config.getDouble(CacheConstants.NODES_SWAP_FACTOR,	"0.5");
+        this.indexBufferSize = config.getLong(CacheConstants.INDEX_BUFFER_SIZE,		"1m");
+        this.indexPageSize   = config.getLong(CacheConstants.INDEX_PAGE_SIZE,		"1k");
+        this.indexSwapFactor = config.getDouble(CacheConstants.INDEX_SWAP_FACTOR,	"0.5");
+        this.dataBufferSize  = config.getLong(CacheConstants.DATA_BUFFER_SIZE,		"64m");
+        this.dataBlockSize   = config.getLong(CacheConstants.DATA_BLOCK_SIZE,		"1k");
+        this.dataPageSize    = config.getLong(CacheConstants.DATA_PAGE_SIZE,		"8k");
+        this.dataSwapFactor  = config.getDouble(CacheConstants.DATA_SWAP_FACTOR,	"0.5");
+        this.maxSizeEntry    = config.getLong(CacheConstants.MAX_SIZE_ENTRY,		"1m");
+        this.maxSizeKey      = config.getInt(CacheConstants.MAX_SIZE_KEY,			"100");
+        this.swapperThread   = config.getInt(CacheConstants.SWAPPER_THREAD,			"4");
+        this.dataPath        = config.getString(CacheConstants.DATA_PATH,			"/mnt/brcache");
+        this.swapper         = this.createSwapper(config.getString(CacheConstants.SWAPPER_TYPE,"file"), classLoader);
+        this.memory          = this.createMemory(config.getString(CacheConstants.MEMORY_ACCESS_TYPE,"heap"), classLoader);
+    }
+    
+    @SuppressWarnings("unchecked")
+	private Swapper createSwapper(String name, ClassLoader classLoader){
+    	try{
+        	String className = 
+        			SWAPPER_PREFIX + 
+        			Character.toUpperCase(name.charAt(0)) + name.substring(1, name.length()).toLowerCase() +
+        			SWAPPER_SUFFIX;
+        	
+        	Class<Swapper> clazz = (Class<Swapper>)Class.forName(className, true, classLoader);
+    		return clazz.newInstance();
+    	}
+    	catch(Throwable e){
+    		throw new IllegalStateException("invalid swapper type: " + name, e);
+    	}
+    }
 
-    	this.configuration       = config;
-        this.nodesBufferSize     = config.getLong(CacheConstants.NODES_BUFFER_SIZE,		"1m");
-        this.nodesPageSize       = config.getLong(CacheConstants.NODES_PAGE_SIZE,		"1k");
-        this.nodesSwapFactor     = config.getDouble(CacheConstants.NODES_SWAP_FACTOR,	"0.5");
-        this.indexBufferSize     = config.getLong(CacheConstants.INDEX_BUFFER_SIZE,		"1m");
-        this.indexPageSize       = config.getLong(CacheConstants.INDEX_PAGE_SIZE,		"1k");
-        this.indexSwapFactor     = config.getDouble(CacheConstants.INDEX_SWAP_FACTOR,	"0.5");
-        this.dataBufferSize      = config.getLong(CacheConstants.DATA_BUFFER_SIZE,		"64m");
-        this.dataBlockSize       = config.getLong(CacheConstants.DATA_BLOCK_SIZE,		"1k");
-        this.dataPageSize        = config.getLong(CacheConstants.DATA_PAGE_SIZE,		"8k");
-        this.dataSwapFactor      = config.getDouble(CacheConstants.DATA_SWAP_FACTOR,	"0.5");
-        this.maxSizeEntry        = config.getLong(CacheConstants.MAX_SIZE_ENTRY,		"1m");
-        this.maxSizeKey          = config.getInt(CacheConstants.MAX_SIZE_KEY,			"100");
-        this.swapperThread       = config.getInt(CacheConstants.SWAPPER_THREAD,			"4");
-        this.dataPath            = config.getString(CacheConstants.DATA_PATH,			"/mnt/brcache");
-        this.swapper             = SwaperStrategy.valueOf(config.getString(CacheConstants.SWAPPER_TYPE,"FILE").toUpperCase());
+    @SuppressWarnings("unchecked")
+	private Memory createMemory(String name, ClassLoader classLoader){
+    	try{
+        	String className = 
+        			MEMORY_PREFIX + 
+        			Character.toUpperCase(name.charAt(0)) + name.substring(1, name.length()).toLowerCase() +
+        			MEMORY_SUFFIX;
+        	
+        	Class<Memory> clazz = (Class<Memory>)Class.forName(className, true, classLoader);
+    		return clazz.newInstance();
+    	}
+    	catch(Throwable e){
+    		throw new IllegalStateException("invalid memory type: " + name, e);
+    	}
     }
     
     /**
@@ -321,10 +365,10 @@ public class BRCacheConfig implements Serializable{
 	}
 
 	/**
-	 * Obtém a estratégia de troca de dados entre a memória e o disco, por exemplo.
+	 * Obtém a estratégia de troca de dados entre a memória e outro dispositivo.
 	 * @return estratégia.
 	 */
-	public SwaperStrategy getSwapper() {
+	public Swapper getSwapper() {
 		return swapper;
 	}
 
@@ -332,23 +376,23 @@ public class BRCacheConfig implements Serializable{
 	 * Obtém a estratégia de acesso a memória.
 	 * @return estratégia.
 	 */
-	public MemoryAccessStrategy getMemoryAccessStrategy() {
-		return memoryAccessStrategy;
+	public Memory getMemory() {
+		return memory;
 	}
 
 	/**
 	 * Define a estratégia de acesso a memória.
 	 * @param memoryAccessStrategy estratégia.
 	 */
-	public void setMemoryAccessStrategy(MemoryAccessStrategy memoryAccessStrategy) {
-		this.memoryAccessStrategy = memoryAccessStrategy;
+	public void setMemoryAccessStrategy(Memory memory) {
+		this.memory = memory;
 	}
 
 	/**
-	 * Define a estratégia de troca de dados entre a memória e o disco, por exemplo.
+	 * Define a estratégia de troca de dados entre a memória e outro dispositivo.
 	 * @param swapper estratégia.
 	 */
-	public void setSwapper(SwaperStrategy swapper) {
+	public void setSwapper(Swapper swapper) {
 		this.swapper = swapper;
 	}
     

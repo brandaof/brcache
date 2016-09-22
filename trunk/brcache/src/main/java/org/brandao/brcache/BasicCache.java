@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import org.brandao.brcache.collections.Swapper;
+import org.brandao.brcache.memory.Memory;
 import org.brandao.brcache.tx.CacheTransactionManager;
 import org.brandao.brcache.tx.TXCache;
 
@@ -35,8 +37,8 @@ public class BasicCache
     			config.getNodesBufferSize(), config.getNodesPageSize(), config.getNodesSwapFactor(),
     			config.getIndexBufferSize(), config.getIndexPageSize(), config.getIndexSwapFactor(), 
     			config.getDataBufferSize(), config.getDataPageSize(), config.getDataBlockSize(), config.getDataSwapFactor(), 
-    			config.getMaxSizeEntry(), config.getMaxSizeKey(), config.getDataPath(), 
-    			config.getSwapper(), config.getSwapperThread(), config.getMemoryAccessStrategy());
+    			config.getMaxSizeEntry(), config.getMaxSizeKey(), 
+    			config.getSwapper(), config.getSwapperThread(), config.getMemory());
     	this.config = config;
     }
     
@@ -55,11 +57,11 @@ public class BasicCache
      * @param dataSwapFactor Fator de permuta dos dados.
      * @param maxSizeEntry Tamanho máximo de uma entrada no cache.
      * @param maxSizeKey Tamanho máximo de uma chave.
-     * @param dataPath Pasta onde os dados do cache serão persistidos.
-     * @param swaperType Estratégia de armazenamento dos dados em disco.
+     * @param swapper Estratégia de troca dos dados entre a memória e outro dispositivo.
      * @param quantitySwaperThread Quantidade de processos usados para fazer a permuta.
+     * @param memory Acesso à memória.
      */
-    private BasicCache(
+    public BasicCache(
     		long nodeBufferSize,
     		long nodePageSize,
     		double nodeSwapFactor,
@@ -75,14 +77,13 @@ public class BasicCache
     		
     		long maxSizeEntry,
     		int maxSizeKey,
-            String dataPath,
-            SwaperStrategy swaperType,
+            Swapper swapper,
             int quantitySwaperThread,
-            MemoryAccessStrategy memoryAccessStrategy
+            Memory memory
     		){	
     	super(nodeBufferSize, nodePageSize, nodeSwapFactor, indexBufferSize, 
     			indexPageSize, indexSwapFactor, dataBufferSize, dataPageSize, blockSize, 
-    			dataSwapFactor, maxSizeEntry, maxSizeKey, dataPath, swaperType, quantitySwaperThread, memoryAccessStrategy);
+    			dataSwapFactor, maxSizeEntry, maxSizeKey, swapper, quantitySwaperThread, memory);
     }
     
     /**
