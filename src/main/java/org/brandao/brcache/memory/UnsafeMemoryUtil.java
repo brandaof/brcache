@@ -20,6 +20,7 @@ class UnsafeMemoryUtil {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        
     }
 
 	public static long alloc(long size){
@@ -40,14 +41,18 @@ class UnsafeMemoryUtil {
 		long dataBaseOffset = UNSAFE.arrayBaseOffset(o.getClass());
 		int addressSize     = UNSAFE.addressSize();
 		
+		long address;
 		switch (addressSize){
 			case 4:
-				return UNSAFE.getInt(array, baseOffset) + dataBaseOffset;
+				address = UNSAFE.getInt(array, baseOffset) + dataBaseOffset;
+				break;
 			case 8:
-				return UNSAFE.getLong(array, baseOffset) + dataBaseOffset;
+				address = UNSAFE.getLong(array, baseOffset) + dataBaseOffset;
+				break;
 			default:
 				throw new Error("unsupported address size: " + addressSize);
 		}
+		return address;
 	}
 		
 	public static Object getObject(long address) {

@@ -8,6 +8,9 @@ package org.brandao.brcache.memory;
  */
 public class UnsafeMemory implements Memory{
 
+	public UnsafeMemory(){
+	}
+	
 	/**
 	 * Aloca uma quantidade específica de memória.
 	 * 
@@ -49,5 +52,5 @@ public class UnsafeMemory implements Memory{
 			r.address = null;
 		}
  	}
-	
+
 }
