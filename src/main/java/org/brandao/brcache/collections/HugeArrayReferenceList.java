@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.brandao.brcache.collections.swapper.TreeFileSwaper;
+import org.brandao.brcache.collections.swapper.TreeFileSwapper;
 
 public class HugeArrayReferenceList<T> 
 	implements HugeReferenceList<T>{
@@ -40,7 +40,7 @@ public class HugeArrayReferenceList<T>
     	this.lists        = new ArrayCollectionReference[lists];
         this.deleteOnExit = true;
         id                = id == null? Collections.getNextId() : id;
-        swap              = swap == null? new TreeFileSwaper() : swap;
+        swap              = swap == null? new TreeFileSwapper() : swap;
     	
     	for(int i=0;i<this.lists.length;i++){
             this.lists[i] = 

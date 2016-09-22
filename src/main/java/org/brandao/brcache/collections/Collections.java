@@ -114,7 +114,7 @@ public class Collections {
         deleteDir(defaultFilePath);
     }
 
-    static boolean deleteDir(File dir) {
+    public static boolean deleteDir(File dir) {
         if (dir.isDirectory()) {
             String[] children = dir.list();
             for (int i = 0; i < children.length; i++) {

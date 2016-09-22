@@ -6,7 +6,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.brandao.brcache.collections.swapper.TreeFileSwaper;
+import org.brandao.brcache.collections.swapper.TreeFileSwapper;
 
 public class ArrayCollectionReference<T> {
 
@@ -45,7 +45,7 @@ public class ArrayCollectionReference<T> {
     	this.lock         = new ReentrantLock();
         this.deleteOnExit = true;
         id                = id == null? Collections.getNextId() : id;
-        swap              = swap == null? new TreeFileSwaper() : swap;
+        swap              = swap == null? new TreeFileSwapper() : swap;
         this.collection   = 
                     new CollectionSegmentImp<Object>(
                         id == null? null : id + "list", 

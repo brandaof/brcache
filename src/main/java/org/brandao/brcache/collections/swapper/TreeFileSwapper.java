@@ -37,7 +37,7 @@ import org.brandao.brcache.collections.Swapper;
  * 
  * @author Brandao
  */
-public class TreeFileSwaper implements DiskSwapper {
+public class TreeFileSwapper implements DiskSwapper {
     
 	private static final long serialVersionUID = -6050325151685902395L;
 
@@ -51,7 +51,7 @@ public class TreeFileSwaper implements DiskSwapper {
     
     private transient boolean hasCreatePath;
 
-    public TreeFileSwaper(){
+    public TreeFileSwapper(){
         this.pathName = Collections.getConfiguration().getProperty(PATH);
     }
     

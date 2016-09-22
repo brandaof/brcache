@@ -20,7 +20,7 @@ package org.brandao.brcache.collections;
 import java.io.Serializable;
 import java.util.*;
 
-import org.brandao.brcache.collections.swapper.TreeFileSwaper;
+import org.brandao.brcache.collections.swapper.TreeFileSwapper;
 
 /**
  *
@@ -64,7 +64,7 @@ public class HugeArrayList<T>
         this.size = 0;
         this.deleteOnExit = true;
         id = id == null? Collections.getNextId() : id;
-        swap = swap == null? new TreeFileSwaper() : swap;
+        swap = swap == null? new TreeFileSwapper() : swap;
         
         this.elements = 
                 new CollectionSegmentImp<T>(
