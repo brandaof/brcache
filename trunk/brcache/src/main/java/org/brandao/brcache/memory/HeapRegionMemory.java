@@ -28,6 +28,18 @@ public class HeapRegionMemory implements RegionMemory{
 		return this.length;
 	}
 	
+	public byte get(long offset){
+		
+		if(offset >= this.length){
+			throw new IndexOutOfBoundsException(offset + " >= " + this.length);
+		}
+		
+		int seg = (int)(offset / this.segmentSize); 
+		int off = (int)(offset % this.segmentSize);
+		
+		return this.segments[seg][off];
+	}
+
 	public int read(long thisOff, byte[] buf, int off, int len){
 
 		if(thisOff >= this.length)

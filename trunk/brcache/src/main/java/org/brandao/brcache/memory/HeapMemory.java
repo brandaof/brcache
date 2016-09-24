@@ -8,23 +8,29 @@ package org.brandao.brcache.memory;
  */
 public class HeapMemory implements Memory{
 
-	/**
-	 * Aloca uma quantidade específica de memória.
-	 * 
-	 * @param size Quantidade.
-	 * @return Região da memória.
-	 */
 	public RegionMemory alloc(long size) {
 		byte[][] segs = HeapMemoryUtil.alloc(size);
 		return new HeapRegionMemory(segs, (int)HeapMemoryUtil.segmentSize, (int)size);
 	}
 
-	/**
-	 * Aloca uma quantidade específica de memória.
-	 * 
-	 * @param size Quantidade.
-	 * @return Região da memória.
-	 */
+	public void realloc(long size, RegionMemory region){
+		HeapRegionMemory r = (HeapRegionMemory)region;
+		byte[][] segs      = r.segments;
+		byte[][] newSegs   = HeapMemoryUtil.alloc(size);
+		
+		if(newSegs.length > segs.length){
+			System.arraycopy(segs, 0, newSegs, 0, segs.length);
+			HeapMemoryUtil.free(segs);
+			r.segments    = newSegs;
+			r.segmentSize = (int)HeapMemoryUtil.segmentSize;
+		}
+		else{
+			System.arraycopy(segs, 0, newSegs, 0, newSegs.length);
+			HeapMemoryUtil.free(segs);
+		}
+		
+	}
+	
 	public void alloc(long size, RegionMemory region) {
 		HeapRegionMemory r = (HeapRegionMemory)region;
 		if(r.segments != null)
@@ -32,12 +38,6 @@ public class HeapMemory implements Memory{
 		allocSegments(size, r);
 	}
 	
-	/**
-	 * Libera uma região da memória.
-	 * 
-	 * @param size Quantidade.
-	 * @return Região da memória.
-	 */
 	public void release(RegionMemory region){
 		HeapRegionMemory r = (HeapRegionMemory)region;
 		if(r.segments == null)

@@ -22,37 +22,85 @@ public class UnsafeRegionMemory
 		return this.length;
 	}
 	
+	public byte get(long off){
+		
+		if(off >= this.length){
+			throw new IndexOutOfBoundsException(off + " >= " + this.length);
+		}
+		
+		return UnsafeMemoryUtil.getByte(this.address, off);
+	}
+	
 	public int read(long thisOff, byte[] buf, int off, int len){
-		long trans = Math.min(this.length - thisOff, len);
-		UnsafeMemoryUtil.arrayCopy(this.address, thisOff, buf, off, trans);
-		return (int)trans;
+		
+		int max = (int)(this.length - thisOff);
+		max     = max > len? len : max;
+
+		if(max > 0){
+			
+			if(thisOff + max >= this.length){
+				throw new IndexOutOfBoundsException((thisOff + max) + " >= " + this.length);
+			}
+			
+			UnsafeMemoryUtil.arrayCopy(this.address, thisOff, buf, off, max);
+		}
+		
+		return max;
 	}
 	
 	public long read(long thisOff, RegionMemory buf, long off, long len){
-		long trans = Math.min(this.length - thisOff, len);
-		UnsafeMemoryUtil.arrayCopy(this.address, thisOff, ((UnsafeRegionMemory)buf).address, off, trans);
-		return trans;
+		
+		long max = (this.length - thisOff);
+		max      = max > len? len : max;
+		
+		if(max > 0){
+			
+			if(thisOff + max >= this.length){
+				throw new IndexOutOfBoundsException("this: " + (thisOff + max) + " >= " + this.length);
+			}
+			
+			if(off + max >= this.length){
+				throw new IndexOutOfBoundsException("buf: " + (off + max) + " >= " + this.length);
+			}
+			
+			UnsafeMemoryUtil.arrayCopy(this.address, thisOff, ((UnsafeRegionMemory)buf).address, off, max);
+		}
+		
+		return max;
 	}
 	
 	public void write(long thisOff, byte[] buf, int off, int len){
 		
-		if(thisOff + len > this.length)
-			throw new IndexOutOfBoundsException(thisOff + len + " >= " + this.length);
+		long max = (this.length - thisOff);
+		max      = max > len? len : max;
 		
-		long trans = Math.min(this.length - thisOff, len);
-		UnsafeMemoryUtil.arrayCopy(buf, off, this.address, thisOff, trans);
+		if(max > 0){
+			if(thisOff + max >= this.length){
+				throw new IndexOutOfBoundsException((thisOff + max) + " >= " + this.length);
+			}
+			
+			UnsafeMemoryUtil.arrayCopy(buf, off, this.address, thisOff, max);
+		}
 	}
 
 	public void write(long thisOff, RegionMemory buf, long off, long len){
 		
-		if(thisOff + len > this.length)
-			throw new IndexOutOfBoundsException("this:" + thisOff + len + " > " + thisOff + this.length);
-
-		if(off + len > buf.size())
-			throw new IndexOutOfBoundsException("buf:" + off + len + " > " + buf.size());
+		long max = (this.length - thisOff);
+		max      = max > len? len : max;
 		
-		long trans = Math.min(this.length - thisOff, len);
-		UnsafeMemoryUtil.arrayCopy(((UnsafeRegionMemory)buf).address, off, this.address, thisOff, trans);
+		if(max > 0){
+		
+			if(thisOff + max >= this.length){
+				throw new IndexOutOfBoundsException("this: " + (thisOff + max) + " >= " + this.length);
+			}
+			
+			if(off + max >= this.length){
+				throw new IndexOutOfBoundsException("buf: " + (off + max) + " >= " + this.length);
+			}
+			
+			UnsafeMemoryUtil.arrayCopy(((UnsafeRegionMemory)buf).address, off, this.address, thisOff, max);
+		}
+		
 	}
 	
 	private void writeObject(ObjectOutputStream stream) throws IOException {

@@ -17,6 +17,7 @@
 
 package org.brandao.brcache;
 
+import java.awt.EventQueue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -323,7 +324,7 @@ public abstract class StreamCache
         }
         finally{
 	    	if(oldMap != null){
-	    		this.releaseSegments(oldMap);
+	    		//this.releaseSegments(oldMap);
 	            this.countRemoved++;
 	    	}
         }
@@ -669,7 +670,17 @@ public abstract class StreamCache
         }
     }
 
-    private void releaseSegments(DataMap map){
+    private void releaseSegments(final DataMap map){
+    	EventQueue.invokeLater(new Runnable(){
+
+			public void run() {
+				releaseAllSegments(map);
+			}
+    		
+    	});
+    }
+    
+    private void releaseAllSegments(DataMap map){
     	long segmentId = map.getFirstSegment();
     	
     	if(segmentId == -1)
