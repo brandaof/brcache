@@ -38,8 +38,8 @@ public class UnsafeRegionMemory
 
 		if(max > 0){
 			
-			if(thisOff + max >= this.length){
-				throw new IndexOutOfBoundsException((thisOff + max) + " >= " + this.length);
+			if(thisOff + max > this.length){
+				throw new IndexOutOfBoundsException((thisOff + max) + " > " + this.length);
 			}
 			
 			UnsafeMemoryUtil.arrayCopy(this.address, thisOff, buf, off, max);
@@ -55,12 +55,12 @@ public class UnsafeRegionMemory
 		
 		if(max > 0){
 			
-			if(thisOff + max >= this.length){
-				throw new IndexOutOfBoundsException("this: " + (thisOff + max) + " >= " + this.length);
+			if(thisOff + max > this.length){
+				throw new IndexOutOfBoundsException("this: " + (thisOff + max) + " > " + this.length);
 			}
 			
-			if(off + max >= this.length){
-				throw new IndexOutOfBoundsException("buf: " + (off + max) + " >= " + this.length);
+			if(off + max > this.length){
+				throw new IndexOutOfBoundsException("buf: " + (off + max) + " > " + this.length);
 			}
 			
 			UnsafeMemoryUtil.arrayCopy(this.address, thisOff, ((UnsafeRegionMemory)buf).address, off, max);
@@ -75,8 +75,8 @@ public class UnsafeRegionMemory
 		max      = max > len? len : max;
 		
 		if(max > 0){
-			if(thisOff + max >= this.length){
-				throw new IndexOutOfBoundsException((thisOff + max) + " >= " + this.length);
+			if(thisOff + max > this.length){
+				throw new IndexOutOfBoundsException((thisOff + max) + " > " + this.length);
 			}
 			
 			UnsafeMemoryUtil.arrayCopy(buf, off, this.address, thisOff, max);
@@ -90,12 +90,12 @@ public class UnsafeRegionMemory
 		
 		if(max > 0){
 		
-			if(thisOff + max >= this.length){
-				throw new IndexOutOfBoundsException("this: " + (thisOff + max) + " >= " + this.length);
+			if(thisOff + max > this.length){
+				throw new IndexOutOfBoundsException("this: " + (thisOff + max) + " > " + this.length);
 			}
 			
-			if(off + max >= this.length){
-				throw new IndexOutOfBoundsException("buf: " + (off + max) + " >= " + this.length);
+			if(off + max > this.length){
+				throw new IndexOutOfBoundsException("buf: " + (off + max) + " > " + this.length);
 			}
 			
 			UnsafeMemoryUtil.arrayCopy(((UnsafeRegionMemory)buf).address, off, this.address, thisOff, max);
