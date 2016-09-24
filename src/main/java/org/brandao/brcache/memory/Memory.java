@@ -16,6 +16,8 @@ public interface Memory {
 	 */
 	RegionMemory alloc(long size);
 
+	void realloc(long size, RegionMemory region);
+	
 	/**
 	 * Aloca uma quantidade específica de memória.
 	 * 

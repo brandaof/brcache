@@ -13,5 +13,7 @@ public interface RegionMemory extends Serializable{
 	void write(long thisOff, byte[] buf, int off, int len);
 
 	void write(long thisOff, RegionMemory buf, long off, long len);
+
+	byte get(long off);
 	
 }

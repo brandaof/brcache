@@ -30,13 +30,21 @@ class UnsafeMemoryUtil {
 	public static long alloc(long size){
 		return UNSAFE.allocateMemory(size);
 	}
-    
+
+	public static long realloc(long address, long size){
+		return UNSAFE.reallocateMemory(address, size);
+	}
+	
 	public static void free(long address){
 		UNSAFE.freeMemory(address);		
 	}
 	
 	public static void arrayCopy(long origin, long originOff, long dest, long destOff, long len){
 		UNSAFE.copyMemory(origin + originOff, dest + destOff, len);
+	}
+	
+	public static byte getByte(long address, long off){
+		return UNSAFE.getByte(address + off);
 	}
 	
     public static void arrayCopy(byte[] src, long srcPos, long dstAddr, long dstPos, long length){

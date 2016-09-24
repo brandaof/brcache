@@ -23,6 +23,17 @@ public class UnsafeMemory implements Memory{
 	}
 
 	/**
+	 * Redimenciona uma região da memória.
+	 * @param size novo tamanho.
+	 * @param region região.
+	 */
+	public void realloc(long size, RegionMemory region) {
+		UnsafeRegionMemory r = (UnsafeRegionMemory)region;
+		long address         = UnsafeMemoryUtil.realloc(r.address, size);
+		r.address            = address;
+	}
+	
+	/**
 	 * Aloca uma quantidade específica de memória.
 	 * 
 	 * @param size Quantidade.
