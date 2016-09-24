@@ -52,7 +52,7 @@ class UnsafeMemoryUtil {
     	srcPos  += arrayBaseOffset;
 		dstAddr += dstPos;
 		
-		while (length > 0) {
+		while(length > 0) {
 			long size = (length > UNSAFE_COPY_THRESHOLD) ? UNSAFE_COPY_THRESHOLD : length;
 			UNSAFE.copyMemory(src, srcPos, null, dstAddr, size);
 			length  -= size;
@@ -66,7 +66,7 @@ class UnsafeMemoryUtil {
     	dstPos  += arrayBaseOffset;
     	srcAddr += srcPos;
 		
-		while (length > 0) {
+		while(length > 0) {
 			long size = (length > UNSAFE_COPY_THRESHOLD) ? UNSAFE_COPY_THRESHOLD : length;
 			UNSAFE.copyMemory(null, srcAddr, dst, dstPos, size);
 			length  -= size;
