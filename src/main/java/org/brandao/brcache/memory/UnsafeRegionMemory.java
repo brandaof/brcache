@@ -24,9 +24,9 @@ public class UnsafeRegionMemory
 	
 	public byte get(long off){
 		
-		if(off >= this.length){
-			throw new IndexOutOfBoundsException(off + " >= " + this.length);
-		}
+		//if(off >= this.length){
+		//	throw new IndexOutOfBoundsException(off + " >= " + this.length);
+		//}
 		
 		return UnsafeMemoryUtil.getByte(this.address, off);
 	}
@@ -36,14 +36,14 @@ public class UnsafeRegionMemory
 		int max = (int)(this.length - thisOff);
 		max     = max > len? len : max;
 
-		if(max > 0){
+		/*if(max > 0){
 			
 			if(thisOff + max > this.length){
 				throw new IndexOutOfBoundsException((thisOff + max) + " > " + this.length);
-			}
+			}*/
 			
 			UnsafeMemoryUtil.arrayCopy(this.address, thisOff, buf, off, max);
-		}
+		//}
 		
 		return max;
 	}
@@ -53,7 +53,7 @@ public class UnsafeRegionMemory
 		long max = (this.length - thisOff);
 		max      = max > len? len : max;
 		
-		if(max > 0){
+		/*if(max > 0){
 			
 			if(thisOff + max > this.length){
 				throw new IndexOutOfBoundsException("this: " + (thisOff + max) + " > " + this.length);
@@ -61,10 +61,10 @@ public class UnsafeRegionMemory
 			
 			if(off + max > this.length){
 				throw new IndexOutOfBoundsException("buf: " + (off + max) + " > " + this.length);
-			}
+			}*/
 			
 			UnsafeMemoryUtil.arrayCopy(this.address, thisOff, ((UnsafeRegionMemory)buf).address, off, max);
-		}
+		//}
 		
 		return max;
 	}
@@ -74,13 +74,13 @@ public class UnsafeRegionMemory
 		long max = (this.length - thisOff);
 		max      = max > len? len : max;
 		
-		if(max > 0){
+		/*if(max > 0){
 			if(thisOff + max > this.length){
 				throw new IndexOutOfBoundsException((thisOff + max) + " > " + this.length);
-			}
+			}*/
 			
 			UnsafeMemoryUtil.arrayCopy(buf, off, this.address, thisOff, max);
-		}
+		//}
 	}
 
 	public void write(long thisOff, RegionMemory buf, long off, long len){
@@ -88,7 +88,7 @@ public class UnsafeRegionMemory
 		long max = (this.length - thisOff);
 		max      = max > len? len : max;
 		
-		if(max > 0){
+		/*if(max > 0){
 		
 			if(thisOff + max > this.length){
 				throw new IndexOutOfBoundsException("this: " + (thisOff + max) + " > " + this.length);
@@ -96,10 +96,10 @@ public class UnsafeRegionMemory
 			
 			if(off + max > this.length){
 				throw new IndexOutOfBoundsException("buf: " + (off + max) + " > " + this.length);
-			}
+			}*/
 			
 			UnsafeMemoryUtil.arrayCopy(((UnsafeRegionMemory)buf).address, off, this.address, thisOff, max);
-		}
+		//}
 		
 	}
 	

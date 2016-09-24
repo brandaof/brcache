@@ -324,7 +324,7 @@ public abstract class StreamCache
         }
         finally{
 	    	if(oldMap != null){
-	    		//this.releaseSegments(oldMap);
+	    		this.releaseSegments(oldMap);
 	            this.countRemoved++;
 	    	}
         }
