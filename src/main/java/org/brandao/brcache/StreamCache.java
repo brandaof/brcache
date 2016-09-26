@@ -17,7 +17,6 @@
 
 package org.brandao.brcache;
 
-import java.awt.EventQueue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -633,9 +632,6 @@ public abstract class StreamCache
             while((read = inputData.read(buffer, 0, this.segmentSize)) != -1){
             	writeData += read;
             	
-        		if(writeData > this.maxBytesToStorageEntry)
-                    throw new StorageException(CacheErrors.ERROR_1007);
-
         		RegionMemory data = this.memory.alloc(this.segmentSize);
         		data.write(0, buffer, 0, read);
         		
@@ -652,8 +648,12 @@ public abstract class StreamCache
             	lastBlock   = block;
                 lastSegment = segment;
             }
-            
+
             this.countWriteData += writeData;
+            
+    		if(writeData > this.maxBytesToStorageEntry){
+                throw new StorageException(CacheErrors.ERROR_1007);
+    		}
             
             map.setLength(writeData);
             map.setSegments(index);
@@ -670,6 +670,7 @@ public abstract class StreamCache
         }
     }
 
+    /*
     private void releaseSegments(final DataMap map){
     	EventQueue.invokeLater(new Runnable(){
 
@@ -679,8 +680,9 @@ public abstract class StreamCache
     		
     	});
     }
+    */
     
-    private void releaseAllSegments(DataMap map){
+    private void releaseSegments(DataMap map){
     	long segmentId = map.getFirstSegment();
     	
     	if(segmentId == -1)
@@ -691,8 +693,8 @@ public abstract class StreamCache
         int i=0;
         while(current != null){
 			if(current.id == map.getId() && current.segment == i){
-				current.id      = -1;
-				current.segment = -1;
+				//current.id      = -1;
+				//current.segment = -1;
 				this.dataList.remove(segmentId, current);
 				this.memory.release(current.buffer);
 			}
