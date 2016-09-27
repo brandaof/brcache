@@ -120,7 +120,9 @@ public class CharNode<T> implements TreeNode<T>{
 
     public T removeValue(ReferenceCollection<T> values) {
         if(this.valueId != -1){
-            return values.set(this.valueId, null);
+            T old = values.set(this.valueId, null);
+            this.valueId = -1;
+            return old;
         }
         else{
         	return null;
@@ -166,7 +168,9 @@ public class CharNode<T> implements TreeNode<T>{
 
 	public boolean removeValue(ReferenceCollection<T> values, T oldValue) {
         if(this.valueId != -1){
-            return values.remove(this.valueId, oldValue);
+            boolean v = values.remove(this.valueId, oldValue);
+            this.valueId = -1;
+            return v;
         }
         else{
         	return false;
