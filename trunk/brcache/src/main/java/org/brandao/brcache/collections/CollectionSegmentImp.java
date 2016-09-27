@@ -160,7 +160,7 @@ class CollectionSegmentImp<I>
 	        if(entry != null){
 	            seg  = entry.getItem();
 	            I old = seg.get(index);
-	            if(old != null && old.equals(value)){
+	            if(old != null && old.equals(oldValue)){
 	            	seg.set(index, value);
 		            entry.setNeedUpdate(true);
 	            	return true;
