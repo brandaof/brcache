@@ -101,14 +101,16 @@ public class ArrayCollectionReference<T> {
 	public T set(long reference, T e) {
 		long segment    = (long)(reference / collection.getFragmentSize());
 		long offset     = (long)(reference % collection.getFragmentSize());
-		return (T)collection.setEntity(segment, (int)offset, (T)e);
+		Object o = collection.setEntity(segment, (int)offset, (T)e);
+		return o instanceof Empty? null : (T)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	public T get(long reference) {
 		long segment    = (long)(reference / collection.getFragmentSize());
 		long offset     = (long)(reference % collection.getFragmentSize());
-		return (T)collection.getEntity(segment, (int)offset);
+		Object o = collection.getEntity(segment, (int)offset);
+		return o instanceof Empty? null : (T)o;
 	}
 
 	public boolean remove(long reference) {
@@ -134,14 +136,16 @@ public class ArrayCollectionReference<T> {
 	public T replace(long reference, T value) {
 		long segment    = (long)(reference / collection.getFragmentSize());
 		long offset     = (long)(reference % collection.getFragmentSize());
-		return (T)collection.replaceEntity(segment, (int)offset, value);
+		Object o = collection.replaceEntity(segment, (int)offset, value);
+		return o instanceof Empty? null : (T)o;
 	}
 
 	@SuppressWarnings("unchecked")
 	public T putIfAbsent(long reference, T value) {
 		long segment    = (long)(reference / collection.getFragmentSize());
 		long offset     = (long)(reference % collection.getFragmentSize());
-		return (T)collection.putIfAbsentEntity(segment, (int)offset, value);
+		Object o = collection.putIfAbsentEntity(segment, (int)offset, value);
+		return o instanceof Empty? null : (T)o;
 	}
 
 	public boolean remove(long reference, T oldValue) {
