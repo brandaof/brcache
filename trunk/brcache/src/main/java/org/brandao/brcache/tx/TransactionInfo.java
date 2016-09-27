@@ -284,7 +284,10 @@ class TransactionInfo implements Serializable {
     	try{
     		if(this.managed.contains(key)){
     			this.updated.add(key);
-    			return cache.remove(ref);
+    			boolean r = cache.remove(ref);
+    			if(cache.get(ref) != null)
+    				throw new IllegalStateException();
+    			return r;
     		}
     		else{
         		this.manageItem(manager, cache, key, this.timeout);
