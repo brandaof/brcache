@@ -1,6 +1,6 @@
 package org.brandao.brcache.tx;
 
-import java.util.UUID;
+import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 import org.brandao.brcache.BRCacheConfig;
@@ -14,19 +14,19 @@ import org.brandao.brcache.BasicCache;
  */
 public interface CacheTransactionManager {
 
-	void lock(UUID transaction, String key) throws TransactionException;
+	void lock(Serializable transaction, String key) throws TransactionException;
 
-	void tryLock(UUID transaction, String key, long time, TimeUnit unit) throws TransactionException;
+	void tryLock(Serializable transaction, String key, long time, TimeUnit unit) throws TransactionException;
 
-	void unlock(UUID transaction, String key) throws TransactionException;
+	void unlock(Serializable transaction, String key) throws TransactionException;
 	
-	void commit(UUID transaction) throws TransactionException;
+	void commit(Serializable transaction) throws TransactionException;
 	
-	void rollback(UUID transaction) throws TransactionException;
+	void rollback(Serializable transaction) throws TransactionException;
 	
-	String getTransactionPath();
-	
-	void setConfiguration(BRCacheConfig config);
+	String getPath();
+
+	long getTimeout();
 	
 	CacheTransactionHandler begin(BasicCache cache);
 	
