@@ -148,8 +148,6 @@ public class TXCache
 	
 	private CacheTransactionManager transactionManager;
 
-	private long transactionTimeout;
-
 	/**
 	 * Cria um cache transacional a partir de um cache.
 	 * @param cache cache não transacional.
@@ -181,7 +179,7 @@ public class TXCache
      * @return tempo em milisegundos.
      */
     public long getTransactionTimeout() {
-		return transactionTimeout;
+		return this.transactionManager.getTimeout();
 	}
 
     /**
@@ -189,7 +187,7 @@ public class TXCache
      * @param transactionTimeout tempo em milisegundos.
      */
 	public void setTransactionTimeout(long transactionTimeout) {
-		this.transactionTimeout = transactionTimeout;
+		this.transactionManager.setTimeout(transactionTimeout);
 	}
 
 	/**
@@ -217,7 +215,7 @@ public class TXCache
 			return (Boolean)this.executeMethodInTX(replace, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
-					key, value, timeToLive, timeToIdle, this.transactionTimeout);
+					key, value, timeToLive, timeToIdle);
 		}
 		catch(StorageException e){
 			throw e;
@@ -245,7 +243,7 @@ public class TXCache
 			return (Boolean)this.executeMethodInTX(replaceStream, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
-					key, inputData, timeToLive, timeToIdle, this.transactionTimeout);
+					key, inputData, timeToLive, timeToIdle);
 		}
 		catch(StorageException e){
 			throw e;
@@ -275,7 +273,7 @@ public class TXCache
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
 					key, oldValue, 
-					newValue, timeToLive, timeToIdle, this.transactionTimeout);
+					newValue, timeToLive, timeToIdle);
 		}
 		catch(StorageException e){
 			throw e;
@@ -305,7 +303,7 @@ public class TXCache
 			return this.executeMethodInTX(putIfAbsent, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
-					key, value, timeToLive, timeToIdle, this.transactionTimeout);
+					key, value, timeToLive, timeToIdle);
 		}
 		catch(StorageException e){
 			throw e;
@@ -333,7 +331,7 @@ public class TXCache
 			return (InputStream)this.executeMethodInTX(putIfAbsentStream, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
-					key, inputData, timeToLive, timeToIdle, this.transactionTimeout);
+					key, inputData, timeToLive, timeToIdle);
 		}
 		catch(StorageException e){
 			throw e;
@@ -359,7 +357,7 @@ public class TXCache
 			return (Boolean)this.executeMethodInTX(put, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
-					key, value, timeToLive, timeToIdle, this.transactionTimeout);
+					key, value, timeToLive, timeToIdle);
 		}
 		catch(StorageException e){
 			throw e;
@@ -386,7 +384,7 @@ public class TXCache
 			return (Boolean)this.executeMethodInTX(putStream, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache, 
-		    		key, inputData, timeToLive, timeToIdle, this.transactionTimeout);
+		    		key, inputData, timeToLive, timeToIdle);
 		}
 		catch(StorageException e){
 			throw e;
@@ -428,7 +426,7 @@ public class TXCache
 			return this.executeMethodInTX(get, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
-					key, forUpdate, this.transactionTimeout);
+					key, forUpdate);
 		}
 		catch(RecoverException e){
 			throw e;
@@ -469,7 +467,7 @@ public class TXCache
 			return (InputStream)this.executeMethodInTX(getStream, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache, 
-		    		key, forUpdate, this.transactionTimeout);
+		    		key, forUpdate);
 		}
 		catch(RecoverException e){
 			throw e;
@@ -499,7 +497,7 @@ public class TXCache
 			return (Boolean)this.executeMethodInTX(removeExact, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
-					key, value, this.transactionTimeout);
+					key, value);
 		}
 		catch(StorageException e){
 			throw e;
@@ -525,7 +523,7 @@ public class TXCache
 			return (Boolean)this.executeMethodInTX(remove, 
 					this.transactionManager.getCurrrent(false), 
 					this.transactionManager, this.cache,
-		    		key, this.transactionTimeout);
+		    		key);
 		}
 		catch(StorageException e){
 			throw e;
