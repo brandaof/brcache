@@ -650,18 +650,6 @@ public abstract class StreamCache
         }
     }
 
-    /*
-    private void releaseSegments(final DataMap map){
-    	EventQueue.invokeLater(new Runnable(){
-
-			public void run() {
-				releaseAllSegments(map);
-			}
-    		
-    	});
-    }
-    */
-    
     private void releaseSegments(DataMap map){
     	long segmentId = map.getFirstSegment();
     	

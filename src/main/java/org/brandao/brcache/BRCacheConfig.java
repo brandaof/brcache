@@ -94,7 +94,7 @@ public class BRCacheConfig implements Serializable{
         this.swapperThread   = config.getInt(CacheConstants.SWAPPER_THREAD,			"4");
         this.dataPath        = config.getString(CacheConstants.DATA_PATH,			"/mnt/brcache");
         this.swapper         = this.createSwapper(config.getString(CacheConstants.SWAPPER_TYPE,"file"), classLoader);
-        this.memory          = this.createMemory(config.getString(CacheConstants.MEMORY_ACCESS_TYPE,"unsafe"), classLoader);
+        this.memory          = this.createMemory(config.getString(CacheConstants.MEMORY_ACCESS_TYPE,"heap"), classLoader);
         
         if(this.swapper instanceof DiskSwapper){
         	((DiskSwapper)this.swapper).setRootPath(this.dataPath);
