@@ -30,6 +30,10 @@ public class CacheTransactionManagerImp
 	
 	private long timeout;
 	
+	public CacheTransactionManagerImp(){
+		this(null, -1);
+	}
+	
 	public CacheTransactionManagerImp(String transactionPath, long timeout){
 		this.transactionLocks = new ConcurrentHashMap<Serializable, CacheTransactionManagerImp.Transaction>();
 		this.locks            = new NamedLock();
@@ -138,6 +142,10 @@ public class CacheTransactionManagerImp
 		this.transactionPath = transactionPath;
 	}
 
+	public void setPath(String value) {
+		this.transactionPath = value;
+	}
+	
 	public String getPath() {
 		return this.transactionPath;
 	}
