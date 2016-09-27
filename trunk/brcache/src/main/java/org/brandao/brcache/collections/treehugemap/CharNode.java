@@ -168,9 +168,11 @@ public class CharNode<T> implements TreeNode<T>{
 
 	public boolean removeValue(ReferenceCollection<T> values, T oldValue) {
         if(this.valueId != -1){
-            boolean v = values.remove(this.valueId, oldValue);
-            this.valueId = -1;
-            return v;
+            boolean success = values.remove(this.valueId, oldValue);
+            if(success){
+            	this.valueId = -1;
+            }
+            return success;
         }
         else{
         	return false;
