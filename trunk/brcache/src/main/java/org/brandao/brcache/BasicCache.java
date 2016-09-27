@@ -95,14 +95,12 @@ public class BasicCache
     }
 
     /**
-     * Obtém o cache com suporte transacional com um gestor transacional e tempo limite específicos.
+     * Obtém o cache com suporte transacional com um gestor transacional específicos.
      * @param txManager gestor transacional.
-     * @param timeout tempo limite. É o tempo máximo que se espera, em milisegundos, para concluir uma operação
-     * no cache.
      * @return cache com suporte transacional.
      */
-    public TXCache getTXCache(CacheTransactionManager txManager, long timeout){
-    	return new TXCache(this, txManager, timeout);
+    public TXCache getTXCache(CacheTransactionManager txManager){
+    	return new TXCache(this, txManager);
     }
     
 	/* métodos de armazenamento */

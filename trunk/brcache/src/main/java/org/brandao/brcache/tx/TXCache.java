@@ -86,48 +86,48 @@ public class TXCache
 		try{
 			replace = CacheTransactionHandler.class.getDeclaredMethod(
 					"replace",	CacheTransactionManager.class, 
-					BasicCache.class, String.class, Object.class, long.class, long.class, long.class);
+					BasicCache.class, String.class, Object.class, long.class, long.class);
 
 			replaceStream = CacheTransactionHandler.class.getDeclaredMethod(
 					"replaceStream", CacheTransactionManager.class, 
-					BasicCache.class, String.class, InputStream.class, long.class, long.class, long.class);
+					BasicCache.class, String.class, InputStream.class, long.class, long.class);
 			
 			replaceExact = CacheTransactionHandler.class.getDeclaredMethod(
 					"replace", CacheTransactionManager.class, BasicCache.class,
 					String.class, Object.class, 
-					Object.class, long.class, long.class, long.class);
+					Object.class, long.class, long.class);
 
 			putIfAbsent = CacheTransactionHandler.class.getDeclaredMethod(
 					"putIfAbsent", CacheTransactionManager.class, BasicCache.class,
-					String.class, Object.class, long.class, long.class, long.class);
+					String.class, Object.class, long.class, long.class);
 
 			putIfAbsentStream = CacheTransactionHandler.class.getDeclaredMethod(
 					"putIfAbsentStream", CacheTransactionManager.class, BasicCache.class,
-					String.class, InputStream.class, long.class, long.class, long.class);
+					String.class, InputStream.class, long.class, long.class);
 			
 			put = CacheTransactionHandler.class.getDeclaredMethod(
 					"put", CacheTransactionManager.class, BasicCache.class,
-					String.class, Object.class, long.class, long.class, long.class);
+					String.class, Object.class, long.class, long.class);
 
 			putStream = CacheTransactionHandler.class.getDeclaredMethod(
 					"putStream", CacheTransactionManager.class, BasicCache.class, 
-		    		String.class, InputStream.class, long.class, long.class, long.class);
+		    		String.class, InputStream.class, long.class, long.class);
 
 			get = CacheTransactionHandler.class.getDeclaredMethod(
 					"get", CacheTransactionManager.class, BasicCache.class,
-					String.class, boolean.class, long.class);
+					String.class, boolean.class);
 
 			getStream = CacheTransactionHandler.class.getDeclaredMethod(
 					"getStream", CacheTransactionManager.class, BasicCache.class, 
-		    		String.class, boolean.class, long.class);
+		    		String.class, boolean.class);
 
 			removeExact = CacheTransactionHandler.class.getDeclaredMethod(
 					"remove", CacheTransactionManager.class, BasicCache.class,
-					String.class, Object.class, long.class);
+					String.class, Object.class);
 
 			remove = CacheTransactionHandler.class.getDeclaredMethod(
 					"remove", CacheTransactionManager.class, BasicCache.class,
-		    		String.class, long.class);
+		    		String.class);
 
 			replace.setAccessible(true);
 			replaceExact.setAccessible(true);
@@ -155,7 +155,7 @@ public class TXCache
 	 * @param cache cache não transacional.
 	 */
     public TXCache(BasicCache cache){
-    	this(cache, new CacheTransactionManagerImp() , TIME_OUT);
+    	this(cache, new CacheTransactionManagerImp(cache.getConfig().getDataPath() + "/tx", TIME_OUT));
     }
 	
     /**
@@ -164,22 +164,8 @@ public class TXCache
      * @param transactionManager gestor transacional.
      */
     public TXCache(BasicCache cache, CacheTransactionManager transactionManager){
-    	this(cache, transactionManager, TIME_OUT);
-    }
-
-    /**
-     * Cria um cache transacional especificando o gestor transacional e o tempo limite.
-     * @param cache cache não transacional.
-     * @param transactionManager gestor transacional.
-     * @param timeout tempo limite. É o tempo máximo que se espera, em milisegundos, para concluir uma operação
-     * no cache.
-     */
-    public TXCache(BasicCache cache, CacheTransactionManager transactionManager, long timeout){
     	this.cache = cache;
     	this.transactionManager = transactionManager;
-    	this.transactionTimeout = timeout;
-    	
-    	this.transactionManager.setConfiguration(cache.getConfig());
     }
     
     /**
