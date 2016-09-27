@@ -1,12 +1,12 @@
 package org.brandao.brcache.tx;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.brandao.brcache.BasicCache;
 import org.brandao.brcache.CacheErrors;
@@ -20,6 +20,8 @@ import org.brandao.concurrent.NamedLock;
 public class CacheTransactionManagerImp 
 	implements CacheTransactionManager{
 
+	private static final int TX_MAX_ID = Integer.MAX_VALUE - 2;
+	
 	private ThreadLocal<CacheTransactionHandler> transactions;
 	
 	private NamedLock locks;
@@ -27,6 +29,8 @@ public class CacheTransactionManagerImp
 	private ConcurrentMap<Serializable, Transaction> transactionLocks;
 	
 	private String transactionPath;
+	
+	private File transactionFilePath;
 	
 	private long timeout;
 	
@@ -38,8 +42,8 @@ public class CacheTransactionManagerImp
 		this.transactionLocks = new ConcurrentHashMap<Serializable, CacheTransactionManagerImp.Transaction>();
 		this.locks            = new NamedLock();
 		this.transactions     = new ThreadLocal<CacheTransactionHandler>();
-		this.transactionPath  = transactionPath;
-		this.timeout          = timeout;
+		this.setPath(transactionPath);
+		this.setTimeout(timeout);
 	}
 	
 	public void lock(Serializable txId, String key) throws TransactionException {
@@ -136,14 +140,11 @@ public class CacheTransactionManagerImp
 		
 		txHandler.rollback();
 	}
-
 	
-	public void setTransactionPath(String transactionPath) {
-		this.transactionPath = transactionPath;
-	}
-
 	public void setPath(String value) {
 		this.transactionPath = value;
+		this.transactionFilePath = new File(this.transactionPath);
+		this.transactionFilePath.mkdirs();
 	}
 	
 	public String getPath() {
@@ -212,10 +213,11 @@ public class CacheTransactionManagerImp
 		this.transactions.remove();
 	}
 
-	private AtomicInteger transactionIDs = new AtomicInteger(0);
+	private int transactionIDs = 0;
 	
-	private Serializable createTransactionID(){
-		Integer i = transactionIDs.incrementAndGet();
+	private synchronized Serializable createTransactionID(){
+		int i = transactionIDs++;
+		transactionIDs = transactionIDs % TX_MAX_ID;
 		return Integer.toString(i, Character.MAX_RADIX);
 	}
 	
