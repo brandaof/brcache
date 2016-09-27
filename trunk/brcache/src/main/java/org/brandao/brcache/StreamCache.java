@@ -214,26 +214,6 @@ public abstract class StreamCache
         }
     }
     
-    protected Memory getMemoryAccessStrategy(){
-    	return null;
-    }
-    
-    /*
-     * Obtém a estratégia de swap dos dados do cache.
-     * 
-     * @param strategy Tipo da estratégia.
-     * @return Estratégia.
-     */
-    /*
-    protected Swapper getSwaper(SwaperStrategy strategy){
-        Swapper swapper = new FileSwaper();
-        if(swapper instanceof DiskSwapper)
-            ((DiskSwapper)swapper).setRootPath(this.dataPath);
-        
-        return swapper;
-    }
-    */
-    
     /**
 	 * Associa o fluxo de bytes do valor à chave.
 	 * @param key chave associada ao fluxo.
@@ -693,10 +673,7 @@ public abstract class StreamCache
         int i=0;
         while(current != null){
 			if(current.id == map.getId() && current.segment == i){
-				//current.id      = -1;
-				//current.segment = -1;
 				this.dataList.remove(segmentId, current);
-				this.memory.release(current.buffer);
 			}
             
 			segmentId = current.nextBlock;
@@ -709,7 +686,6 @@ public abstract class StreamCache
     
     /**
      * Obtém a quantidade de itens recuperados.
-     * 
      * @return Quantidade de itens recuperados.
      */
     public long getCountRead(){
@@ -718,7 +694,6 @@ public abstract class StreamCache
 
     /**
      * Obtém a quantidade de itens armazenados.
-     * 
      * @return Quantidade de itens armazenados.
      */
     public long getCountWrite(){
@@ -727,7 +702,6 @@ public abstract class StreamCache
 
     /**
      * Obtém a quantidade de itens removidos.
-     * 
      * @return Quantidade de itens removidos.
      */
     public long getCountRemoved() {
@@ -736,7 +710,6 @@ public abstract class StreamCache
 
     /**
      * Obtém a quantidade de bytes recuperados.
-     * 
      * @return Quantidade de bytes recuperados.
      */
     public long getCountReadData() {
@@ -745,7 +718,6 @@ public abstract class StreamCache
     
     /**
      * Obtém a quantidade de bytes armazenados.
-     * 
      * @return Quantidade de bytes armazenados.
      */
     public long getCountWriteData() {
@@ -754,7 +726,6 @@ public abstract class StreamCache
 
     /**
      * Obtém a quantidade de bytes removidos.
-     * 
      * @return Quantidade de bytes removidos.
      */
     public long getCountRemovedData() {
@@ -803,23 +774,7 @@ public abstract class StreamCache
 		this.dataList.destroy();
 		this.dataMap.destroy();
 		this.swapper.destroy();
-		//this.deleteDir(new File(this.swapper));
 	}
-	
-	/*
-	private boolean deleteDir(File dir) {
-        if (dir.isDirectory()) {
-            String[] children = dir.list();
-            for (int i = 0; i < children.length; i++) {
-                boolean success = deleteDir(new File(dir, children[i]));
-                if (!success) {
-                    return false;
-                }
-            }
-        }
-        return dir.delete();
-    }
-    */
 	
     protected void finalize() throws Throwable{
     	try{
