@@ -24,8 +24,12 @@ public interface CacheTransactionManager {
 	
 	void rollback(Serializable transaction) throws TransactionException;
 	
+	void setPath(String value);
+	
 	String getPath();
 
+	void setTimeout(long value);
+	
 	long getTimeout();
 	
 	CacheTransactionHandler begin(BasicCache cache);
