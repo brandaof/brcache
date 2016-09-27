@@ -272,12 +272,12 @@ abstract class AbstractCollectionSegment<I,T>
     public void destroy(){
     	
     	try{
+	    	this.live = false;
 	    	for(Thread st: this.swapperThreads){
 	    		st.interrupt();
 	    	}
     	}
     	finally{
-	    	this.live      = false;
 	    	this.swapCandidates.clear();
 	        this.swap.destroy();
 	        

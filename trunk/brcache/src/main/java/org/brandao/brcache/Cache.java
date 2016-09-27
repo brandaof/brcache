@@ -39,13 +39,6 @@ public class Cache
     public Cache(){
     	super(new BRCacheConfig(new Configuration()));
     	this.locks = new NamedLock();
-    	/*
-        this(
-    		3L*1024L*1024L, 1024, 0.5, 
-    		1L*1024L*1024L, 1024, 0.5, 
-    		10L*1024L*1024L, 64*1024, 1*1024, 0.5, 
-    		1*1024*1024L, 100, "/mnt/brcache", SwaperStrategy.FILE, 1);
-		*/
     }
     
     /**
