@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.UUID;
 
 import org.brandao.brcache.BasicCache;
 import org.brandao.brcache.CacheErrors;
@@ -39,15 +38,14 @@ class CacheTransactionHandlerImp
 
 	private String transactionName;
 	
-	private UUID id;
+	private Serializable id;
 	
-	private BRCacheTransactionConfig cacheTransactionConfig;
+	private long timeout;
 	
 	public CacheTransactionHandlerImp(
-			BRCacheTransactionConfig cacheTransactionConfig,
-			UUID id, 
+			Serializable id, 
 			CacheTransactionManager transactionManager, 
-			BasicCache cache){
+			BasicCache cache, long timeout){
 		
 		this.commitInProgress   = false;
 		this.started            = false;
@@ -57,7 +55,7 @@ class CacheTransactionHandlerImp
 		this.transactionManager	= transactionManager;
 		this.transactionName    = id.toString();
 		this.id					= id;
-		this.cacheTransactionConfig = cacheTransactionConfig;
+		this.timeout            = timeout;
 	}
 	
 	public Serializable getId() {
@@ -66,12 +64,10 @@ class CacheTransactionHandlerImp
 	
 	public synchronized void begin() {
 		
-		//this.transactionInfo = new TransactionInfo(id, transactionManager.getTransactionPath());
-		this.transactionInfo = new TransactionInfo(
-				id, this.cacheTransactionConfig);
+		this.transactionInfo = new TransactionInfo(id, this.timeout);
 		
 		this.file            = new File(
-				transactionManager.getTransactionPath(), 
+				transactionManager.getPath(), 
 				TRANSACTION_NAME.replace("{{name}}", this.transactionName));
 		
 		if(this.started){
@@ -185,7 +181,7 @@ class CacheTransactionHandlerImp
 	
 	public void close(){
 		try{
-			transactionInfo.close();
+			transactionInfo.close(this.cache);
 			file.delete();
 			this.cache 				= null;
 			this.file 				= null;
@@ -235,68 +231,66 @@ class CacheTransactionHandlerImp
 	}
 
 	public Object replace(CacheTransactionManager manager, BasicCache cache,
-			String key, Object value, long timeToLive, long timeToIdle,
-			long time) throws StorageException {
-		return this.transactionInfo.replace(manager, cache, key, value, timeToLive, timeToIdle, time);
+			String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
+		return this.transactionInfo.replace(manager, cache, key, value, timeToLive, timeToIdle);
 	}
 
 	public boolean replaceStream(CacheTransactionManager manager,
 			BasicCache cache, String key, InputStream inputData,
-			long timeToLive, long timeToIdle, long time)
+			long timeToLive, long timeToIdle)
 			throws StorageException {
 		return this.transactionInfo.replaceStream(manager, cache, key, inputData, 
-				timeToLive, timeToIdle, time);
+				timeToLive, timeToIdle);
 	}
 
 	public boolean replace(CacheTransactionManager manager, BasicCache cache,
 			String key, Object oldValue, Object newValue, long timeToLive,
-			long timeToIdle, long time) throws StorageException {
-		return this.transactionInfo.replace(manager, cache, key, oldValue, newValue, timeToLive, timeToIdle, time);
+			long timeToIdle) throws StorageException {
+		return this.transactionInfo.replace(manager, cache, key, oldValue, newValue, timeToLive, timeToIdle);
 	}
 
 	public Object putIfAbsent(CacheTransactionManager manager,
 			BasicCache cache, String key, Object value, long timeToLive,
-			long timeToIdle, long time) throws StorageException {
-		return this.transactionInfo.putIfAbsent(manager, cache, key, value, timeToLive, timeToIdle, time);
+			long timeToIdle) throws StorageException {
+		return this.transactionInfo.putIfAbsent(manager, cache, key, value, timeToLive, timeToIdle);
 	}
 
 	public InputStream putIfAbsentStream(CacheTransactionManager manager,
 			BasicCache cache, String key, InputStream inputData,
-			long timeToLive, long timeToIdle, long time)
+			long timeToLive, long timeToIdle)
 			throws StorageException {
-		return this.transactionInfo.putIfAbsentStream(manager, cache, key, inputData, timeToLive, timeToIdle, time);
+		return this.transactionInfo.putIfAbsentStream(manager, cache, key, inputData, timeToLive, timeToIdle);
 	}
 
 	public boolean put(CacheTransactionManager manager, BasicCache cache,
-			String key, Object value, long timeToLive, long timeToIdle,
-			long time) throws StorageException {
-		return this.transactionInfo.put(manager, cache, key, value, timeToLive, timeToIdle, time);
+			String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
+		return this.transactionInfo.put(manager, cache, key, value, timeToLive, timeToIdle);
 	}
 
 	public boolean putStream(CacheTransactionManager manager, BasicCache cache,
-			String key,InputStream inputData, long timeToLive, long timeToIdle, long time) throws StorageException {
-		return this.transactionInfo.putStream(manager, cache, key, inputData, timeToLive, timeToIdle, time);
+			String key,InputStream inputData, long timeToLive, long timeToIdle) throws StorageException {
+		return this.transactionInfo.putStream(manager, cache, key, inputData, timeToLive, timeToIdle);
 	}
 
 	public Object get(CacheTransactionManager manager, BasicCache cache,
-			String key, boolean forUpdate, long time) throws RecoverException {
-		return this.transactionInfo.get(manager, cache, key, forUpdate, time);
+			String key, boolean forUpdate) throws RecoverException {
+		return this.transactionInfo.get(manager, cache, key, forUpdate);
 	}
 
 	public InputStream getStream(CacheTransactionManager manager,
-			BasicCache cache, String key, boolean forUpdate, long time)
+			BasicCache cache, String key, boolean forUpdate)
 			throws RecoverException {
-		return this.transactionInfo.getStream(manager, cache, key, forUpdate, time);
+		return this.transactionInfo.getStream(manager, cache, key, forUpdate);
 	}
 
 	public boolean remove(CacheTransactionManager manager, BasicCache cache,
-			String key, Object value, long time) throws StorageException {
-		return this.transactionInfo.remove(manager, cache, key, value, time);
+			String key, Object value) throws StorageException {
+		return this.transactionInfo.remove(manager, cache, key, value);
 	}
 
 	public boolean remove(CacheTransactionManager manager, BasicCache cache,
-			String key, long time) throws StorageException {
-		return this.transactionInfo.remove(manager, cache, key, time);
+			String key) throws StorageException {
+		return this.transactionInfo.remove(manager, cache, key);
 	}
 
 }

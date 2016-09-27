@@ -3,10 +3,11 @@ package org.brandao.brcache.tx;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import org.brandao.brcache.BRCacheConfig;
 import org.brandao.brcache.BasicCache;
 import org.brandao.brcache.CacheErrors;
 import org.brandao.concurrent.NamedLock;
@@ -23,31 +24,21 @@ public class CacheTransactionManagerImp
 	
 	private NamedLock locks;
 	
-	private Map<UUID, Transaction> transactionLocks;
+	private ConcurrentMap<Serializable, Transaction> transactionLocks;
 	
 	private String transactionPath;
 	
-	private BRCacheConfig config;
-
-	private BRCacheTransactionConfig cacheTransactionConfig;
-    
-	public CacheTransactionManagerImp(){
+	private long timeout;
+	
+	public CacheTransactionManagerImp(String transactionPath, long timeout){
+		this.transactionLocks = new ConcurrentHashMap<Serializable, CacheTransactionManagerImp.Transaction>();
+		this.locks            = new NamedLock();
+		this.transactions     = new ThreadLocal<CacheTransactionHandler>();
+		this.transactionPath  = transactionPath;
+		this.timeout          = timeout;
 	}
 	
-	public void setConfiguration(BRCacheConfig config){
-		this.config                 = config;
-		this.transactionLocks       = new HashMap<UUID, CacheTransactionManagerImp.Transaction>();
-		this.locks                  = new NamedLock();
-		this.transactions           = new ThreadLocal<CacheTransactionHandler>();
-		
-		this.cacheTransactionConfig = new BRCacheTransactionConfig();
-		this.cacheTransactionConfig.setConfiguration(config.getConfiguration());
-		
-        this.transactionPath = this.cacheTransactionConfig.getDataPath();
-
-	}
-	
-	public void lock(UUID txId, String key) throws TransactionException {
+	public void lock(Serializable txId, String key) throws TransactionException {
 		Serializable lockId = null;
 		try{
 			Transaction tx = transactionLocks.get(txId);
@@ -64,7 +55,7 @@ public class CacheTransactionManagerImp
 		}
 	}
 
-	public void tryLock(UUID txId, String key, long time, TimeUnit unit)
+	public void tryLock(Serializable txId, String key, long time, TimeUnit unit)
 			throws TransactionException {
 		Serializable lockId = null;
 		try{
@@ -90,7 +81,7 @@ public class CacheTransactionManagerImp
 		}
 	}
 
-	public void unlock(UUID txId, String key)
+	public void unlock(Serializable txId, String key)
 			throws TransactionException {
 		Transaction tx = transactionLocks.get(txId);
 		
@@ -118,7 +109,7 @@ public class CacheTransactionManagerImp
 		}
 	}
 
-	public void commit(UUID txId) throws TransactionException {
+	public void commit(Serializable txId) throws TransactionException {
 		Transaction tx = this.transactionLocks.get(txId);
 		
 		if(tx == null){
@@ -130,7 +121,7 @@ public class CacheTransactionManagerImp
 		txHandler.commit();
 	}
 
-	public void rollback(UUID txId) throws TransactionException {
+	public void rollback(Serializable txId) throws TransactionException {
 		Transaction tx = this.transactionLocks.get(txId);
 		
 		if(tx == null){
@@ -147,10 +138,18 @@ public class CacheTransactionManagerImp
 		this.transactionPath = transactionPath;
 	}
 
-	public String getTransactionPath() {
+	public String getPath() {
 		return this.transactionPath;
 	}
 
+	public long getTimeout() {
+		return this.timeout;
+	}
+
+	public void setTimeout(long value) {
+		this.timeout = value;
+	}
+	
 	public CacheTransactionHandler begin(BasicCache cache) {
 		CacheTransactionHandler txh = this.transactions.get();
 		
@@ -158,11 +157,9 @@ public class CacheTransactionManagerImp
 			throw new TransactionException(CacheErrors.ERROR_1016);
 		}
 		
-		UUID txId = UUID.randomUUID();
-		//txh = new CacheTransactionHandlerImp(txId, this, cache);
+		Serializable txId = this.createTransactionID();
 		
-		txh = new CacheTransactionHandlerImp(
-				this.cacheTransactionConfig, txId, this, cache);
+		txh = new CacheTransactionHandlerImp(txId, this, cache, this.timeout);
 		
 		this.transactionLocks.put(txId, new Transaction(txh, new HashMap<String, Serializable>()));
 		this.transactions.set(txh);
@@ -193,7 +190,7 @@ public class CacheTransactionManagerImp
 			throw new TransactionException(CacheErrors.ERROR_1027);
 		}
 		
-		UUID txId = (UUID) tx.getId();
+		Serializable txId = tx.getId();
 		
 		Transaction txInfo = this.transactionLocks.remove(txId);
 		Map<String, Serializable> locks = txInfo.locks;
@@ -207,6 +204,13 @@ public class CacheTransactionManagerImp
 		this.transactions.remove();
 	}
 
+	private AtomicInteger transactionIDs = new AtomicInteger(0);
+	
+	private Serializable createTransactionID(){
+		Integer i = transactionIDs.incrementAndGet();
+		return Integer.toString(i, Character.MAX_RADIX);
+	}
+	
 	private class Transaction{
 		
 		public CacheTransactionHandler txHandler;
@@ -220,4 +224,5 @@ public class CacheTransactionManagerImp
 		}
 		
 	}
+	
 }
