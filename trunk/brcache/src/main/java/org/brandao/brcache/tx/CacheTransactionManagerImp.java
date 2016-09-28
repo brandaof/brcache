@@ -142,9 +142,15 @@ public class CacheTransactionManagerImp
 	}
 	
 	public void setPath(String value) {
-		this.transactionPath = value;
-		this.transactionFilePath = new File(this.transactionPath);
-		this.transactionFilePath.mkdirs();
+		if(value != null){
+			this.transactionPath     = value;
+			this.transactionFilePath = new File(this.transactionPath);
+			this.transactionFilePath.mkdirs();
+		}
+		else{
+			this.transactionPath     = null;
+			this.transactionFilePath = null;
+		}
 	}
 	
 	public String getPath() {
