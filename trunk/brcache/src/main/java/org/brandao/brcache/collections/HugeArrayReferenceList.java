@@ -45,7 +45,7 @@ public class HugeArrayReferenceList<T>
     	for(int i=0;i<this.lists.length;i++){
             this.lists[i] = 
                     new ArrayCollectionReference<T>(
-                        id == null? null : id + "list_" + i, 
+                        id == null? null : id + "_ref_" + i, 
                         maxCapacityElements, 
                         clearFactorElements, 
                         fragmentFactorElements,

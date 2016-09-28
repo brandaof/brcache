@@ -99,7 +99,7 @@ abstract class AbstractCollectionSegment<I,T>
         
         for(int i=0;i<swapperThreads.length;i++){
         	SwapperThread swapperThread = new SwapperThread(swapCandidates);
-        	swapperThreads[i] = new Thread(swapperThread);
+        	swapperThreads[i] = new Thread(swapperThread, id + "_" + i);
         	swapperThreads[i].start();
         }
         
