@@ -65,15 +65,15 @@ public abstract class StreamCache
     
     private Memory memory;
     
-    private final StringTreeMap<DataMap> dataMap;
+    private StringTreeMap<DataMap> dataMap;
 
-    private final HugeArrayReferenceList<Block> dataList;
+    private HugeArrayReferenceList<Block> dataList;
     
-    private final int segmentSize;
+    private int segmentSize;
     
-    private final long maxBytesToStorageEntry;
+    private long maxBytesToStorageEntry;
     
-    private final int maxLengthKey;
+    private int maxLengthKey;
     
     private Swapper swapper;
     
@@ -92,6 +92,14 @@ public abstract class StreamCache
     volatile long countRemovedData;
     
     private boolean deleteOnExit;
+    
+    public StreamCache(){
+        this.dataMap 				= null;
+        this.dataList 				= null;
+        this.segmentSize 			= -1;
+        this.maxBytesToStorageEntry = -1;
+        this.maxLengthKey 			= -1;
+    }
     
     /**
      * Cria um novo cache.
@@ -113,6 +121,49 @@ public abstract class StreamCache
      * @param memory Acesso à memória.
      */
     public StreamCache(
+    		long nodeBufferSize,
+    		long nodePageSize,
+    		double nodeSwapFactor,
+    		
+    		long indexBufferSize,
+    		long indexPageSize,
+    		double indexSwapFactor,
+    		
+    		long dataBufferSize,
+    		long dataPageSize,
+    		long blockSize,
+    		double dataSwapFactor,
+    		
+    		long maxSizeEntry,
+    		int maxSizeKey,
+            Swapper swapper,
+            int quantitySwaperThread,
+            Memory memory
+    		){
+    	this.init(nodeBufferSize, nodePageSize, nodeSwapFactor, indexBufferSize, 
+    			indexPageSize, indexSwapFactor, dataBufferSize, dataPageSize, blockSize, 
+    			dataSwapFactor, maxSizeEntry, maxSizeKey, swapper, quantitySwaperThread, memory);
+    }
+
+    /**
+     * Inicia o cache.
+     * @param nodeBufferSize Tamanho do buffer, em bytes, onde os nós ficarão armazenados. 
+     * @param nodePageSize Tamanho da página, em bytes, do buffer de nós.
+     * @param nodeSwapFactor Fator de permuta dos nós.
+     * @param indexBufferSize Tamanho do buffer, em bytes, onde os índices ficarão armazenados.
+     * @param indexPageSize Tamanho da página, em bytes, do buffer de índices.
+     * @param indexSwapFactor Fator de permuta dos índices.
+     * @param dataBufferSize Tamanho do buffer, em bytes, onde os dados ficarão armazenados. 
+     * @param dataPageSize Tamanho da página, em bytes, do buffer de dados.
+     * @param blockSize Tamanho do bloco, em bytes.
+     * @param dataSwapFactor Fator de permuta dos dados.
+     * @param maxSizeEntry Tamanho máximo de uma entrada no cache.
+     * @param maxSizeKey Tamanho máximo de uma chave.
+     * @param swapper Estratégia de troca dos dados entre a memória e outro dispositivo.
+     * @param quantitySwaperThread Quantidade de processos usados para fazer a permuta.
+     * @param memory Acesso à memória.
+     */
+    protected void init(
     		long nodeBufferSize,
     		long nodePageSize,
     		double nodeSwapFactor,

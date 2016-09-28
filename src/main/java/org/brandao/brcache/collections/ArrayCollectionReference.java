@@ -48,7 +48,7 @@ public class ArrayCollectionReference<T> {
         swap              = swap == null? new TreeFileSwapper() : swap;
         this.collection   = 
                     new CollectionSegmentImp<Object>(
-                        id == null? null : id + "list", 
+                        id == null? null : id + "_array", 
                         maxCapacityElements, 
                         clearFactorElements, 
                         fragmentFactorElements,
