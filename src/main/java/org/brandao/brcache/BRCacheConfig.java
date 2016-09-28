@@ -81,14 +81,14 @@ public class BRCacheConfig implements Serializable{
     	this.configuration   = config;
         this.nodesBufferSize = config.getLong(CacheConstants.NODES_BUFFER_SIZE,		"1m");
         this.nodesPageSize   = config.getLong(CacheConstants.NODES_PAGE_SIZE,		"1k");
-        this.nodesSwapFactor = config.getDouble(CacheConstants.NODES_SWAP_FACTOR,	"0.5");
+        this.nodesSwapFactor = config.getDouble(CacheConstants.NODES_SWAP_FACTOR,	"0.3");
         this.indexBufferSize = config.getLong(CacheConstants.INDEX_BUFFER_SIZE,		"1m");
         this.indexPageSize   = config.getLong(CacheConstants.INDEX_PAGE_SIZE,		"1k");
-        this.indexSwapFactor = config.getDouble(CacheConstants.INDEX_SWAP_FACTOR,	"0.5");
+        this.indexSwapFactor = config.getDouble(CacheConstants.INDEX_SWAP_FACTOR,	"0.3");
         this.dataBufferSize  = config.getLong(CacheConstants.DATA_BUFFER_SIZE,		"64m");
         this.dataBlockSize   = config.getLong(CacheConstants.DATA_BLOCK_SIZE,		"1k");
         this.dataPageSize    = config.getLong(CacheConstants.DATA_PAGE_SIZE,		"8k");
-        this.dataSwapFactor  = config.getDouble(CacheConstants.DATA_SWAP_FACTOR,	"0.5");
+        this.dataSwapFactor  = config.getDouble(CacheConstants.DATA_SWAP_FACTOR,	"0.3");
         this.maxSizeEntry    = config.getLong(CacheConstants.MAX_SIZE_ENTRY,		"1m");
         this.maxSizeKey      = config.getInt(CacheConstants.MAX_SIZE_KEY,			"100");
         this.swapperThread   = config.getInt(CacheConstants.SWAPPER_THREAD,			"4");
