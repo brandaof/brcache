@@ -46,7 +46,7 @@ public class StressCacheTest extends TestCase{
     public void test() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
         Collections.setPath("/mnt/brcache");
-        final Cache cache = new Cache()/*.getTXCache()*/;
+        final Cache cache = new Cache().getTXCache();
 
         Thread read =
             new Thread(){

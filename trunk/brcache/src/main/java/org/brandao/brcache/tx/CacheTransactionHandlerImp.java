@@ -18,7 +18,7 @@ import org.brandao.brcache.StorageException;
 class CacheTransactionHandlerImp
 	implements CacheTransactionHandler{
 
-	private static final String TRANSACTION_NAME = "{{name}}.tx";
+	private static final String TRANSACTION_NAME = "tx-{{name}}.tx";
 	
 	private TransactionInfo transactionInfo;
 	
