@@ -310,16 +310,17 @@ class TransactionInfo implements Serializable {
 
 		for(String key: this.updated){
 			CacheInputStream in = (CacheInputStream) cache.getStream(key);
+			String orgKey       = this.originalDataPrefix + key;
 			
 			if(in != null){
-				String orgKey = this.originalDataPrefix + key;
 				cache.putStream(orgKey, in, this.timeout, 0); 
 				this.cacheItemMetadata.put(orgKey, new ItemCacheMetadata(in));
-				saved.add(key);
 			}
 			else{
-				saved.add(key);
+				cache.remove(orgKey); 
 			}
+			
+			saved.add(key);
 		}
 		
 	}
@@ -354,11 +355,6 @@ class TransactionInfo implements Serializable {
 				}
 				else{
 					ItemCacheMetadata metadata = this.cacheItemMetadata.get(key);
-					/*
-					ItemCacheInputStream in = new ItemCacheInputStream(
-							-1, metadata.getTimeToLive(), metadata.getTimeToIdle(), 
-							-1, -1, entity.getFlag(), entity.getSize(), entity);
-					*/
 					cache.putStream(key, entity, metadata.getTimeToLive(), metadata.getTimeToIdle());
 				}
 			}
@@ -368,7 +364,7 @@ class TransactionInfo implements Serializable {
 	
 	public void close(BasicCache cache) throws TransactionException{
 		
-		for(String key: this.managed){
+		for(String key: this.updated){
 			String org = this.originalDataPrefix + key;
 			String ref = this.dataPrefix + key;
 			cache.remove(org);

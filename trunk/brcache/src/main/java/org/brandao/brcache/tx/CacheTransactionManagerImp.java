@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.brandao.brcache.BasicCache;
 import org.brandao.brcache.CacheErrors;
+import org.brandao.brcache.collections.Collections;
 import org.brandao.concurrent.NamedLock;
 
 /**
@@ -145,6 +146,7 @@ public class CacheTransactionManagerImp
 		if(value != null){
 			this.transactionPath     = value;
 			this.transactionFilePath = new File(this.transactionPath);
+            Collections.deleteDir(this.transactionFilePath);
 			this.transactionFilePath.mkdirs();
 		}
 		else{
