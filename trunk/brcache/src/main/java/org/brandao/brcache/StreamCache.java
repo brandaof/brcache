@@ -40,7 +40,7 @@ import org.brandao.brcache.memory.RegionMemory;
  *    
  *    Cache cache = ...;
  *    InputStream valueStream = ...;
- *    cache.putStream("uma_chave", valueStream, 1200);
+ *    cache.putStream("uma_chave", valueStream, 1200, 0);
  *    
  * ex2:
  *    

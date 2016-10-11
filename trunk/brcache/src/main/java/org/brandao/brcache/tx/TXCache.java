@@ -42,9 +42,9 @@ import org.brandao.brcache.memory.Memory;
  *    CacheTransaction tx = txCache.beginTransaction();
  *    
  *    try{
- *        cache.put("chave1", objeto1);
+ *        cache.put("chave1", objeto1, 0, 0);
  *        cache.remove("chave2");
- *        cache.putIfAbsent("chave3", objeto3);
+ *        cache.putIfAbsent("chave3", objeto3, 0, 0);
  *        tx.commit();
  *    }
  *    catch(Throwable e){
