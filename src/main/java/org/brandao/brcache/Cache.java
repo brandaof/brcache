@@ -15,7 +15,7 @@ import org.brandao.concurrent.NamedLock;
  * ex:
  *    
  *    Cache cache = ...;
- *    cache.put("uma_chave", meuObjeto, 1200);
+ *    cache.put("uma_chave", meuObjeto, 1200, 0);
  *    
  * ex2:
  *    
