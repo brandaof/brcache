@@ -218,7 +218,8 @@ public class TXCache
      * Substitui o valor associado à chave somente se ele existir.
      * @param key chave associada ao valor.
      * @param value valor para ser associado à chave.
-     * @param maxAliveTime tempo máximo de vida do valor no cache.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
      * @return o valor anterior associado à chave.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
@@ -275,7 +276,8 @@ public class TXCache
 	 * @param key chave associada ao valor.
 	 * @param oldValue valor esperado associado à chave.
 	 * @param newValue valor para ser associado à chave.
-	 * @param maxAliveTime tempo máximo de vida do valor no cache.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
 	 * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
@@ -305,7 +307,8 @@ public class TXCache
 	 * Associa o valor a chave somente se a chave não estiver associada a um valor.
 	 * @param key chave associada ao valor.
 	 * @param value valor para ser associado à chave.
-	 * @param maxAliveTime tempo máximo de vida do valor no cache.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
 	 * @return valor anterior associado à chave.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item ou se o item atual 
      * expirar no momento da execução do método.
@@ -362,7 +365,8 @@ public class TXCache
 	 * Associa o valor à chave.
 	 * @param key chave associada ao valor.
 	 * @param value valor para ser associado à chave.
-	 * @param maxAliveTime tempo máximo de vida do valor no cache.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
 	public boolean put(
@@ -387,7 +391,8 @@ public class TXCache
     /**
 	 * Associa o fluxo de bytes do valor à chave.
 	 * @param key chave associada ao fluxo.
-	 * @param maxAliveTime tempo máximo de vida do valor no cache.
+	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
+	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
      * @param inputData fluxo de bytes do valor.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */

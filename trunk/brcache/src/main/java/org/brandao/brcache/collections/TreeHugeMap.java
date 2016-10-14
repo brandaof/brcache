@@ -66,22 +66,6 @@ public class TreeHugeMap<K extends TreeKey,T>
             1);
     }
 
-    /**
-     * Cria uma nova instância.
-     * @param id Identificação.
-     * @param maxCapacityNodes
-     * @param clearFactorNodes
-     * @param fragmentFactorNodes
-     * @param swapNodes
-     * @param quantityLockNodes
-     * @param quantitySwaperThreadNodes
-     * @param maxCapacityElements
-     * @param clearFactorElements
-     * @param fragmentFactorElements
-     * @param swapElements
-     * @param quantityLockElements
-     * @param quantitySwaperThreadElements 
-     */
     public TreeHugeMap(
             String id, 
             int maxCapacityNodes,

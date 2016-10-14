@@ -65,185 +65,94 @@ public class CacheList<T>
         this.internalList.setForceSwap(true);
     }
     
-    /**
-     * @see List#size() 
-     * @return 
-     */
     public int size() {
         return this.internalList.size();
     }
 
-    /**
-     * @see List#isEmpty() 
-     * @return 
-     */
     public boolean isEmpty() {
         return this.internalList.isEmpty();
     }
 
-    /**
-     * @see List#contains(java.lang.Object) 
-     * @return 
-     */
     public boolean contains(Object o) {
         return this.internalList.contains(o);
     }
 
-    /**
-     * @see List#iterator() 
-     * @return 
-     */
     public Iterator<T> iterator() {
         return this.internalList.iterator();
     }
 
-    /**
-     * @see List#toArray() 
-     * @return 
-     */
     public Object[] toArray() {
         return this.internalList.toArray();
     }
 
-    /**
-     * @see List#toArray(T[]) 
-     * @return 
-     */
     public <K> K[] toArray(K[] a) {
         return this.internalList.toArray(a);
     }
 
-    /**
-     * @see List#add(java.lang.Object) 
-     * @return 
-     */
     public boolean add(T e) {
         return this.internalList.add(e);
     }
 
-    /**
-     * @see List#remove(java.lang.Object) 
-     * @return 
-     */
     public boolean remove(Object o) {
         return this.internalList.remove(o);
     }
 
-    /**
-     * @see List#containsAll(java.util.Collection) 
-     * @return 
-     */
     public boolean containsAll(Collection<?> c) {
         return this.internalList.containsAll(c);
     }
 
-    /**
-     * @see List#addAll(java.util.Collection) 
-     * @return 
-     */
     public boolean addAll(Collection<? extends T> c) {
         return this.internalList.addAll(c);
     }
 
-    /**
-     * @see List#addAll(int, java.util.Collection) 
-     * @return 
-     */
     public boolean addAll(int index, Collection<? extends T> c) {
         return this.addAll(index, c);
     }
 
-    /**
-     * @see List#removeAll(java.util.Collection) 
-     * @return 
-     */
     public boolean removeAll(Collection<?> c) {
         return this.internalList.removeAll(c);
     }
 
-    /**
-     * @see List#retainAll(java.util.Collection) 
-     * @return 
-     */
     public boolean retainAll(Collection<?> c) {
         return this.internalList.removeAll(c);
     }
 
-    /**
-     * @see List#clear() 
-     */
     public void clear() {
         this.internalList.clear();
     }
 
-    /**
-     * @see List#get(int) 
-     * @return 
-     */
     public T get(int index) {
         return this.internalList.get(index);
     }
 
-    /**
-     * @see List#set(int, java.lang.Object) 
-     * @return 
-     */
     public T set(int index, T element) {
         return this.internalList.set(index, element);
     }
 
-    /**
-     * @see List#addAll(int, java.util.Collection) 
-     * @return 
-     */
     public void add(int index, T element) {
         this.internalList.add(index, element);
     }
 
-    /**
-     * @see List#remove(int) 
-     * @return 
-     */
     public T remove(int index) {
         return this.remove(index);
     }
 
-    /**
-     * @see List#indexOf(java.lang.Object) 
-     * @return 
-     */
     public int indexOf(Object o) {
         return this.internalList.indexOf(o);
     }
 
-    /**
-     * @see List#lastIndexOf(java.lang.Object) 
-     * @return 
-     */
     public int lastIndexOf(Object o) {
         return this.internalList.lastIndexOf(o);
     }
 
-    /**
-     * @see List#listIterator() 
-     * @return 
-     */
     public ListIterator<T> listIterator() {
         return this.internalList.listIterator();
     }
 
-    /**
-     * @see List#listIterator(int) 
-     * @return 
-     */
     public ListIterator<T> listIterator(int index) {
         return this.internalList.listIterator(index);
     }
 
-    /**
-     * @see List#subList(int, int) 
-     * @return 
-     */
     public List<T> subList(int fromIndex, int toIndex) {
         return this.internalList.subList(fromIndex, toIndex);
     }
@@ -251,7 +160,6 @@ public class CacheList<T>
     /**
      * Obtém o responsável por fazer a troca de dados entre as instâncias.
      * @return responsável.
-     * @see {@link Swapper}
      */
     public static Swapper getSwapper() {
 		return swapper;
@@ -260,7 +168,6 @@ public class CacheList<T>
     /**
      * Define o responsável por fazer a troca de dados entre as instâncias.
      * @param swapper responsável.
-     * @see {@link Swapper}
      */
 	public static void setSwapper(Swapper swapper) {
 		CacheList.swapper = swapper;
