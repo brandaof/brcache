@@ -40,7 +40,7 @@ public class CacheError {
 	/**
 	 * Obtém a descrição do erro.
 	 * @param params
-	 * @return
+	 * @return Descrição.
 	 */
 	public String getString(Object ... params){
 		return "ERROR " + this.id + ": " + String.format(this.message, (Object[])params);

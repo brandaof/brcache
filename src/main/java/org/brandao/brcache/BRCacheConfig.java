@@ -388,7 +388,7 @@ public class BRCacheConfig implements Serializable{
 
 	/**
 	 * Define a estratégia de acesso a memória.
-	 * @param memoryAccessStrategy estratégia.
+	 * @param memory estratégia.
 	 */
 	public void setMemory(Memory memory) {
 		this.memory = memory;
