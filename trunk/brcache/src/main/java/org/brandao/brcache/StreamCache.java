@@ -552,7 +552,7 @@ public abstract class StreamCache
     
     protected InputStream getStream(String key) throws RecoverException {
         DataMap map = this.dataMap.get(key);
-    	return this.getStream(key, map);
+    	return map == null? null : this.getStream(key, map);
     }
     
     private InputStream getStream(String key, DataMap map) throws RecoverException {
@@ -560,45 +560,40 @@ public abstract class StreamCache
         try{
             countRead++;
 
-            if(map != null){
-            	
-            	//Verifica se o item já expirou
-            	if(map.isDead()){
-            		//Se expirou, remove do cache e retorna null.
-            		this.remove(key, map);
-            		return null;
-            	}
-            	
-            	//Se timeToIdle foi definido, é atualizado o horário do último acesso.
-            	if(map.getTimeToIdle() > 0){
-	            	map.setMostRecentTime(System.currentTimeMillis());
-	            	//a instância no momento do replace porde não ser a mesma passada em oldElement.
-	            	this.dataMap.replace(key, map, map);
-            	}
-            	
-                Block[] segments = new Block[map.getSegments()];
-                Block current    = this.dataList.get(map.getFirstSegment());
-                int i            = 0;
-                
-                while(current != null){
+        	//Verifica se o item já expirou
+        	if(map.isDead()){
+        		//Se expirou, remove do cache e retorna null.
+        		this.remove(key, map);
+        		return null;
+        	}
+        	
+        	//Se timeToIdle foi definido, é atualizado o horário do último acesso.
+        	if(map.getTimeToIdle() > 0){
+            	map.setMostRecentTime(System.currentTimeMillis());
+            	//a instância no momento do replace porde não ser a mesma passada em oldElement.
+            	this.dataMap.replace(key, map, map);
+        	}
+        	
+            Block[] segments = new Block[map.getSegments()];
+            Block current    = this.dataList.get(map.getFirstSegment());
+            int i            = 0;
+            
+            while(current != null){
 
-                    /*
-                    Se id for diferente da
-                    id do DataMap, significa que essa entrada foi ou está sendo
-                    removida.
-                    */
-					if(current.id != map.getId() || current.segment != i)
-					    throw new CorruptedDataException("invalid segment: " + current.id + ":" + map.getId() + " " + current.segment + ":" + i);
-                    
-                    segments[i] = current;
-                	current = current.nextBlock < 0? null : this.dataList.get(current.nextBlock);
-                	i++;
-                }
+                /*
+                Se id for diferente da
+                id do DataMap, significa que essa entrada foi ou está sendo
+                removida.
+                */
+				if(current.id != map.getId() || current.segment != i)
+				    throw new CorruptedDataException("invalid segment: " + current.id + ":" + map.getId() + " " + current.segment + ":" + i);
                 
-                return new CacheInputStream(this, map, segments);
+                segments[i] = current;
+            	current = current.nextBlock < 0? null : this.dataList.get(current.nextBlock);
+            	i++;
             }
-            else
-                return null;
+            
+            return new CacheInputStream(this, map, segments);
         }
         catch(CorruptedDataException e){
             //e.printStackTrace();
