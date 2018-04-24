@@ -28,7 +28,7 @@ O BRCache é um sistema de cache de propósito geral desenvolvido em Java. Ele p
 
 O pacote org.brandao.brcache é a sua base. Nele contém as classes BasicCache, Cache e TXCache. A classe BasicCache provê as operações básicas de um cache, que são put, get, getStream, replace,  putIfAbsent, putStream, replaceStream e putIfAbsentStream. A classe Cache provê além das operações básicas, as operações atômicos putIfAbsemt, remove e replace. A classe TXCache provê todos as operações da classe Cache, mas com suporte transacional.
 
-As operações em um cache podem ser dividias em operações de armazenamento, recuperação e exclusão.
+As operações em um cache podem ser divididas em operações de armazenamento, recuperação e exclusão.
 
 As operações de armazenamento são put, replace e putIfAbsent. As operações de recuperação são get e getStream,  e a operação de exclusão é remove.
 
@@ -65,7 +65,7 @@ nodes_swap_factor=0.2
 
 As propriedades estão descritas abaixo:
 
-- swapper_thread: Número se threads que irão fazer o swap dos dados entre a memória e o disco.
+- swapper_thread: Número de threads que irão fazer o swap dos dados entre a memória e o disco.
 - data_path: Pasta onde o servidor irá fazer o swap dos dados quando o limite da memória for atingido. O valor padrão é /var/brcache.
 - nodes_buffer_size: Tamanho do buffer usado para armazenar os nós na memória. O valor padrão é 16m.
 - nodes_page_size: Tamanho da página do buffer dos nós. O valor padrão é 16k.
@@ -77,8 +77,8 @@ As propriedades estão descritas abaixo:
 - data_page_size: Tamanho da página do buffer dos itens. O valor padrão é 16k.
 - data_block_size: Tamanho do bloco de dados. O valor padrão é 512b.
 - data_swap_factor: Fator de swap dos itens. O valor padrão é 0.3.
-- max_size_entry: Tamanho máximo, em bytes, que um item pode ter para ser armazenado no cache. O valor padrão é 1m.
-- max_size_key: Tamanho máximo, em bytes, que uma chave pode ter. O valor padrão é 48.
+- max_size_entry: Tamanho máximo em bytes que um item pode ter para ser armazenado no cache. O valor padrão é 1m.
+- max_size_key: Tamanho máximo em bytes que uma chave pode ter. O valor padrão é 48.
 
 A configuração programática é feita com o uso da classe BRCacheConfig. Ela possui métodos que permitem definir a configuração de um cache.
 
@@ -179,7 +179,7 @@ public class BasicCache
 
 #### 3.1.1 - Adicionar itens.
 
-São oferecidos vários métodos para inserir um item no cache. Cada um com sua particularidade. Os métodos put e putStream associam um valor a uma chave, mesmo que ela exista. Os dois métodos tem a mesma função, com a diferença que respectivamente um recebe o valor e o outro o fluxo de bytes do valor.
+São oferecidos vários métodos para inserir um item no cache. Cada um com sua particularidade. Os métodos put e putStream associam um valor a uma chave, mesmo que ela exista. Os dois métodos têm a mesma função, com a diferença que respectivamente um recebe o valor e o outro o fluxo de bytes do valor.
 
 ```java
 BasicCache cache = ...;
@@ -193,7 +193,7 @@ else{
 }
 ```
 
-Os métodos replace e replaceStream substituem o valor associado à chave somente se ele existir. Os dois métodos tem a mesma função, com a diferença que respectivamente um recebe o valor e o outro o fluxo de bytes do valor.
+Os métodos replace e replaceStream substituem o valor associado à chave somente se ele existir. Os dois métodos têm a mesma função, com a diferença que respectivamente um recebe o valor e o outro o fluxo de bytes do valor.
 
 ```java
 BasicCache cache = ...;
@@ -229,7 +229,7 @@ catch(StorageException e){
 ```
 #### 3.1.2 - Recuperar itens.
 
-São oferecidos vários métodos para recuperar um item do cache. Eles são get e getStream. Os dois métodos tem a mesma função, com a diferença que respectivamente um recupera o valor e o outro o fluxo de bytes do valor.
+São oferecidos vários métodos para recuperar um item do cache. Eles são get e getStream. Os dois métodos têm a mesma função, com a diferença que respectivamente um recupera o valor e o outro o fluxo de bytes do valor.
 
 ```java
 BasicCache cache = ...;
@@ -261,7 +261,7 @@ else{
 
 ### 3.2 - O cache.
 
-A classe Cache além de prover as operações básica, ela também provê as operações atômicas putIfAbsent, putIfAbsentStream, replace, repalceStream e remove. Os itens, nela, sofrem bloqueio em todas as operações de inserção e remoção para garantir a atomicidade dos métodos. Sendo assim suas operações são mais lentas em comparação as operações da classe BasicCache.
+A classe Cache além de prover as operações básica, ela também provê as operações atômicas putIfAbsent, putIfAbsentStream, replace, repalceStream e remove. Os itens, nela, sofrem bloqueio em todas as operações de inserção e remoção para garantir a atomicidade dos métodos. Sendo assim suas operações são mais lentas em comparação às operações da classe BasicCache.
 
 ```java
 public class Cache 
