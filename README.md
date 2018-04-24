@@ -243,7 +243,7 @@ else{
 }
 ```
 
-####3.1.3 - Remover itens.
+#### 3.1.3 - Remover itens.
 
 Um item é removido com o método remove. Se o item existir, ele irá retornar true. Se não existir ou estiver expirado ele irá retornar false.
 
