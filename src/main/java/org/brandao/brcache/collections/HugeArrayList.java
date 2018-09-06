@@ -27,7 +27,7 @@ import org.brandao.brcache.collections.swapper.TreeFileSwapper;
  * @author Brandao
  */
 public class HugeArrayList<T> 
-    implements HugeList<T>,Serializable{
+    implements HugeList<T>, Serializable{
 
 	private static final long serialVersionUID = 2177932987390402265L;
 
@@ -45,7 +45,6 @@ public class HugeArrayList<T>
     
     public HugeArrayList() {
         this(
-            null, 
             DEFAULT_MAX_CAPACITY_ELEMENT, 
             DEFAULT_CLEAR_FACTOR_ELEMENT, 
             DEFAULT_FRAGMENT_FACTOR_ELEMENT,
@@ -54,7 +53,6 @@ public class HugeArrayList<T>
     }
 
     public HugeArrayList(
-            String id, 
             int maxCapacityElements,
             double clearFactorElements, 
             double fragmentFactorElements,
@@ -63,12 +61,10 @@ public class HugeArrayList<T>
         
         this.size = 0;
         this.deleteOnExit = true;
-        id = id == null? Collections.getNextId() : id;
         swap = swap == null? new TreeFileSwapper() : swap;
         
         this.elements = 
                 new SegmentedCollectionImp<T>(
-                id,
                 maxCapacityElements, 
                 clearFactorElements, 
                 fragmentFactorElements,
@@ -258,10 +254,6 @@ public class HugeArrayList<T>
 
     public boolean isReadOnly() {
         return this.elements.isReadOnly();
-    }
-
-    public String getUniqueId(){
-        return this.elements.getId();
     }
 
     public boolean isDeleteOnExit() {

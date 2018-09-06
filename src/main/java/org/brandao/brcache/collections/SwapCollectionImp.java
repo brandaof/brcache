@@ -272,4 +272,8 @@ public class SwapCollectionImp<T>
     	}
 	}
 
+	public void setForceSwap(boolean value) {
+		this.forceSwap = value;
+	}
+
 }

@@ -280,4 +280,12 @@ class SegmentedCollectionImp<I>
 	public void destroy(){
 		swapCollection.destroy();
 	}
+
+	public boolean isForceSwap() {
+		return swapCollection.isForceSwap();
+	}
+
+	public void setForceSwap(boolean value) {
+		swapCollection.setForceSwap(value);
+	}
 }

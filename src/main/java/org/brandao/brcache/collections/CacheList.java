@@ -55,7 +55,6 @@ public class CacheList<T>
         
         this.internalList = 
             new HugeArrayList<T>(
-                Collections.getNextId(), 
                 maxCapacityElementsOnMemory, 
                 swapFactorElements, 
                 fragmentFactorElements, 
@@ -189,14 +188,6 @@ public class CacheList<T>
      */
     public boolean isReadOnly() {
         return this.internalList.isReadOnly();
-    }
-
-    /**
-     * Obtém a identificação da coleção no cache.
-     * @return Identificação.
-     */
-    public String getUniqueId(){
-        return this.internalList.getUniqueId();
     }
 
     /**

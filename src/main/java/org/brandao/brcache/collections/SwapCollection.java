@@ -26,6 +26,8 @@ public interface SwapCollection<T> {
 
 	Swapper getSwap();
 
+	void setForceSwap(boolean value);
+	
 	boolean isForceSwap();
 
 	long getMaxSegmentCapacity();

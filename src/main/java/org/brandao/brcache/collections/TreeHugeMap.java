@@ -81,7 +81,6 @@ public class TreeHugeMap<K extends TreeKey,T>
         
         this.values = 
             new HugeArrayList<T>(
-                id == null? null : id + "Values", 
                 maxCapacityElements, 
                 clearFactorElements, 
                 fragmentFactorElements,
@@ -90,7 +89,6 @@ public class TreeHugeMap<K extends TreeKey,T>
         
         this.nodes = 
             new HugeArrayList<Map<Object,TreeHugeMapNode<T>>>(
-                id == null? null : id + "Nodes", 
                 maxCapacityNodes, 
                 clearFactorNodes, 
                 fragmentFactorNodes,

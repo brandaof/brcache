@@ -92,7 +92,6 @@ public class TreeMap<K,T>
         
         this.values = 
             new FlushableReferenceCollectionImp<T>(
-                id == null? null : id + "Values", 
                 maxCapacityElements, 
                 clearFactorElements, 
                 fragmentFactorElements,
@@ -102,7 +101,6 @@ public class TreeMap<K,T>
         
         this.nodes = 
             new FlushableReferenceCollectionImp<TreeNode<T>>(
-                id == null? null : id + "Nodes", 
                 maxCapacityNodes, 
                 clearFactorNodes, 
                 fragmentFactorNodes,
