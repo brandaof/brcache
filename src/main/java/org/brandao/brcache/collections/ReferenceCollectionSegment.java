@@ -6,8 +6,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.brandao.brcache.collections.swapper.TreeFileSwapper;
-
 public class ReferenceCollectionSegment<T> 
 	implements ReferenceCollection<T>{
 
@@ -40,12 +38,15 @@ public class ReferenceCollectionSegment<T>
             double fragmentFactorElements,
             Swapper swap,
             int quantityClearThread) {
-    
+
+    	if(swap == null){
+    		throw new NullPointerException("swap");
+    	}
+		
     	this.freeAddress  = new LinkedBlockingQueue<Long>();
     	this.lastPos      = 0;
     	this.lock         = new ReentrantLock();
         this.deleteOnExit = true;
-        swap              = swap == null? new TreeFileSwapper() : swap;
         this.collection   = 
                     new SegmentedCollectionImp<Object>(
                         maxCapacityElements, 

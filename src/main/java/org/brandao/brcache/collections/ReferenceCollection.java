@@ -5,6 +5,8 @@ import java.io.Serializable;
 public interface ReferenceCollection<T> 
 	extends Serializable{
 
+	boolean isEmpty();
+	
 	long insert(T e);
 
 	T set(long reference, T e);
@@ -23,4 +25,16 @@ public interface ReferenceCollection<T>
     
     boolean remove(long reference, T oldValue);
 	
+    void destroy();
+
+    void clear();
+    
+    void setReadOnly(boolean value);
+    
+    boolean isReadOnly();
+
+    void setDeleteOnExit(boolean value);
+    
+    boolean isDeleteOnExit();
+    
 }

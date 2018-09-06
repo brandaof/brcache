@@ -20,8 +20,6 @@ package org.brandao.brcache.collections;
 import java.io.Serializable;
 import java.util.*;
 
-import org.brandao.brcache.collections.swapper.TreeFileSwapper;
-
 /**
  *
  * @author Brandao
@@ -59,11 +57,13 @@ public class HugeArrayList<T>
             Swapper swap,
             int quantityClearThread) {
         
-        this.size = 0;
+    	if(swap == null){
+    		throw new NullPointerException("swap");
+    	}
+    	
+        this.size         = 0;
         this.deleteOnExit = true;
-        swap = swap == null? new TreeFileSwapper() : swap;
-        
-        this.elements = 
+        this.elements     = 
                 new SegmentedCollectionImp<T>(
                 maxCapacityElements, 
                 clearFactorElements, 

@@ -75,8 +75,6 @@ public abstract class StreamCache
     
     private int maxLengthKey;
     
-    private Swapper swapper;
-    
     private volatile long modCount;
     
     volatile long countRead;
@@ -190,7 +188,6 @@ public abstract class StreamCache
         this.maxBytesToStorageEntry = maxSizeEntry;
         this.maxLengthKey           = maxSizeKey;
         this.deleteOnExit           = true;
-    	this.swapper                = swapper;
     	
         synchronized(Collections.class){
 	    	HugeListInfo nodeInfo;
@@ -203,11 +200,10 @@ public abstract class StreamCache
 		    				.calculate(dataBufferSize, dataPageSize, blockSize, dataSwapFactor);
 		        this.dataList =
 		                new FlushableReferenceCollectionImp<Block>(
-		                "data",
 		                dataInfo.getMaxCapacityElements(),
 		                dataInfo.getClearFactorElements(),
 		                dataInfo.getFragmentFactorElements(),
-		                this.swapper.clone(),
+		                swapper,
 		                quantitySwaperThread,
 		                dataInfo.getSubLists()
 		                );
@@ -242,17 +238,15 @@ public abstract class StreamCache
 	    	try{
 	            this.dataMap =
 	                    new StringTreeMap<DataMap>(
-	                    "dataMap",
 	                    nodeInfo.getMaxCapacityElements(),
 	                    nodeInfo.getClearFactorElements(),
 	                    nodeInfo.getFragmentFactorElements(),
-	                    this.swapper.clone(),
+	                    swapper,
 	                    quantitySwaperThread,
 	                    nodeInfo.getSubLists(),
 	                    indexInfo.getMaxCapacityElements(),
 	                    indexInfo.getClearFactorElements(),
 	                    indexInfo.getFragmentFactorElements(),
-	                    this.swapper.clone(),
 	                    quantitySwaperThread,
 	                    indexInfo.getSubLists()
 	                    );
@@ -807,7 +801,6 @@ public abstract class StreamCache
 	public void destroy(){
 		this.dataList.destroy();
 		this.dataMap.destroy();
-		this.swapper.destroy();
 	}
 	
     protected void finalize() throws Throwable{

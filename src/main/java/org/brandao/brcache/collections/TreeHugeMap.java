@@ -41,7 +41,7 @@ public class TreeHugeMap<K extends TreeKey,T>
     
     public static final float DEFAULT_CLEAR_FACTOR_ELEMENT 		= 0.25F;
     
-    public static final float DEFAULT_FRAGMENT_FACTOR_ELEMENT           = 0.03F;
+    public static final float DEFAULT_FRAGMENT_FACTOR_ELEMENT   = 0.03F;
     
     private HugeArrayList<T> values;
     private HugeArrayList<Map<Object,TreeHugeMapNode<T>>> nodes;

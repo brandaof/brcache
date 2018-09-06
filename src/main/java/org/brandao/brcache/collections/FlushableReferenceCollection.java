@@ -5,14 +5,4 @@ public interface FlushableReferenceCollection<T>
 
     void flush();
     
-    void setReadOnly(boolean value);
-    
-    boolean isReadOnly();
-
-    void setDeleteOnExit(boolean value);
-    
-    boolean isDeleteOnExit();
-    
-    void destroy();
-    
 }

@@ -28,23 +28,21 @@ public class StringTreeMap<T> extends TreeMap<String, T> {
 	private static final long serialVersionUID = 4262873183379962091L;
 
 	public StringTreeMap(
-            String id, 
             int maxCapacityNodes,
             double clearFactorNodes, 
             double fragmentFactorNodes,
-            Swapper swapNodes,
+            Swapper swap,
             int quantitySwaperThreadNodes,
             int subListsNodes,
             int maxCapacityElements,
             double clearFactorElements, 
             double fragmentFactorElements,
-            Swapper swapElements,
             int quantitySwaperThreadElements,
             int subListsElements){
-        super(id, maxCapacityNodes, clearFactorNodes, fragmentFactorNodes, 
-                swapNodes, quantitySwaperThreadNodes, subListsNodes,
+        super(maxCapacityNodes, clearFactorNodes, fragmentFactorNodes, 
+                swap, quantitySwaperThreadNodes, subListsNodes,
                 maxCapacityElements, clearFactorElements, fragmentFactorElements, 
-                swapElements, quantitySwaperThreadElements, subListsElements, 
+                swap, quantitySwaperThreadElements, subListsElements, 
                 new StringTreeNodes<T>());
     }    
 }

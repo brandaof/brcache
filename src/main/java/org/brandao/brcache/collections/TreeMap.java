@@ -20,6 +20,7 @@ package org.brandao.brcache.collections;
 import org.brandao.brcache.collections.treehugemap.TreeNode;
 import org.brandao.brcache.collections.treehugemap.TreeNodes;
 import org.brandao.brcache.collections.treehugemap.TreeMapKey;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
@@ -58,7 +59,6 @@ public class TreeMap<K,T>
      */
     public TreeMap(){
         this(
-            null, 
             DEFAULT_MAX_CAPACITY_NODE, 
             DEFAULT_CLEAR_FACTOR_NODE, 
             DEFAULT_FRAGMENT_FACTOR_NODE,
@@ -75,7 +75,6 @@ public class TreeMap<K,T>
     }
 
     public TreeMap(
-            String id, 
             int maxCapacityNodes,
             double clearFactorNodes, 
             double fragmentFactorNodes,
@@ -234,7 +233,7 @@ public class TreeMap<K,T>
     }
     
     public int size() {
-        return this.values.size();
+        return (int)this.values.length();
     }
 
     public boolean isEmpty() {
@@ -246,7 +245,7 @@ public class TreeMap<K,T>
     }
 
     public boolean containsValue(Object value) {
-        return this.values.contains(value);
+    	throw new UnsupportedOperationException("not implemented yet");
     }
 
     public T get(Object key) {
@@ -306,7 +305,7 @@ public class TreeMap<K,T>
 	}
     
     public Collection<T> values() {
-        return this.values;
+    	throw new UnsupportedOperationException("not implemented yet");
     }
 
     public void setReadOnly(boolean value){
