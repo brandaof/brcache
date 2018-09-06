@@ -1,7 +1,7 @@
 package org.brandao.brcache.collections;
 
-public interface HugeReferenceList<T> 
-	extends ReferenceList<T>, HugeCollection<T> {
+public interface FlushableReferenceCollection<T> 
+	extends ReferenceCollection<T> {
 
     void flush();
     

@@ -8,13 +8,16 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.brandao.brcache.collections.swapper.TreeFileSwapper;
 
-public class ArrayCollectionReference<T> {
+public class ReferenceCollectionSegment<T> 
+	implements ReferenceCollection<T>{
+
+	private static final long serialVersionUID = 4658022218986426713L;
 
 	private static final Empty EMPTY = new Empty();
 	
 	private BlockingQueue<Long> freeAddress;
 	
-	private CollectionSegmentImp<Object> collection;
+	private SegmentedCollection<Object> collection;
 	
 	private long lastPos;
 	
@@ -22,9 +25,8 @@ public class ArrayCollectionReference<T> {
 	
     private Lock lock;
 
-    public ArrayCollectionReference() {
+    public ReferenceCollectionSegment() {
         this(
-            null, 
             HugeArrayList.DEFAULT_MAX_CAPACITY_ELEMENT, 
             HugeArrayList.DEFAULT_CLEAR_FACTOR_ELEMENT, 
             HugeArrayList.DEFAULT_FRAGMENT_FACTOR_ELEMENT,
@@ -32,8 +34,7 @@ public class ArrayCollectionReference<T> {
             1);
     }
 
-	public ArrayCollectionReference(
-            String id, 
+	public ReferenceCollectionSegment(
             int maxCapacityElements,
             double clearFactorElements, 
             double fragmentFactorElements,
@@ -44,15 +45,13 @@ public class ArrayCollectionReference<T> {
     	this.lastPos      = 0;
     	this.lock         = new ReentrantLock();
         this.deleteOnExit = true;
-        id                = id == null? Collections.getNextId() : id;
         swap              = swap == null? new TreeFileSwapper() : swap;
         this.collection   = 
-                    new CollectionSegmentImp<Object>(
-                        id == null? null : id + "_array", 
+                    new SegmentedCollectionImp<Object>(
                         maxCapacityElements, 
                         clearFactorElements, 
                         fragmentFactorElements,
-                        swap.clone(),
+                        swap,
                         quantityClearThread);
     }
     

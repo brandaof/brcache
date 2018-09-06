@@ -39,7 +39,7 @@ public class HugeArrayList<T>
 
     private volatile int size;
     
-    private CollectionSegmentImp<T> elements;
+    private SegmentedCollection<T> elements;
     
     private boolean deleteOnExit;
     
@@ -67,7 +67,7 @@ public class HugeArrayList<T>
         swap = swap == null? new TreeFileSwapper() : swap;
         
         this.elements = 
-                new CollectionSegmentImp<T>(
+                new SegmentedCollectionImp<T>(
                 id,
                 maxCapacityElements, 
                 clearFactorElements, 
@@ -204,7 +204,7 @@ public class HugeArrayList<T>
         return true;
     }
 
-    public boolean retainAll(ArrayCollectionReference<?> c) {
+    public boolean retainAll(ReferenceCollectionSegment<?> c) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

@@ -1,24 +1,16 @@
 package org.brandao.brcache.collections;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-
-import org.brandao.brcache.collections.swapper.TreeFileSwapper;
-
-public class HugeArrayReferenceList<T> 
-	implements HugeReferenceList<T>{
+public class FlushableReferenceCollectionImp<T> 
+	implements FlushableReferenceCollection<T>{
 
 	private static final long serialVersionUID = 1406571295066759006L;
 
-	private ArrayCollectionReference<T>[] lists;
+	private ReferenceCollectionSegment<T>[] lists;
 
     private boolean deleteOnExit;
 	
-    public HugeArrayReferenceList() {
+    public FlushableReferenceCollectionImp() {
         this(
-            null, 
             HugeArrayList.DEFAULT_MAX_CAPACITY_ELEMENT, 
             HugeArrayList.DEFAULT_CLEAR_FACTOR_ELEMENT, 
             HugeArrayList.DEFAULT_FRAGMENT_FACTOR_ELEMENT,
@@ -28,8 +20,7 @@ public class HugeArrayReferenceList<T>
     }
 
     @SuppressWarnings("unchecked")
-	public HugeArrayReferenceList(
-            String id, 
+	public FlushableReferenceCollectionImp(
             int maxCapacityElements,
             double clearFactorElements, 
             double fragmentFactorElements,
@@ -37,19 +28,16 @@ public class HugeArrayReferenceList<T>
             int quantityClearThread, 
             int lists) {
     
-    	this.lists        = new ArrayCollectionReference[lists];
+    	this.lists        = new ReferenceCollectionSegment[lists];
         this.deleteOnExit = true;
-        id                = id == null? Collections.getNextId() : id;
-        swap              = swap == null? new TreeFileSwapper() : swap;
     	
     	for(int i=0;i<this.lists.length;i++){
             this.lists[i] = 
-                    new ArrayCollectionReference<T>(
-                        id == null? null : id + "_ref_" + i, 
+                    new ReferenceCollectionSegment<T>(
                         maxCapacityElements, 
                         clearFactorElements, 
                         fragmentFactorElements,
-                        swap.clone(),
+                        swap,
                         quantityClearThread);
     		
     	}
@@ -128,7 +116,7 @@ public class HugeArrayReferenceList<T>
     
     public long length(){
     	long size = 0;
-    	for(ArrayCollectionReference<T> l: this.lists){
+    	for(ReferenceCollectionSegment<T> l: this.lists){
     		size += l.length();
     	}
     	return size;
@@ -143,98 +131,26 @@ public class HugeArrayReferenceList<T>
     }
 
     public void clear() {
-    	for(ArrayCollectionReference<T> l: this.lists){
+    	for(ReferenceCollectionSegment<T> l: this.lists){
     		l.clear();
     	}
     }
 
     public void destroy(){
-    	for(ArrayCollectionReference<T> l: this.lists){
+    	for(ReferenceCollectionSegment<T> l: this.lists){
     		l.destroy();
     	}
     }
     
     public void flush(){
-    	for(ArrayCollectionReference<T> l: this.lists){
+    	for(ReferenceCollectionSegment<T> l: this.lists){
     		l.flush();
     	}
     	
     }
 
-	public Iterator<T> iterator() {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public Object[] toArray() {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public <K> K[] toArray(K[] a) {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public boolean remove(Object o) {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public boolean containsAll(Collection<?> c) {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public boolean addAll(Collection<? extends T> c) {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public boolean addAll(int index, Collection<? extends T> c) {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public boolean removeAll(Collection<?> c) {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public boolean retainAll(Collection<?> c) {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public T get(int index) {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public T set(int index, T element) {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public void add(int index, T element) {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public T remove(int index) {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public int indexOf(Object o) {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public int lastIndexOf(Object o) {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public ListIterator<T> listIterator() {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public ListIterator<T> listIterator(int index) {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public List<T> subList(int fromIndex, int toIndex) {
-        throw new UnsupportedOperationException("Not supported yet.");
-	}
-
 	public void setReadOnly(boolean value) {
-    	for(ArrayCollectionReference<T> l: this.lists){
+    	for(ReferenceCollectionSegment<T> l: this.lists){
     		l.setReadOnly(value);
     	}
 	}

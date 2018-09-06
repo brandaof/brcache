@@ -24,31 +24,34 @@ import java.util.concurrent.locks.Lock;
  *
  * @author Brandao
  */
-class CollectionSegmentImp<I> 
-    extends AbstractCollectionSegment<I,ArraySegment<I>> 
-    implements Serializable{
+class SegmentedCollectionImp<I> 
+    implements SegmentedCollection<I>, Serializable{
 
 	private static final long serialVersionUID = 239844470898102007L;
 
-	public CollectionSegmentImp(
-            String id, 
+	private SwapCollection<ArraySegment<I>> swapCollection;
+	
+	private double fragmentSize;
+	
+	public SegmentedCollectionImp(
             int maxCapacity, 
             double clearFactor,
             double fragmentFactor,
             Swapper swap,
             int quantitySwaperThread){
-        super(id, maxCapacity, 
-                clearFactor, fragmentFactor, swap, 
-                quantitySwaperThread);
-        
+		this.swapCollection = new SegmentedSwapCollectionImp<ArraySegment<I>>(
+				maxCapacity, clearFactor, fragmentFactor, swap, quantitySwaperThread);
+		
+        this.fragmentSize = (int)(maxCapacity * fragmentFactor);
     }
     
     public I getEntity(long segment, int index) {
 
-    	Lock lock = super.getSegment(segment).getLock();
+    	//o segmento (segment) é o item no swapCollection
+    	Lock lock = swapCollection.getGroupLock(segment);
     	lock.lock();
     	try{
-	        Entry<ArraySegment<I>> entry = this.getEntry(segment);
+	        Entry<ArraySegment<I>> entry = swapCollection.getEntry(segment);
 	        
 	        if (entry == null)
 	            return null;
@@ -64,7 +67,7 @@ class CollectionSegmentImp<I>
 
     public int putEntity(long segment, int index, I value) {
         
-        if(this.readOnly)
+        if(this.swapCollection.isReadOnly())
             throw new IllegalStateException("readOnly");
 
         if(segment < 0)
@@ -73,17 +76,18 @@ class CollectionSegmentImp<I>
         if(index < 0)
             throw new IllegalStateException("index");
         
-    	Lock lock = super.getSegment(segment).getLock();
+    	//o segmento (segment) é o item no swapCollection
+    	Lock lock = swapCollection.getGroupLock(segment);
     	lock.lock();
     	try{
-	        Entry<ArraySegment<I>> entry = super.getEntry(segment);
+	        Entry<ArraySegment<I>> entry = swapCollection.getEntry(segment);
 	        ArraySegment<I> seg;
 		
 	        if(entry == null){
 	            seg = new ArraySegment<I>(segment, (int) getFragmentSize());
 	            entry = new Entry<ArraySegment<I>>(segment, seg);
             	seg.set(index, value); //int idx = seg.add(value);
-            	add(entry);
+            	swapCollection.add(entry);
 	            return index;
 	        } 
 	        else{
@@ -100,7 +104,7 @@ class CollectionSegmentImp<I>
 
     public I setEntity(long segment, int index, I value) {
         
-        if(this.readOnly)
+        if(swapCollection.isReadOnly())
             throw new IllegalStateException();
         
         if(segment < 0)
@@ -109,10 +113,11 @@ class CollectionSegmentImp<I>
         if(index < 0)
     		throw new IllegalStateException("index");
         
-    	Lock lock = super.getSegment(segment).getLock();
+    	//o segmento (segment) é o item no swapCollection
+    	Lock lock = swapCollection.getGroupLock(segment);
     	lock.lock();
     	try{
-	        Entry<ArraySegment<I>> entry = super.getEntry(segment);
+	        Entry<ArraySegment<I>> entry = swapCollection.getEntry(segment);
 	        ArraySegment<I> seg;
 		
 	        if(entry == null){
@@ -123,7 +128,7 @@ class CollectionSegmentImp<I>
 	            seg = new ArraySegment<I>(segment, (int) getFragmentSize());
 	            entry = new Entry<ArraySegment<I>>(segment, seg);
 	            seg.set(index, value);
-	        	add(entry);
+	        	swapCollection.add(entry);
 	            return null;
 	        } 
 	        else{
@@ -142,7 +147,7 @@ class CollectionSegmentImp<I>
 
     public boolean replaceEntity(long segment, int index, I oldValue, I value) {
         
-        if(this.readOnly)
+        if(swapCollection.isReadOnly())
             throw new IllegalStateException();
         
         if(segment < 0)
@@ -151,10 +156,11 @@ class CollectionSegmentImp<I>
         if(index < 0)
     		throw new IllegalStateException("index");
         
-    	Lock lock = super.getSegment(segment).getLock();
+    	//o segmento (segment) é o item no swapCollection
+    	Lock lock = swapCollection.getGroupLock(segment);
     	lock.lock();
     	try{
-	        Entry<ArraySegment<I>> entry = super.getEntry(segment);
+	        Entry<ArraySegment<I>> entry = swapCollection.getEntry(segment);
 	        ArraySegment<I> seg;
 		
 	        if(entry != null){
@@ -178,7 +184,7 @@ class CollectionSegmentImp<I>
     
     public I replaceEntity(long segment, int index, I value) {
         
-        if(this.readOnly)
+        if(swapCollection.isReadOnly())
             throw new IllegalStateException();
         
         if(segment < 0)
@@ -187,10 +193,11 @@ class CollectionSegmentImp<I>
         if(index < 0)
     		throw new IllegalStateException("index");
         
-    	Lock lock = super.getSegment(segment).getLock();
+    	//o segmento (segment) é o item no swapCollection
+    	Lock lock = swapCollection.getGroupLock(segment);
     	lock.lock();
     	try{
-	        Entry<ArraySegment<I>> entry = super.getEntry(segment);
+	        Entry<ArraySegment<I>> entry = swapCollection.getEntry(segment);
 	        ArraySegment<I> seg;
 		
 	        if(entry != null){
@@ -213,7 +220,7 @@ class CollectionSegmentImp<I>
     
     public I putIfAbsentEntity(long segment, int index, I value) {
         
-        if(this.readOnly)
+        if(swapCollection.isReadOnly())
             throw new IllegalStateException();
         
         if(segment < 0)
@@ -222,10 +229,11 @@ class CollectionSegmentImp<I>
         if(index < 0)
     		throw new IllegalStateException("index");
         
-    	Lock lock = super.getSegment(segment).getLock();
+    	//o segmento (segment) é o item no swapCollection
+    	Lock lock = swapCollection.getGroupLock(segment);
     	lock.lock();
     	try{
-	        Entry<ArraySegment<I>> entry = super.getEntry(segment);
+	        Entry<ArraySegment<I>> entry = swapCollection.getEntry(segment);
 	        ArraySegment<I> seg;
 		
 	        if(entry != null){
@@ -249,4 +257,27 @@ class CollectionSegmentImp<I>
         throw new UnsupportedOperationException();
     }
 
+	public double getFragmentSize() {
+		return fragmentSize;
+	}
+
+	public void flush() {
+		swapCollection.flush();
+	}
+
+	public void setReadOnly(boolean value) {
+		swapCollection.setReadOnly(value);
+	}
+
+	public boolean isReadOnly() {
+		return swapCollection.isReadOnly();
+	}
+
+	public void clear() {
+		swapCollection.clear();
+	}
+
+	public void destroy(){
+		swapCollection.destroy();
+	}
 }

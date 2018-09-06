@@ -21,11 +21,32 @@ package org.brandao.brcache.collections;
  *
  * @author Brandao
  */
-public interface HugeCollection<T>{
+interface SegmentedCollection<T> {
+    
+    T getEntity(long segment, int index);
 
-    int size();
+    int putEntity(long segment, int index, T value);
 
-    T get(int index);
-
-    Object remove(int index);
+    T removeEntity(long segment, int index);
+    
+    T setEntity(long segment, int index, T value);
+    
+    boolean replaceEntity(long segment, int index, T oldValue, T value);
+    
+    T replaceEntity(long segment, int index, T value);
+    
+    T putIfAbsentEntity(long segment, int index, T value);
+    
+    double getFragmentSize();
+    
+    void flush();
+    
+    void clear();
+    
+    void destroy();
+    
+    void setReadOnly(boolean value);
+    
+    boolean isReadOnly();
+    
 }

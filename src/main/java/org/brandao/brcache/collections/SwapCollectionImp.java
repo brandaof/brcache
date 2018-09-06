@@ -5,8 +5,11 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Segment<T> {
+public class SwapCollectionImp<T> 
+	implements SwapCollection<T>{
 
+	private final long id;
+	
     protected Map<Long, Entry<T>> data;
 
     protected Lock lock;
@@ -21,9 +24,8 @@ public class Segment<T> {
     
     protected boolean readOnly;
 
-    public Segment(Swapper swap,
-			boolean forceSwap, long maxSegmentCapacity,	boolean readOnly) {
-		super();
+    public SwapCollectionImp(Swapper swap, boolean forceSwap, long maxSegmentCapacity,	boolean readOnly) {
+    	this.id                 = getNextUniqueID();
 		this.data 				= new HashMap<Long, Entry<T>>();
 		this.lock 				= new ReentrantLock();
 		this.swap 				= swap;
@@ -32,6 +34,10 @@ public class Segment<T> {
 		this.firstItem 			= null;
 		this.readOnly 			= readOnly;
 	}
+    
+    public long getId(){
+    	return id;
+    }
     
     /* -------- */
     
@@ -44,7 +50,7 @@ public class Segment<T> {
         this.addListedItemOnMemory(item);
     }
 
-    protected Entry<T> getEntry(long index) {
+    public Entry<T> getEntry(long index) {
         Entry<T> e = this.data.get(index);
         
         if(e == null)
@@ -106,7 +112,7 @@ public class Segment<T> {
             return;
     	
         if(!this.readOnly && item.isNeedUpdate())
-            this.swap.sendItem(item.getIndex(), item);
+            this.swap.sendItem(this, item.getIndex(), item);
 
         Entry<T> removedItem = this.remove(item);
         
@@ -124,7 +130,7 @@ public class Segment<T> {
         if(forceSwap && this.needSwap())
             this.swapFirst();
         
-        Entry<T> entity = (Entry<T>)this.swap.getItem(key);
+        Entry<T> entity = (Entry<T>)this.swap.getItem(this, key);
 
         if(entity != null){
         	this.data.put(key, entity);
@@ -200,6 +206,7 @@ public class Segment<T> {
     	try{
 	    	this.firstItem = null;
     		data.clear();
+    		swap.clear(this);
     	}
     	finally{
     		this.lock.unlock();
@@ -234,4 +241,35 @@ public class Segment<T> {
 		return maxSegmentCapacity;
 	}
     
+	private static long uniqueID = 0;
+
+	private static final long getNextUniqueID(){
+		long value = uniqueID++;
+		return value;
+	}
+
+	public int getNumberOfGroups() {
+		return 1;
+	}
+
+	public Lock getGroupLock(long index) {
+		return lock;
+	}
+
+	public void flush() {
+		while(swapNextCandidate());		
+	}
+
+	public void destroy() {
+    	this.lock.lock();
+    	try{
+	    	this.firstItem = null;
+    		data.clear();
+    		swap.destroy(this);
+    	}
+    	finally{
+    		this.lock.unlock();
+    	}
+	}
+
 }

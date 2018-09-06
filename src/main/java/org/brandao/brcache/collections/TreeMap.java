@@ -46,9 +46,9 @@ public class TreeMap<K,T>
     
     public static final float DEFAULT_FRAGMENT_FACTOR_ELEMENT	= 0.03F;
     
-    private HugeReferenceList<T> values;
+    private FlushableReferenceCollection<T> values;
     
-    private HugeReferenceList<TreeNode<T>> nodes;
+    private FlushableReferenceCollection<TreeNode<T>> nodes;
     
     private TreeNodes<T> treeNodes;
     
@@ -91,7 +91,7 @@ public class TreeMap<K,T>
             TreeNodes<T> treeNodes){
         
         this.values = 
-            new HugeArrayReferenceList<T>(
+            new FlushableReferenceCollectionImp<T>(
                 id == null? null : id + "Values", 
                 maxCapacityElements, 
                 clearFactorElements, 
@@ -101,7 +101,7 @@ public class TreeMap<K,T>
                 subListsElements);
         
         this.nodes = 
-            new HugeArrayReferenceList<TreeNode<T>>(
+            new FlushableReferenceCollectionImp<TreeNode<T>>(
                 id == null? null : id + "Nodes", 
                 maxCapacityNodes, 
                 clearFactorNodes, 

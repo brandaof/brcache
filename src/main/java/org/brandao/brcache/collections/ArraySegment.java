@@ -18,7 +18,6 @@
 package org.brandao.brcache.collections;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 /**
  * 
@@ -59,31 +58,12 @@ class ArraySegment<K>
         this.data = data;
     }
 
-    /*
-    public int add(K value) {
-        if (data == null) {
-            data = new Object[segmentSize];
-        }
-
-        if (size >= data.length)
-            data = Arrays.copyOf(data, data.length + 10);
-        
-        int index = size;
-        data[index] = value;
-        size++;
-        return index;
-    }
-    */
-    
     public int set(int index, K value) {
         if (data == null) {
             data = new Object[segmentSize];
         }
 
-        //if (index >= size)
-        //    throw new IndexOutOfBoundsException(index + " >= " + size);
-
-        if (index >= this.data.length)
+        if (index >= data.length)
             throw new IndexOutOfBoundsException(index + " >= " + size);
         
         data[index] = value;
@@ -98,13 +78,6 @@ class ArraySegment<K>
         }
 
         K oldValue = (K) data[index];
-        //int moved = size - index - 1;
-
-        //if (moved > 0) {
-        //    System.arraycopy(data, index + 1, data, index, moved);
-        //}
-
-        //data[--size] = null;
         data[index] = null;
         return oldValue;
     }
@@ -129,36 +102,5 @@ class ArraySegment<K>
     public void setId(long id) {
         this.id = id;
     }
-
-    /*
-    private void writeObject(ObjectOutputStream out) throws IOException {
-    	out.writeInt(this.getHashCode());
-        out.writeInt(id);
-        out.writeInt(size);
-        out.writeObject(data);
-        out.writeInt(segmentSize);
-    }
-
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-    	int hash = in.readInt();
-        id = in.readInt();
-        size = in.readInt();
-        data = (Object[]) in.readObject();
-        segmentSize = in.readInt();
-        
-        if(hash != this.getHashCode())
-        	throw new IOException(hash + " != " + this.getHashCode());
-    }
-
-	private int getHashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + Arrays.hashCode(data);
-		result = prime * result + id;
-		result = prime * result + segmentSize;
-		result = prime * result + size;
-		return result;
-	}
-*/
     
 }

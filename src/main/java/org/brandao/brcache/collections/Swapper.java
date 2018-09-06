@@ -27,39 +27,36 @@ import org.brandao.brcache.Cache;
  * 
  * @author Brandao
  */
-public interface Swapper extends Serializable, Cloneable {
-    
-    /**
-     * Define a identificação do agrupamento de entidades.
-     * @param value identificação do agrupamento.
-     */
-    void setId(String value);
+public interface Swapper 
+	extends Serializable {
     
     /**
      * Envia uma entidade para o agrupamento.
+     * @param swapCollection Coleção de onde o item pertence.
      * @param index índice da entidade.
      * @param item Item.
      */
-    void sendItem(long index, Entry<?> item);
+    void sendItem(SwapCollectionImp<?> swapCollection, long index, Entry<?> item);
 
     /**
      * Recupera uma entidade do agrupamento.
+     * @param swapCollection Coleção de onde o item pertence.
      * @param index índice
      * @return item.
      */
-    Entry<?> getItem(long index);
+    Entry<?> getItem(SwapCollectionImp<?> swapCollection, long index);
     
     /**
      * Remove todos os agrupamentos.
+     * @param swapCollection Coleção de onde o item pertence.
      */
-    void clear();
+    void clear(SwapCollectionImp<?> swapCollection);
     
     /**
      * Destrói todos as agrupamentos. Executado quando a instâcnia do 
      * {@link Cache} associado a ele é destruido. 
+     * @param swapCollection Coleção de onde o item pertence.
      */
-    void destroy();
-
-    Swapper clone();
+    void destroy(SwapCollectionImp<?> swapCollection);
     
 }

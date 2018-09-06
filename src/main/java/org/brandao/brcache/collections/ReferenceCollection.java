@@ -1,10 +1,9 @@
 package org.brandao.brcache.collections;
 
 import java.io.Serializable;
-import java.util.Collection;
 
 public interface ReferenceCollection<T> 
-	extends Collection<T>, Serializable{
+	extends Serializable{
 
 	long insert(T e);
 

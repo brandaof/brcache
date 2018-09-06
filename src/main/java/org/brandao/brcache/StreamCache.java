@@ -23,7 +23,7 @@ import java.io.Serializable;
 
 import org.brandao.brcache.HugeListCalculator.HugeListInfo;
 import org.brandao.brcache.collections.Collections;
-import org.brandao.brcache.collections.HugeArrayReferenceList;
+import org.brandao.brcache.collections.FlushableReferenceCollectionImp;
 import org.brandao.brcache.collections.StringTreeMap;
 import org.brandao.brcache.collections.Swapper;
 import org.brandao.brcache.collections.treehugemap.CharNode;
@@ -67,7 +67,7 @@ public abstract class StreamCache
     
     private StringTreeMap<DataMap> dataMap;
 
-    private HugeArrayReferenceList<Block> dataList;
+    private FlushableReferenceCollectionImp<Block> dataList;
     
     private int segmentSize;
     
@@ -202,7 +202,7 @@ public abstract class StreamCache
 		    			HugeListCalculator
 		    				.calculate(dataBufferSize, dataPageSize, blockSize, dataSwapFactor);
 		        this.dataList =
-		                new HugeArrayReferenceList<Block>(
+		                new FlushableReferenceCollectionImp<Block>(
 		                "data",
 		                dataInfo.getMaxCapacityElements(),
 		                dataInfo.getClearFactorElements(),

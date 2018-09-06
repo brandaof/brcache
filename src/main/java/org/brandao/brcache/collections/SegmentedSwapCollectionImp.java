@@ -21,25 +21,23 @@ import java.io.*;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
 
 /**
  * @author Brandao
  */
-abstract class AbstractCollectionSegment<I,T> 
-    implements CollectionSegment<I>, 
-    /*CollectionSegmentSwapper<T>,*/ Runnable, Serializable{
+class SegmentedSwapCollectionImp<T> 
+    implements SwapCollection<T>, Runnable, Serializable{
     
 	private static final long serialVersionUID = 7817500681111470845L;
 
 	private static final int MAX_ITENS_PER_SEGMENT = 300;
 	
-    protected Segment<T>[] segments;
+    protected SwapCollectionImp<T>[] swapCollections;
 
     private transient File path;
     
     private transient boolean hasCreatePath;
-    
-    private String id;
     
     private int maxCapacity;
     
@@ -51,8 +49,6 @@ abstract class AbstractCollectionSegment<I,T>
     
     protected boolean readOnly;
     
-    private Swapper swap;
-
     private boolean forceSwap;
     
     private BlockingQueue<Entry<T>> swapCandidates;
@@ -64,30 +60,24 @@ abstract class AbstractCollectionSegment<I,T>
     private volatile long onMemory;
     
     @SuppressWarnings("unchecked")
-	public AbstractCollectionSegment(
-            String id, int maxCapacity, double clearFactor,
-            double fragmentFactor,
-            Swapper swap,
-            int quantitySwaperThread) {
+	public SegmentedSwapCollectionImp(int maxCapacity, double clearFactor,
+            double fragmentFactor, Swapper swap, int quantitySwaperThread) {
 
-        this.id                  = id;
         this.fragmentSize        = (int)(maxCapacity * fragmentFactor);
         this.maxCapacity         = maxCapacity;
         this.clearFactor         = clearFactor;
         this.maxSegmentCapacity  = (int)(maxCapacity/fragmentSize);
         this.swapCandidates      = new LinkedBlockingQueue<Entry<T>>();
         this.readOnly            = false;
-        this.swap                = swap;
         this.forceSwap           = true;
         this.live                = true;
-        this.segments            = new Segment[maxCapacity/MAX_ITENS_PER_SEGMENT + (maxCapacity % MAX_ITENS_PER_SEGMENT != 0? 1 : 0)];
+        this.swapCollections     = new SwapCollectionImp[maxCapacity/MAX_ITENS_PER_SEGMENT + (maxCapacity % MAX_ITENS_PER_SEGMENT != 0? 1 : 0)];
         this.onMemory            = 0;
         swapperThreads           = new Thread[quantitySwaperThread];
-        this.swap.setId(this.id);
         
         int countMaxCapacity = maxCapacity;
-        for(int i=0;i<this.segments.length;i++){
-        	this.segments[i] = new Segment<T>(
+        for(int i=0;i<this.swapCollections.length;i++){
+        	this.swapCollections[i] = new SwapCollectionImp<T>(
         			swap, forceSwap, 
         			(countMaxCapacity - MAX_ITENS_PER_SEGMENT) > MAX_ITENS_PER_SEGMENT? 
         					MAX_ITENS_PER_SEGMENT : 
@@ -99,7 +89,7 @@ abstract class AbstractCollectionSegment<I,T>
         
         for(int i=0;i<swapperThreads.length;i++){
         	SwapperThread swapperThread = new SwapperThread(swapCandidates);
-        	swapperThreads[i] = new Thread(swapperThread, id + "_" + i);
+        	swapperThreads[i] = new Thread(swapperThread);
         	swapperThreads[i].start();
         }
         
@@ -109,19 +99,19 @@ abstract class AbstractCollectionSegment<I,T>
     
     /* ------ */
     
-    protected void add(Entry<T> item) {
-    	this.getSegment(item.getIndex()).add(item);
-        this.onMemory++;
+    public void add(Entry<T> item) {
+    	getSegment(item.getIndex()).add(item);
+        onMemory++;
     }
 
-    protected Entry<T> remove(Entry<T> item){
-        Entry<T> e = this.getSegment(item.getIndex()).remove(item);
-        this.onMemory--;
+    public Entry<T> remove(Entry<T> item){
+        Entry<T> e = getSegment(item.getIndex()).remove(item);
+        onMemory--;
         return e;
     }
     
-    protected Entry<T> getEntry(long index) {
-    	return this.getSegment(index).getEntry(index);
+    public Entry<T> getEntry(long index) {
+    	return getSegment(index).getEntry(index);
     }
     
     public Entry<T> reload(Entry<T> entity){
@@ -142,8 +132,8 @@ abstract class AbstractCollectionSegment<I,T>
         }
     }
 
-    protected Segment<T> getSegment(long value){
-    	return this.segments[(int)(value % this.segments.length)];
+    protected SwapCollectionImp<T> getSegment(long value){
+    	return swapCollections[(int)(value % this.swapCollections.length)];
     }
     
     public boolean isLive() {
@@ -159,7 +149,7 @@ abstract class AbstractCollectionSegment<I,T>
         	int free  = 0;
             do{
             	free  = 0;
-	        	for(Segment<T> seg: this.segments){
+	        	for(SwapCollectionImp<T> seg: this.swapCollections){
 	        		if(seg.swapNextCandidate()){
 	        			count++;
 	        		}
@@ -168,7 +158,7 @@ abstract class AbstractCollectionSegment<I,T>
 	        		}
 	        	}
             }
-            while(count < i && free != this.segments.length);
+            while(count < i && free != this.swapCollections.length);
         }
         
     }
@@ -178,8 +168,8 @@ abstract class AbstractCollectionSegment<I,T>
     }
     
     public void flush(){
-    	for(Segment<T> seg: this.segments){
-    		while(seg.swapNextCandidate());
+    	for(SwapCollection<T> seg: this.swapCollections){
+    		seg.flush();
     	}
     }
     
@@ -205,14 +195,6 @@ abstract class AbstractCollectionSegment<I,T>
         this.hasCreatePath = hasCreatePath;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public int getMaxCapacity() {
         return maxCapacity;
     }
@@ -221,7 +203,7 @@ abstract class AbstractCollectionSegment<I,T>
         this.maxCapacity = maxCapacity;
     }
 
-    public int getMaxSegmentCapacity() {
+    public long getMaxSegmentCapacity() {
         return maxSegmentCapacity;
     }
 
@@ -262,11 +244,10 @@ abstract class AbstractCollectionSegment<I,T>
     }
 
     public void clear(){
-    	for(Segment<T> seg: this.segments){
+    	this.swapCandidates.clear();
+    	for(SwapCollectionImp<T> seg: this.swapCollections){
     		seg.clear();
     	}
-    	this.swapCandidates.clear();
-        this.swap.clear();
     }
     
     public void destroy(){
@@ -279,10 +260,9 @@ abstract class AbstractCollectionSegment<I,T>
     	}
     	finally{
 	    	this.swapCandidates.clear();
-	        this.swap.destroy();
 	        
-	    	for(Segment<T> seg: this.segments){
-	    		seg.clear();
+	    	for(SwapCollectionImp<T> seg: this.swapCollections){
+	    		seg.destroy();
 	    	}
     	}
     	
@@ -297,10 +277,10 @@ abstract class AbstractCollectionSegment<I,T>
     	}
     	
     	public void run() {
-    		while(AbstractCollectionSegment.this.live){
+    		while(SegmentedSwapCollectionImp.this.live){
     			try{
     				Entry<T> entry = itens.take();
-    				AbstractCollectionSegment.this.getSegment(entry.getIndex()).swap(entry);
+    				SegmentedSwapCollectionImp.this.getSegment(entry.getIndex()).swap(entry);
     			}
     			catch(Throwable e){
     				if(!(e instanceof InterruptedException)){
@@ -312,5 +292,25 @@ abstract class AbstractCollectionSegment<I,T>
     	}
     	
     }
-    
+
+	public long getId() {
+		return swapCollections[0].getId();
+	}
+
+	public Lock getLock() {
+		return swapCollections[0].getLock();
+	}
+
+	public Swapper getSwap() {
+		return swapCollections[0].getSwap();
+	}
+
+	public Lock getGroupLock(long index) {
+		return getSegment(index).getLock();
+	}
+
+	public int getNumberOfGroups() {
+		return swapCollections.length;
+	}
+	
 }
