@@ -15,7 +15,7 @@ public class ReferenceCollectionSegment<T>
 	
 	private BlockingQueue<Long> freeAddress;
 	
-	private SwapCollection<T> collection;
+	private SwapCollection<Object> collection;
 	
 	private long lastPos;
 	
@@ -48,7 +48,7 @@ public class ReferenceCollectionSegment<T>
     	this.lock         = new ReentrantLock();
         this.deleteOnExit = true;
         this.collection   = 
-                    new SegmentedSwapCollectionImp<T>(
+                    new SegmentedSwapCollectionImp<Object>(
                         maxCapacityElements, 
                         clearFactorElements, 
                         fragmentFactorElements,
@@ -74,7 +74,7 @@ public class ReferenceCollectionSegment<T>
 		Lock lock = collection.getGroupLock(index);
 		lock.lock();
 		try{
-			collection.add(new Entry<T>(index, e));
+			collection.add(new Entry<Object>(index, e));
 		}
 		catch(Throwable ex){
 			this.freeAddress.add(index);
@@ -88,41 +88,66 @@ public class ReferenceCollectionSegment<T>
 
 	@SuppressWarnings("unchecked")
 	public T set(long reference, T e) {
-		Object o;
+		Entry<Object> entry = null;
 		Lock lock = collection.getGroupLock(reference);
 		lock.lock();
 		try{
-			o = collection.getEntry(reference);
-			collection.add(new Entry<T>(reference, e));
+			entry = collection.getEntry(reference);
+			collection.add(new Entry<Object>(reference, e));
 		}
 		finally{
 			lock.unlock();
 		}
-		return o instanceof Empty? null : (T)o;
+		T old = entry != null? (T)entry.getItem() : null;
+		return old instanceof Empty? null : old;
 	}
 
 	@SuppressWarnings("unchecked")
 	public T get(long reference) {
-		long segment    = (long)(reference / collection.getFragmentSize());
-		long offset     = (long)(reference % collection.getFragmentSize());
-		Object o = collection.getEntity(segment, (int)offset);
-		return o instanceof Empty? null : (T)o;
+		Entry<Object> entry = null;
+		Lock lock = collection.getGroupLock(reference);
+		lock.lock();
+		try{
+			entry = collection.getEntry(reference);
+		}
+		finally{
+			lock.unlock();
+		}
+		T value = entry != null? (T)entry.getItem() : null;
+		return value instanceof Empty? null : value;
 	}
 
 	public boolean remove(long reference) {
-		long segment    = (long)(reference / collection.getFragmentSize());
-		long offset     = (long)(reference % collection.getFragmentSize());
+		Entry<Object> entry = null;
+		Lock lock = collection.getGroupLock(reference);
+		lock.lock();
+		try{
+			entry = collection.getEntry(reference);
+			collection.add(new Entry<Object>(reference, EMPTY));
+		}
+		finally{
+			lock.unlock();
+		}
 		
-		if(!EMPTY.equals(collection.replaceEntity(segment, (int)offset, EMPTY))){
-			this.freeAddress.add(reference);
-			return true;
-		}
-		else{
-			return false;
-		}
+		Object old = entry != null? entry.getItem() : null;
+		return !EMPTY.equals(old);
+
 	}
 	
 	public boolean replace(long reference, T oldValue, T value) {
+		Entry<Object> entry = null;
+		Lock lock = collection.getGroupLock(reference);
+		lock.lock();
+		try{
+			entry = collection.getEntry(reference);
+			collection.add(new Entry<Object>(reference, e));
+		}
+		finally{
+			lock.unlock();
+		}
+		T old = entry != null? (T)entry.getItem() : null;
+		return old instanceof Empty? null : old;
+		
 		long segment    = (long)(reference / collection.getFragmentSize());
 		long offset     = (long)(reference % collection.getFragmentSize());
 		return collection.replaceEntity(segment, (int)offset, oldValue, value);
