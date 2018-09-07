@@ -1,12 +1,13 @@
 package org.brandao.brcache;
 
 import java.io.InputStream;
+import java.io.Serializable;
+
+import org.brandao.concurrent.NamedLock;
+import org.brandao.entityfilemanager.EntityFileManager;
 
 /**
- * É a classe central do BRCache. 
- * <p>Ele faz o mapeamento chave-valor. Uma chave 
- * somente pode estar associado a um valor. Não são
- * permtidos chaves duplicadas.</p> 
+ * Provê as operações de um cache com bloqueio dos métodos que alteram o cache.
  * 
  * <pre>
  * ex:
@@ -22,7 +23,31 @@ import java.io.InputStream;
  * @author Brandao
  *
  */
-public interface Cache {
+public class LockCache extends BasicCache {
+	
+	private static final long serialVersionUID = -8558471389768293591L;
+
+	protected transient NamedLock locks;
+	
+    /**
+     * Cria um novo cache.
+     * 
+     */
+    public LockCache(EntityFileManager efm){
+    	super(new BRCacheConfig(new Configuration()), efm);
+    	this.locks = new NamedLock();
+    }
+    
+    /**
+     * Cria um novo cache a partir de uma configuração específica.
+     * @param config configuração.
+     */
+    public LockCache(BRCacheConfig config, EntityFileManager efm){
+    	super(config, efm);
+    	this.locks = new NamedLock();
+    }
+    
+	/* métodos de armazenamento */
 	
     /**
      * Substitui o valor associado à chave somente se ele existir.
@@ -33,8 +58,19 @@ public interface Cache {
      * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-	boolean replace(String key, Object value, 
-			long timeToLive, long timeToIdle) throws StorageException;
+	public boolean replace(String key, Object value, 
+			long timeToLive, long timeToIdle) throws StorageException {
+		
+		Serializable refLock = this.locks.lock(key);
+		try{
+			return super.replace(key, value, timeToLive, timeToIdle);
+		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
+	}
 	
     /**
      * Substitui o fluxo de bytes associado à chave somente se ele existir.
@@ -45,8 +81,17 @@ public interface Cache {
      * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    boolean replaceStream(String key, InputStream inputData, 
-    		long timeToLive, long timeToIdle) throws StorageException;
+    public boolean replaceStream(String key, InputStream inputData, long timeToLive, long timeToIdle) throws StorageException{
+		Serializable refLock = this.locks.lock(key);
+		try{
+			return super.replaceStream(key, inputData, timeToLive, timeToIdle);
+		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
+    }
 	
 	/**
 	 * Substitui o valor associado à chave somente se ele for igual a um determinado valor.
@@ -58,8 +103,31 @@ public interface Cache {
 	 * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
-	boolean replace(String key, Object oldValue, 
-			Object newValue, long timeToLive, long timeToIdle) throws StorageException;
+	public boolean replace(String key, Object oldValue, 
+			Object newValue, long timeToLive, long timeToIdle) throws StorageException {
+		
+		Serializable refLock = this.locks.lock(key);
+		try{
+			Object o = super.get(key);
+			if(o != null && o.equals(oldValue)){
+				super.put(key, newValue, timeToLive, timeToIdle);
+				return true;
+			}
+			else
+				return false;
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(RecoverException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
+	}
 	
 	/**
 	 * Associa o valor à chave somente se a chave não estiver associada a um valor.
@@ -70,8 +138,19 @@ public interface Cache {
 	 * @return valor anterior associado à chave.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
-	Object putIfAbsent(String key,
-			Object value, long timeToLive, long timeToIdle) throws StorageException;
+	public Object putIfAbsent(String key,
+			Object value, long timeToLive, long timeToIdle) throws StorageException {
+		
+		Serializable refLock = this.locks.lock(key);
+		try{
+			return super.putIfAbsent(key, value, timeToLive, timeToIdle);
+		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
+	}
 	
     /**
      * Associa o fluxo de bytes do valor à chave somente se a chave não estiver associada a um valor.
@@ -82,8 +161,24 @@ public interface Cache {
      * @return fluxo associado à chave ou <code>null</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    InputStream putIfAbsentStream(String key, InputStream inputData, 
-    		long timeToLive, long timeToIdle) throws StorageException;
+    public InputStream putIfAbsentStream(String key, InputStream inputData, long timeToLive, long timeToIdle) throws StorageException{
+    	
+		Serializable refLock = this.locks.lock(key);
+		try{
+			return super.putIfAbsentStream(key, inputData, timeToLive, timeToIdle);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(RecoverException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
+    }
 	
 	/**
 	 * Associa o valor à chave.
@@ -94,7 +189,18 @@ public interface Cache {
      * @return <code>true</code> se o item for substituido. Caso contrário, <code>false</code>
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
 	 */
-	boolean put(String key, Object value, long timeToLive, long timeToIdle) throws StorageException;
+	public boolean put(String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
+		
+		Serializable refLock = this.locks.lock(key);
+		try{
+			return super.put(key, value, timeToLive, timeToIdle);
+		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
+	}
 	
     /**
 	 * Associa o fluxo de bytes do valor à chave.
@@ -105,8 +211,18 @@ public interface Cache {
      * @return <code>true</code> se o item for substituido. Caso contrário, <code>false</code>
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    boolean putStream(String key, InputStream inputData, 
-    		long timeToLive, long timeToIdle) throws StorageException;
+    public boolean putStream(String key, InputStream inputData, 
+    		long timeToLive, long timeToIdle) throws StorageException{
+		Serializable refLock = this.locks.lock(key);
+		try{
+			return super.putStream(key, inputData, timeToLive, timeToIdle);
+		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
+    }
 	
     /* métodos de coleta */
 	
@@ -117,7 +233,19 @@ public interface Cache {
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
      * item.
 	 */
-	Object get(String key) throws RecoverException;
+	public Object get(String key) throws RecoverException {
+		/* Deixar sem bloqueio */
+		
+		//Serializable refLock = this.locks.lock(key);
+		//try{
+			return super.get(key);
+		//}
+		//finally{
+		//	if(refLock != null){
+		//		this.locks.unlock(refLock, key);
+		//	}
+		//}
+	}
 
     /**
      * Obtém o fluxo de bytes do valor associado à chave.
@@ -126,7 +254,19 @@ public interface Cache {
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
      * item.
      */
-    InputStream getStream(String key) throws RecoverException;
+    public InputStream getStream(String key) throws RecoverException {
+		/* Deixar sem bloqueio */
+    	
+		//Serializable refLock = this.locks.lock(key);
+		//try{
+			return super.getStream(key);
+		//}
+		//finally{
+		//	if(refLock != null){
+		//		this.locks.unlock(refLock, key);
+		//	}
+		//}
+    }
 	
     /* métodos de remoção */
 
@@ -138,7 +278,32 @@ public interface Cache {
 	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
      * item.
 	 */
-	boolean remove(String key, Object value) throws StorageException;
+	public boolean remove(String key, Object value) throws StorageException {
+		
+		Serializable refLock = this.locks.lock(key);
+		try{
+			Object o = super.get(key);
+			if(o != null && o.equals(value)){
+				return super.remove(key);
+			}
+			else
+				return false;
+		}
+    	catch(StorageException e){
+    		throw e;
+    	}
+    	catch(RecoverException e){
+    		throw new StorageException(e, e.getError(), e.getParams());
+    	}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1021);
+		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
+	}
 	
     /**
      * Remove o valor associado à chave.
@@ -147,7 +312,17 @@ public interface Cache {
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
      * item.
      */
-    boolean remove(String key) throws StorageException;
+    public boolean remove(String key) throws StorageException{
+		Serializable refLock = this.locks.lock(key);
+		try{
+			return super.remove(key);
+		}
+		finally{
+			if(refLock != null){
+				this.locks.unlock(refLock, key);
+			}
+		}
+    }
 	
     /* métodos de manipulação*/
     
@@ -155,13 +330,17 @@ public interface Cache {
 	 * Obtém a quantidade de itens contido no cache.
 	 * @return quantidade de itens.
 	 */
-	long size();
+	public long size() {
+		return super.getCountRemoved() - super.getCountWrite();
+	}
 
 	/**
 	 * Verifica se o cache está vazio.
 	 * @return <code>true</code> se o cache estiver vazio. Caso contrário, <code>false</code>.
 	 */
-	boolean isEmpty();
+	public boolean isEmpty() {
+		return this.size() == 0;
+	}
 
 	/**
 	 * Verifica se uma chave está associado a um valor.
@@ -170,6 +349,8 @@ public interface Cache {
      * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
      * item.
 	 */
-	boolean containsKey(String key) throws RecoverException;
-
+	public boolean containsKey(String key) throws RecoverException {
+		return super.getStream(key) != null;
+	}
+	
 }

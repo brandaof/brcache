@@ -17,8 +17,7 @@ import org.brandao.entityfilemanager.EntityFileManager;
  * @author Brandao.
  *
  */
-public class BasicCache 
-	extends StreamCache{
+public class BasicCache extends AbstractCache {
 
 	private static final long serialVersionUID = -3101078990483084845L;
 	

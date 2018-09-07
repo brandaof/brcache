@@ -46,7 +46,7 @@ public class StressCacheTest extends TestCase{
     public void test() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
         Collections.setPath("/mnt/brcache");
-        final Cache cache = new Cache().getTXCache();
+        final LockCache cache = new LockCache().getTXCache();
 
         Thread read =
             new Thread(){
@@ -158,7 +158,7 @@ public class StressCacheTest extends TestCase{
     public void test2() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
         Collections.setPath("/mnt/brcache");
-        final Cache cache = new Cache();
+        final LockCache cache = new LockCache();
 
         Thread read =
             new Thread(){

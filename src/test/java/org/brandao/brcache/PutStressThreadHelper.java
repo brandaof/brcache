@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class PutStressThreadHelper extends Thread{
 	
-	private Cache cache;
+	private LockCache cache;
 	
 	private AtomicLong key;
 	
@@ -12,7 +12,7 @@ public class PutStressThreadHelper extends Thread{
 	
 	private Throwable error;
 	
-	public PutStressThreadHelper(AtomicLong key, String value, Cache cache){
+	public PutStressThreadHelper(AtomicLong key, String value, LockCache cache){
 		this.key   = key;
 		this.value = value;
 		this.cache = cache;

@@ -38,7 +38,7 @@ public class CacheInputStream extends InputStream{
     
     private int currentDataindex;
 
-    private StreamCache cache;
+    private AbstractCache cache;
     
     private byte[] bufByte = new byte[1];
 
@@ -46,7 +46,7 @@ public class CacheInputStream extends InputStream{
     	this(null, null, null);
     }
 
-    public CacheInputStream(StreamCache cache, DataMap map, Block[] dataList){
+    public CacheInputStream(AbstractCache cache, DataMap map, Block[] dataList){
         this.map                 = map;
         this.arrayDataList       = dataList;
         this.currentDataindex    = 0;
@@ -70,11 +70,11 @@ public class CacheInputStream extends InputStream{
 		this.arrayDataList = arrayDataList;
 	}
 
-	public StreamCache getCache() {
+	public AbstractCache getCache() {
 		return cache;
 	}
 
-	public void setCache(StreamCache cache) {
+	public void setCache(AbstractCache cache) {
 		this.cache = cache;
 	}
 

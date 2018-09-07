@@ -54,8 +54,7 @@ import org.brandao.entityfilemanager.EntityFileManager;
  * 
  * @author Brandao
  */
-public abstract class StreamCache 
-	implements Serializable{
+public abstract class AbstractCache implements Serializable{
     
     private static final long serialVersionUID = 8023029671447700902L;
 
@@ -95,7 +94,7 @@ public abstract class StreamCache
     
     private boolean deleteOnExit;
     
-    public StreamCache(){
+    public AbstractCache(){
         this.dataMap 				= null;
         this.dataList 				= null;
         this.segmentSize 			= -1;
@@ -123,7 +122,7 @@ public abstract class StreamCache
      * @param memory Acesso à memória.
      * @param efm Sistema de arquivos usado pelo cache.
      */
-    public StreamCache(
+    public AbstractCache(
     		String name,
     		long nodeBufferSize,
     		long nodePageSize,
