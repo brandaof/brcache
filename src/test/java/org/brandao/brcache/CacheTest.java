@@ -12,15 +12,17 @@ public class CacheTest extends TestCase{
 
 	private static final String VALUE2 = "val";
 	
+	private static final BRCacheConfig config = new TestBRCacheConfig();
+	
 	/* replace */
 	
 	public void testReplace() throws StorageException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		TestCase.assertFalse(cache.replace(KEY, VALUE, 0, 0));
 	}
 
 	public void testReplaceSuccess() throws StorageException, RecoverException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		TestCase.assertTrue(cache.replace(KEY, VALUE2, 0, 0));
@@ -28,12 +30,12 @@ public class CacheTest extends TestCase{
 	}
 
 	public void testReplaceStream() throws StorageException, IOException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		TestCase.assertFalse(cache.replaceStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0));
 	}
 
 	public void testReplaceStreamSuccess() throws StorageException, RecoverException, IOException, ClassNotFoundException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		cache.putStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0);
 		TestCase.assertEquals(VALUE, (String)CacheTestHelper.toObject(cache.getStream(KEY)));
 		TestCase.assertTrue(cache.replaceStream(KEY, CacheTestHelper.toStream(VALUE2), 0, 0));
@@ -41,12 +43,12 @@ public class CacheTest extends TestCase{
 	}
 	
 	public void testReplaceExact() throws StorageException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0, 0));
 	}
 
 	public void testReplaceExactSuccess() throws StorageException, RecoverException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		TestCase.assertTrue(cache.replace(KEY, VALUE, VALUE2, 0, 0));
@@ -56,26 +58,26 @@ public class CacheTest extends TestCase{
 	/* putIfAbsent */
 	
 	public void testputIfAbsent() throws StorageException, RecoverException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		TestCase.assertNull(cache.putIfAbsent(KEY, VALUE, 0, 0));
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
 	public void testputIfAbsentExistValue() throws StorageException, RecoverException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, cache.putIfAbsent(KEY, VALUE2, 0, 0));
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
 	public void testputIfAbsentStream() throws StorageException, RecoverException, IOException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		TestCase.assertNull(cache.putIfAbsentStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0));
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
 	public void testputIfAbsentStreamExistValue() throws StorageException, RecoverException, IOException, ClassNotFoundException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		cache.putStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0);
 		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.putIfAbsentStream(KEY, CacheTestHelper.toStream(VALUE2), 0, 0)));
 		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.getStream(KEY)));
@@ -84,7 +86,7 @@ public class CacheTest extends TestCase{
 	/* put */
 	
 	public void testPut() throws StorageException, RecoverException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		TestCase.assertNull((String)cache.get(KEY));
 		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
@@ -93,14 +95,14 @@ public class CacheTest extends TestCase{
 	/* get */
 	
 	public void testGet() throws StorageException, RecoverException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		TestCase.assertNull((String)cache.get(KEY));
 		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
 	public void testGetOverride() throws StorageException, RecoverException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		TestCase.assertNull((String)cache.get(KEY));
 		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
@@ -111,7 +113,7 @@ public class CacheTest extends TestCase{
 	/* remove */
 	
 	public void testRemoveExact() throws StorageException, RecoverException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		
 		TestCase.assertNull((String)cache.get(KEY));
 		TestCase.assertFalse(cache.remove(KEY, VALUE));
@@ -125,7 +127,7 @@ public class CacheTest extends TestCase{
 	}
 
 	public void testRemove() throws StorageException, RecoverException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		
 		TestCase.assertNull((String)cache.get(KEY));
 		TestCase.assertFalse(cache.remove(KEY));
@@ -140,7 +142,7 @@ public class CacheTest extends TestCase{
 	/* timeToLive */
 	
 	public void testTimeToLive() throws InterruptedException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		cache.put(KEY, VALUE, 1000, 0);
 		assertEquals(cache.get(KEY), VALUE);
 		Thread.sleep(800);
@@ -150,7 +152,7 @@ public class CacheTest extends TestCase{
 	}
 
 	public void testTimeToLiveLessThanTimeToIdle() throws InterruptedException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		cache.put(KEY, VALUE, 1000, 5000);
 		assertEquals(cache.get(KEY), VALUE);
 		Thread.sleep(1200);
@@ -159,7 +161,7 @@ public class CacheTest extends TestCase{
 
 	public void testNegativeTimeToLive() throws InterruptedException{
 		try{
-			ConcurrentCache cache = new ConcurrentCache();
+			ConcurrentCache cache = new ConcurrentCache(config);
 			cache.put(KEY, VALUE, -1, 5000);
 			fail();
 		}
@@ -174,7 +176,7 @@ public class CacheTest extends TestCase{
 	/* TimeToIdle */
 	
 	public void testTimeToIdle() throws InterruptedException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		cache.put(KEY, VALUE, 0, 1000);
 		assertEquals(cache.get(KEY), VALUE);
 		Thread.sleep(800);
@@ -187,7 +189,7 @@ public class CacheTest extends TestCase{
 	}
 
 	public void testTimeToIdleLessThanTimeToLive() throws InterruptedException{
-		ConcurrentCache cache = new ConcurrentCache();
+		ConcurrentCache cache = new ConcurrentCache(config);
 		cache.put(KEY, VALUE, 20000, 1000);
 		assertEquals(cache.get(KEY), VALUE);
 		Thread.sleep(800);
@@ -200,7 +202,7 @@ public class CacheTest extends TestCase{
 
 	public void testNegativeTimeToIdle() throws InterruptedException{
 		try{
-			ConcurrentCache cache = new ConcurrentCache();
+			ConcurrentCache cache = new ConcurrentCache(config);
 			cache.put(KEY, VALUE, 0, -1);
 			fail();
 		}

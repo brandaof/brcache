@@ -19,7 +19,7 @@ public class CacheInputStreamTest extends TestCase{
 	
 	private Random r      = new Random();
 	
-	private BasicCache c  = new BasicCache();
+	private BasicCache c  = new BasicCache(new TestBRCacheConfig());
 	
 	public void testOneSegment() throws IOException{
 		byte[] dta    = new byte[30];

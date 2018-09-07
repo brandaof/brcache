@@ -6,9 +6,13 @@ package org.brandao.brcache;
 
 import java.io.*;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
 import junit.framework.Assert;
 import junit.framework.TestCase;
+
 import org.brandao.brcache.collections.Collections;
+import org.brandao.brcache.tx.CacheTransactionManagerImp;
 
 /**
  *
@@ -43,10 +47,13 @@ public class StressCacheTest extends TestCase{
     
     private static int count = 0;
     
+	private static final BRCacheConfig config = new TestBRCacheConfig();
+    
     public void test() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
         Collections.setPath("/mnt/brcache");
-        final ConcurrentCache cache = new ConcurrentCache().getTXCache();
+        final ConcurrentCache cache = new ConcurrentCache(config)
+        	.getTXCache(new CacheTransactionManagerImp("./tx", TimeUnit.SECONDS.toMillis(30)));
 
         Thread read =
             new Thread(){
@@ -158,7 +165,7 @@ public class StressCacheTest extends TestCase{
     public void test2() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
         Collections.setPath("/mnt/brcache");
-        final ConcurrentCache cache = new ConcurrentCache();
+        final ConcurrentCache cache = new ConcurrentCache(config);
 
         Thread read =
             new Thread(){
