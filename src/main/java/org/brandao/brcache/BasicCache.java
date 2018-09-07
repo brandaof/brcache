@@ -6,10 +6,10 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import org.brandao.brcache.collections.Swapper;
 import org.brandao.brcache.memory.Memory;
 import org.brandao.brcache.tx.CacheTransactionManager;
 import org.brandao.brcache.tx.TXCache;
+import org.brandao.entityfilemanager.EntityFileManager;
 
 /**
  * Provê as operações básicas de um cache.
@@ -28,23 +28,38 @@ public class BasicCache
      * Cria um novo cache.
      * 
      */
-    public BasicCache(){
-    	this(new BRCacheConfig(new Configuration()));
+    public BasicCache(EntityFileManager efm){
+    	this(new BRCacheConfig(new Configuration()), efm);
     }
     
-    public BasicCache(BRCacheConfig config){
+    public BasicCache(BRCacheConfig config, EntityFileManager efm){
     	this(
-    			config.getNodesBufferSize(), config.getNodesPageSize(), config.getNodesSwapFactor(),
-    			config.getIndexBufferSize(), config.getIndexPageSize(), config.getIndexSwapFactor(), 
-    			config.getDataBufferSize(), config.getDataPageSize(), config.getDataBlockSize(), config.getDataSwapFactor(), 
-    			config.getMaxSizeEntry(), config.getMaxSizeKey(), 
-    			config.getSwapper(), config.getSwapperThread(), config.getMemory());
+			"default",
+			config.getNodesBufferSize(), 
+			config.getNodesPageSize(), 
+			config.getNodesSwapFactor(),
+			
+			config.getIndexBufferSize(), 
+			config.getIndexPageSize(), 
+			config.getIndexSwapFactor(),
+			
+			config.getDataBufferSize(), 
+			config.getDataPageSize(), 
+			config.getDataBlockSize(),
+			config.getDataSwapFactor(),
+			
+			config.getMaxSizeEntry(), 
+			config.getMaxSizeKey(), 
+			config.getSwapperThread(), 
+			config.getMemory(),
+			efm);
     	this.config = config;
     }
     
     /**
      * Cria um novo cache.
      * 
+     * @param name Nome do cache.
      * @param nodeBufferSize Tamanho do buffer, em bytes, onde os nós ficarão armazenados. 
      * @param nodePageSize Tamanho da página, em bytes, do buffer de nós.
      * @param nodeSwapFactor Fator de permuta dos nós.
@@ -57,11 +72,12 @@ public class BasicCache
      * @param dataSwapFactor Fator de permuta dos dados.
      * @param maxSizeEntry Tamanho máximo de uma entrada no cache.
      * @param maxSizeKey Tamanho máximo de uma chave.
-     * @param swapper Estratégia de troca dos dados entre a memória e outro dispositivo.
      * @param quantitySwaperThread Quantidade de processos usados para fazer a permuta.
      * @param memory Acesso à memória.
+     * @param efm Sistema de arquivos usado pelo cache.
      */
     public BasicCache(
+    		String name,
     		long nodeBufferSize,
     		long nodePageSize,
     		double nodeSwapFactor,
@@ -77,13 +93,13 @@ public class BasicCache
     		
     		long maxSizeEntry,
     		int maxSizeKey,
-            Swapper swapper,
             int quantitySwaperThread,
-            Memory memory
-    		){	
-    	super(nodeBufferSize, nodePageSize, nodeSwapFactor, indexBufferSize, 
+            Memory memory,
+            EntityFileManager efm
+    		){
+    	this.init(name, nodeBufferSize, nodePageSize, nodeSwapFactor, indexBufferSize, 
     			indexPageSize, indexSwapFactor, dataBufferSize, dataPageSize, blockSize, 
-    			dataSwapFactor, maxSizeEntry, maxSizeKey, swapper, quantitySwaperThread, memory);
+    			dataSwapFactor, maxSizeEntry, maxSizeKey, quantitySwaperThread, memory, efm);
     }
     
     /**

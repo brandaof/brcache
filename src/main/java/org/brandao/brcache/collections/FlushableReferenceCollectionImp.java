@@ -5,7 +5,7 @@ public class FlushableReferenceCollectionImp<T>
 
 	private static final long serialVersionUID = 1406571295066759006L;
 
-	private ReferenceCollectionSegment<T>[] lists;
+	private SimpleReferenceCollection<T>[] lists;
 
     private boolean deleteOnExit;
 	
@@ -24,16 +24,16 @@ public class FlushableReferenceCollectionImp<T>
             int maxCapacityElements,
             double clearFactorElements, 
             double fragmentFactorElements,
-            Swapper swap,
+            Swapper<T> swap,
             int quantityClearThread, 
             int lists) {
     
-    	this.lists        = new ReferenceCollectionSegment[lists];
+    	this.lists        = new SimpleReferenceCollection[lists];
         this.deleteOnExit = true;
     	
     	for(int i=0;i<this.lists.length;i++){
             this.lists[i] = 
-                    new ReferenceCollectionSegment<T>(
+                    new SimpleReferenceCollection<T>(
                         maxCapacityElements, 
                         clearFactorElements, 
                         fragmentFactorElements,
@@ -116,7 +116,7 @@ public class FlushableReferenceCollectionImp<T>
     
     public long length(){
     	long size = 0;
-    	for(ReferenceCollectionSegment<T> l: this.lists){
+    	for(SimpleReferenceCollection<T> l: this.lists){
     		size += l.length();
     	}
     	return size;
@@ -131,26 +131,26 @@ public class FlushableReferenceCollectionImp<T>
     }
 
     public void clear() {
-    	for(ReferenceCollectionSegment<T> l: this.lists){
+    	for(SimpleReferenceCollection<T> l: this.lists){
     		l.clear();
     	}
     }
 
     public void destroy(){
-    	for(ReferenceCollectionSegment<T> l: this.lists){
+    	for(SimpleReferenceCollection<T> l: this.lists){
     		l.destroy();
     	}
     }
     
     public void flush(){
-    	for(ReferenceCollectionSegment<T> l: this.lists){
+    	for(SimpleReferenceCollection<T> l: this.lists){
     		l.flush();
     	}
     	
     }
 
 	public void setReadOnly(boolean value) {
-    	for(ReferenceCollectionSegment<T> l: this.lists){
+    	for(SimpleReferenceCollection<T> l: this.lists){
     		l.setReadOnly(value);
     	}
 	}

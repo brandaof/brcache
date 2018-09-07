@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 
 import org.brandao.concurrent.NamedLock;
+import org.brandao.entityfilemanager.EntityFileManager;
 
 /**
  * É a classe central do BRCache. 
@@ -36,8 +37,8 @@ public class Cache
      * Cria um novo cache.
      * 
      */
-    public Cache(){
-    	super(new BRCacheConfig(new Configuration()));
+    public Cache(EntityFileManager efm){
+    	super(new BRCacheConfig(new Configuration()), efm);
     	this.locks = new NamedLock();
     }
     
@@ -45,8 +46,8 @@ public class Cache
      * Cria um novo cache a partir de uma configuração específica.
      * @param config configuração.
      */
-    public Cache(BRCacheConfig config){
-    	super(config);
+    public Cache(BRCacheConfig config, EntityFileManager efm){
+    	super(config, efm);
     	this.locks = new NamedLock();
     }
     

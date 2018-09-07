@@ -26,7 +26,7 @@ import java.util.concurrent.locks.Lock;
 /**
  * @author Brandao
  */
-class SegmentedSwapCollectionImp<T> 
+public class SegmentedSwapCollectionImp<T> 
     implements SwapCollection<T>, Runnable, Serializable{
     
 	private static final long serialVersionUID = 7817500681111470845L;
@@ -61,7 +61,7 @@ class SegmentedSwapCollectionImp<T>
     
     @SuppressWarnings("unchecked")
 	public SegmentedSwapCollectionImp(int maxCapacity, double clearFactor,
-            double fragmentFactor, Swapper swap, int quantitySwaperThread) {
+            double fragmentFactor, Swapper<T> swap, int quantitySwaperThread) {
 
         this.fragmentSize        = (int)(maxCapacity * fragmentFactor);
         this.maxCapacity         = maxCapacity;
@@ -301,7 +301,8 @@ class SegmentedSwapCollectionImp<T>
 		return swapCollections[0].getLock();
 	}
 
-	public Swapper getSwap() {
+	@SuppressWarnings("unchecked")
+	public Swapper<T> getSwap() {
 		return swapCollections[0].getSwap();
 	}
 

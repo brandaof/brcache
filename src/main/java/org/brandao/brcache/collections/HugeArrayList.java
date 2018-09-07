@@ -37,7 +37,7 @@ public class HugeArrayList<T>
 
     private volatile int size;
     
-    private SegmentedCollection<T> elements;
+    private FlushableReferenceCollection<T> elements;
     
     private boolean deleteOnExit;
     
@@ -64,20 +64,13 @@ public class HugeArrayList<T>
         this.size         = 0;
         this.deleteOnExit = true;
         this.elements     = 
-                new SegmentedCollectionImp<T>(
+                new FlushableReferenceCollectionImp<T>(
                 maxCapacityElements, 
                 clearFactorElements, 
                 fragmentFactorElements,
                 swap,
-                quantityClearThread);
-    }
-    
-    public boolean isForceSwap() {
-        return this.elements.isForceSwap();
-    }
-
-    public void setForceSwap(boolean forceSwap) {
-        this.elements.setForceSwap(forceSwap);
+                quantityClearThread,
+                1);
     }
     
     public int size() {
@@ -122,15 +115,11 @@ public class HugeArrayList<T>
         if(index >= localSize)
             throw new IndexOutOfBoundsException(index + " >= " + localSize);
 
-        long segmentId = (long)(index/this.elements.getFragmentSize());
-        int idx        = (int)(index%this.elements.getFragmentSize());
-
-        return this.elements.getEntity(segmentId, idx);
+        return elements.get(index);
     }
     
     public synchronized boolean add(T e) {
-        long segmentId = (long)(size/this.elements.getFragmentSize());
-        elements.putEntity(segmentId, -1, e);
+    	elements.insert(e);
         size++;
         return true;
     }
@@ -140,12 +129,7 @@ public class HugeArrayList<T>
         if(index >= size)
             throw new IndexOutOfBoundsException(index + " > " + size);
         
-        int segmentId = (int)(index/this.elements.getFragmentSize());
-        int idx       = (int)(index%this.elements.getFragmentSize());
-        
-        T old = this.elements.getEntity(segmentId, idx);
-        this.elements.putEntity(segmentId, idx, element);
-        return old;
+        return elements.set(index, element);
     }
     
     public synchronized T remove(int index) {
@@ -200,17 +184,17 @@ public class HugeArrayList<T>
         return true;
     }
 
-    public boolean retainAll(ReferenceCollectionSegment<?> c) {
+    public boolean retainAll(SimpleReferenceCollection<?> c) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public synchronized void clear() {
-        this.elements.clear();
-        this.size = 0;
+        elements.clear();
+        size = 0;
     }
 
     public void destroy(){
-    	this.elements.destroy();
+    	elements.destroy();
     }
     
     public void add(int index, T element) {
@@ -225,7 +209,7 @@ public class HugeArrayList<T>
     }
 
     public void flush(){
-        this.elements.flush();
+        elements.flush();
     }
     
 	public boolean retainAll(Collection<?> c) {
@@ -249,11 +233,11 @@ public class HugeArrayList<T>
     }
 
     public void setReadOnly(boolean value) {
-        this.elements.setReadOnly(value);
+        elements.setReadOnly(value);
     }
 
     public boolean isReadOnly() {
-        return this.elements.isReadOnly();
+        return elements.isReadOnly();
     }
 
     public boolean isDeleteOnExit() {
@@ -267,8 +251,8 @@ public class HugeArrayList<T>
 	@Override
     protected void finalize() throws Throwable{
         try{
-            if(this.deleteOnExit)
-                this.destroy();
+            if(deleteOnExit)
+                destroy();
         }
         finally{
             super.finalize();

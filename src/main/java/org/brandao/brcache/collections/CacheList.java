@@ -39,8 +39,6 @@ public class CacheList<T>
 
     private final HugeArrayList<T> internalList;
     
-    private static Swapper swapper;
-    
     /**
      * Cria uma nova instância.
      * 
@@ -51,7 +49,8 @@ public class CacheList<T>
     public CacheList(
             int maxCapacityElementsOnMemory,
             double swapFactorElements, 
-            double fragmentFactorElements){
+            double fragmentFactorElements,
+            Swapper<T> swapper){
         
         this.internalList = 
             new HugeArrayList<T>(
@@ -61,7 +60,7 @@ public class CacheList<T>
                 swapper, 
                 1);
         
-        this.internalList.setForceSwap(true);
+        //this.internalList.setForceSwap(true);
     }
     
     public int size() {
@@ -155,22 +154,6 @@ public class CacheList<T>
     public List<T> subList(int fromIndex, int toIndex) {
         return this.internalList.subList(fromIndex, toIndex);
     }
-
-    /**
-     * Obtém o responsável por fazer a troca de dados entre as instâncias.
-     * @return responsável.
-     */
-    public static Swapper getSwapper() {
-		return swapper;
-	}
-
-    /**
-     * Define o responsável por fazer a troca de dados entre as instâncias.
-     * @param swapper responsável.
-     */
-	public static void setSwapper(Swapper swapper) {
-		CacheList.swapper = swapper;
-	}
 
     /**
      * Define se itens podem ser incluidos, atualizados ou removidos.

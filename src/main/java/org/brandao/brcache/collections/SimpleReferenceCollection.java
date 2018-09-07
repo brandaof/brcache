@@ -6,16 +6,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class ReferenceCollectionSegment<T> 
+public class SimpleReferenceCollection<T> 
 	implements ReferenceCollection<T>{
 
 	private static final long serialVersionUID = 4658022218986426713L;
 
-	private static final Empty EMPTY = new Empty();
-	
 	private BlockingQueue<Long> freeAddress;
 	
-	private SwapCollection<Object> collection;
+	private SwapCollection<T> collection;
 	
 	private long lastPos;
 	
@@ -23,7 +21,7 @@ public class ReferenceCollectionSegment<T>
 	
     private Lock lock;
 
-    public ReferenceCollectionSegment() {
+    public SimpleReferenceCollection() {
         this(
             HugeArrayList.DEFAULT_MAX_CAPACITY_ELEMENT, 
             HugeArrayList.DEFAULT_CLEAR_FACTOR_ELEMENT, 
@@ -32,11 +30,11 @@ public class ReferenceCollectionSegment<T>
             1);
     }
 
-	public ReferenceCollectionSegment(
+	public SimpleReferenceCollection(
             int maxCapacityElements,
             double clearFactorElements, 
             double fragmentFactorElements,
-            Swapper swap,
+            Swapper<T> swap,
             int quantityClearThread) {
 
     	if(swap == null){
@@ -48,7 +46,7 @@ public class ReferenceCollectionSegment<T>
     	this.lock         = new ReentrantLock();
         this.deleteOnExit = true;
         this.collection   = 
-                    new SegmentedSwapCollectionImp<Object>(
+                    new SegmentedSwapCollectionImp<T>(
                         maxCapacityElements, 
                         clearFactorElements, 
                         fragmentFactorElements,
@@ -74,7 +72,7 @@ public class ReferenceCollectionSegment<T>
 		Lock lock = collection.getGroupLock(index);
 		lock.lock();
 		try{
-			collection.add(new Entry<Object>(index, e));
+			collection.add(new Entry<T>(index, e));
 		}
 		catch(Throwable ex){
 			this.freeAddress.add(index);
@@ -86,14 +84,13 @@ public class ReferenceCollectionSegment<T>
 		return index;
 	}
 
-	@SuppressWarnings("unchecked")
 	public T set(long reference, T e) {
-		Entry<Object> entry = null;
+		Entry<T> entry = null;
 		Lock lock = collection.getGroupLock(reference);
 		lock.lock();
 		try{
 			entry = collection.getEntry(reference);
-			collection.add(new Entry<Object>(reference, e));
+			collection.add(new Entry<T>(reference, e));
 		}
 		finally{
 			lock.unlock();
@@ -102,9 +99,8 @@ public class ReferenceCollectionSegment<T>
 		return old instanceof Empty? null : old;
 	}
 
-	@SuppressWarnings("unchecked")
 	public T get(long reference) {
-		Entry<Object> entry = null;
+		Entry<T> entry = null;
 		Lock lock = collection.getGroupLock(reference);
 		lock.lock();
 		try{
@@ -118,24 +114,24 @@ public class ReferenceCollectionSegment<T>
 	}
 
 	public boolean remove(long reference) {
-		Entry<Object> entry = null;
+		Entry<T> entry = null;
 		Lock lock = collection.getGroupLock(reference);
 		lock.lock();
 		try{
 			entry = collection.getEntry(reference);
-			collection.add(new Entry<Object>(reference, EMPTY));
+			collection.add(new Entry<T>(reference, null));
 		}
 		finally{
 			lock.unlock();
 		}
 		
 		Object old = entry != null? entry.getItem() : null;
-		return !EMPTY.equals(old);
+		return old != null;
 
 	}
 	
 	public boolean replace(long reference, T oldValue, T value) {
-		Entry<Object> entry = null;
+		Entry<T> entry = null;
 		Object old;
 		Lock lock = collection.getGroupLock(reference);
 		lock.lock();
@@ -143,7 +139,7 @@ public class ReferenceCollectionSegment<T>
 			entry = collection.getEntry(reference);
 			old   = entry != null? entry.getItem() : null;
 			if(oldValue.equals(old)){
-				collection.add(new Entry<Object>(reference, value));
+				collection.add(new Entry<T>(reference, value));
 				return true;
 			}
 		}
@@ -156,15 +152,15 @@ public class ReferenceCollectionSegment<T>
 
 	@SuppressWarnings("unchecked")
 	public T replace(long reference, T value) {
-		Entry<Object> entry = null;
+		Entry<T> entry = null;
 		Object old = null;
 		Lock lock = collection.getGroupLock(reference);
 		lock.lock();
 		try{
 			entry = collection.getEntry(reference);
 			old   = entry != null? entry.getItem() : null;
-			if(old != null && !EMPTY.equals(old)){
-				collection.add(new Entry<Object>(reference, value));
+			if(old != null && old != null){
+				collection.add(new Entry<T>(reference, value));
 			}
 		}
 		finally{
@@ -176,15 +172,15 @@ public class ReferenceCollectionSegment<T>
 
 	@SuppressWarnings("unchecked")
 	public T putIfAbsent(long reference, T value) {
-		Entry<Object> entry = null;
+		Entry<T> entry = null;
 		Object old = null;
 		Lock lock = collection.getGroupLock(reference);
 		lock.lock();
 		try{
 			entry = collection.getEntry(reference);
 			old   = entry != null? entry.getItem() : null;
-			if(old == null || EMPTY.equals(old)){
-				collection.add(new Entry<Object>(reference, value));
+			if(old == null || old == null){
+				collection.add(new Entry<T>(reference, value));
 			}
 		}
 		finally{
@@ -195,7 +191,7 @@ public class ReferenceCollectionSegment<T>
 	}
 
 	public boolean remove(long reference, T oldValue) {
-		Entry<Object> entry = null;
+		Entry<T> entry = null;
 		Object old = null;
 		Lock lock = collection.getGroupLock(reference);
 		lock.lock();
@@ -203,7 +199,7 @@ public class ReferenceCollectionSegment<T>
 			entry = collection.getEntry(reference);
 			old   = entry != null? entry.getItem() : null;
 			if(old != null && oldValue.equals(old)){
-				collection.add(new Entry<Object>(reference, EMPTY));
+				collection.add(new Entry<T>(reference, null));
 				return true;
 			}
 		}
