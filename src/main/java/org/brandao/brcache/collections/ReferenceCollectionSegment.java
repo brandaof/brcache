@@ -15,7 +15,7 @@ public class ReferenceCollectionSegment<T>
 	
 	private BlockingQueue<Long> freeAddress;
 	
-	private SegmentedCollection<Object> collection;
+	private SwapCollection<T> collection;
 	
 	private long lastPos;
 	
@@ -48,7 +48,7 @@ public class ReferenceCollectionSegment<T>
     	this.lock         = new ReentrantLock();
         this.deleteOnExit = true;
         this.collection   = 
-                    new SegmentedCollectionImp<Object>(
+                    new SegmentedSwapCollectionImp<T>(
                         maxCapacityElements, 
                         clearFactorElements, 
                         fragmentFactorElements,
@@ -68,30 +68,19 @@ public class ReferenceCollectionSegment<T>
 			finally{
 				lock.unlock();
 			}
-			
-			
-			long segment = (long)(index / collection.getFragmentSize());
-			long offset  = (long)(index % collection.getFragmentSize());
-	
-			try{
-				collection.putEntity(segment, (int)offset, e);
-			}
-			catch(Throwable ex){
-				this.freeAddress.add(index);
-			}
-			
 		}
-		else{
-			long segment = (long)(index / collection.getFragmentSize());
-			long offset  = (long)(index % collection.getFragmentSize());
+		
 			
-			try{
-				collection.putEntity(segment, (int)offset, e);
-			}
-			catch(Throwable ex){
-				this.freeAddress.add(index);
-			}
-			
+		Lock lock = collection.getGroupLock(index);
+		lock.lock();
+		try{
+			collection.add(new Entry<T>(index, e));
+		}
+		catch(Throwable ex){
+			this.freeAddress.add(index);
+		}
+		finally{
+			lock.unlock();
 		}
 			
 		return index;
@@ -99,9 +88,16 @@ public class ReferenceCollectionSegment<T>
 
 	@SuppressWarnings("unchecked")
 	public T set(long reference, T e) {
-		long segment    = (long)(reference / collection.getFragmentSize());
-		long offset     = (long)(reference % collection.getFragmentSize());
-		Object o = collection.setEntity(segment, (int)offset, (T)e);
+		Object o;
+		Lock lock = collection.getGroupLock(reference);
+		lock.lock();
+		try{
+			o = collection.getEntry(reference);
+			collection.add(new Entry<T>(reference, e));
+		}
+		finally{
+			lock.unlock();
+		}
 		return o instanceof Empty? null : (T)o;
 	}
 

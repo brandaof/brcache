@@ -20,6 +20,7 @@ package org.brandao.brcache.collections;
 import java.io.Serializable;
 
 import org.brandao.brcache.Cache;
+import org.brandao.brcache.CacheException;
 
 /**
  * Permite o envio e recebimento de entidades de outro nível. 
@@ -27,36 +28,33 @@ import org.brandao.brcache.Cache;
  * 
  * @author Brandao
  */
-public interface Swapper 
-	extends Serializable {
+public interface Swapper extends Serializable {
     
     /**
      * Envia uma entidade para o agrupamento.
-     * @param swapCollection Coleção de onde o item pertence.
      * @param index índice da entidade.
      * @param item Item.
      */
-    void sendItem(SwapCollectionImp<?> swapCollection, long index, Entry<?> item);
+    void sendItem(long index, Entry<?> item) throws CacheException;
 
     /**
      * Recupera uma entidade do agrupamento.
-     * @param swapCollection Coleção de onde o item pertence.
      * @param index índice
      * @return item.
      */
-    Entry<?> getItem(SwapCollectionImp<?> swapCollection, long index);
+    Entry<?> getItem(long index) throws CacheException;
     
     /**
      * Remove todos os agrupamentos.
      * @param swapCollection Coleção de onde o item pertence.
      */
-    void clear(SwapCollectionImp<?> swapCollection);
+    void clear() throws CacheException;
     
     /**
-     * Destrói todos as agrupamentos. Executado quando a instâcnia do 
+     * Destrói todos os agrupamentos. Executado quando a instância do 
      * {@link Cache} associado a ele é destruido. 
      * @param swapCollection Coleção de onde o item pertence.
      */
-    void destroy(SwapCollectionImp<?> swapCollection);
+    void destroy() throws CacheException;
     
 }
