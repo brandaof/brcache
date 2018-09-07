@@ -136,50 +136,82 @@ public class ReferenceCollectionSegment<T>
 	
 	public boolean replace(long reference, T oldValue, T value) {
 		Entry<Object> entry = null;
+		Object old;
 		Lock lock = collection.getGroupLock(reference);
 		lock.lock();
 		try{
 			entry = collection.getEntry(reference);
-			collection.add(new Entry<Object>(reference, e));
+			old   = entry != null? entry.getItem() : null;
+			if(oldValue.equals(old)){
+				collection.add(new Entry<Object>(reference, value));
+				return true;
+			}
 		}
 		finally{
 			lock.unlock();
 		}
-		T old = entry != null? (T)entry.getItem() : null;
-		return old instanceof Empty? null : old;
 		
-		long segment    = (long)(reference / collection.getFragmentSize());
-		long offset     = (long)(reference % collection.getFragmentSize());
-		return collection.replaceEntity(segment, (int)offset, oldValue, value);
+		return false;
 	}
 
 	@SuppressWarnings("unchecked")
 	public T replace(long reference, T value) {
-		long segment    = (long)(reference / collection.getFragmentSize());
-		long offset     = (long)(reference % collection.getFragmentSize());
-		Object o = collection.replaceEntity(segment, (int)offset, value);
-		return o instanceof Empty? null : (T)o;
+		Entry<Object> entry = null;
+		Object old = null;
+		Lock lock = collection.getGroupLock(reference);
+		lock.lock();
+		try{
+			entry = collection.getEntry(reference);
+			old   = entry != null? entry.getItem() : null;
+			if(old != null && !EMPTY.equals(old)){
+				collection.add(new Entry<Object>(reference, value));
+			}
+		}
+		finally{
+			lock.unlock();
+		}
+		
+		return (T) old;
 	}
 
 	@SuppressWarnings("unchecked")
 	public T putIfAbsent(long reference, T value) {
-		long segment    = (long)(reference / collection.getFragmentSize());
-		long offset     = (long)(reference % collection.getFragmentSize());
-		Object o = collection.putIfAbsentEntity(segment, (int)offset, value);
-		return o instanceof Empty? null : (T)o;
+		Entry<Object> entry = null;
+		Object old = null;
+		Lock lock = collection.getGroupLock(reference);
+		lock.lock();
+		try{
+			entry = collection.getEntry(reference);
+			old   = entry != null? entry.getItem() : null;
+			if(old == null || EMPTY.equals(old)){
+				collection.add(new Entry<Object>(reference, value));
+			}
+		}
+		finally{
+			lock.unlock();
+		}
+		
+		return (T) old;
 	}
 
 	public boolean remove(long reference, T oldValue) {
-		long segment    = (long)(reference / collection.getFragmentSize());
-		long offset     = (long)(reference % collection.getFragmentSize());
+		Entry<Object> entry = null;
+		Object old = null;
+		Lock lock = collection.getGroupLock(reference);
+		lock.lock();
+		try{
+			entry = collection.getEntry(reference);
+			old   = entry != null? entry.getItem() : null;
+			if(old != null && oldValue.equals(old)){
+				collection.add(new Entry<Object>(reference, EMPTY));
+				return true;
+			}
+		}
+		finally{
+			lock.unlock();
+		}
 		
-		if(!EMPTY.equals(collection.replaceEntity(segment, (int)offset, oldValue, EMPTY))){
-			this.freeAddress.add(reference);
-			return true;
-		}
-		else{
-			return false;
-		}
+		return false;
 	}
 	
     public void setDeleteOnExit(boolean value){
