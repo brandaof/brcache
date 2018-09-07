@@ -112,7 +112,7 @@ public class SwapCollectionImp<T>
             return;
     	
         if(!this.readOnly && item.isNeedUpdate())
-            this.swap.sendItem(this, item.getIndex(), item);
+            this.swap.sendItem(item.getIndex(), item);
 
         Entry<T> removedItem = this.remove(item);
         
@@ -130,7 +130,7 @@ public class SwapCollectionImp<T>
         if(forceSwap && this.needSwap())
             this.swapFirst();
         
-        Entry<T> entity = (Entry<T>)this.swap.getItem(this, key);
+        Entry<T> entity = (Entry<T>)this.swap.getItem(key);
 
         if(entity != null){
         	this.data.put(key, entity);
@@ -206,7 +206,7 @@ public class SwapCollectionImp<T>
     	try{
 	    	this.firstItem = null;
     		data.clear();
-    		swap.clear(this);
+    		swap.clear();
     	}
     	finally{
     		this.lock.unlock();
@@ -265,7 +265,7 @@ public class SwapCollectionImp<T>
     	try{
 	    	this.firstItem = null;
     		data.clear();
-    		swap.destroy(this);
+    		swap.destroy();
     	}
     	finally{
     		this.lock.unlock();

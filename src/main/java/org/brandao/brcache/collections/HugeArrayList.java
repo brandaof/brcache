@@ -54,7 +54,7 @@ public class HugeArrayList<T>
             int maxCapacityElements,
             double clearFactorElements, 
             double fragmentFactorElements,
-            Swapper swap,
+            Swapper<T> swap,
             int quantityClearThread) {
         
     	if(swap == null){

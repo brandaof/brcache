@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.brandao.brcache.memory.RegionMemory;
 
 @SuppressWarnings("serial")
-class Block 
+public class Block 
     implements Serializable{
 
     public long id;

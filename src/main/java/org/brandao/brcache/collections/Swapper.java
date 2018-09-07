@@ -28,21 +28,21 @@ import org.brandao.brcache.CacheException;
  * 
  * @author Brandao
  */
-public interface Swapper extends Serializable {
+public interface Swapper<T> extends Serializable {
     
     /**
      * Envia uma entidade para o agrupamento.
      * @param index índice da entidade.
      * @param item Item.
      */
-    void sendItem(long index, Entry<?> item) throws CacheException;
+    void sendItem(long index, Entry<T> item) throws CacheException;
 
     /**
      * Recupera uma entidade do agrupamento.
      * @param index índice
      * @return item.
      */
-    Entry<?> getItem(long index) throws CacheException;
+    Entry<T> getItem(long index) throws CacheException;
     
     /**
      * Remove todos os agrupamentos.

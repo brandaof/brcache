@@ -43,6 +43,11 @@ public class CacheErrors {
 	public static final CacheError ERROR_1014 = new CacheError(1014, "Cache write error");
 
 	/**
+	 * ERROR 1014: Cache read error
+	 */
+	public static final CacheError ERROR_1015 = new CacheError(1014, "Cache read error");
+	
+	/**
 	 * ERROR 1016: Transaction has been started
 	 */
 	public static final CacheError ERROR_1016 = new CacheError(1016, "Transaction has been started");
