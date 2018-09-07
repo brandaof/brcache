@@ -19,7 +19,7 @@ package org.brandao.brcache.collections;
 
 import java.io.Serializable;
 
-import org.brandao.brcache.LockCache;
+import org.brandao.brcache.ConcurrentCache;
 import org.brandao.brcache.CacheException;
 
 /**
@@ -52,7 +52,7 @@ public interface Swapper<T> extends Serializable {
     
     /**
      * Destrói todos os agrupamentos. Executado quando a instância do 
-     * {@link LockCache} associado a ele é destruido. 
+     * {@link ConcurrentCache} associado a ele é destruido. 
      * @param swapCollection Coleção de onde o item pertence.
      */
     void destroy() throws CacheException;

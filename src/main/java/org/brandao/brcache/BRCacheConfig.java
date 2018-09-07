@@ -2,12 +2,11 @@ package org.brandao.brcache;
 
 import java.io.Serializable;
 
-import org.brandao.brcache.collections.DiskSwapper;
-import org.brandao.brcache.collections.Swapper;
 import org.brandao.brcache.memory.Memory;
+import org.brandao.entityfilemanager.EntityFileManager;
 
 /**
- * Configuração de um cache.
+ * Define a configuração de um cache.
  * <pre>
  * ex:
  *     BRCacheConfig config = new BRCacheConfig();
@@ -21,14 +20,6 @@ public class BRCacheConfig implements Serializable{
 
 	private static final long serialVersionUID = 9065603898804344980L;
 
-	private static final String SWAPPER_PREFIX = "org.brandao.brcache.collections.swapper.";
-
-	private static final String SWAPPER_SUFFIX = "Swapper";
-
-	private static final String MEMORY_PREFIX = "org.brandao.brcache.memory.";
-
-	private static final String MEMORY_SUFFIX = "Memory";
-	
 	protected long nodesBufferSize;
     
 	protected long nodesPageSize;
@@ -55,93 +46,12 @@ public class BRCacheConfig implements Serializable{
     
     protected int swapperThread;
     
-    protected Swapper swapper;
-    
     protected Memory memory;
     
     protected String dataPath;
     
-    protected Configuration configuration;
+    private EntityFileManager entityFileManager;
     
-    public BRCacheConfig(){
-    }
-
-    public BRCacheConfig(Configuration config){
-    	this.setConfiguration(config);
-    }
-    
-    /**
-     * Define os metadados de configuração.
-     * @param config metadados.
-     */
-    public void setConfiguration(Configuration config){
-    	
-    	ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-    	
-    	this.configuration   = config;
-        this.nodesBufferSize = config.getLong(CacheConstants.NODES_BUFFER_SIZE,		"1m");
-        this.nodesPageSize   = config.getLong(CacheConstants.NODES_PAGE_SIZE,		"1k");
-        this.nodesSwapFactor = config.getDouble(CacheConstants.NODES_SWAP_FACTOR,	"0.3");
-        this.indexBufferSize = config.getLong(CacheConstants.INDEX_BUFFER_SIZE,		"1m");
-        this.indexPageSize   = config.getLong(CacheConstants.INDEX_PAGE_SIZE,		"1k");
-        this.indexSwapFactor = config.getDouble(CacheConstants.INDEX_SWAP_FACTOR,	"0.3");
-        this.dataBufferSize  = config.getLong(CacheConstants.DATA_BUFFER_SIZE,		"64m");
-        this.dataBlockSize   = config.getLong(CacheConstants.DATA_BLOCK_SIZE,		"1k");
-        this.dataPageSize    = config.getLong(CacheConstants.DATA_PAGE_SIZE,		"8k");
-        this.dataSwapFactor  = config.getDouble(CacheConstants.DATA_SWAP_FACTOR,	"0.3");
-        this.maxSizeEntry    = config.getLong(CacheConstants.MAX_SIZE_ENTRY,		"1m");
-        this.maxSizeKey      = config.getInt(CacheConstants.MAX_SIZE_KEY,			"100");
-        this.swapperThread   = config.getInt(CacheConstants.SWAPPER_THREAD,			"4");
-        this.dataPath        = config.getString(CacheConstants.DATA_PATH,			"/mnt/brcache");
-        this.swapper         = this.createSwapper(config.getString(CacheConstants.SWAPPER_TYPE,"file"), classLoader);
-        this.memory          = this.createMemory(config.getString(CacheConstants.MEMORY_ACCESS_TYPE,"heap"), classLoader);
-        
-        if(this.swapper instanceof DiskSwapper){
-        	((DiskSwapper)this.swapper).setRootPath(this.dataPath);
-        }
-        
-    }
-    
-    @SuppressWarnings("unchecked")
-	protected Swapper createSwapper(String name, ClassLoader classLoader){
-    	try{
-        	String className = 
-        			SWAPPER_PREFIX + 
-        			Character.toUpperCase(name.charAt(0)) + name.substring(1, name.length()).toLowerCase() +
-        			SWAPPER_SUFFIX;
-        	
-        	Class<Swapper> clazz = (Class<Swapper>)Class.forName(className, true, classLoader);
-    		return clazz.newInstance();
-    	}
-    	catch(Throwable e){
-    		throw new IllegalStateException("invalid swapper type: " + name, e);
-    	}
-    }
-
-    @SuppressWarnings("unchecked")
-    protected Memory createMemory(String name, ClassLoader classLoader){
-    	try{
-        	String className = 
-        			MEMORY_PREFIX + 
-        			Character.toUpperCase(name.charAt(0)) + name.substring(1, name.length()).toLowerCase() +
-        			MEMORY_SUFFIX;
-        	
-        	Class<Memory> clazz = (Class<Memory>)Class.forName(className, true, classLoader);
-    		return clazz.newInstance();
-    	}
-    	catch(Throwable e){
-    		throw new IllegalStateException("invalid memory type: " + name, e);
-    	}
-    }
-    
-    /**
-     * Obtém os metadados de configuração.
-     * @return metadados.
-     */
-	public Configuration getConfiguration() {
-		return configuration;
-	}
-
 	/**
 	 * Obtém a pasta onde o servidor irá fazer o swap dos dados quando 
 	 * o limite da memória for atingido.
@@ -371,14 +281,6 @@ public class BRCacheConfig implements Serializable{
 	}
 
 	/**
-	 * Obtém a estratégia de troca de dados entre a memória e outro dispositivo.
-	 * @return estratégia.
-	 */
-	public Swapper getSwapper() {
-		return swapper;
-	}
-
-	/**
 	 * Obtém a estratégia de acesso a memória.
 	 * @return estratégia.
 	 */
@@ -395,11 +297,19 @@ public class BRCacheConfig implements Serializable{
 	}
 
 	/**
-	 * Define a estratégia de troca de dados entre a memória e outro dispositivo.
-	 * @param swapper estratégia.
+	 * Obtém o sistema de arquivos do cache.
+	 * @return Sistema de arquivos.
 	 */
-	public void setSwapper(Swapper swapper) {
-		this.swapper = swapper;
+	public EntityFileManager getEntityFileManager() {
+		return entityFileManager;
+	}
+
+	/**
+	 * Define o sistema de arquivos do cache.
+	 * @param entityFileManager Sistema de arquivos.
+	 */
+	public void setEntityFileManager(EntityFileManager entityFileManager) {
+		this.entityFileManager = entityFileManager;
 	}
     
 }

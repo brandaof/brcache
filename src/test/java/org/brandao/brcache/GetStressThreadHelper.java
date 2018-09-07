@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 
 public class GetStressThreadHelper extends Thread{
 	
-	private LockCache cache;
+	private ConcurrentCache cache;
 	
 	private AtomicLong key;
 	
@@ -18,7 +18,7 @@ public class GetStressThreadHelper extends Thread{
 	
 	private long count;
 	
-	public GetStressThreadHelper(AtomicLong key, String value, LockCache cache){
+	public GetStressThreadHelper(AtomicLong key, String value, ConcurrentCache cache){
 		this.key   = key;
 		this.value = value;
 		this.cache = cache;

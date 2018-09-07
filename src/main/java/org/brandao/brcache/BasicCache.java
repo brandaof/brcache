@@ -6,10 +6,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import org.brandao.brcache.memory.Memory;
 import org.brandao.brcache.tx.CacheTransactionManager;
 import org.brandao.brcache.tx.TXCache;
-import org.brandao.entityfilemanager.EntityFileManager;
 
 /**
  * Provê as operações básicas de um cache.
@@ -23,16 +21,8 @@ public class BasicCache extends AbstractCache {
 	
 	protected BRCacheConfig config;
 	
-    /**
-     * Cria um novo cache.
-     * 
-     */
-    public BasicCache(EntityFileManager efm){
-    	this(new BRCacheConfig(new Configuration()), efm);
-    }
-    
-    public BasicCache(BRCacheConfig config, EntityFileManager efm){
-    	this(
+    public BasicCache(BRCacheConfig config){
+    	super(
 			"default",
 			config.getNodesBufferSize(), 
 			config.getNodesPageSize(), 
@@ -51,54 +41,8 @@ public class BasicCache extends AbstractCache {
 			config.getMaxSizeKey(), 
 			config.getSwapperThread(), 
 			config.getMemory(),
-			efm);
+			config.getEntityFileManager());
     	this.config = config;
-    }
-    
-    /**
-     * Cria um novo cache.
-     * 
-     * @param name Nome do cache.
-     * @param nodeBufferSize Tamanho do buffer, em bytes, onde os nós ficarão armazenados. 
-     * @param nodePageSize Tamanho da página, em bytes, do buffer de nós.
-     * @param nodeSwapFactor Fator de permuta dos nós.
-     * @param indexBufferSize Tamanho do buffer, em bytes, onde os índices ficarão armazenados.
-     * @param indexPageSize Tamanho da página, em bytes, do buffer de índices.
-     * @param indexSwapFactor Fator de permuta dos índices.
-     * @param dataBufferSize Tamanho do buffer, em bytes, onde os dados ficarão armazenados. 
-     * @param dataPageSize Tamanho da página, em bytes, do buffer de dados.
-     * @param blockSize Tamanho do bloco, em bytes.
-     * @param dataSwapFactor Fator de permuta dos dados.
-     * @param maxSizeEntry Tamanho máximo de uma entrada no cache.
-     * @param maxSizeKey Tamanho máximo de uma chave.
-     * @param quantitySwaperThread Quantidade de processos usados para fazer a permuta.
-     * @param memory Acesso à memória.
-     * @param efm Sistema de arquivos usado pelo cache.
-     */
-    public BasicCache(
-    		String name,
-    		long nodeBufferSize,
-    		long nodePageSize,
-    		double nodeSwapFactor,
-    		
-    		long indexBufferSize,
-    		long indexPageSize,
-    		double indexSwapFactor,
-    		
-    		long dataBufferSize,
-    		long dataPageSize,
-    		long blockSize,
-    		double dataSwapFactor,
-    		
-    		long maxSizeEntry,
-    		int maxSizeKey,
-            int quantitySwaperThread,
-            Memory memory,
-            EntityFileManager efm
-    		){
-    	this.init(name, nodeBufferSize, nodePageSize, nodeSwapFactor, indexBufferSize, 
-    			indexPageSize, indexSwapFactor, dataBufferSize, dataPageSize, blockSize, 
-    			dataSwapFactor, maxSizeEntry, maxSizeKey, quantitySwaperThread, memory, efm);
     }
     
     /**
@@ -337,6 +281,23 @@ public class BasicCache extends AbstractCache {
 	 */
 	public BRCacheConfig getConfig() {
 		return config;
+	}
+
+	public boolean replace(String key, Object oldValue, Object newValue,
+			long timeToLive, long timeToIdle) throws StorageException {
+		throw new UnsupportedOperationException();
+	}
+
+	public boolean remove(String key, Object value) throws StorageException {
+		throw new UnsupportedOperationException();
+	}
+
+	public long size() {
+		return super.getCountRemoved() - super.getCountWrite();
+	}
+
+	public boolean isEmpty() {
+		return this.size() == 0;
 	}
     
 }

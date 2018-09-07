@@ -54,7 +54,7 @@ import org.brandao.entityfilemanager.EntityFileManager;
  * 
  * @author Brandao
  */
-public abstract class AbstractCache implements Serializable{
+public abstract class AbstractCache implements Cache, Serializable{
     
     private static final long serialVersionUID = 8023029671447700902L;
 
@@ -148,26 +148,6 @@ public abstract class AbstractCache implements Serializable{
     			dataSwapFactor, maxSizeEntry, maxSizeKey, quantitySwaperThread, memory, efm);
     }
 
-    /**
-     * Inicia o cache.
-     * 
-     * @param name Nome do cache.
-     * @param nodeBufferSize Tamanho do buffer, em bytes, onde os nós ficarão armazenados. 
-     * @param nodePageSize Tamanho da página, em bytes, do buffer de nós.
-     * @param nodeSwapFactor Fator de permuta dos nós.
-     * @param indexBufferSize Tamanho do buffer, em bytes, onde os índices ficarão armazenados.
-     * @param indexPageSize Tamanho da página, em bytes, do buffer de índices.
-     * @param indexSwapFactor Fator de permuta dos índices.
-     * @param dataBufferSize Tamanho do buffer, em bytes, onde os dados ficarão armazenados. 
-     * @param dataPageSize Tamanho da página, em bytes, do buffer de dados.
-     * @param blockSize Tamanho do bloco, em bytes.
-     * @param dataSwapFactor Fator de permuta dos dados.
-     * @param maxSizeEntry Tamanho máximo de uma entrada no cache.
-     * @param maxSizeKey Tamanho máximo de uma chave.
-     * @param quantitySwaperThread Quantidade de processos usados para fazer a permuta.
-     * @param memory Acesso à memória.
-     * @param efm Sistema de arquivos usado pelo cache.
-     */
     protected void init(
     		String name, 
     		long nodeBufferSize,
@@ -278,7 +258,8 @@ public abstract class AbstractCache implements Serializable{
      * @return <code>true</code> se o item for substituido. Caso contrário, <code>false</code>
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    protected boolean putStream(String key, InputStream inputData, long timeToLive, long timeToIdle) throws StorageException{
+    public boolean putStream(String key, InputStream inputData, 
+    		long timeToLive, long timeToIdle) throws StorageException{
         
     	if(timeToLive < 0)
             throw new StorageException(CacheErrors.ERROR_1029);
@@ -376,7 +357,7 @@ public abstract class AbstractCache implements Serializable{
      * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
      */
-    protected boolean replaceStream(String key, InputStream inputData, 
+    public boolean replaceStream(String key, InputStream inputData, 
     		long timeToLive, long timeToIdle) throws StorageException{
         
     	if(timeToLive < 0)
@@ -457,7 +438,7 @@ public abstract class AbstractCache implements Serializable{
      * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item ou se o item atual 
      * expirar no momento da execução do método.
      */
-    protected InputStream putIfAbsentStream(String key, InputStream inputData, 
+    public InputStream putIfAbsentStream(String key, InputStream inputData, 
     		long timeToLive, long timeToIdle) throws StorageException{
         
     	if(timeToLive < 0)
@@ -554,7 +535,7 @@ public abstract class AbstractCache implements Serializable{
      * item.
      */
     
-    protected InputStream getStream(String key) throws RecoverException {
+    public InputStream getStream(String key) throws RecoverException {
         DataMap map = this.dataMap.get(key);
     	return map == null? null : this.getStream(key, map);
     }

@@ -10,7 +10,7 @@ class StatisticsThread implements Runnable{
     
     private long write;
 	
-    private LockCache cache;
+    private ConcurrentCache cache;
     
     private long currentReadings;
     
@@ -22,7 +22,7 @@ class StatisticsThread implements Runnable{
     
     private long currentMemory;
     
-    public StatisticsThread(LockCache cache){
+    public StatisticsThread(ConcurrentCache cache){
         this.lastRead  = 0;
         this.lastWrite = 0;
         this.read      = 0;

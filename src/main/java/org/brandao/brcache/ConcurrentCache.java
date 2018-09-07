@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.io.Serializable;
 
 import org.brandao.concurrent.NamedLock;
-import org.brandao.entityfilemanager.EntityFileManager;
 
 /**
  * Provê as operações de um cache com bloqueio dos métodos que alteram o cache.
@@ -23,27 +22,18 @@ import org.brandao.entityfilemanager.EntityFileManager;
  * @author Brandao
  *
  */
-public class LockCache extends BasicCache {
+public class ConcurrentCache extends BasicCache {
 	
 	private static final long serialVersionUID = -8558471389768293591L;
 
 	protected transient NamedLock locks;
 	
     /**
-     * Cria um novo cache.
-     * 
-     */
-    public LockCache(EntityFileManager efm){
-    	super(new BRCacheConfig(new Configuration()), efm);
-    	this.locks = new NamedLock();
-    }
-    
-    /**
      * Cria um novo cache a partir de uma configuração específica.
      * @param config configuração.
      */
-    public LockCache(BRCacheConfig config, EntityFileManager efm){
-    	super(config, efm);
+    public ConcurrentCache(BRCacheConfig config){
+    	super(config);
     	this.locks = new NamedLock();
     }
     

@@ -23,7 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.brandao.brcache.BasicCache;
-import org.brandao.brcache.LockCache;
+import org.brandao.brcache.ConcurrentCache;
 import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.CacheException;
 import org.brandao.brcache.RecoverException;
@@ -55,7 +55,7 @@ import org.brandao.entityfilemanager.EntityFileManager;
  * @author Brandao
  */
 public class TXCache 
-	extends LockCache
+	extends ConcurrentCache
 	implements Serializable{
     
 	private static final long serialVersionUID = 1L;

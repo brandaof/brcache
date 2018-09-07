@@ -20,12 +20,12 @@ public class TXCacheTest extends TestCase{
 	/* replace */
 	
 	public void testReplace() throws StorageException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		TestCase.assertFalse(cache.replace(KEY, VALUE, 0, 0));
 	}
 
 	public void testReplaceSuccess() throws StorageException, RecoverException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		TestCase.assertTrue(cache.replace(KEY, VALUE2, 0, 0));
@@ -33,12 +33,12 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testReplaceStream() throws StorageException, IOException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		TestCase.assertFalse(cache.replaceStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0));
 	}
 
 	public void testReplaceStreamSuccess() throws StorageException, RecoverException, IOException, ClassNotFoundException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		cache.putStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0);
 		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.getStream(KEY)));
 		TestCase.assertTrue(cache.replaceStream(KEY, CacheTestHelper.toStream(VALUE2), 0, 0));
@@ -46,12 +46,12 @@ public class TXCacheTest extends TestCase{
 	}
 	
 	public void testReplaceExact() throws StorageException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0, 0));
 	}
 
 	public void testReplaceExactSuccess() throws StorageException, RecoverException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 		TestCase.assertTrue(cache.replace(KEY, VALUE, VALUE2, 0, 0));
@@ -61,26 +61,26 @@ public class TXCacheTest extends TestCase{
 	/* putIfAbsent */
 	
 	public void testputIfAbsent() throws StorageException, RecoverException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		TestCase.assertNull(cache.putIfAbsent(KEY, VALUE, 0, 0));
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
 	public void testputIfAbsentExistValue() throws StorageException, RecoverException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, cache.putIfAbsent(KEY, VALUE2, 0, 0));
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
 	public void testputIfAbsentStream() throws StorageException, RecoverException, IOException, ClassNotFoundException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		TestCase.assertNull(cache.putIfAbsentStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0));
 		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.getStream(KEY)));
 	}
 
 	public void testputIfAbsentStreamExistValue() throws StorageException, RecoverException, IOException, ClassNotFoundException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		cache.putStream(KEY, CacheTestHelper.toStream(VALUE), 0, 0);
 		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.putIfAbsentStream(KEY, CacheTestHelper.toStream(VALUE2), 0, 0)));
 		TestCase.assertEquals(VALUE, CacheTestHelper.toObject(cache.getStream(KEY)));
@@ -89,7 +89,7 @@ public class TXCacheTest extends TestCase{
 	/* put */
 	
 	public void testPut() throws StorageException, RecoverException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		TestCase.assertNull((String)cache.get(KEY));
 		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
@@ -98,14 +98,14 @@ public class TXCacheTest extends TestCase{
 	/* get */
 	
 	public void testGet() throws StorageException, RecoverException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		TestCase.assertNull((String)cache.get(KEY));
 		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
 	}
 
 	public void testGetOverride() throws StorageException, RecoverException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		TestCase.assertNull((String)cache.get(KEY));
 		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
@@ -116,7 +116,7 @@ public class TXCacheTest extends TestCase{
 	/* remove */
 	
 	public void testRemoveExact() throws StorageException, RecoverException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		
 		TestCase.assertNull((String)cache.get(KEY));
 		TestCase.assertFalse(cache.remove(KEY, VALUE));
@@ -131,7 +131,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testRemove() throws StorageException, RecoverException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		
 		TestCase.assertNull((String)cache.get(KEY));
 		TestCase.assertFalse(cache.remove(KEY));
@@ -149,7 +149,7 @@ public class TXCacheTest extends TestCase{
 	/* replace */
 	
 	public void testExplicitTransactionReplace() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
 		TestCase.assertFalse(cache.replace(KEY, VALUE, 0, 0));
 		tx.commit();
@@ -157,7 +157,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testExplicitTransactionReplaceSuccess() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
 		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
@@ -169,7 +169,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testExplicitTransactionReplaceExact() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
 		TestCase.assertFalse(cache.replace(KEY, VALUE, VALUE2, 0, 0));
 		tx.commit();
@@ -177,7 +177,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testExplicitTransactionReplaceExactSuccess() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
 		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
@@ -191,7 +191,7 @@ public class TXCacheTest extends TestCase{
 	/* putIfAbsent */
 	
 	public void testExplicitTransactionPutIfAbsent() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
 		TestCase.assertNull(cache.putIfAbsent(KEY, VALUE, 0, 0));
 		TestCase.assertEquals(VALUE, (String)cache.get(KEY));
@@ -201,7 +201,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testExplicitTransactionPutIfAbsentExistValue() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
 		cache.put(KEY, VALUE, 0, 0);
 		TestCase.assertEquals(VALUE, cache.putIfAbsent(KEY, VALUE2, 0, 0));
@@ -214,7 +214,7 @@ public class TXCacheTest extends TestCase{
 	/* put */
 	
 	public void testExplicitTransactionPut() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
 		TestCase.assertNull((String)cache.get(KEY));
 		cache.put(KEY, VALUE, 0, 0);
@@ -227,7 +227,7 @@ public class TXCacheTest extends TestCase{
 	/* get */
 	
 	public void testExplicitTransactionGet() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
 		TestCase.assertNull((String)cache.get(KEY));
 		cache.put(KEY, VALUE, 0, 0);
@@ -238,7 +238,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testExplicitTransactionGetOverride() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
 		TestCase.assertNull((String)cache.get(KEY));
 		cache.put(KEY, VALUE, 0, 0);
@@ -253,7 +253,7 @@ public class TXCacheTest extends TestCase{
 	/* remove */
 	
 	public void testExplicitTransactionRemoveExact() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
 		
 		TestCase.assertNull((String)cache.get(KEY));
@@ -271,7 +271,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testExplicitTransactionRemove() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		CacheTransaction tx = cache.beginTransaction();
 		
 		TestCase.assertNull((String)cache.get(KEY));
@@ -293,7 +293,7 @@ public class TXCacheTest extends TestCase{
 	/* replace */
 	
 	public void testConcurrentTransactionReplace() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, CacheTestHelper.toStream(VALUE), CacheTestHelper.toStream(VALUE2)){
 
@@ -317,7 +317,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testConcurrentTransactionReplaceSuccess() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
@@ -347,7 +347,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testConcurrentTransactionReplaceStream() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, CacheTestHelper.toStream(VALUE), CacheTestHelper.toStream(VALUE2)){
 
@@ -371,7 +371,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testConcurrentTransactionReplaceStreamSuccess() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, CacheTestHelper.toStream(VALUE), CacheTestHelper.toStream(VALUE2)){
 
@@ -401,7 +401,7 @@ public class TXCacheTest extends TestCase{
 	}
 	
 	public void testConcurrentTransactionReplaceExact() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
@@ -427,7 +427,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testConcurrentTransactionReplaceExactSuccess() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
@@ -457,7 +457,7 @@ public class TXCacheTest extends TestCase{
 	/* putIfAbsent */
 	
 	public void testConcurrentTransactionPutIfAbsent() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
@@ -484,7 +484,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testConcurrentTransactionPutIfAbsentExistValue() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
@@ -511,7 +511,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testConcurrentTransactionPutIfAbsentStream() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, CacheTestHelper.toStream(VALUE), CacheTestHelper.toStream(VALUE2)){
 
@@ -538,7 +538,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testConcurrentTransactionPutIfAbsentStreamExistValue() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
@@ -566,7 +566,7 @@ public class TXCacheTest extends TestCase{
 	/* put */
 	
 	public void testConcurrentTransactionPut() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
@@ -595,7 +595,7 @@ public class TXCacheTest extends TestCase{
 	/* get */
 	
 	public void testConcurrentTransactionGet() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
@@ -622,7 +622,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testConcurrentTransactionGetOverride() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
@@ -653,7 +653,7 @@ public class TXCacheTest extends TestCase{
 	/* remove */
 	
 	public void testConcurrentTransactionRemoveExact() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
@@ -686,7 +686,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testConcurrentTransactionRemove() throws Throwable{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 
 		ConcurrentTask task = new ConcurrentTask(cache, KEY, VALUE, VALUE2){
 
@@ -719,7 +719,7 @@ public class TXCacheTest extends TestCase{
 	/* timeToLive */
 	
 	public void testTimeToLive() throws InterruptedException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		cache.put(KEY, VALUE, 1000, 0);
 		assertEquals(cache.get(KEY), VALUE);
 		Thread.sleep(800);
@@ -729,7 +729,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testTimeToLiveLessThanTimeToIdle() throws InterruptedException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		cache.put(KEY, VALUE, 1000, 5000);
 		assertEquals(cache.get(KEY), VALUE);
 		Thread.sleep(1200);
@@ -738,7 +738,7 @@ public class TXCacheTest extends TestCase{
 
 	public void testNegativeTimeToLive() throws InterruptedException{
 		try{
-			TXCache cache = new LockCache().getTXCache();
+			TXCache cache = new ConcurrentCache().getTXCache();
 			cache.put(KEY, VALUE, -1, 5000);
 			fail();
 		}
@@ -753,7 +753,7 @@ public class TXCacheTest extends TestCase{
 	/* TimeToIdle */
 	
 	public void testTimeToIdle() throws InterruptedException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		cache.put(KEY, VALUE, 0, 1000);
 		assertEquals(cache.get(KEY), VALUE);
 		Thread.sleep(800);
@@ -766,7 +766,7 @@ public class TXCacheTest extends TestCase{
 	}
 
 	public void testTimeToIdleLessThanTimeToLive() throws InterruptedException{
-		TXCache cache = new LockCache().getTXCache();
+		TXCache cache = new ConcurrentCache().getTXCache();
 		cache.put(KEY, VALUE, 20000, 1000);
 		assertEquals(cache.get(KEY), VALUE);
 		Thread.sleep(800);
@@ -779,7 +779,7 @@ public class TXCacheTest extends TestCase{
 
 	public void testNegativeTimeToIdle() throws InterruptedException{
 		try{
-			TXCache cache = new LockCache().getTXCache();
+			TXCache cache = new ConcurrentCache().getTXCache();
 			cache.put(KEY, VALUE, 0, -1);
 			fail();
 		}
