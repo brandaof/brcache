@@ -22,13 +22,17 @@ import java.io.InputStream;
 import java.io.Serializable;
 
 import org.brandao.brcache.HugeListCalculator.HugeListInfo;
-import org.brandao.brcache.collections.Collections;
+import org.brandao.brcache.collections.BasicMapReferenceCollection;
+import org.brandao.brcache.collections.FlushableReferenceCollection;
 import org.brandao.brcache.collections.FlushableReferenceCollectionImp;
-import org.brandao.brcache.collections.StringTreeMap;
-import org.brandao.brcache.collections.Swapper;
+import org.brandao.brcache.collections.MapReferenceCollection;
+import org.brandao.brcache.collections.swapper.BasicEntityFileSwapper;
 import org.brandao.brcache.collections.treehugemap.CharNode;
+import org.brandao.brcache.collections.treehugemap.StringTreeNodes;
+import org.brandao.brcache.collections.treehugemap.TreeNode;
 import org.brandao.brcache.memory.Memory;
 import org.brandao.brcache.memory.RegionMemory;
+import org.brandao.entityfilemanager.EntityFileManager;
 
 /**
  * É a base para um cache. Ele faz o mapeamento chave-fluxo de 
@@ -65,9 +69,9 @@ public abstract class StreamCache
     
     private Memory memory;
     
-    private StringTreeMap<DataMap> dataMap;
+    protected MapReferenceCollection<String, DataMap> dataMap;
 
-    private FlushableReferenceCollectionImp<Block> dataList;
+    protected FlushableReferenceCollection<Block> dataList;
     
     private int segmentSize;
     
@@ -102,6 +106,7 @@ public abstract class StreamCache
     /**
      * Cria um novo cache.
      * 
+     * @param name Nome do cache.
      * @param nodeBufferSize Tamanho do buffer, em bytes, onde os nós ficarão armazenados. 
      * @param nodePageSize Tamanho da página, em bytes, do buffer de nós.
      * @param nodeSwapFactor Fator de permuta dos nós.
@@ -114,11 +119,12 @@ public abstract class StreamCache
      * @param dataSwapFactor Fator de permuta dos dados.
      * @param maxSizeEntry Tamanho máximo de uma entrada no cache.
      * @param maxSizeKey Tamanho máximo de uma chave.
-     * @param swapper Estratégia de troca dos dados entre a memória e outro dispositivo.
      * @param quantitySwaperThread Quantidade de processos usados para fazer a permuta.
      * @param memory Acesso à memória.
+     * @param efm Sistema de arquivos usado pelo cache.
      */
     public StreamCache(
+    		String name,
     		long nodeBufferSize,
     		long nodePageSize,
     		double nodeSwapFactor,
@@ -134,17 +140,19 @@ public abstract class StreamCache
     		
     		long maxSizeEntry,
     		int maxSizeKey,
-            Swapper swapper,
             int quantitySwaperThread,
-            Memory memory
+            Memory memory,
+            EntityFileManager efm
     		){
-    	this.init(nodeBufferSize, nodePageSize, nodeSwapFactor, indexBufferSize, 
+    	this.init(name, nodeBufferSize, nodePageSize, nodeSwapFactor, indexBufferSize, 
     			indexPageSize, indexSwapFactor, dataBufferSize, dataPageSize, blockSize, 
-    			dataSwapFactor, maxSizeEntry, maxSizeKey, swapper, quantitySwaperThread, memory);
+    			dataSwapFactor, maxSizeEntry, maxSizeKey, quantitySwaperThread, memory, efm);
     }
 
     /**
      * Inicia o cache.
+     * 
+     * @param name Nome do cache.
      * @param nodeBufferSize Tamanho do buffer, em bytes, onde os nós ficarão armazenados. 
      * @param nodePageSize Tamanho da página, em bytes, do buffer de nós.
      * @param nodeSwapFactor Fator de permuta dos nós.
@@ -157,11 +165,12 @@ public abstract class StreamCache
      * @param dataSwapFactor Fator de permuta dos dados.
      * @param maxSizeEntry Tamanho máximo de uma entrada no cache.
      * @param maxSizeKey Tamanho máximo de uma chave.
-     * @param swapper Estratégia de troca dos dados entre a memória e outro dispositivo.
      * @param quantitySwaperThread Quantidade de processos usados para fazer a permuta.
      * @param memory Acesso à memória.
+     * @param efm Sistema de arquivos usado pelo cache.
      */
     protected void init(
+    		String name, 
     		long nodeBufferSize,
     		long nodePageSize,
     		double nodeSwapFactor,
@@ -177,9 +186,9 @@ public abstract class StreamCache
     		
     		long maxSizeEntry,
     		int maxSizeKey,
-            Swapper swapper,
             int quantitySwaperThread,
-            Memory memory
+            Memory memory,
+            EntityFileManager efm
     		){
 
     	this.memory                 = memory;
@@ -189,74 +198,76 @@ public abstract class StreamCache
         this.maxLengthKey           = maxSizeKey;
         this.deleteOnExit           = true;
     	
-        synchronized(Collections.class){
-	    	HugeListInfo nodeInfo;
-	    	HugeListInfo indexInfo;
-	    	HugeListInfo dataInfo; 
+    	HugeListInfo nodeInfo;
+    	HugeListInfo indexInfo;
+    	HugeListInfo dataInfo; 
         	
-	    	try{
-		    	dataInfo = 
-		    			HugeListCalculator
-		    				.calculate(dataBufferSize, dataPageSize, blockSize, dataSwapFactor);
-		        this.dataList =
-		                new FlushableReferenceCollectionImp<Block>(
-		                dataInfo.getMaxCapacityElements(),
-		                dataInfo.getClearFactorElements(),
-		                dataInfo.getFragmentFactorElements(),
-		                swapper,
-		                quantitySwaperThread,
-		                dataInfo.getSubLists()
-		                );
-		        this.dataList.setDeleteOnExit(false);
-	    	}
-	    	catch(IllegalArgumentException e){
-	    		throw new IllegalArgumentException("fail create data buffer", e);
-	    	}
+    	try{
+	    	dataInfo = 
+	    			HugeListCalculator
+	    				.calculate(dataBufferSize, dataPageSize, blockSize, dataSwapFactor);
+	        this.dataList =
+	                new FlushableReferenceCollectionImp<Block>(
+	                dataInfo.getMaxCapacityElements(),
+	                dataInfo.getClearFactorElements(),
+	                dataInfo.getFragmentFactorElements(),
+	                new BasicEntityFileSwapper<Block>(efm, name + "#dta"),
+	                quantitySwaperThread,
+	                dataInfo.getSubLists()
+	                );
+	        this.dataList.setDeleteOnExit(false);
+    	}
+    	catch(IllegalArgumentException e){
+    		throw new IllegalArgumentException("fail create data buffer", e);
+    	}
 
+    	
+    	try{
+	    	nodeInfo = 
+	    			HugeListCalculator
+	    				.calculate(
+	    						nodeBufferSize, nodePageSize, 
+	    						NODE_BINARY_SIZE, nodeSwapFactor);
+    	}
+    	catch(IllegalArgumentException e){
+    		throw new IllegalArgumentException("fail create nodes buffer", e);
+    	}
+    	
+    	try{
+	    	indexInfo = 
+	    			HugeListCalculator
+	    				.calculate(indexBufferSize, indexPageSize, 
+	    						INDEX_BINARY_SIZE, indexSwapFactor);
+    	}
+    	catch(IllegalArgumentException e){
+    		throw new IllegalArgumentException("fail create index buffer", e);
+    	}
 	    	
-	    	try{
-		    	nodeInfo = 
-		    			HugeListCalculator
-		    				.calculate(
-		    						nodeBufferSize, nodePageSize, 
-		    						NODE_BINARY_SIZE, nodeSwapFactor);
-	    	}
-	    	catch(IllegalArgumentException e){
-	    		throw new IllegalArgumentException("fail create nodes buffer", e);
-	    	}
+    	try{
+            this.dataMap =
+            		new BasicMapReferenceCollection<String, DataMap>(
+                            nodeInfo.getMaxCapacityElements(),
+                            nodeInfo.getClearFactorElements(),
+                            nodeInfo.getFragmentFactorElements(),
+                            new BasicEntityFileSwapper<TreeNode<DataMap>>(efm, name + "#idx"),
+                            quantitySwaperThread, 
+                            nodeInfo.getSubLists(), 
+                            indexInfo.getMaxCapacityElements(),
+                            indexInfo.getClearFactorElements(),
+                            indexInfo.getFragmentFactorElements(),
+                            new BasicEntityFileSwapper<DataMap>(efm, name + "#idx_vla"),
+                            quantitySwaperThread, 
+                            indexInfo.getSubLists(), 
+                            new StringTreeNodes<DataMap>()
+    				);
+            		
+            		
+	        this.dataMap.setDeleteOnExit(false);
+    	}
+    	catch(IllegalArgumentException e){
+    		throw new IllegalArgumentException("fail data map", e);
+    	}
 	    	
-	    	try{
-		    	indexInfo = 
-		    			HugeListCalculator
-		    				.calculate(indexBufferSize, indexPageSize, 
-		    						INDEX_BINARY_SIZE, indexSwapFactor);
-	    	}
-	    	catch(IllegalArgumentException e){
-	    		throw new IllegalArgumentException("fail create index buffer", e);
-	    	}
-		    	
-	    	try{
-	            this.dataMap =
-	                    new StringTreeMap<DataMap>(
-	                    nodeInfo.getMaxCapacityElements(),
-	                    nodeInfo.getClearFactorElements(),
-	                    nodeInfo.getFragmentFactorElements(),
-	                    swapper,
-	                    quantitySwaperThread,
-	                    nodeInfo.getSubLists(),
-	                    indexInfo.getMaxCapacityElements(),
-	                    indexInfo.getClearFactorElements(),
-	                    indexInfo.getFragmentFactorElements(),
-	                    quantitySwaperThread,
-	                    indexInfo.getSubLists()
-	                    );
-		        this.dataMap.setDeleteOnExit(false);
-	    	}
-	    	catch(IllegalArgumentException e){
-	    		throw new IllegalArgumentException("fail data map", e);
-	    	}
-	    	
-        }
     }
     
     /**
@@ -629,7 +640,7 @@ public abstract class StreamCache
      * @return <code>true</code> se a chave estiver associada a um valor. Caso contrário, <code>false</code>.
      */
     public boolean containsKey(String key){
-    	return this.dataMap.containsKey(key);
+    	return this.dataMap.get(key) != null;
     }
     
     private void remove(String key, DataMap data){

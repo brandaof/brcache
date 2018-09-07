@@ -17,7 +17,7 @@ public abstract class AbstractEntityFileSwapper<T>
 
 	private volatile long maxID;
 	
-	private Class<T> type;
+	protected Class<T> type;
 	
 	@SuppressWarnings("unchecked")
 	protected synchronized void allocSpace(EntityFileManager efm, String name, long index, Entry<T> item){
@@ -31,7 +31,8 @@ public abstract class AbstractEntityFileSwapper<T>
 			eft = efm.beginTransaction();
 			EntityFile<T> ef = efm.getEntityFile(name, eft, type);
 			T[] array = (T[]) Array.newInstance(type, (int)(index - maxID));
-			ef.insert(array);
+			long[] ids = ef.insert(array);
+			assert ids[ids.length - 1] == index;
 			eft.commit();
 			maxID = index;
 		}

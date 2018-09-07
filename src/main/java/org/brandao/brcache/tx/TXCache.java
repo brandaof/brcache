@@ -169,10 +169,22 @@ public class TXCache
     }
     
     @Override
-    protected void init(long nodeBufferSize, long nodePageSize, double nodeSwapFactor, long indexBufferSize,
-    		long indexPageSize, double indexSwapFactor, long dataBufferSize, long dataPageSize,
-    		long blockSize, double dataSwapFactor, long maxSizeEntry, int maxSizeKey, Swapper swapper,
-            int quantitySwaperThread, Memory memory){
+    protected void init(
+    		long nodeBufferSize, 
+    		long nodePageSize, 
+    		double nodeSwapFactor, 
+    		long indexBufferSize,
+    		long indexPageSize, 
+    		double indexSwapFactor, 
+    		long dataBufferSize, 
+    		long dataPageSize,
+    		long blockSize, 
+    		double dataSwapFactor, 
+    		long maxSizeEntry, 
+    		int maxSizeKey, 
+    		Swapper swapper,
+            int quantitySwaperThread, 
+            Memory memory){
     	super.setDeleteOnExit(false);
     }
     
