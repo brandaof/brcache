@@ -60,7 +60,7 @@ public class TXCache
     
 	private static final long serialVersionUID = 1L;
 
-	private static final long TIME_OUT = 5*60*1000;
+	//private static final long TIME_OUT = 5*60*1000;
 	
 	private static final Method replace;
 
@@ -150,14 +150,6 @@ public class TXCache
 	
 	private CacheTransactionManager transactionManager;
 
-	/**
-	 * Cria um cache transacional a partir de um cache.
-	 * @param cache cache não transacional.
-	 */
-    public TXCache(BasicCache cache){
-    	this(cache, new CacheTransactionManagerImp(cache.getConfig().getDataPath() + "/tx", TIME_OUT));
-    }
-	
     /**
      * Cria um cache transacional especificando o gestor transacional.
      * @param cache cache não transacional.

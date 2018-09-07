@@ -1,5 +1,9 @@
 package org.brandao.brcache;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
 import org.brandao.brcache.memory.Memory;
 
 /**
@@ -23,8 +27,18 @@ public class FileBRCacheConfig
 
 	private Configuration configuration;
 	
-	public FileBRCacheConfig(Configuration value){
-		this.apply(value);
+	public FileBRCacheConfig(File f) throws IOException{
+		Configuration c = new Configuration();
+		FileInputStream fin = null;
+		try{
+			c.load(fin);
+			this.apply(c);
+		}
+		finally{
+			if(fin != null){
+				fin.close();
+			}
+		}
 	}
 	
     private void apply(Configuration config){
