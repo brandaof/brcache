@@ -24,9 +24,9 @@ public class BlockEntityFileDataHandler
 	
 	public BlockEntityFileDataHandler(Memory memory, int blockSize){
 		this.blockSize = blockSize;
-		this.empty  = new byte[25 + blockSize];
-		this.buffer = new byte[25 + blockSize];
-		this.recordSize = empty.length;
+		this.recordSize = 25 + blockSize;
+		this.empty  = new byte[this.recordSize - 1];
+		this.buffer = new byte[this.recordSize - 1];
 		this.memory = memory;
 	}
 	

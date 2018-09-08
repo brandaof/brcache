@@ -18,8 +18,8 @@ public class DataMapEntityFileDataHandler
 	
 	public DataMapEntityFileDataHandler(){
 		this.recordSize = 63;
-		this.buffer = new byte[this.recordSize];
-		this.buffer = new byte[this.recordSize];
+		this.buffer = new byte[this.recordSize - 1];
+		this.empty  = new byte[this.recordSize - 1];
 	}
 	
 	public void writeMetaData(DataWritter stream, DataMapEntityFileHeader value)
