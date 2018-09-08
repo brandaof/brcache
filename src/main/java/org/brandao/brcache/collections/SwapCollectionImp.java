@@ -14,7 +14,7 @@ public class SwapCollectionImp<T>
 
     protected Lock lock;
     
-    protected Swapper swap;
+    protected Swapper<T> swap;
     
     protected boolean forceSwap;
     
@@ -24,7 +24,7 @@ public class SwapCollectionImp<T>
     
     protected boolean readOnly;
 
-    public SwapCollectionImp(Swapper swap, boolean forceSwap, long maxSegmentCapacity,	boolean readOnly) {
+    public SwapCollectionImp(Swapper<T> swap, boolean forceSwap, long maxSegmentCapacity,	boolean readOnly) {
     	this.id                 = getNextUniqueID();
 		this.data 				= new HashMap<Long, Entry<T>>();
 		this.lock 				= new ReentrantLock();
@@ -46,7 +46,10 @@ public class SwapCollectionImp<T>
             this.swapFirst();
         }
         
-        this.data.put(item.getIndex(), item);
+        if(data.put(item.getIndex(), item) != null){
+        	throw new IllegalStateException();
+        }
+        
         this.addListedItemOnMemory(item);
     }
 
@@ -120,7 +123,6 @@ public class SwapCollectionImp<T>
             throw new IllegalStateException();
     }
 
-    @SuppressWarnings("unchecked")
 	public Entry<T> swapOnMemory(long key){
         Entry<T> onMemoryEntity = this.data.get(key);
 
@@ -229,7 +231,7 @@ public class SwapCollectionImp<T>
 		return lock;
 	}
 
-	public Swapper getSwap() {
+	public Swapper<T> getSwap() {
 		return swap;
 	}
 

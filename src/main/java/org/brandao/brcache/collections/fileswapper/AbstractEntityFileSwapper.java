@@ -63,6 +63,7 @@ public abstract class AbstractEntityFileSwapper<T>
 			eft.commit();
 		}
 		catch(Throwable e){
+			e.printStackTrace();
 			if(eft != null){
 				try{
 					eft.rollback();
@@ -89,6 +90,7 @@ public abstract class AbstractEntityFileSwapper<T>
 			return e;
 		}
 		catch(Throwable e){
+			e.printStackTrace();
 			if(eft != null){
 				try{
 					eft.rollback();

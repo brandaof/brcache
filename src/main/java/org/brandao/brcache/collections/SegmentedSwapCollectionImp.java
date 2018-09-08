@@ -71,7 +71,7 @@ public class SegmentedSwapCollectionImp<T>
         this.readOnly            = false;
         this.forceSwap           = true;
         this.live                = true;
-        this.swapCollections     = new SwapCollectionImp[maxCapacity/MAX_ITENS_PER_SEGMENT + (maxCapacity % MAX_ITENS_PER_SEGMENT != 0? 1 : 0)];
+        this.swapCollections     = new SwapCollectionImp[1];//[maxCapacity/MAX_ITENS_PER_SEGMENT + (maxCapacity % MAX_ITENS_PER_SEGMENT != 0? 1 : 0)];
         this.onMemory            = 0;
         swapperThreads           = new Thread[quantitySwaperThread];
         
@@ -301,7 +301,6 @@ public class SegmentedSwapCollectionImp<T>
 		return swapCollections[0].getLock();
 	}
 
-	@SuppressWarnings("unchecked")
 	public Swapper<T> getSwap() {
 		return swapCollections[0].getSwap();
 	}

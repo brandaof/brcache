@@ -1,6 +1,5 @@
 package org.brandao.brcache.collections;
 
-import java.io.Serializable;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
@@ -76,6 +75,7 @@ public class SimpleReferenceCollection<T>
 		}
 		catch(Throwable ex){
 			this.freeAddress.add(index);
+			throw new IllegalStateException(ex);
 		}
 		finally{
 			lock.unlock();
@@ -85,61 +85,72 @@ public class SimpleReferenceCollection<T>
 	}
 
 	public T set(long reference, T e) {
-		Entry<T> entry = null;
+		T old = null;
 		Lock lock = collection.getGroupLock(reference);
 		lock.lock();
 		try{
-			entry = collection.getEntry(reference);
-			collection.add(new Entry<T>(reference, e));
-		}
-		finally{
-			lock.unlock();
-		}
-		T old = entry != null? (T)entry.getItem() : null;
-		return old instanceof Empty? null : old;
-	}
-
-	public T get(long reference) {
-		Entry<T> entry = null;
-		Lock lock = collection.getGroupLock(reference);
-		lock.lock();
-		try{
-			entry = collection.getEntry(reference);
-		}
-		finally{
-			lock.unlock();
-		}
-		T value = entry != null? (T)entry.getItem() : null;
-		return value instanceof Empty? null : value;
-	}
-
-	public boolean remove(long reference) {
-		Entry<T> entry = null;
-		Lock lock = collection.getGroupLock(reference);
-		lock.lock();
-		try{
-			entry = collection.getEntry(reference);
-			collection.add(new Entry<T>(reference, null));
+			Entry<T> entry = collection.getEntry(reference);
+			if(entry != null){
+				old = entry.getItem();
+				entry.setItem(e);
+				entry.setNeedUpdate(true);
+			}
+			else{
+				throw new IllegalStateException();
+			}
 		}
 		finally{
 			lock.unlock();
 		}
 		
-		Object old = entry != null? entry.getItem() : null;
-		return old != null;
+		return old;
+	}
+
+	public T get(long reference) {
+		T v = null;
+		Lock lock = collection.getGroupLock(reference);
+		lock.lock();
+		try{
+			Entry<T> entry = collection.getEntry(reference);
+			v = entry == null? null : entry.getItem();
+		}
+		finally{
+			lock.unlock();
+		}
+		return v;
+	}
+
+	public boolean remove(long reference) {
+		T v = null;
+		Lock lock = collection.getGroupLock(reference);
+		lock.lock();
+		try{
+			Entry<T> entry = collection.getEntry(reference);
+			if(entry != null){
+				v = entry.getItem();
+				entry.setItem(null);
+				entry.setNeedUpdate(true);
+				freeAddress.add(reference);
+			}
+		}
+		finally{
+			lock.unlock();
+		}
+		
+		return v != null;
 
 	}
 	
 	public boolean replace(long reference, T oldValue, T value) {
-		Entry<T> entry = null;
 		Object old;
 		Lock lock = collection.getGroupLock(reference);
 		lock.lock();
 		try{
-			entry = collection.getEntry(reference);
-			old   = entry != null? entry.getItem() : null;
+			Entry<T> entry = collection.getEntry(reference);
+			old = entry != null? entry.getItem() : null;
 			if(oldValue.equals(old)){
-				collection.add(new Entry<T>(reference, value));
+				entry.setItem(value);
+				entry.setNeedUpdate(true);
 				return true;
 			}
 		}
@@ -150,56 +161,62 @@ public class SimpleReferenceCollection<T>
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
 	public T replace(long reference, T value) {
-		Entry<T> entry = null;
-		Object old = null;
+		T v = null;
 		Lock lock = collection.getGroupLock(reference);
 		lock.lock();
 		try{
-			entry = collection.getEntry(reference);
-			old   = entry != null? entry.getItem() : null;
-			if(old != null && old != null){
-				collection.add(new Entry<T>(reference, value));
+			Entry<T> entry = collection.getEntry(reference);
+			v = entry != null? entry.getItem() : null;
+			if(v != null){
+				entry.setItem(value);
+				entry.setNeedUpdate(true);
 			}
 		}
 		finally{
 			lock.unlock();
 		}
 		
-		return (T) old;
+		return v;
 	}
 
-	@SuppressWarnings("unchecked")
 	public T putIfAbsent(long reference, T value) {
-		Entry<T> entry = null;
-		Object old = null;
+		T v = null;
 		Lock lock = collection.getGroupLock(reference);
 		lock.lock();
 		try{
-			entry = collection.getEntry(reference);
-			old   = entry != null? entry.getItem() : null;
-			if(old == null || old == null){
-				collection.add(new Entry<T>(reference, value));
+			Entry<T> entry = collection.getEntry(reference);
+			v = entry != null? entry.getItem() : null;
+			if(v == null){
+				if(entry != null){
+					entry.setItem(value);
+					entry.setNeedUpdate(true);
+				}
+				else{
+					collection.add(new Entry<T>(reference, value));
+				}
 			}
 		}
 		finally{
 			lock.unlock();
 		}
 		
-		return (T) old;
+		return v;
 	}
 
 	public boolean remove(long reference, T oldValue) {
-		Entry<T> entry = null;
-		Object old = null;
+		T v = null;
 		Lock lock = collection.getGroupLock(reference);
 		lock.lock();
 		try{
-			entry = collection.getEntry(reference);
-			old   = entry != null? entry.getItem() : null;
-			if(old != null && oldValue.equals(old)){
-				collection.add(new Entry<T>(reference, null));
+			Entry<T> entry = collection.getEntry(reference);
+			v = entry != null? entry.getItem() : null;
+			if(oldValue.equals(v)){
+				if(entry != null){
+					entry.setItem(null);
+					entry.setNeedUpdate(true);
+					freeAddress.add(reference);
+				}
 				return true;
 			}
 		}
@@ -253,18 +270,5 @@ public class SimpleReferenceCollection<T>
 	public boolean isReadOnly() {
     	return this.collection.isReadOnly();
 	}
-
-	private static class Empty implements Serializable{
-		
-		private static final long serialVersionUID = -881123035360397425L;
-
-		public int hashCode(){
-			return 1;
-		}
-		
-		public boolean equals(Object x){
-			return x instanceof Empty;
-		}
-	};
 	
 }
