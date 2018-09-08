@@ -28,8 +28,6 @@ import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.CacheException;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
-import org.brandao.brcache.memory.Memory;
-import org.brandao.entityfilemanager.EntityFileManager;
 
 /**
  * Provê suporte transacional a um cache.
@@ -159,30 +157,6 @@ public class TXCache
     	super(null);
     	this.cache = cache;
     	this.transactionManager = transactionManager;
-    }
-    
-    @Override
-    protected void init(
-    		String name, 
-    		long nodeBufferSize,
-    		long nodePageSize,
-    		double nodeSwapFactor,
-    		
-    		long indexBufferSize,
-    		long indexPageSize,
-    		double indexSwapFactor,
-    		
-    		long dataBufferSize,
-    		long dataPageSize,
-    		long blockSize,
-    		double dataSwapFactor,
-    		
-    		long maxSizeEntry,
-    		int maxSizeKey,
-            int quantitySwaperThread,
-            Memory memory,
-            EntityFileManager efm
-    		){
     	super.setDeleteOnExit(false);
     }
     

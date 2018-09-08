@@ -3,7 +3,6 @@ package org.brandao.brcache;
 import java.io.Serializable;
 
 import org.brandao.brcache.memory.Memory;
-import org.brandao.entityfilemanager.EntityFileManager;
 
 /**
  * Define a configuração de um cache.
@@ -49,8 +48,6 @@ public class BRCacheConfig implements Serializable{
     protected Memory memory;
     
     protected String dataPath;
-    
-    protected EntityFileManager entityFileManager;
     
 	/**
 	 * Obtém a pasta onde o servidor irá fazer o swap dos dados quando 
@@ -294,22 +291,6 @@ public class BRCacheConfig implements Serializable{
 	 */
 	public void setMemory(Memory memory) {
 		this.memory = memory;
-	}
-
-	/**
-	 * Obtém o sistema de arquivos do cache.
-	 * @return Sistema de arquivos.
-	 */
-	public EntityFileManager getEntityFileManager() {
-		return entityFileManager;
-	}
-
-	/**
-	 * Define o sistema de arquivos do cache.
-	 * @param entityFileManager Sistema de arquivos.
-	 */
-	public void setEntityFileManager(EntityFileManager entityFileManager) {
-		this.entityFileManager = entityFileManager;
 	}
     
 }

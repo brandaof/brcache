@@ -39,7 +39,6 @@ import org.brandao.brcache.collections.treehugemap.StringTreeNodes;
 import org.brandao.brcache.collections.treehugemap.TreeNode;
 import org.brandao.brcache.memory.Memory;
 import org.brandao.brcache.memory.RegionMemory;
-import org.brandao.entityfilemanager.EntityFileManager;
 import org.brandao.entityfilemanager.EntityFileManagerConfigurer;
 import org.brandao.entityfilemanager.EntityFileManagerImp;
 import org.brandao.entityfilemanager.EntityFileTransactionFactory;
@@ -115,12 +114,15 @@ public abstract class AbstractCache implements Cache, Serializable{
     
     private EntityFileManagerConfigurer entityFileManager;
     
+	protected BRCacheConfig config;
+
     public AbstractCache(){
         this.dataMap 				= null;
         this.dataList 				= null;
         this.segmentSize 			= -1;
         this.maxBytesToStorageEntry = -1;
         this.maxLengthKey 			= -1;
+        this.config                 = null;
     }
     
     /**
@@ -148,6 +150,7 @@ public abstract class AbstractCache implements Cache, Serializable{
     }
 
     protected void init(String name, BRCacheConfig config) throws CacheException{
+    	this.config                 = config;
     	this.memory                 = config.getMemory();
         this.modCount               = 0;
         this.segmentSize            = (int)config.getDataBlockSize();
@@ -229,7 +232,8 @@ public abstract class AbstractCache implements Cache, Serializable{
     	}
     }
     
-    private MapReferenceCollection<String, DataMap> createDataMap(
+    @SuppressWarnings("rawtypes")
+	private MapReferenceCollection<String, DataMap> createDataMap(
     		String name, EntityFileManagerConfigurer efm, BRCacheConfig config){
 
     	try{

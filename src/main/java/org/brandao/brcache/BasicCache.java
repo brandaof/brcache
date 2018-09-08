@@ -19,30 +19,8 @@ public class BasicCache extends AbstractCache {
 
 	private static final long serialVersionUID = -3101078990483084845L;
 	
-	protected BRCacheConfig config;
-	
     public BasicCache(BRCacheConfig config){
-    	super(
-			"default",
-			config.getNodesBufferSize(), 
-			config.getNodesPageSize(), 
-			config.getNodesSwapFactor(),
-			
-			config.getIndexBufferSize(), 
-			config.getIndexPageSize(), 
-			config.getIndexSwapFactor(),
-			
-			config.getDataBufferSize(), 
-			config.getDataPageSize(), 
-			config.getDataBlockSize(),
-			config.getDataSwapFactor(),
-			
-			config.getMaxSizeEntry(), 
-			config.getMaxSizeKey(), 
-			config.getSwapperThread(), 
-			config.getMemory(),
-			config.getEntityFileManager());
-    	this.config = config;
+    	super("default", config);
     }
     
     /**

@@ -206,7 +206,7 @@ public class StressCacheTest extends TestCase{
         
         for(int i=0;i<10000;i++){
             try{
-                String key = String.valueOf(i) + "- INDEX AJBK - ";
+                String key = String.valueOf(i) + "-INDEX-AJBK-";
                 String value = key + text;
                 cache.put(key, value, 0, 0);
             }
@@ -223,7 +223,7 @@ public class StressCacheTest extends TestCase{
                     int i = 0;
                     while(true){
                         int rv = r.nextInt(1000);
-                        String key = String.valueOf(rv) + "- INDEX AJBK - ";
+                        String key = String.valueOf(rv) + "-INDEX-AJBK-";
                         String value = key + text;
                         try{
                             String val = (String) cache.get(key);
