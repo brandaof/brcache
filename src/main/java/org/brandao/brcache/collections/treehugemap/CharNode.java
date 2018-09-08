@@ -36,13 +36,20 @@ public class CharNode<T> implements TreeNode<T>{
 
     private long[] nextNodes;
 
+    public CharNode(long id, long valueId, long[] nextNodes){
+        this.nextNodes  = nextNodes;
+        this.id         = id;
+        this.valueId    = valueId;
+    }
+    
     public CharNode(){
         this.nextNodes  = new long[LEN_NODES];
         this.id         = -1;
         this.valueId    = -1;
 
-        for(int i=0;i<this.nextNodes.length;i++)
-                this.nextNodes[i] = -1;
+        for(int i=0;i<this.nextNodes.length;i++){
+            this.nextNodes[i] = -1;
+        }
     }
 
     public void setNext(ReferenceCollection<TreeNode<T>> nodes, Object key, TreeNode<T> node){
@@ -106,7 +113,11 @@ public class CharNode<T> implements TreeNode<T>{
         return valueId;
     }
 
-    public T setValue(ReferenceCollection<T> values, T value) {
+    public long[] getNextNodes() {
+		return nextNodes;
+	}
+
+	public T setValue(ReferenceCollection<T> values, T value) {
         if(this.valueId == -1){
         	this.valueId = values.insert(value);
             return null;

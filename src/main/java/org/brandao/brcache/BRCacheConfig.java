@@ -50,7 +50,7 @@ public class BRCacheConfig implements Serializable{
     
     protected String dataPath;
     
-    private EntityFileManager entityFileManager;
+    protected EntityFileManager entityFileManager;
     
 	/**
 	 * Obtém a pasta onde o servidor irá fazer o swap dos dados quando 

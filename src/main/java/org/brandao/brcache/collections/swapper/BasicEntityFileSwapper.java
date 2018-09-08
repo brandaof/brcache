@@ -1,7 +1,5 @@
 package org.brandao.brcache.collections.swapper;
 
-import java.lang.reflect.ParameterizedType;
-
 import org.brandao.brcache.CacheException;
 import org.brandao.brcache.collections.Entry;
 import org.brandao.brcache.collections.fileswapper.AbstractEntityFileSwapper;
@@ -19,12 +17,11 @@ public class BasicEntityFileSwapper<T>
 	private volatile long maxID;
 	
 	@SuppressWarnings("unchecked")
-	public BasicEntityFileSwapper(EntityFileManager efm, String name){
+	public BasicEntityFileSwapper(EntityFileManager efm, String name, Class<?> type){
 		this.efm   = efm;
 		this.name  = name;
 		this.maxID = -1;
-		this.type  = (Class<T>)((ParameterizedType)getClass()
-				.getGenericInterfaces()[0]).getActualTypeArguments()[0];
+		this.type  = (Class<T>) type;
 	}
 	
 	public void sendItem(long index, Entry<T> item) throws CacheException{

@@ -17,12 +17,19 @@
 
 package org.brandao.brcache;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 
 import org.brandao.brcache.HugeListCalculator.HugeListInfo;
 import org.brandao.brcache.collections.BasicMapReferenceCollection;
+import org.brandao.brcache.collections.BlockEntityFileDataHandler;
+import org.brandao.brcache.collections.BlockEntityFileHeader;
+import org.brandao.brcache.collections.CharNodeEntityFileDataHandler;
+import org.brandao.brcache.collections.CharNodeEntityFileHeader;
+import org.brandao.brcache.collections.DataMapEntityFileDataHandler;
+import org.brandao.brcache.collections.DataMapEntityFileHeader;
 import org.brandao.brcache.collections.FlushableReferenceCollection;
 import org.brandao.brcache.collections.FlushableReferenceCollectionImp;
 import org.brandao.brcache.collections.MapReferenceCollection;
@@ -33,6 +40,18 @@ import org.brandao.brcache.collections.treehugemap.TreeNode;
 import org.brandao.brcache.memory.Memory;
 import org.brandao.brcache.memory.RegionMemory;
 import org.brandao.entityfilemanager.EntityFileManager;
+import org.brandao.entityfilemanager.EntityFileManagerConfigurer;
+import org.brandao.entityfilemanager.EntityFileManagerImp;
+import org.brandao.entityfilemanager.EntityFileTransactionFactory;
+import org.brandao.entityfilemanager.LockProvider;
+import org.brandao.entityfilemanager.LockProviderImp;
+import org.brandao.entityfilemanager.SimpleEntityFileAccess;
+import org.brandao.entityfilemanager.TransactionLog;
+import org.brandao.entityfilemanager.tx.EntityFileTransactionManagerConfigurer;
+import org.brandao.entityfilemanager.tx.EntityFileTransactionManagerImp;
+import org.brandao.entityfilemanager.tx.TransactionLogImp;
+import org.brandao.entityfilemanager.tx.async.AsyncEntityFileTransactionFactory;
+import org.brandao.entityfilemanager.tx.async.AsyncRecoveryTransactionLog;
 
 /**
  * É a base para um cache. Ele faz o mapeamento chave-fluxo de 
@@ -94,6 +113,8 @@ public abstract class AbstractCache implements Cache, Serializable{
     
     private boolean deleteOnExit;
     
+    private EntityFileManagerConfigurer entityFileManager;
+    
     public AbstractCache(){
         this.dataMap 				= null;
         this.dataList 				= null;
@@ -122,131 +143,147 @@ public abstract class AbstractCache implements Cache, Serializable{
      * @param memory Acesso à memória.
      * @param efm Sistema de arquivos usado pelo cache.
      */
-    public AbstractCache(
-    		String name,
-    		long nodeBufferSize,
-    		long nodePageSize,
-    		double nodeSwapFactor,
-    		
-    		long indexBufferSize,
-    		long indexPageSize,
-    		double indexSwapFactor,
-    		
-    		long dataBufferSize,
-    		long dataPageSize,
-    		long blockSize,
-    		double dataSwapFactor,
-    		
-    		long maxSizeEntry,
-    		int maxSizeKey,
-            int quantitySwaperThread,
-            Memory memory,
-            EntityFileManager efm
-    		){
-    	this.init(name, nodeBufferSize, nodePageSize, nodeSwapFactor, indexBufferSize, 
-    			indexPageSize, indexSwapFactor, dataBufferSize, dataPageSize, blockSize, 
-    			dataSwapFactor, maxSizeEntry, maxSizeKey, quantitySwaperThread, memory, efm);
+    public AbstractCache(String name, BRCacheConfig config){
+    	this.init(name, config);
     }
 
-    protected void init(
-    		String name, 
-    		long nodeBufferSize,
-    		long nodePageSize,
-    		double nodeSwapFactor,
-    		
-    		long indexBufferSize,
-    		long indexPageSize,
-    		double indexSwapFactor,
-    		
-    		long dataBufferSize,
-    		long dataPageSize,
-    		long blockSize,
-    		double dataSwapFactor,
-    		
-    		long maxSizeEntry,
-    		int maxSizeKey,
-            int quantitySwaperThread,
-            Memory memory,
-            EntityFileManager efm
-    		){
-
-    	this.memory                 = memory;
+    protected void init(String name, BRCacheConfig config) throws CacheException{
+    	this.memory                 = config.getMemory();
         this.modCount               = 0;
-        this.segmentSize            = (int)blockSize;
-        this.maxBytesToStorageEntry = maxSizeEntry;
-        this.maxLengthKey           = maxSizeKey;
+        this.segmentSize            = (int)config.getDataBlockSize();
+        this.maxBytesToStorageEntry = config.getMaxSizeEntry();
+        this.maxLengthKey           = config.getMaxSizeKey();
         this.deleteOnExit           = true;
-    	
-    	HugeListInfo nodeInfo;
-    	HugeListInfo indexInfo;
-    	HugeListInfo dataInfo; 
-        	
+    	this.entityFileManager      = this.createEntityFileManager(config);
+        this.dataList               = this.createDataBuffer(name, this.entityFileManager, config);
+        this.dataMap                = this.createDataMap(name, this.entityFileManager, config);
+    }
+    
+    private EntityFileManagerConfigurer createEntityFileManager(BRCacheConfig config){
     	try{
-	    	dataInfo = 
+			File path   = new File(config.getDataPath());
+			File txPath = new File(path, "tx");
+			
+			EntityFileManagerConfigurer efm           = new EntityFileManagerImp();
+			LockProvider lp                           = new LockProviderImp();
+			EntityFileTransactionManagerConfigurer tm = new EntityFileTransactionManagerImp();
+			AsyncRecoveryTransactionLog rtl           = new AsyncRecoveryTransactionLog("recovery", txPath, tm);
+			TransactionLog tl                         = new TransactionLogImp("binlog", txPath, tm);
+			EntityFileTransactionFactory eftf         = new AsyncEntityFileTransactionFactory(rtl);
+			
+			rtl.setForceReload(true);
+			
+			tm.setTransactionLog(tl);
+			tm.setRecoveryTransactionLog(rtl);
+			tm.setEntityFileTransactionFactory(eftf);
+			tm.setLockProvider(lp);
+			tm.setTimeout(EntityFileTransactionManagerImp.DEFAULT_TIMEOUT);
+			tm.setTransactionPath(txPath);
+			tm.setEntityFileManagerConfigurer(efm);
+			tm.setEnabledTransactionLog(false);
+			
+			efm.setEntityFileTransactionManager(tm);
+			efm.setLockProvider(lp);
+			efm.setPath(path);
+			
+			efm.init();
+			
+			return efm;    	
+    	}
+    	catch(IllegalArgumentException e){
+    		throw new IllegalArgumentException("fail create persistence manager", e);
+    	}
+    }
+    
+    private FlushableReferenceCollection<Block> createDataBuffer(String name, 
+    		EntityFileManagerConfigurer efm, BRCacheConfig config){
+    	try{
+	    	HugeListInfo dataInfo = 
 	    			HugeListCalculator
-	    				.calculate(dataBufferSize, dataPageSize, blockSize, dataSwapFactor);
-	        this.dataList =
+	    				.calculate(
+	    						config.getDataBufferSize(),
+	    						config.getDataPageSize(),
+	    						config.getDataBlockSize(),
+	    						config.getDataSwapFactor());
+	    	
+	    	efm.register(new SimpleEntityFileAccess<Block, byte[], BlockEntityFileHeader>(
+	    			name + "_dta", 
+	    			new File(name + "_dta"), 
+	    			new BlockEntityFileDataHandler(this.memory, (int)config.getDataBlockSize())));
+	    	
+	    	FlushableReferenceCollection<Block> dataList =
 	                new FlushableReferenceCollectionImp<Block>(
 	                dataInfo.getMaxCapacityElements(),
 	                dataInfo.getClearFactorElements(),
 	                dataInfo.getFragmentFactorElements(),
-	                new BasicEntityFileSwapper<Block>(efm, name + "#dta"),
-	                quantitySwaperThread,
+	                new BasicEntityFileSwapper<Block>(efm, name + "_dta", Block.class),
+	                config.getSwapperThread(),
 	                dataInfo.getSubLists()
 	                );
-	        this.dataList.setDeleteOnExit(false);
+	        dataList.setDeleteOnExit(false);
+	        
+	        return dataList;
     	}
     	catch(IllegalArgumentException e){
     		throw new IllegalArgumentException("fail create data buffer", e);
     	}
+    }
+    
+    private MapReferenceCollection<String, DataMap> createDataMap(
+    		String name, EntityFileManagerConfigurer efm, BRCacheConfig config){
 
-    	
     	try{
-	    	nodeInfo = 
+    		HugeListInfo nodeInfo = 
 	    			HugeListCalculator
 	    				.calculate(
-	    						nodeBufferSize, nodePageSize, 
-	    						NODE_BINARY_SIZE, nodeSwapFactor);
-    	}
-    	catch(IllegalArgumentException e){
-    		throw new IllegalArgumentException("fail create nodes buffer", e);
-    	}
-    	
-    	try{
-	    	indexInfo = 
+	    						config.getNodesBufferSize(),
+	    						config.getNodesPageSize(),
+	    						NODE_BINARY_SIZE, 
+	    						config.getNodesSwapFactor());
+    		
+    		HugeListInfo indexInfo = 
 	    			HugeListCalculator
-	    				.calculate(indexBufferSize, indexPageSize, 
-	    						INDEX_BINARY_SIZE, indexSwapFactor);
-    	}
-    	catch(IllegalArgumentException e){
-    		throw new IllegalArgumentException("fail create index buffer", e);
-    	}
+	    				.calculate(
+	    						config.getIndexBufferSize(),
+	    						config.getIndexPageSize(),
+	    						INDEX_BINARY_SIZE, 
+	    						config.getIndexSwapFactor());
+    		
+	    	efm.register(new SimpleEntityFileAccess<CharNode, byte[], CharNodeEntityFileHeader>(
+	    			name + "_idx", 
+	    			new File(name + "_idx"), 
+	    			new CharNodeEntityFileDataHandler()));
+
+	    	efm.register(new SimpleEntityFileAccess<DataMap, byte[], DataMapEntityFileHeader>(
+	    			name + "_idxv", 
+	    			new File(name + "_idxv"), 
+	    			new DataMapEntityFileDataHandler()));
 	    	
-    	try{
-            this.dataMap =
+    		MapReferenceCollection<String, DataMap> dataMap =
             		new BasicMapReferenceCollection<String, DataMap>(
                             nodeInfo.getMaxCapacityElements(),
                             nodeInfo.getClearFactorElements(),
                             nodeInfo.getFragmentFactorElements(),
-                            new BasicEntityFileSwapper<TreeNode<DataMap>>(efm, name + "#idx"),
-                            quantitySwaperThread, 
+                            new BasicEntityFileSwapper<TreeNode<DataMap>>(efm, name + "_idx", TreeNode.class),
+                            config.getSwapperThread(), 
                             nodeInfo.getSubLists(), 
                             indexInfo.getMaxCapacityElements(),
                             indexInfo.getClearFactorElements(),
                             indexInfo.getFragmentFactorElements(),
-                            new BasicEntityFileSwapper<DataMap>(efm, name + "#idx_vla"),
-                            quantitySwaperThread, 
+                            new BasicEntityFileSwapper<DataMap>(efm, name + "_idxv", DataMap.class),
+                            config.getSwapperThread(), 
                             indexInfo.getSubLists(), 
                             new StringTreeNodes<DataMap>()
     				);
             		
             		
-	        this.dataMap.setDeleteOnExit(false);
+	        dataMap.setDeleteOnExit(false);
+	        return dataMap;
     	}
     	catch(IllegalArgumentException e){
     		throw new IllegalArgumentException("fail data map", e);
     	}
-	    	
+    	
     }
     
     /**
@@ -792,6 +829,7 @@ public abstract class AbstractCache implements Cache, Serializable{
 	public void destroy(){
 		this.dataList.destroy();
 		this.dataMap.destroy();
+		this.entityFileManager.destroy();
 	}
 	
     protected void finalize() throws Throwable{
