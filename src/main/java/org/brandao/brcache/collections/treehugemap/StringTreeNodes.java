@@ -134,8 +134,8 @@ public class StringTreeNodes<T> implements TreeNodes<T>{
         	Lock lock = this.locks.getLock(node.getId());
         	lock.lock();
         	try{
-                node = nodes.get(node.getId());
-                next = node.getNext(nodes, i);
+        		TreeNode<T> tmpNode = nodes.get(node.getId());
+                next = tmpNode.getNext(nodes, i);
                 
                 if(next != null)
                     return next;

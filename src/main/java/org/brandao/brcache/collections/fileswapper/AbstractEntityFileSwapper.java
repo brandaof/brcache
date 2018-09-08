@@ -32,13 +32,27 @@ public abstract class AbstractEntityFileSwapper<T>
 		
 		EntityFileTransaction eft = null;
 		try{
+			//inicia a transação no arquivo
 			eft = efm.beginTransaction();
+			//obtém o entityfile da entidade
 			EntityFile<T> ef = efm.getEntityFile(name, eft, type);
-			T[] array = (T[]) Array.newInstance(type, (int)(index - maxID));
-			long[] ids = ef.insert(array);
+			//obtém a quantidade de itens ainda não foram inseridos no arquivo
+			int emptyInsert = (int)(index - maxID - 1);
+			
+			if(emptyInsert > 0){
+				//reserva espaço para os itens ainda não inseridos no arquivo
+				T[] array = (T[]) Array.newInstance(type, emptyInsert);
+				long[] ids = ef.insert(array);
+				assert ids[ids.length - 1] == index;
+			}
+			
+			//insere o item atual
 			ef.insert(item.getItem());
-			assert ids[ids.length - 1] == index;
+			
+			//confirma a alteração
 			eft.commit();
+			
+			//atualiza a maior id já inserida no arquivo
 			maxID = index;
 		}
 		catch(Throwable e){
