@@ -164,7 +164,6 @@ public class StressCacheTest extends TestCase{
     
     public void test2() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
         
-        Collections.setPath("/mnt/brcache");
         final ConcurrentCache cache = new ConcurrentCache(config);
 
         Thread read =

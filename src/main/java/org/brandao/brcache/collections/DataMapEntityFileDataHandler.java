@@ -17,7 +17,7 @@ public class DataMapEntityFileDataHandler
 	private byte[] empty;
 	
 	public DataMapEntityFileDataHandler(){
-		this.recordSize = 62;
+		this.recordSize = 63;
 		this.buffer = new byte[this.recordSize];
 		this.buffer = new byte[this.recordSize];
 	}
@@ -42,6 +42,7 @@ public class DataMapEntityFileDataHandler
 			stream.write(empty);
 		}
 		else{
+			stream.writeByte((byte)1);
 			stream.writeLong(entity.getId());
 			stream.writeLong(entity.getTimeToLive());
 			stream.writeLong(entity.getCreationTime());

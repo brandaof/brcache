@@ -211,7 +211,7 @@ public abstract class AbstractCache implements Cache, Serializable{
 	    	
 	    	efm.register(new SimpleEntityFileAccess<Block, byte[], BlockEntityFileHeader>(
 	    			name + "_dta", 
-	    			new File(name + "_dta"), 
+	    			new File(config.getDataPath(), name + "_dta"), 
 	    			new BlockEntityFileDataHandler(this.memory, (int)config.getDataBlockSize())));
 	    	
 	    	FlushableReferenceCollection<Block> dataList =
@@ -255,12 +255,12 @@ public abstract class AbstractCache implements Cache, Serializable{
     		
 	    	efm.register(new SimpleEntityFileAccess<CharNode, byte[], CharNodeEntityFileHeader>(
 	    			name + "_idx", 
-	    			new File(name + "_idx"), 
+	    			new File(config.getDataPath(), name + "_idx"), 
 	    			new CharNodeEntityFileDataHandler()));
 
 	    	efm.register(new SimpleEntityFileAccess<DataMap, byte[], DataMapEntityFileHeader>(
 	    			name + "_idxv", 
-	    			new File(name + "_idxv"), 
+	    			new File(config.getDataPath(), name + "_idxv"), 
 	    			new DataMapEntityFileDataHandler()));
 	    	
     		MapReferenceCollection<String, DataMap> dataMap =

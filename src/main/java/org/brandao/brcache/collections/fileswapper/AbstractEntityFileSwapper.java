@@ -37,6 +37,7 @@ public abstract class AbstractEntityFileSwapper<T>
 			maxID = index;
 		}
 		catch(Throwable e){
+			e.printStackTrace();
 			if(eft != null){
 				try{
 					eft.rollback();

@@ -18,9 +18,9 @@ public class CharNodeEntityFileDataHandler
 	private byte[] empty;
 	
 	public CharNodeEntityFileDataHandler(){
-		this.recordSize = CharNode.DATA_SIZE;
+		this.recordSize = CharNode.DATA_SIZE + 17;
 		this.buffer = new byte[this.recordSize];
-		this.buffer = new byte[this.recordSize];
+		this.empty  = new byte[this.recordSize];
 	}
 	
 	public void writeMetaData(DataWritter stream, CharNodeEntityFileHeader value)
@@ -43,6 +43,7 @@ public class CharNodeEntityFileDataHandler
 			stream.write(empty);
 		}
 		else{
+			stream.writeByte((byte)1);
 			stream.writeLong(entity.getId());
 			stream.writeLong(entity.getValueId());
 			
