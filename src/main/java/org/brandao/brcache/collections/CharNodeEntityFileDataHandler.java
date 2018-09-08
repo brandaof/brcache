@@ -18,7 +18,7 @@ public class CharNodeEntityFileDataHandler
 	private byte[] empty;
 	
 	public CharNodeEntityFileDataHandler(){
-		this.recordSize = CharNode.DATA_SIZE + 17;
+		this.recordSize = CharNode.DATA_SIZE + 1;
 		this.buffer = new byte[this.recordSize - 1];
 		this.empty  = new byte[this.recordSize - 1];
 	}
@@ -64,9 +64,10 @@ public class CharNodeEntityFileDataHandler
 			return null;
 		}
 		else{
+			long[] nextNodes = new long[CharNode.LEN_NODES];
+			
 			long id = stream.readLong();
 			long valueId = stream.readLong();
-			long[] nextNodes = new long[CharNode.LEN_NODES];
 			
 			for(int i=0;i<nextNodes.length;i++){
 				nextNodes[i] = stream.readLong();

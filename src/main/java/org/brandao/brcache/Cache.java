@@ -172,4 +172,67 @@ public interface Cache {
 	 */
 	boolean containsKey(String key) throws RecoverException;
 
+    /**
+     * Obtém a quantidade de itens recuperados.
+     * @return Quantidade de itens recuperados.
+     */
+    long getCountRead();
+
+    /**
+     * Obtém a quantidade de itens armazenados.
+     * @return Quantidade de itens armazenados.
+     */
+    long getCountWrite();
+
+    /**
+     * Obtém a quantidade de itens removidos.
+     * @return Quantidade de itens removidos.
+     */
+    long getCountRemoved();
+
+    /**
+     * Obtém a quantidade de bytes recuperados.
+     * @return Quantidade de bytes recuperados.
+     */
+    long getCountReadData();
+    
+    /**
+     * Obtém a quantidade de bytes armazenados.
+     * @return Quantidade de bytes armazenados.
+     */
+    long getCountWriteData();
+
+    /**
+     * Obtém a quantidade de bytes removidos.
+     * @return Quantidade de bytes removidos.
+     */
+    long getCountRemovedData();
+    
+    /**
+     * Verifica se os arquivos contidos na pasta de dados serão 
+     * destruidos junto com essa instância. 
+     * @return <code>true</code> para destruir todos os arquivos. 
+     * Caso contrário, <code>false</code>.
+     */
+    boolean isDeleteOnExit();
+
+    /**
+     * Define que os arquivos contidos na pasta de dados sejam 
+     * destruidos junto com essa instância. 
+     * @param deleteOnExit <code>true</code> para destruir todos os arquivos. 
+     * Caso contrário, <code>false</code>.
+     */
+	void setDeleteOnExit(boolean deleteOnExit);
+
+	/**
+	 * Remove todas as entradas contidas no cache.
+	 */
+	void clear();
+	
+	/**
+	 * Destrói os dados contidos nesta instância. Deve ser executado se {@link #isDeleteOnExit()} 
+	 * for <code>false</code>.
+	 */
+	void destroy();
+	
 }

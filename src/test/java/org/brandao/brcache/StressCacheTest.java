@@ -163,47 +163,13 @@ public class StressCacheTest extends TestCase{
     }    
     
     public void test2() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
+        final int itens = 1000;
+        final Cache cache = new ConcurrentCache(config);
+        StatisticsTask statisticsTask = new StatisticsTask(cache);
         
-        final ConcurrentCache cache = new ConcurrentCache(config);
-
-        Thread read =
-            new Thread(){
-                public void run(){
-                    long lastRead = 0;
-                    long lastWrite = 0;
-                    long read = 0;
-                    long write = 0;
-                    while(true){
-                        try{
-                            System.out.println("----------------------------------");
-                            System.out.println(
-                                "write entry: " + (write-lastWrite) + "/sec " +
-                                "read entry: " + (read-lastRead) + "/sec");
-                            
-                            Runtime runtime = Runtime.getRuntime();
-                            // Run the garbage collector
-                            runtime.gc();
-                            // Calculate the used memory
-                            long memory = runtime.totalMemory() - runtime.freeMemory();
-                            System.out.println("Used memory is bytes: " + memory);
-                            System.out.println("Used memory is megabytes: " + ((memory/1024L)/1024L));
-                            lastRead = cache.getCountRead();
-                            
-                            lastWrite = cache.getCountWrite();
-                            Thread.sleep(1000);
-                            read = cache.getCountRead();
-                            write = cache.getCountWrite();
-                        }
-                        catch(Exception e){
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            };
+        new Thread(statisticsTask).start();
         
-        read.start();
-        
-        for(int i=0;i<10000;i++){
+        for(int i=0;i<itens;i++){
             try{
                 String key = String.valueOf(i) + "-INDEX-AJBK-";
                 String value = key + text;
@@ -214,14 +180,14 @@ public class StressCacheTest extends TestCase{
             }
         }
         
-        for(int i=0;i<100;i++){
+        for(int i=0;i<1;i++){
             Thread th = null;
             th = new Thread(){
                 public void run(){
                     Random r = new Random();
                     int i = 0;
                     while(true){
-                        int rv = r.nextInt(1000);
+                        int rv = r.nextInt(itens);
                         String key = String.valueOf(rv) + "-INDEX-AJBK-";
                         String value = key + text;
                         try{

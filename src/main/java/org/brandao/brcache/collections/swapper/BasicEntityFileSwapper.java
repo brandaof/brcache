@@ -20,12 +20,11 @@ public class BasicEntityFileSwapper<T>
 	public BasicEntityFileSwapper(EntityFileManager efm, String name, Class<?> type){
 		this.efm   = efm;
 		this.name  = name;
-		this.maxID = -1;
 		this.type  = (Class<T>) type;
 	}
 	
 	public void sendItem(long index, Entry<T> item) throws CacheException{
-		if(maxID < index){
+		if(maxID <= index){
 			super.allocSpace(efm, name, index, item);
 		}
 		else{
