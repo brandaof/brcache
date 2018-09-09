@@ -1,5 +1,6 @@
 package org.brandao.brcache;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import junit.framework.TestCase;
@@ -214,4 +215,34 @@ public class CacheTest extends TestCase{
 		}
 	}
 	
+    public void testswap() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
+    	
+        final int itens   = 1000;
+        final Cache cache = new ConcurrentCache(config);
+        
+        for(int i=0;i<itens;i++){
+            try{
+                String key = String.valueOf(i) + "-INDEX-AJBK-";
+                String value = key + "-INDEX-AJBK-";
+                cache.put(key, value, 0, 0);
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        for(int i=0;i<itens;i++){
+            try{
+                String key = String.valueOf(i) + "-INDEX-AJBK-";
+                String value = key + "-INDEX-AJBK-";
+                String cachedValue = (String) cache.get(key);
+                assertEquals(value, cachedValue);
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+        
+    }    
+    
 }
