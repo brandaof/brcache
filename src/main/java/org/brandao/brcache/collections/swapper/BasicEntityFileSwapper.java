@@ -33,7 +33,11 @@ public class BasicEntityFileSwapper<T>
 	}
 	
 	public Entry<T> getItem(long index) throws CacheException{
-		return super.get(efm, name, index);
+		Entry<T> e = super.get(efm, name, index);
+		if(e != null){
+			e.setNeedUpdate(false);
+		}
+		return e;
 	}
 
 	public synchronized void clear() throws CacheException{

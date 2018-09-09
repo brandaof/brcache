@@ -162,7 +162,7 @@ public class StressCacheTest extends TestCase{
     }    
     
     public void test2() throws FileNotFoundException, IOException, ClassNotFoundException, InterruptedException{
-        final int itens = 1000;
+        final int itens = 100;
         final Cache cache = new ConcurrentCache(config);
         StatisticsTask statisticsTask = new StatisticsTask(cache);
         

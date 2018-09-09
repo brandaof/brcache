@@ -26,7 +26,8 @@ public class SwapCollectionImp<T>
 
     protected long length;
     
-    public SwapCollectionImp(Swapper<T> swap, boolean forceSwap, long maxSegmentCapacity,	boolean readOnly) {
+    public SwapCollectionImp(Swapper<T> swap, boolean forceSwap, 
+    		long maxSegmentCapacity, boolean readOnly) {
     	this.id                 = getNextUniqueID();
 		this.data 				= new HashMap<Long, Entry<T>>();
 		this.lock 				= new ReentrantLock();
@@ -161,38 +162,26 @@ public class SwapCollectionImp<T>
     }
 
     protected Entry<T> getEntry(long index) {
-		lock.lock();
-		try{
-	        Entry<T> e = this.data.get(index);
-	        
-	        if(e == null)
-	            return swapOnMemory(index);
-	        else{
-	        	realocItemListedOnMemory(e);
-	        	return e;
-	        }
-		}
-		finally{
-			lock.unlock();
-		}
+        Entry<T> e = this.data.get(index);
+        
+        if(e == null)
+            return swapOnMemory(index);
+        else{
+        	realocItemListedOnMemory(e);
+        	return e;
+        }
     }
 	
     protected Entry<T> remove(Entry<T> item){
-    	lock.lock();
-    	try{
-	        Entry<T> e = this.data.remove(item.getIndex());
-	        this.removeItemListedOnMemory(item);
-	        
-	        //remover do disco também
-	        
-	        item.setItem(null);
-	        item.setNeedUpdate(false);
-	        item.setNeedReload(true);
-	        return e;
-    	}
-    	finally{
-    		lock.unlock();
-    	}
+        Entry<T> e = this.data.remove(item.getIndex());
+        this.removeItemListedOnMemory(item);
+        
+        //remover do disco também
+        
+        item.setItem(null);
+        item.setNeedUpdate(false);
+        item.setNeedReload(true);
+        return e;
     }
 
     public boolean swapNextCandidate(){
@@ -210,17 +199,8 @@ public class SwapCollectionImp<T>
     	}
     }
     
-    public void swap(Entry<T> item){
-    	this.lock.lock();
-    	try{
-    		this.swapOnDisk(item);
-    	}
-    	finally{
-        	lock.unlock();
-    	}
-    }
-    
-    public void swapOnDisk(Entry<T> item){
+    protected void swapOnDisk(Entry<T> item){
+
         if(item.isNeedReload())
             return;
     	
@@ -233,7 +213,7 @@ public class SwapCollectionImp<T>
             throw new IllegalStateException();
     }
 
-	public Entry<T> swapOnMemory(long key){
+	protected Entry<T> swapOnMemory(long key){
         Entry<T> onMemoryEntity = this.data.get(key);
 
         if(onMemoryEntity != null)
@@ -259,7 +239,7 @@ public class SwapCollectionImp<T>
         }
     }
     
-    private void addListedItemOnMemory(Entry<T> item){
+    protected void addListedItemOnMemory(Entry<T> item){
         
         if(firstItem == null){
             firstItem = item;
@@ -277,7 +257,7 @@ public class SwapCollectionImp<T>
         }
     }
 
-    private void removeItemListedOnMemory(Entry<T> item){
+    protected void removeItemListedOnMemory(Entry<T> item){
     	Entry<T> before = item.getBefore();
     	Entry<T> next   = item.getNext();
     	
@@ -298,7 +278,7 @@ public class SwapCollectionImp<T>
         item.setBefore(null);
     }
     
-    private void realocItemListedOnMemory(Entry<T> item){
+    protected void realocItemListedOnMemory(Entry<T> item){
     	
     	if(item.getBefore() == null && item.getNext() == null)
     		return;
