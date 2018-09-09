@@ -21,6 +21,7 @@ public class StatisticsTask implements Runnable{
                     "read entry: " + (read-lastRead) + "/sec");
                 
                 Runtime runtime = Runtime.getRuntime();
+                runtime.gc();
                 // Calculate the used memory
                 long memory = runtime.totalMemory() - runtime.freeMemory();
                 System.out.println("Used memory is bytes: " + memory);

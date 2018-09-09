@@ -5,15 +5,19 @@ import java.util.concurrent.locks.Lock;
 public interface SwapCollection<T> {
 
     long getId();
-    
-	void add(Entry<T> item);
 
-    Entry<T> getEntry(long index);
+	long add(T item);
+    
+	T set(long index, T item);
+
+	T get(long index);
+
+	boolean replace(long index, T oldValue, T item);
+
+	T replace(long index, T item);
+
+	T putIfAbsent(long index, T item);
 	
-    Entry<T> remove(Entry<T> item);
-
-    Entry<T> reload(Entry<T> entity);
-    
 	boolean isReadOnly();
 
 	void setReadOnly(boolean readOnly);
@@ -24,7 +28,7 @@ public interface SwapCollection<T> {
 	
 	Lock getLock();
 
-	Swapper getSwap();
+	Swapper<T> getSwap();
 
 	void setForceSwap(boolean value);
 	

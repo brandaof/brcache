@@ -17,23 +17,21 @@
 
 package org.brandao.brcache.collections;
 
-import java.io.*;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.io.File;
+import java.io.Serializable;
 import java.util.concurrent.locks.Lock;
 
 /**
  * @author Brandao
  */
 public class SegmentedSwapCollectionImp<T> 
-    implements SwapCollection<T>, Runnable, Serializable{
+    implements SwapCollection<T>, Serializable{
     
 	private static final long serialVersionUID = 7817500681111470845L;
 
 	private static final int MAX_ITENS_PER_SEGMENT = 300;
 	
-    protected SwapCollectionImp<T>[] swapCollections;
+    protected SwapCollection<T>[] swapCollections;
 
     private transient File path;
     
@@ -51,13 +49,9 @@ public class SegmentedSwapCollectionImp<T>
     
     private boolean forceSwap;
     
-    private BlockingQueue<Entry<T>> swapCandidates;
-    
-    private transient Thread[] swapperThreads;
-    
     private boolean live;
     
-    private volatile long onMemory;
+    private long index;
     
     @SuppressWarnings("unchecked")
 	public SegmentedSwapCollectionImp(int maxCapacity, double clearFactor,
@@ -67,13 +61,10 @@ public class SegmentedSwapCollectionImp<T>
         this.maxCapacity         = maxCapacity;
         this.clearFactor         = clearFactor;
         this.maxSegmentCapacity  = (int)(maxCapacity/fragmentSize);
-        this.swapCandidates      = new LinkedBlockingQueue<Entry<T>>();
         this.readOnly            = false;
         this.forceSwap           = true;
         this.live                = true;
         this.swapCollections     = new SwapCollectionImp[1];//[maxCapacity/MAX_ITENS_PER_SEGMENT + (maxCapacity % MAX_ITENS_PER_SEGMENT != 0? 1 : 0)];
-        this.onMemory            = 0;
-        swapperThreads           = new Thread[quantitySwaperThread];
         
         int countMaxCapacity = maxCapacity;
         for(int i=0;i<this.swapCollections.length;i++){
@@ -87,98 +78,56 @@ public class SegmentedSwapCollectionImp<T>
         	countMaxCapacity = countMaxCapacity - MAX_ITENS_PER_SEGMENT;
         }
         
-        for(int i=0;i<swapperThreads.length;i++){
-        	SwapperThread swapperThread = new SwapperThread(swapCandidates);
-        	swapperThreads[i] = new Thread(swapperThread);
-        	swapperThreads[i].start();
-        }
-        
-        Thread clearThread = new Thread(this);
-        clearThread.start();
     }
     
-    /* ------ */
-    
-    public void add(Entry<T> item) {
-    	getSegment(item.getIndex()).add(item);
-        onMemory++;
-    }
+	public long add(T item) {
+		long off;
+		long i;
+		synchronized(this){
+			off = index%swapCollections.length;
+			i = index++;
+		}
+		
+		swapCollections[(int)off].add(item);
+		
+		return i;
+	}
 
-    public Entry<T> remove(Entry<T> item){
-        Entry<T> e = getSegment(item.getIndex()).remove(item);
-        onMemory--;
-        return e;
-    }
-    
-    public Entry<T> getEntry(long index) {
-    	return getSegment(index).getEntry(index);
-    }
-    
-    public Entry<T> reload(Entry<T> entity){
-    	return this.getSegment(entity.getIndex()).reload(entity);
-    }
-    
-    /* ------ */
-    
-    public void run(){
-        while(this.live){
-            try{
-                Thread.sleep(10000);
-            	clearLimit();
-            }
-            catch(Exception e){
-                e.printStackTrace();
-            }
-        }
-    }
+	public T set(long index, T item) {
+		long off = index%swapCollections.length;
+		return swapCollections[(int)off].set(off, item);
+	}
 
-    protected SwapCollectionImp<T> getSegment(long value){
-    	return swapCollections[(int)(value % this.swapCollections.length)];
-    }
+	public T get(long index) {
+		long off = index%swapCollections.length;
+		return swapCollections[(int)off].get(off);
+	}
+
+	public boolean replace(long index, T oldValue, T item) {
+		long off = index%swapCollections.length;
+		return swapCollections[(int)off].replace(off, oldValue, item);
+	}
+
+	public T replace(long index, T item) {
+		long off = index%swapCollections.length;
+		return swapCollections[(int)off].replace(off, item);
+	}
+
+	public T putIfAbsent(long index, T item) {
+		long off = index%swapCollections.length;
+		return swapCollections[(int)off].putIfAbsent(index, item);
+	}
     
     public boolean isLive() {
 		return live;
 	}
 
-    protected void clearLimit() {
-    	double i = maxSegmentCapacity * clearFactor;
-        double limit = maxSegmentCapacity - i;
-        
-        if (maxSegmentCapacity > 0 && onMemory > limit) {
-        	int count = 0;
-        	int free  = 0;
-            do{
-            	free  = 0;
-	        	for(SwapCollectionImp<T> seg: this.swapCollections){
-	        		if(seg.swapNextCandidate()){
-	        			count++;
-	        		}
-	        		else{
-	        			free++;
-	        		}
-	        	}
-            }
-            while(count < i && free != this.swapCollections.length);
-        }
-        
-    }
-    
-    protected boolean needSwap(){
-    	return maxSegmentCapacity > 0 && onMemory > maxSegmentCapacity - 2;    	
-    }
-    
     public void flush(){
     	for(SwapCollection<T> seg: this.swapCollections){
     		seg.flush();
     	}
     }
     
-    /* ------ */
-    
-    public Map<Long, Entry<T>> getSegments() {
-        throw new UnsupportedOperationException();
-    }
-
     public File getPath() {
         return path;
     }
@@ -244,53 +193,15 @@ public class SegmentedSwapCollectionImp<T>
     }
 
     public void clear(){
-    	this.swapCandidates.clear();
-    	for(SwapCollectionImp<T> seg: this.swapCollections){
+    	for(SwapCollection<T> seg: swapCollections){
     		seg.clear();
     	}
     }
     
     public void destroy(){
-    	
-    	try{
-	    	this.live = false;
-	    	for(Thread st: this.swapperThreads){
-	    		st.interrupt();
-	    	}
+    	for(SwapCollection<T> seg: swapCollections){
+    		seg.destroy();
     	}
-    	finally{
-	    	this.swapCandidates.clear();
-	        
-	    	for(SwapCollectionImp<T> seg: this.swapCollections){
-	    		seg.destroy();
-	    	}
-    	}
-    	
-    }
-
-    public class SwapperThread implements Runnable{
-
-    	private BlockingQueue<Entry<T>> itens;
-    	
-    	public SwapperThread(BlockingQueue<Entry<T>> itens){
-    		this.itens = itens;
-    	}
-    	
-    	public void run() {
-    		while(SegmentedSwapCollectionImp.this.live){
-    			try{
-    				Entry<T> entry = itens.take();
-    				SegmentedSwapCollectionImp.this.getSegment(entry.getIndex()).swap(entry);
-    			}
-    			catch(Throwable e){
-    				if(!(e instanceof InterruptedException)){
-    					e.printStackTrace();
-    				}
-    			}
-    		}
-    		
-    	}
-    	
     }
 
 	public long getId() {
@@ -306,7 +217,7 @@ public class SegmentedSwapCollectionImp<T>
 	}
 
 	public Lock getGroupLock(long index) {
-		return getSegment(index).getLock();
+		return swapCollections[(int)(index%swapCollections.length)].getLock();
 	}
 
 	public int getNumberOfGroups() {

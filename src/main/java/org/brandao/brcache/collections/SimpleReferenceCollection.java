@@ -60,171 +60,48 @@ public class SimpleReferenceCollection<T>
 		if(index == null){
 			lock.lock();
 			try{
-				index = this.lastPos++;
+				lastPos = collection.add(e);
+				return lastPos;
 			}
 			finally{
 				lock.unlock();
 			}
 		}
-		
-			
-		Lock lock = collection.getGroupLock(index);
-		lock.lock();
-		try{
-			collection.add(new Entry<T>(index, e));
-		}
-		catch(Throwable ex){
-			this.freeAddress.add(index);
-			throw new IllegalStateException(ex);
-		}
-		finally{
-			lock.unlock();
+		else{
+			collection.set(index, e);
+			return index;
 		}
 			
-		return index;
 	}
 
 	public T set(long reference, T e) {
-		T old = null;
-		Lock lock = collection.getGroupLock(reference);
-		lock.lock();
-		try{
-			Entry<T> entry = collection.getEntry(reference);
-			if(entry != null){
-				old = entry.getItem();
-				entry.setItem(e);
-				entry.setNeedUpdate(true);
-			}
-			else{
-				throw new IllegalStateException();
-			}
-		}
-		finally{
-			lock.unlock();
-		}
-		
-		return old;
+		return collection.set(reference, e);
 	}
 
 	public T get(long reference) {
-		T v = null;
-		Lock lock = collection.getGroupLock(reference);
-		lock.lock();
-		try{
-			Entry<T> entry = collection.getEntry(reference);
-			v = entry == null? null : entry.getItem();
-		}
-		finally{
-			lock.unlock();
-		}
-		return v;
+		return collection.get(reference);
 	}
 
 	public boolean remove(long reference) {
-		T v = null;
-		Lock lock = collection.getGroupLock(reference);
-		lock.lock();
-		try{
-			Entry<T> entry = collection.getEntry(reference);
-			if(entry != null){
-				v = entry.getItem();
-				entry.setItem(null);
-				entry.setNeedUpdate(true);
-				freeAddress.add(reference);
-			}
-		}
-		finally{
-			lock.unlock();
-		}
-		
-		return v != null;
-
+		freeAddress.add(reference);
+		return collection.set(reference, null) != null;
 	}
 	
 	public boolean replace(long reference, T oldValue, T value) {
-		Object old;
-		Lock lock = collection.getGroupLock(reference);
-		lock.lock();
-		try{
-			Entry<T> entry = collection.getEntry(reference);
-			old = entry != null? entry.getItem() : null;
-			if(oldValue.equals(old)){
-				entry.setItem(value);
-				entry.setNeedUpdate(true);
-				return true;
-			}
-		}
-		finally{
-			lock.unlock();
-		}
-		
-		return false;
+		return collection.replace(reference, oldValue, value);
 	}
 
 	public T replace(long reference, T value) {
-		T v = null;
-		Lock lock = collection.getGroupLock(reference);
-		lock.lock();
-		try{
-			Entry<T> entry = collection.getEntry(reference);
-			v = entry != null? entry.getItem() : null;
-			if(v != null){
-				entry.setItem(value);
-				entry.setNeedUpdate(true);
-			}
-		}
-		finally{
-			lock.unlock();
-		}
-		
-		return v;
+		return collection.replace(reference, value);
 	}
 
 	public T putIfAbsent(long reference, T value) {
-		T v = null;
-		Lock lock = collection.getGroupLock(reference);
-		lock.lock();
-		try{
-			Entry<T> entry = collection.getEntry(reference);
-			v = entry != null? entry.getItem() : null;
-			if(v == null){
-				if(entry != null){
-					entry.setItem(value);
-					entry.setNeedUpdate(true);
-				}
-				else{
-					collection.add(new Entry<T>(reference, value));
-				}
-			}
-		}
-		finally{
-			lock.unlock();
-		}
-		
-		return v;
+		return collection.putIfAbsent(reference, value);
 	}
 
 	public boolean remove(long reference, T oldValue) {
-		T v = null;
-		Lock lock = collection.getGroupLock(reference);
-		lock.lock();
-		try{
-			Entry<T> entry = collection.getEntry(reference);
-			v = entry != null? entry.getItem() : null;
-			if(oldValue.equals(v)){
-				if(entry != null){
-					entry.setItem(null);
-					entry.setNeedUpdate(true);
-					freeAddress.add(reference);
-				}
-				return true;
-			}
-		}
-		finally{
-			lock.unlock();
-		}
-		
-		return false;
+		freeAddress.add(reference);
+		return collection.replace(reference, oldValue, null);
 	}
 	
     public void setDeleteOnExit(boolean value){
@@ -247,10 +124,6 @@ public class SimpleReferenceCollection<T>
     	return this.size() == 0;
     }
     
-    public boolean contains(Object value) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
     public void clear() {
 		collection.clear();
     }

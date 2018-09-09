@@ -8,7 +8,6 @@ import java.io.*;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.brandao.brcache.collections.Collections;
@@ -143,7 +142,7 @@ public class StressCacheTest extends TestCase{
                                 String val = (String) cache.get(key);
                                 if(val != null){
                                     //System.out.println(val);
-                                    Assert.assertEquals(value, val);
+                                    assertEquals(value, val);
                                 }
                             }
                             catch(Throwable e){
@@ -180,12 +179,11 @@ public class StressCacheTest extends TestCase{
             }
         }
         
-        for(int i=0;i<1;i++){
+        for(int i=0;i<100;i++){
             Thread th = null;
             th = new Thread(){
                 public void run(){
                     Random r = new Random();
-                    int i = 0;
                     while(true){
                         int rv = r.nextInt(itens);
                         String key = String.valueOf(rv) + "-INDEX-AJBK-";
@@ -193,8 +191,7 @@ public class StressCacheTest extends TestCase{
                         try{
                             String val = (String) cache.get(key);
                             if(val != null){
-                                //System.out.println(val);
-                                Assert.assertEquals(value, val);
+                                assertEquals(value, val);
                             }
                         }
                         catch(Throwable e){
