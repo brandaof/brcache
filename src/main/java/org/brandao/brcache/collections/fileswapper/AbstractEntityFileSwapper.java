@@ -20,15 +20,15 @@ public abstract class AbstractEntityFileSwapper<T>
 	protected Class<T> type;
 	
 	public AbstractEntityFileSwapper(){
-		this.maxID = 0;
+		this.maxID = -1;
 	}
 	
 	@SuppressWarnings("unchecked")
 	protected synchronized void allocSpace(EntityFileManager efm, String name, long index, Entry<T> item){
 		
-		if(maxID > index){
-			return;
-		}
+		//if(maxID >= index){
+		//	return;
+		//}
 		
 		EntityFileTransaction eft = null;
 		try{
@@ -43,17 +43,24 @@ public abstract class AbstractEntityFileSwapper<T>
 				//reserva espaço para os itens ainda não inseridos no arquivo
 				T[] array = (T[]) Array.newInstance(type, emptyInsert);
 				long[] ids = ef.insert(array);
-				assert ids[ids.length - 1] == index;
+				assert ids[ids.length] == index;
 			}
 			
 			//insere o item atual
-			ef.insert(item.getItem());
+			if(index < maxID){
+				ef.update(index, item.getItem());
+			}
+			else{
+				long newid = ef.insert(item.getItem());
+				assert newid == index;
+				maxID = newid;
+			}
+			
+			//atualiza a maior id já inserida no arquivo
+			//maxID = index;
 			
 			//confirma a alteração
 			eft.commit();
-			
-			//atualiza a maior id já inserida no arquivo
-			maxID = index;
 		}
 		catch(Throwable e){
 			e.printStackTrace();
