@@ -17,6 +17,8 @@ public class BlockEntityFileDataHandler
 	private byte[] empty;
 	
 	private byte[] buffer;
+
+	private byte[] bufferBlock;
 	
 	private int recordSize;
 	
@@ -27,6 +29,7 @@ public class BlockEntityFileDataHandler
 		this.recordSize = 25 + blockSize;
 		this.empty  = new byte[this.recordSize - 1];
 		this.buffer = new byte[this.recordSize - 1];
+		this.bufferBlock = new byte[this.blockSize];
 		this.memory = memory;
 	}
 	
@@ -49,14 +52,13 @@ public class BlockEntityFileDataHandler
 			stream.write(empty);
 		}
 		else{
-			byte[] b = new byte[blockSize];
-			entity.buffer.read(0, b, 0, (int)entity.buffer.size());
+			entity.buffer.read(0, bufferBlock, 0, entity.length);
 			stream.writeByte((byte)1);
 			stream.writeLong(entity.id);
 			stream.writeLong(entity.nextBlock);
 			stream.writeInt(entity.length);
 			stream.writeInt(entity.segment);
-			stream.write(b);
+			stream.write(bufferBlock);
 		}
 	}
 
@@ -75,10 +77,10 @@ public class BlockEntityFileDataHandler
 			long nextBlock = stream.readLong();
 			int length = stream.readInt();
 			int segment = stream.readInt();
-			stream.read(buffer);
+			stream.read(bufferBlock);
 			
 			RegionMemory rm = memory.alloc(blockSize);
-			rm.write(0, buffer, 0, buffer.length);
+			rm.write(0, bufferBlock, 0, length);
 			
 			Block b = new Block(id, segment, rm, length);
 			b.nextBlock = nextBlock;
