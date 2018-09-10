@@ -26,10 +26,6 @@ public abstract class AbstractEntityFileSwapper<T>
 	@SuppressWarnings("unchecked")
 	protected synchronized void allocSpace(EntityFileManager efm, String name, long index, Entry<T> item){
 		
-		//if(maxID >= index){
-		//	return;
-		//}
-		
 		EntityFileTransaction eft = null;
 		try{
 			//inicia a transação no arquivo
@@ -37,17 +33,17 @@ public abstract class AbstractEntityFileSwapper<T>
 			//obtém o entityfile da entidade
 			EntityFile<T> ef = efm.getEntityFile(name, eft, type);
 			//obtém a quantidade de itens ainda não foram inseridos no arquivo
-			int emptyInsert = (int)(index - maxID - 1);
+			int emptyInsert = (int)(maxID < 0? index : index - maxID - 1);
 			
 			if(emptyInsert > 0){
 				//reserva espaço para os itens ainda não inseridos no arquivo
 				T[] array = (T[]) Array.newInstance(type, emptyInsert);
 				long[] ids = ef.insert(array);
-				assert ids[ids.length] == index;
+				assert ids[ids.length-1] == index - 1;
 			}
 			
 			//insere o item atual
-			if(index < maxID){
+			if(index <= maxID){
 				ef.update(index, item.getItem());
 			}
 			else{

@@ -186,16 +186,18 @@ public class StressCacheTest extends TestCase{
                     Random r = new Random();
                     while(true){
                         int rv = r.nextInt(itens);
-                        String key = String.valueOf(rv) + "-INDEX-AJBK-";
+                        String key   = String.valueOf(rv) + "-INDEX-AJBK-";
                         String value = key + text;
+                        String val   = null;
                         try{
-                            String val = (String) cache.get(key);
+                            val = (String) cache.get(key);
                             if(val != null){
                                 assertEquals(value, val);
                             }
                         }
                         catch(Throwable e){
                             e.printStackTrace();
+                            assertEquals(value, val);
                         }
                     }
                 }

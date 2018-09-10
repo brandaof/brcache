@@ -24,6 +24,7 @@ public class BasicEntityFileSwapper<T>
 	}
 	
 	public void sendItem(long index, Entry<T> item) throws CacheException{
+		assert index == item.getIndex();
 		if(maxID <= index){
 			super.allocSpace(efm, name, index, item);
 		}
@@ -35,6 +36,7 @@ public class BasicEntityFileSwapper<T>
 	public Entry<T> getItem(long index) throws CacheException{
 		Entry<T> e = super.get(efm, name, index);
 		if(e != null){
+			assert index == e.getIndex();
 			e.setNeedUpdate(false);
 		}
 		return e;

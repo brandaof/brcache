@@ -64,7 +64,7 @@ public class SegmentedSwapCollectionImp<T>
         this.readOnly            = false;
         this.forceSwap           = true;
         this.live                = true;
-        this.swapCollections     = new SwapCollectionImp[maxCapacity/MAX_ITENS_PER_SEGMENT + (maxCapacity % MAX_ITENS_PER_SEGMENT != 0? 1 : 0)];
+        this.swapCollections     = new SwapCollectionImp[1];//[maxCapacity/MAX_ITENS_PER_SEGMENT + (maxCapacity % MAX_ITENS_PER_SEGMENT != 0? 1 : 0)];
         
         int countMaxCapacity = maxCapacity;
         for(int i=0;i<this.swapCollections.length;i++){
@@ -82,13 +82,15 @@ public class SegmentedSwapCollectionImp<T>
     
 	public long add(T item) {
 		long seg;
+		long off;
 		long i;
 		synchronized(this){
 			seg = index%swapCollections.length;
+			off = index/swapCollections.length;
 			i = index++;
+			long segIndex = swapCollections[(int)seg].add(item);
+			assert segIndex == off;
 		}
-		
-		swapCollections[(int)seg].add(item);
 		
 		return i;
 	}
