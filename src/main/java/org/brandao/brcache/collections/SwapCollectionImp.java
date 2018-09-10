@@ -24,8 +24,6 @@ public class SwapCollectionImp<T>
     
     protected boolean readOnly;
 
-    protected long length;
-    
     public SwapCollectionImp(Swapper<T> swap, boolean forceSwap, 
     		long maxSegmentCapacity, boolean readOnly) {
     	this.id                 = getNextUniqueID();
@@ -36,20 +34,17 @@ public class SwapCollectionImp<T>
 		this.maxSegmentCapacity = maxSegmentCapacity;
 		this.firstItem 			= null;
 		this.readOnly 			= readOnly;
-		this.length             = 0;
 	}
     
     public long getId(){
     	return id;
     }
 
-	public long add(T item){
+	public void add(long index, T item){
 		lock.lock();
 		try{
-			long index = length++;
 			Entry<T> e = new Entry<T>(index, item);
 			add(e);
-			return index;
 		}
 		finally{
 			lock.unlock();
@@ -59,10 +54,6 @@ public class SwapCollectionImp<T>
 	public T set(long index, T item){
 		lock.lock();
 		try{
-			if(index >= length){
-				throw new IndexOutOfBoundsException(index + " >= " + length);
-			}
-			
 			Entry<T> e = getEntry(index);
 			T old = e.getItem();
 			e.setItem(item);
@@ -77,10 +68,6 @@ public class SwapCollectionImp<T>
 	public T get(long index){
 		lock.lock();
 		try{
-			if(index >= length){
-				throw new IndexOutOfBoundsException(index + " >= " + length);
-			}
-			
 			Entry<T> e = getEntry(index);
 			return e.getItem();
 		}
@@ -92,10 +79,6 @@ public class SwapCollectionImp<T>
 	public boolean replace(long index, T oldValue, T item){
 		lock.lock();
 		try{
-			if(index >= length){
-				throw new IndexOutOfBoundsException(index + " >= " + length);
-			}
-			
 			Entry<T> e = getEntry(index);
 			T old = e.getItem();
 			if(oldValue.equals(old)){
@@ -113,10 +96,6 @@ public class SwapCollectionImp<T>
 	public T replace(long index, T item){
 		lock.lock();
 		try{
-			if(index >= length){
-				throw new IndexOutOfBoundsException(index + " >= " + length);
-			}
-			
 			Entry<T> e = getEntry(index);
 			T old = e.getItem();
 			e.setItem(item);
@@ -131,10 +110,6 @@ public class SwapCollectionImp<T>
 	public T putIfAbsent(long index, T item){
 		lock.lock();
 		try{
-			if(index >= length){
-				throw new IndexOutOfBoundsException(index + " >= " + length);
-			}
-			
 			Entry<T> e = getEntry(index);
 			T old = e.getItem();
 			if(old == null){

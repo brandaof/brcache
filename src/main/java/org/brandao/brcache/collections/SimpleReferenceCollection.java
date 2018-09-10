@@ -20,6 +20,8 @@ public class SimpleReferenceCollection<T>
 	
     private Lock lock;
 
+    private long length;
+    
     public SimpleReferenceCollection() {
         this(
             HugeArrayList.DEFAULT_MAX_CAPACITY_ELEMENT, 
@@ -60,8 +62,9 @@ public class SimpleReferenceCollection<T>
 		if(index == null){
 			lock.lock();
 			try{
-				lastPos = collection.add(e);
-				return lastPos;
+				collection.add(length, e);
+				long i = length++;
+				return i;
 			}
 			finally{
 				lock.unlock();

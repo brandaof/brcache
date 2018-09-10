@@ -51,8 +51,6 @@ public class SegmentedSwapCollectionImp<T>
     
     private boolean live;
     
-    private long index;
-    
     @SuppressWarnings("unchecked")
 	public SegmentedSwapCollectionImp(int maxCapacity, double clearFactor,
             double fragmentFactor, Swapper<T> swap, int quantitySwaperThread) {
@@ -64,7 +62,7 @@ public class SegmentedSwapCollectionImp<T>
         this.readOnly            = false;
         this.forceSwap           = true;
         this.live                = true;
-        this.swapCollections     = new SwapCollectionImp[1];//[maxCapacity/MAX_ITENS_PER_SEGMENT + (maxCapacity % MAX_ITENS_PER_SEGMENT != 0? 1 : 0)];
+        this.swapCollections     = new SwapCollectionImp[2];//[maxCapacity/MAX_ITENS_PER_SEGMENT + (maxCapacity % MAX_ITENS_PER_SEGMENT != 0? 1 : 0)];
         
         int countMaxCapacity = maxCapacity;
         for(int i=0;i<this.swapCollections.length;i++){
@@ -80,49 +78,44 @@ public class SegmentedSwapCollectionImp<T>
         
     }
     
-	public long add(T item) {
+	public void add(long index, T item) {
 		long seg;
 		long off;
-		long i;
 		synchronized(this){
 			seg = index%swapCollections.length;
 			off = index/swapCollections.length;
-			i = index++;
-			long segIndex = swapCollections[(int)seg].add(item);
-			assert segIndex == off;
+			swapCollections[(int)seg].add(index, item);
 		}
-		
-		return i;
 	}
 
 	public T set(long index, T item) {
 		long seg = index%swapCollections.length;
 		long off = index/swapCollections.length;
-		return swapCollections[(int)seg].set(off, item);
+		return swapCollections[(int)seg].set(index, item);
 	}
 
 	public T get(long index) {
 		long seg = index%swapCollections.length;
 		long off = index/swapCollections.length;
-		return swapCollections[(int)seg].get(off);
+		return swapCollections[(int)seg].get(index);
 	}
 
 	public boolean replace(long index, T oldValue, T item) {
 		long seg = index%swapCollections.length;
 		long off = index/swapCollections.length;
-		return swapCollections[(int)seg].replace(off, oldValue, item);
+		return swapCollections[(int)seg].replace(index, oldValue, item);
 	}
 
 	public T replace(long index, T item) {
 		long seg = index%swapCollections.length;
 		long off = index/swapCollections.length;
-		return swapCollections[(int)seg].replace(off, item);
+		return swapCollections[(int)seg].replace(index, item);
 	}
 
 	public T putIfAbsent(long index, T item) {
 		long seg = index%swapCollections.length;
 		long off = index/swapCollections.length;
-		return swapCollections[(int)seg].putIfAbsent(off, item);
+		return swapCollections[(int)seg].putIfAbsent(index, item);
 	}
     
     public boolean isLive() {

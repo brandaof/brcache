@@ -9,7 +9,7 @@ public class TestBRCacheConfig
 
 	public TestBRCacheConfig(){
 
-        this.nodesBufferSize = 1024*1024;
+        this.nodesBufferSize = 128*1024*1024;
         this.nodesPageSize   = 1024;
         this.nodesSwapFactor = 0.3;
         this.indexBufferSize = 1024*1024;

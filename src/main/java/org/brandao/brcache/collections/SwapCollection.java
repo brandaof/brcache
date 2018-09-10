@@ -6,7 +6,7 @@ public interface SwapCollection<T> {
 
     long getId();
 
-	long add(T item);
+	void add(long index, T item);
     
 	T set(long index, T item);
 
