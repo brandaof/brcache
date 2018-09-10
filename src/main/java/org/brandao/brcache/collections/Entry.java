@@ -189,4 +189,9 @@ public class Entry<T> implements Serializable {
         this.before = before;
     }
 
+	@Override
+	public String toString() {
+		return "Entry [index=" + index + ", item=" + item + "]";
+	}
+
 }

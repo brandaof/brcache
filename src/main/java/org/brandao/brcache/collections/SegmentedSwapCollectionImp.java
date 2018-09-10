@@ -79,43 +79,27 @@ public class SegmentedSwapCollectionImp<T>
     }
     
 	public void add(long index, T item) {
-		long seg;
-		long off;
-		synchronized(this){
-			seg = index%swapCollections.length;
-			off = index/swapCollections.length;
-			swapCollections[(int)seg].add(index, item);
-		}
+		swapCollections[(int)index%swapCollections.length].add(index, item);
 	}
 
 	public T set(long index, T item) {
-		long seg = index%swapCollections.length;
-		long off = index/swapCollections.length;
-		return swapCollections[(int)seg].set(index, item);
+		return swapCollections[(int)index%swapCollections.length].set(index, item);
 	}
 
 	public T get(long index) {
-		long seg = index%swapCollections.length;
-		long off = index/swapCollections.length;
-		return swapCollections[(int)seg].get(index);
+		return swapCollections[(int)index%swapCollections.length].get(index);
 	}
 
 	public boolean replace(long index, T oldValue, T item) {
-		long seg = index%swapCollections.length;
-		long off = index/swapCollections.length;
-		return swapCollections[(int)seg].replace(index, oldValue, item);
+		return swapCollections[(int)index%swapCollections.length].replace(index, oldValue, item);
 	}
 
 	public T replace(long index, T item) {
-		long seg = index%swapCollections.length;
-		long off = index/swapCollections.length;
-		return swapCollections[(int)seg].replace(index, item);
+		return swapCollections[(int)index%swapCollections.length].replace(index, item);
 	}
 
 	public T putIfAbsent(long index, T item) {
-		long seg = index%swapCollections.length;
-		long off = index/swapCollections.length;
-		return swapCollections[(int)seg].putIfAbsent(index, item);
+		return swapCollections[(int)index%swapCollections.length].putIfAbsent(index, item);
 	}
     
     public boolean isLive() {

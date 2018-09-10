@@ -50,5 +50,11 @@ public class Block
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "Block [id=" + id + ", segment=" + segment + ", length="
+				+ length + ", nextBlock=" + nextBlock + "]";
+	}
     
 }

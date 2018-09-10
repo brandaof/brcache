@@ -124,41 +124,6 @@ public class SwapCollectionImp<T>
 		}
 	}
 	
-	protected void add(Entry<T> item){
-        if(this.forceSwap && this.needSwap()){
-            this.swapFirst();
-        }
-        
-        if(data.put(item.getIndex(), item) != null){
-        	throw new IllegalStateException();
-        }
-        
-        this.addListedItemOnMemory(item);
-    }
-
-    protected Entry<T> getEntry(long index) {
-        Entry<T> e = this.data.get(index);
-        
-        if(e == null)
-            return swapOnMemory(index);
-        else{
-        	realocItemListedOnMemory(e);
-        	return e;
-        }
-    }
-	
-    protected Entry<T> remove(Entry<T> item){
-        Entry<T> e = this.data.remove(item.getIndex());
-        this.removeItemListedOnMemory(item);
-        
-        //remover do disco também
-        
-        item.setItem(null);
-        item.setNeedUpdate(false);
-        item.setNeedReload(true);
-        return e;
-    }
-
     public boolean swapNextCandidate(){
     	this.lock.lock();
     	try{
@@ -173,22 +138,55 @@ public class SwapCollectionImp<T>
         	lock.unlock();
     	}
     }
-    
+	
+	protected void add(Entry<T> item){
+		
+        if(this.forceSwap && this.needSwap()){
+            this.swapFirst();
+        }
+        
+        if(data.put(item.getIndex(), item) != null){
+        	throw new IllegalStateException();
+        }
+        
+        this.addListedItemOnMemory(item);
+        
+    }
+
+    protected Entry<T> getEntry(long index) {
+        Entry<T> e = this.data.get(index);
+        
+        if(e == null)
+            return swapOnMemory(index);
+        else{
+        	realocItemListedOnMemory(e);
+        	return e;
+        }
+    }
+	
     protected void swapOnDisk(Entry<T> item){
 
         if(item.isNeedReload())
             return;
     	
-        if(!this.readOnly && item.isNeedUpdate())
+        if(!this.readOnly && item.isNeedUpdate()){
             this.swap.sendItem(item.getIndex(), item);
+        }
 
-        Entry<T> removedItem = this.remove(item);
+        Entry<T> removedItem = this.data.remove(item.getIndex());
+        this.removeItemListedOnMemory(removedItem);
+        removedItem.setItem(null);
+        removedItem.setNeedUpdate(false);
+        removedItem.setNeedReload(false);
         
-        if(item != removedItem)
+        if(item != removedItem){
             throw new IllegalStateException();
+        }
+        
     }
 
 	protected Entry<T> swapOnMemory(long key){
+		
         Entry<T> onMemoryEntity = this.data.get(key);
 
         if(onMemoryEntity != null)
@@ -198,11 +196,10 @@ public class SwapCollectionImp<T>
             this.swapFirst();
         
         Entry<T> entity = (Entry<T>)this.swap.getItem(key);
-
-        if(entity != null){
-        	this.data.put(key, entity);
-            this.addListedItemOnMemory(entity);
-        }
+        entity.setNeedUpdate(false);
+        entity.setNeedReload(false);
+    	this.data.put(key, entity);
+        this.addListedItemOnMemory(entity);
 
         return entity;
     }

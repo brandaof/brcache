@@ -62,8 +62,8 @@ public class SimpleReferenceCollection<T>
 		if(index == null){
 			lock.lock();
 			try{
-				collection.add(length, e);
 				long i = length++;
+				collection.add(i, e);
 				return i;
 			}
 			finally{
