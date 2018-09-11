@@ -23,6 +23,12 @@ import java.io.InputStream;
  *
  */
 public interface Cache {
+
+	/**
+	 * Obtém a configuração do cache.
+	 * @return Configuração.
+	 */
+	BRCacheConfig getConfig();
 	
     /**
      * Substitui o valor associado à chave somente se ele existir.

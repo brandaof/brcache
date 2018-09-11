@@ -50,8 +50,8 @@ public class FlushableReferenceCollectionImp<T>
 	}
 	
 	public long insert(T e) {
-		long threadReference = Thread.currentThread().getId() % this.lists.length;
-		long index           = this.lists[(int)threadReference].insert(e);
+		int threadReference  = (int)(Thread.currentThread().getId() % this.lists.length);
+		long index           = lists[threadReference].insert(e);
 		
 		threadReference = threadReference & 0xff;
 		index           = index & 0xffffffffL;

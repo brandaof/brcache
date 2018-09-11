@@ -98,6 +98,10 @@ public abstract class AbstractCache implements Cache, Serializable{
     
     private volatile long modCount;
     
+    protected EntityFileManagerConfigurer entityFileManager;
+    
+	protected BRCacheConfig config;
+    
     volatile long countRead;
     
     volatile long countWrite;
@@ -112,10 +116,6 @@ public abstract class AbstractCache implements Cache, Serializable{
     
     private boolean deleteOnExit;
     
-    private EntityFileManagerConfigurer entityFileManager;
-    
-	protected BRCacheConfig config;
-
     public AbstractCache(){
         this.dataMap 				= null;
         this.dataList 				= null;
@@ -213,6 +213,7 @@ public abstract class AbstractCache implements Cache, Serializable{
 	    			name + "_dta", 
 	    			new File(config.getDataPath(), name + "_dta"), 
 	    			new BlockEntityFileDataHandler(this.memory, (int)config.getDataBlockSize())));
+	    	efm.truncate(name + "_dta");
 	    	
 	    	FlushableReferenceCollection<Block> dataList =
 	                new FlushableReferenceCollectionImp<Block>(
@@ -257,11 +258,13 @@ public abstract class AbstractCache implements Cache, Serializable{
 	    			name + "_idx", 
 	    			new File(config.getDataPath(), name + "_idx"), 
 	    			new CharNodeEntityFileDataHandler()));
+	    	efm.truncate(name + "_idx");
 
 	    	efm.register(new SimpleEntityFileAccess<DataMap, byte[], DataMapEntityFileHeader>(
 	    			name + "_idxv", 
 	    			new File(config.getDataPath(), name + "_idxv"), 
 	    			new DataMapEntityFileDataHandler()));
+	    	efm.truncate(name + "_idxv");
 	    	
     		MapReferenceCollection<String, DataMap> dataMap =
             		new BasicMapReferenceCollection<String, DataMap>(
@@ -597,7 +600,7 @@ public abstract class AbstractCache implements Cache, Serializable{
         	if(map.getTimeToIdle() > 0){
             	map.setMostRecentTime(System.currentTimeMillis());
             	//a instância no momento do replace porde não ser a mesma passada em oldElement.
-            	this.dataMap.replace(key, map, map);
+            	dataMap.replace(key, map, map);
         	}
         	
             Block[] segments = new Block[map.getSegments()];
@@ -688,11 +691,11 @@ public abstract class AbstractCache implements Cache, Serializable{
         		data.write(0, buffer, 0, read);
         		
             	Block block = new Block(map.getId(), index++, data, read);
-                Long segment = this.dataList.insert(block);
-                
+                Long segment = dataList.insert(block);
+
                 if(lastBlock != null){
                 	lastBlock.nextBlock = segment;
-                	this.dataList.set(lastSegment, lastBlock);
+                	dataList.set(lastSegment, lastBlock);
                 }
                 else
                 	map.setFirstSegment(segment);

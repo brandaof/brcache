@@ -16,21 +16,15 @@ public class BlockEntityFileDataHandler
 	
 	private byte[] empty;
 	
-	private byte[] buffer;
-
-	private byte[] bufferBlock;
-	
 	private int recordSize;
 	
 	private Memory memory;
 	
 	public BlockEntityFileDataHandler(Memory memory, int blockSize){
-		this.blockSize = blockSize;
+		this.blockSize  = blockSize;
 		this.recordSize = 25 + blockSize;
-		this.empty  = new byte[this.recordSize - 1];
-		this.buffer = new byte[this.recordSize - 1];
-		this.bufferBlock = new byte[this.blockSize];
-		this.memory = memory;
+		this.empty      = new byte[this.recordSize - 1];
+		this.memory     = memory;
 	}
 	
 	public void writeMetaData(DataWritter stream, BlockEntityFileHeader value)
@@ -52,13 +46,15 @@ public class BlockEntityFileDataHandler
 			stream.write(empty);
 		}
 		else{
-			entity.buffer.read(0, bufferBlock, 0, entity.length);
+			byte[] b = new byte[blockSize]; 
+			entity.buffer.read(0, b, 0, blockSize);
+			
 			stream.writeByte((byte)1);
 			stream.writeLong(entity.id);
 			stream.writeLong(entity.nextBlock);
 			stream.writeInt(entity.length);
 			stream.writeInt(entity.segment);
-			stream.write(bufferBlock);
+			stream.write(b);
 		}
 	}
 
@@ -67,24 +63,25 @@ public class BlockEntityFileDataHandler
 	}
 
 	public Block read(DataReader stream) throws IOException {
+		byte[] b = new byte[blockSize];
 		byte e = stream.readByte();
 		if(e == 0){
-			stream.read(buffer);
+			stream.read(b);
 			return null;
 		}
 		else{
 			long id = stream.readLong();
 			long nextBlock = stream.readLong();
-			int length = stream.readInt();
-			int segment = stream.readInt();
-			stream.read(bufferBlock);
+			int length     = stream.readInt();
+			int segment    = stream.readInt();
+			stream.read(b);
 			
 			RegionMemory rm = memory.alloc(blockSize);
-			rm.write(0, bufferBlock, 0, length);
+			rm.write(0, b, 0, b.length);
 			
-			Block b = new Block(id, segment, rm, length);
-			b.nextBlock = nextBlock;
-			return b;
+			Block block = new Block(id, segment, rm, length);
+			block.nextBlock = nextBlock;
+			return block;
 		}
 	}
 

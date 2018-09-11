@@ -29,7 +29,7 @@ public class SegmentedSwapCollectionImp<T>
     
 	private static final long serialVersionUID = 7817500681111470845L;
 
-	private static final int MAX_ITENS_PER_SEGMENT = 300;
+	private static final int MAX_ITENS_PER_SEGMENT = 5;
 	
     protected SwapCollection<T>[] swapCollections;
 
@@ -62,7 +62,7 @@ public class SegmentedSwapCollectionImp<T>
         this.readOnly            = false;
         this.forceSwap           = true;
         this.live                = true;
-        this.swapCollections     = new SwapCollectionImp[2];//[maxCapacity/MAX_ITENS_PER_SEGMENT + (maxCapacity % MAX_ITENS_PER_SEGMENT != 0? 1 : 0)];
+        this.swapCollections     = new SwapCollectionImp[maxCapacity/MAX_ITENS_PER_SEGMENT + (maxCapacity % MAX_ITENS_PER_SEGMENT != 0? 1 : 0)];
         
         int countMaxCapacity = maxCapacity;
         for(int i=0;i<this.swapCollections.length;i++){
