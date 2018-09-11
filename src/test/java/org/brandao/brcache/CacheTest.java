@@ -22,6 +22,8 @@ public class CacheTest extends TestCase{
 	
 	public void tearDown(){
 		this.cache.destroy();
+		this.cache = null;
+		System.gc();
 	}
 	
 	/* replace */

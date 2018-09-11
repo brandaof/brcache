@@ -13,6 +13,7 @@ import org.brandao.brcache.memory.UnsafeMemory;
 
 import junit.framework.TestCase;
 
+@SuppressWarnings("resource")
 public class CacheInputStreamTest extends TestCase{
 
 	private Memory memory = new UnsafeMemory();

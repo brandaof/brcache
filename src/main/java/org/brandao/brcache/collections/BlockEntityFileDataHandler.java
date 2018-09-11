@@ -14,6 +14,8 @@ public class BlockEntityFileDataHandler
 
 	private int blockSize;
 	
+	private int dataSize;
+	
 	private byte[] empty;
 	
 	private int recordSize;
@@ -23,7 +25,8 @@ public class BlockEntityFileDataHandler
 	public BlockEntityFileDataHandler(Memory memory, int blockSize){
 		this.blockSize  = blockSize;
 		this.recordSize = 25 + blockSize;
-		this.empty      = new byte[this.recordSize - 1];
+		this.dataSize   = this.recordSize - 1;
+		this.empty      = new byte[this.dataSize];
 		this.memory     = memory;
 	}
 	
@@ -63,13 +66,15 @@ public class BlockEntityFileDataHandler
 	}
 
 	public Block read(DataReader stream) throws IOException {
-		byte[] b = new byte[blockSize];
 		byte e = stream.readByte();
 		if(e == 0){
+			byte[] b = new byte[dataSize];
 			stream.read(b);
 			return null;
 		}
 		else{
+			byte[] b = new byte[blockSize];
+			
 			long id = stream.readLong();
 			long nextBlock = stream.readLong();
 			int length     = stream.readInt();
