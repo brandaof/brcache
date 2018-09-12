@@ -286,7 +286,7 @@ public class CacheHandler implements Serializable{
         }
         
         //Todo item inserido tem que ter uma nova id. Mesmo que ela exista.
-        map.setId(this.modCount++);
+        map.setId(modCount++);
 
         try{
             //Registra os dados no buffer de dados.
@@ -468,7 +468,7 @@ public class CacheHandler implements Serializable{
 
         try{
             //Faz a indexação do item e retorna o índice atual, caso exista.
-            oldMap = this.dataMap.putIfAbsent(key, map);
+            oldMap = dataMap.putIfAbsent(key, map);
         }
         catch(Throwable e){
         	try{
@@ -538,7 +538,7 @@ public class CacheHandler implements Serializable{
         	DataMap data = this.dataMap.get(key);
 
             if(data != null){
-            	this.remove(key, data);
+            	remove(key, data);
             	return true;
             }
             else
@@ -556,7 +556,26 @@ public class CacheHandler implements Serializable{
      * @return <code>true</code> se a chave estiver associada a um valor. Caso contrário, <code>false</code>.
      */
     public boolean containsKey(String key){
-    	return this.dataMap.get(key) != null;
+    	return dataMap.get(key) != null;
+    }
+
+    /**
+     * Obtém o apontamento da chave.
+     * @param key chave.
+     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
+     * apontamento.
+     */
+    
+    public DataMap getPointer(String key) throws RecoverException {
+        return this.dataMap.get(key);
+    }
+
+    public void setPointer(String key, DataMap newDta) throws RecoverException {
+    	dataMap.put(key, newDta);
+    }
+    
+    public boolean replacePointer(String key, DataMap originalDta, DataMap newDta) throws RecoverException {
+    	return dataMap.replace(key, originalDta, newDta);
     }
     
     /**
@@ -683,6 +702,10 @@ public class CacheHandler implements Serializable{
         }
     }
 
+    public long getNextModCount(){
+    	return modCount++;
+    }
+    
     private void releaseSegments(DataMap map){
     	long segmentId = map.getFirstSegment();
     	

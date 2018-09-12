@@ -10,12 +10,14 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.brandao.brcache.BasicCache;
 import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.CacheException;
+import org.brandao.brcache.CacheHandler;
 import org.brandao.brcache.CacheInputStream;
 import org.brandao.brcache.DataMap;
 import org.brandao.brcache.ItemCacheInputStream;
@@ -38,7 +40,7 @@ class TransactionInfo implements Serializable {
 	
 	private Map<String, DataMap> cacheItemMetadata;
 	
-	private Set<String> saved;
+	private Map<String, DataMap> originalMetadata;
 	
 	private long timeout;
 	
@@ -47,43 +49,24 @@ class TransactionInfo implements Serializable {
 	private String dataPrefix;
 	
 	public TransactionInfo(Serializable id, long timeout){
-		this.id                 = id;
-		this.updated            = new HashSet<String>();
-		this.managed            = new HashSet<String>();
-		this.cacheItemMetadata  = new HashMap<String, DataMap>();
-		this.saved              = new HashSet<String>();
-		this.timeout            = timeout;
+		this.id                = id;
+		this.updated           = new HashSet<String>();
+		this.managed           = new HashSet<String>();
+		this.cacheItemMetadata = new HashMap<String, DataMap>();
+		this.originalMetadata  = new HashMap<String, DataMap>();
+		this.timeout           = timeout;
 	}
 	
 	/* métodos de armazenamento */
 	
-	public boolean replace(CacheTransactionManager manager, BasicCache cache,
-			String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
-		
-		try{
-			Object o = this.get(manager, cache, key, true);
-			if(o != null){
-				this.put(manager, cache, key, value, timeToLive, timeToIdle);
-				return true;
-			}
-			else
-				return false;
-		}
-		catch(CacheException e){
-			throw new StorageException(e, e.getError(), e.getParams());
-		}
-		catch(Throwable e){
-			throw new StorageException(e, CacheErrors.ERROR_1020);
-		}
-	}
-	
-	public boolean replaceStream(CacheTransactionManager manager, BasicCache cache,
+	public boolean replaceStream(CacheTransactionManager manager, CacheHandler cache,
 			String key, InputStream inputData, long timeToLive, long timeToIdle) throws StorageException{
 
 		try{
-			Object o = this.getStream(manager, cache, key, true);
-			if(o != null){
-				this.putStream(manager, cache, key, inputData, timeToLive, timeToIdle);
+			DataMap dta = getEntity(manager, cache, key, true);
+			
+			if(dta != null){
+				putEntity(manager, cache, key, dta, inputData, timeToLive, timeToIdle);
 				return true;
 			}
 			else
@@ -98,58 +81,18 @@ class TransactionInfo implements Serializable {
 		
 	}
 	
-	public boolean replace(CacheTransactionManager manager, BasicCache cache,
-			String key, Object oldValue, 
-			Object newValue, long timeToLive, long timeToIdle) throws StorageException {
-		
-		try{
-			Object o = this.get(manager, cache, key, true);
-			if(o != null && o.equals(oldValue)){
-				this.put(manager, cache, key, newValue, timeToLive, timeToIdle);
-				return true;
-			}
-			else
-				return false;
-		}
-		catch(CacheException e){
-			throw new StorageException(e, e.getError(), e.getParams());
-		}
-		catch(Throwable e){
-			throw new StorageException(e, CacheErrors.ERROR_1020);
-		}
-	}
-	
-	public Object putIfAbsent(CacheTransactionManager manager, BasicCache cache,
-			String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
-		
-		try{
-			Object o = this.get(manager, cache, key, true);
-			
-			if(o == null){
-				this.put(manager, cache, key, value, timeToLive, timeToIdle);
-			}
-			
-			return o;
-		}
-		catch(CacheException e){
-			throw new StorageException(e, e.getError(), e.getParams());
-		}
-		catch(Throwable e){
-			throw new StorageException(e, CacheErrors.ERROR_1020);
-		}
-	}
-	
-	public InputStream putIfAbsentStream(CacheTransactionManager manager, BasicCache cache,
+	public InputStream putIfAbsentStream(CacheTransactionManager manager, CacheHandler cache,
 			String key, InputStream inputData, long timeToLive, long timeToIdle) throws StorageException{
 		
 		try{
-			InputStream o = this.getStream(manager, cache, key, true);
+			DataMap dta = getEntity(manager, cache, key, true);
 			
-			if(o == null){
-				this.putStream(manager, cache, key, inputData, timeToLive, timeToIdle);
+			if(dta == null){
+				putEntity(manager, cache, key, dta, inputData, timeToLive, timeToIdle);
+				return null;
 			}
 			
-			return o;
+			return cache.getStream(key, dta);
 		}
 		catch(CacheException e){
 			throw new StorageException(e, e.getError(), e.getParams());
@@ -159,47 +102,14 @@ class TransactionInfo implements Serializable {
 		}		
 	}
 	
-	
-	public boolean put(CacheTransactionManager manager, BasicCache cache,
-			String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
-		try{
-			ByteArrayOutputStream bout = new ByteArrayOutputStream();
-			ObjectOutputStream oout = new ObjectOutputStream(bout);
-			oout.writeObject(value);
-			oout.flush();
-			oout.close();
-			return this.putStream(
-				manager, cache, key, new ByteArrayInputStream(bout.toByteArray()), 
-				timeToLive, timeToIdle);
-		}
-		catch(CacheException e){
-			throw new StorageException(e, e.getError(), e.getParams());
-		}
-		catch(Throwable e){
-			throw new StorageException(e, CacheErrors.ERROR_1020);
-		}
-	}
-	
-    public boolean putStream(CacheTransactionManager manager, BasicCache cache, 
+    public boolean putStream(CacheTransactionManager manager, CacheHandler cache, 
     		String key, InputStream inputData, long timeToLive, long timeToIdle) 
     		throws StorageException {
 
-    	String ref = this.dataPrefix + key;
     	try{
-    		if(!this.managed.contains(key)){
-        		this.manageItem(manager, cache, key, this.timeout);
-        		cache.putStream(ref, inputData, this.timeout, 0);
-    			this.updated.add(key);
-    			this.cacheItemMetadata.put(key, new ItemCacheMetadata
-    					(-1, timeToLive, timeToIdle, -1, -1, -1, -1, (short)-1, -1));
-    			return cache.containsKey(key);
-    		}
-    		else{
-				this.updated.add(key);
-				this.cacheItemMetadata.put(key, new ItemCacheMetadata
-						(-1, timeToLive, timeToIdle, -1, -1, -1, -1, (short)-1, -1));
-				return cache.putStream(ref, inputData, this.timeout, 0);
-    		}
+    		DataMap o = getEntity(manager, cache, key, true);
+    		putEntity(manager, cache, key, o, inputData, timeToLive, timeToIdle);
+    		return o != null;
     	}
 		catch(CacheException e){
 			throw new StorageException(e, e.getError(), e.getParams());
@@ -211,31 +121,13 @@ class TransactionInfo implements Serializable {
 	
 	/* métodos de coleta*/
 	
-	public Object get(CacheTransactionManager manager, BasicCache cache,
-			String key, boolean forUpdate) throws RecoverException {
-		try{
-			InputStream in = this.getStream(manager, cache, key, forUpdate);
-			if(in != null){
-				ObjectInputStream oin = new ObjectInputStream(in);
-				return oin.readObject();
-			}
-			else
-				return null;
-		}
-		catch(CacheException e){
-			throw new StorageException(e, e.getError(), e.getParams());
-		}
-		catch(Throwable e){
-			throw new StorageException(e, CacheErrors.ERROR_1021);
-		}
-	}
     
-    public InputStream getStream(CacheTransactionManager manager, BasicCache cache, 
+    public InputStream getStream(CacheTransactionManager manager, CacheHandler cache, 
     		String key, boolean forUpdate) throws RecoverException {
     	
     	try{
-			InputStream dta = this.getEntity(manager, cache, key, forUpdate);
-			return dta;
+			DataMap dta = getEntity(manager, cache, key, forUpdate);
+			return dta != null? cache.getStream(key, dta) : null;
     	}
     	catch(RecoverException e){
     		throw e;
@@ -250,42 +142,13 @@ class TransactionInfo implements Serializable {
 
     /* métodos de remoção */
     
-	public boolean remove(CacheTransactionManager manager, BasicCache cache,
-			String key, Object value) throws StorageException {
-		
-		try{
-			Object o = this.get(manager, cache, key, true);
-			if(o != null && o.equals(value)){
-				return this.remove(manager, cache, key);
-			}
-			else
-				return false;
-		}
-		catch(CacheException e){
-			throw new StorageException(e, e.getError(), e.getParams());
-		}
-		catch(Throwable e){
-			throw new StorageException(e, CacheErrors.ERROR_1021);
-		}
-	}
-	
-    public boolean remove(CacheTransactionManager manager, BasicCache cache,
+    public boolean remove(CacheTransactionManager manager, CacheHandler cache,
     		String key) throws StorageException{
     	
-    	String ref = this.dataPrefix + key;
     	try{
-    		if(this.managed.contains(key)){
-    			this.updated.add(key);
-    			boolean r = cache.remove(ref);
-    			if(cache.get(ref) != null)
-    				throw new IllegalStateException();
-    			return r;
-    		}
-    		else{
-        		this.manageItem(manager, cache, key, this.timeout);
-    			this.updated.add(key);
-    			return cache.getStream(key) != null;
-    		}
+    		DataMap o = getEntity(manager, cache, key, true);
+    		putEntity(manager, cache, key, o, null, 0, 0);
+    		return o != null;
     	}
 		catch(CacheException e){
 			throw new StorageException(e, e.getError(), e.getParams());
@@ -297,46 +160,30 @@ class TransactionInfo implements Serializable {
 	
     /* métodos de manipulação*/
     
-	public void savePoint(BasicCache cache) throws IOException, RecoverException{
-		saved.clear();
-
-		for(String key: this.updated){
-			CacheInputStream in = (CacheInputStream) cache.getStream(key);
-			String orgKey       = this.originalDataPrefix + key;
+	public void rollback(CacheHandler cache) throws StorageException, RecoverException {
+		
+		for(Entry<String,DataMap> e: originalMetadata.entrySet()){
 			
-			if(in != null){
-				cache.putStream(orgKey, in, this.timeout, 0); 
-				this.cacheItemMetadata.put(orgKey, new ItemCacheMetadata(in));
+			DataMap dta = cacheItemMetadata.get(e.getKey());
+			
+			if(e.getValue() == null){
+				if(dta != null){
+					cache.remove(e.getKey(), dta);
+				}
 			}
 			else{
-				cache.remove(orgKey); 
-			}
-			
-			saved.add(key);
-		}
-		
-	}
-    
-	public void rollback(BasicCache cache) throws StorageException, RecoverException {
-		
-		for(String key: this.saved){
-			
-			String orgKey = this.originalDataPrefix + key;
-			InputStream in = cache.getStream(orgKey);
-			
-			if(in == null){
-				cache.remove(key);
-			}
-			else{
-				ItemCacheMetadata metadata = this.cacheItemMetadata.get(orgKey);
-				ItemCacheInputStream item  = new ItemCacheInputStream(metadata, in);
-				cache.putStream(key, item, 0, 0);
+				if(dta != null){
+					cache.replacePointer(e.getKey(), dta, e.getValue());
+				}
+				else{
+					cache.setPointer(e.getKey(), e.getValue());
+				}
 			}
 		}
 		
 	}
 	
-	public void commit(BasicCache cache) throws RecoverException, StorageException {
+	public void commit(CacheHandler cache) throws RecoverException, StorageException {
 		if(!this.updated.isEmpty()){
 			for(String key: this.updated){
 				String ref = this.dataPrefix + key;
@@ -367,71 +214,63 @@ class TransactionInfo implements Serializable {
 		this.saved.clear();
 		this.cacheItemMetadata.clear();
 		this.updated.clear();
-		
-		/*
-		this.updated.clear();
-		this.locked.clear();
-		
-		if(!this.managed.isEmpty()){
-			for(String key: this.managed){
-				this.entities.remove(key);
-			}
-		}
-		
-		this.times.clear();
-		this.managed.clear();
-		this.saved.clear();
-		*/
 	}
 	
     /* métodos internos */
     
-    private InputStream getEntity(CacheTransactionManager manager, BasicCache cache,
+    private DataMap getEntity(CacheTransactionManager manager, CacheHandler cache,
     		String key, boolean lock) 
     		throws RecoverException, IOException, TransactionException{
     	
-    	String ref = this.dataPrefix + key;
+    	if(lock && !managed.contains(key)){
+			manageItem(manager, cache, key, timeout);
+    	}
     	
-    	if(this.managed.contains(key)){
-    		InputStream entry = cache.getStream(ref);
-    		return entry;
+    	return cacheItemMetadata.containsKey(key)? 
+    				cacheItemMetadata.get(key) : 
+					cache.getPointer(key);
+    	
+    }
+
+    private void putEntity(
+    		CacheTransactionManager manager, CacheHandler cache, String key, DataMap originalDta, 
+    		InputStream inputData, long timeToLive, long timeToIdle
+    		) throws StorageException, InterruptedException{
+
+		manageItem(manager, cache, key, timeout);
+    	
+		DataMap newDta = new DataMap();
+		
+		newDta.setCreationTime(System.currentTimeMillis());
+		newDta.setId(cache.getNextModCount());
+		newDta.setMostRecentTime(System.currentTimeMillis());
+		newDta.setTimeToIdle(timeToIdle);
+		newDta.setTimeToLive(timeToLive);
+		
+		cache.putData(newDta, inputData);
+		
+		cacheItemMetadata.put(key, newDta);
+
+    	if(!originalMetadata.containsKey(key)){
+			originalMetadata.put(key, originalDta);
     	}
-    	else{
-			this.manageItem(manager, cache, key, this.timeout);
-    		CacheInputStream dta = (CacheInputStream) this.getSharedEntity(manager, cache, key, lock);
-			
-			if(dta != null){
-				cache.putStream(ref, dta, this.timeout, 0);
-				this.cacheItemMetadata.put(key, new ItemCacheMetadata(dta));
-				return cache.getStream(ref);
-			}
-			else
-				return dta;
-    	}
+    	
     }
     
-    private void manageItem(CacheTransactionManager manager, BasicCache cache, String key, long time){
+    private void manageItem(CacheTransactionManager manager, CacheHandler cache, String key, long time){
     	
-    	if(this.managed.contains(key)){
+    	if(managed.contains(key)){
     		return;
     	}
     	
     	if(time <= 0){
-    		manager.lock(this.id, key);
+    		manager.lock(id, key);
     	}
     	else{
-			manager.tryLock(this.id, key, time, TimeUnit.MILLISECONDS);
+			manager.tryLock(id, key, time, TimeUnit.MILLISECONDS);
     	}
     	
-    	this.managed.add(key);
-    }
-
-    
-    private InputStream getSharedEntity(CacheTransactionManager manager, BasicCache cache,
-    		String key, boolean lock) 
-    		throws IOException, TransactionException, RecoverException{
-		InputStream in = cache.getStream(key);
-		return in;
+    	managed.add(key);
     }
     
 }

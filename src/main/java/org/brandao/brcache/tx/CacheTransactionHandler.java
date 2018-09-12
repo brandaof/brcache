@@ -3,7 +3,7 @@ package org.brandao.brcache.tx;
 import java.io.InputStream;
 import java.io.Serializable;
 
-import org.brandao.brcache.BasicCache;
+import org.brandao.brcache.CacheHandler;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 
@@ -18,42 +18,24 @@ interface CacheTransactionHandler
 	
 	/* métodos de armazenamento */
 	
-	Object replace(CacheTransactionManager manager, BasicCache cache,
-			String key, Object value, long timeToLive, long timeToIdle) throws StorageException;
-	
-	boolean replaceStream(CacheTransactionManager manager, BasicCache cache,
+	boolean replaceStream(CacheTransactionManager manager, CacheHandler cache,
 			String key, InputStream inputData, long timeToLive, long timeToIdle) throws StorageException;
 	
-	boolean replace(CacheTransactionManager manager, BasicCache cache,
-			String key, Object oldValue, Object newValue, long timeToLive, long timeToIdle) throws StorageException;
-	
-	Object putIfAbsent(CacheTransactionManager manager, BasicCache cache,
-			String key, Object value, long timeToLive, long timeToIdle) throws StorageException;
-	
-	InputStream putIfAbsentStream(CacheTransactionManager manager, BasicCache cache,
+	InputStream putIfAbsentStream(CacheTransactionManager manager, CacheHandler cache,
 			String key, InputStream inputData, long timeToLive, long timeToIdle) throws StorageException;
     		
-	boolean put(CacheTransactionManager manager, BasicCache cache,
-			String key, Object value, long timeToLive, long timeToIdle) throws StorageException;
-	
-    boolean putStream(CacheTransactionManager manager, BasicCache cache, 
+    boolean putStream(CacheTransactionManager manager, CacheHandler cache, 
     		String key, InputStream inputData, long timeToLive, long timeToIdle) 
     		throws StorageException;
 	
 	/* métodos de coleta*/
 	
-	Object get(CacheTransactionManager manager, BasicCache cache,
-			String key, boolean forUpdate) throws RecoverException;
-    
-    InputStream getStream(CacheTransactionManager manager, BasicCache cache, 
+    InputStream getStream(CacheTransactionManager manager, CacheHandler cache, 
     		String key, boolean forUpdate) throws RecoverException;
 
     /* métodos de remoção */
     
-	boolean remove(CacheTransactionManager manager, BasicCache cache,
-			String key, Object value) throws StorageException;
-	
-    boolean remove(CacheTransactionManager manager, BasicCache cache,
+    boolean remove(CacheTransactionManager manager, CacheHandler cache,
     		String key) throws StorageException;
     
 }
