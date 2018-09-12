@@ -23,6 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.brandao.brcache.BasicCache;
+import org.brandao.brcache.CacheHandler;
 import org.brandao.brcache.ConcurrentCache;
 import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.CacheException;
@@ -144,7 +145,7 @@ public class TXCache
 		}
 	}
 	
-	private BasicCache cache;
+	private CacheHandler cache;
 	
 	private CacheTransactionManager transactionManager;
 
@@ -153,7 +154,7 @@ public class TXCache
      * @param cache cache não transacional.
      * @param transactionManager gestor transacional.
      */
-    public TXCache(BasicCache cache, CacheTransactionManager transactionManager){
+    public TXCache(CacheHandler cache, CacheTransactionManager transactionManager){
     	super(null);
     	this.cache = cache;
     	this.transactionManager = transactionManager;

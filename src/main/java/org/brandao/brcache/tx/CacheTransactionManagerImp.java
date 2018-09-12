@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.brandao.brcache.BasicCache;
 import org.brandao.brcache.CacheErrors;
+import org.brandao.brcache.CacheHandler;
 import org.brandao.brcache.collections.Collections;
 import org.brandao.concurrent.NamedLock;
 
@@ -167,7 +168,7 @@ public class CacheTransactionManagerImp
 		this.timeout = value;
 	}
 	
-	public CacheTransactionHandler begin(BasicCache cache) {
+	public CacheTransactionHandler begin(CacheHandler cache) {
 		CacheTransactionHandler txh = this.transactions.get();
 		
 		if(txh != null){

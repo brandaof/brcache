@@ -314,8 +314,6 @@ public class ConcurrentCache extends BasicCache {
 		}
     }
 	
-    /* métodos de manipulação*/
-    
 	/**
 	 * Obtém a quantidade de itens contido no cache.
 	 * @return quantidade de itens.

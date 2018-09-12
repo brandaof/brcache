@@ -242,7 +242,7 @@ public class BasicCache extends AbstractCache {
      * item.
      */
     public boolean remove(String key) throws StorageException{
-    	return super.removeStream(key);
+    	return cacheHandler.removeStream(key);
     }
 
 	/**
@@ -250,7 +250,7 @@ public class BasicCache extends AbstractCache {
 	 * @return configuração.
 	 */
 	public BRCacheConfig getConfig() {
-		return config;
+		return cacheHandler.getConfig();
 	}
 
 	public boolean replace(String key, Object oldValue, Object newValue,

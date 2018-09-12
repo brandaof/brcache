@@ -17,6 +17,7 @@ import org.brandao.brcache.BasicCache;
 import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.CacheException;
 import org.brandao.brcache.CacheInputStream;
+import org.brandao.brcache.DataMap;
 import org.brandao.brcache.ItemCacheInputStream;
 import org.brandao.brcache.ItemCacheMetadata;
 import org.brandao.brcache.RecoverException;
@@ -25,10 +26,6 @@ import org.brandao.brcache.StorageException;
 class TransactionInfo implements Serializable {
 
 	private static final long serialVersionUID = 3758041685386590737L;
-
-	private static final String ORIGINAL_PREFIX  = "t:o:{{name}}:";
-
-	private static final String DATA_PREFIX = "t:{{name}}:";
 	
 	private Serializable id;
 	
@@ -39,7 +36,7 @@ class TransactionInfo implements Serializable {
 	 */
 	private Set<String> managed;
 	
-	private Map<String, ItemCacheMetadata> cacheItemMetadata;
+	private Map<String, DataMap> cacheItemMetadata;
 	
 	private Set<String> saved;
 	
@@ -49,18 +46,13 @@ class TransactionInfo implements Serializable {
 
 	private String dataPrefix;
 	
-	private String name;
-	
 	public TransactionInfo(Serializable id, long timeout){
 		this.id                 = id;
-		this.name               = id.toString();
 		this.updated            = new HashSet<String>();
 		this.managed            = new HashSet<String>();
-		this.cacheItemMetadata  = new HashMap<String, ItemCacheMetadata>();
+		this.cacheItemMetadata  = new HashMap<String, DataMap>();
 		this.saved              = new HashSet<String>();
 		this.timeout            = timeout;
-		this.originalDataPrefix = ORIGINAL_PREFIX.replace("{{name}}", this.name);
-		this.dataPrefix         = DATA_PREFIX.replace("{{name}}", this.name);
 	}
 	
 	/* métodos de armazenamento */

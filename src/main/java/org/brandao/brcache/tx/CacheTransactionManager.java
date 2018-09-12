@@ -3,8 +3,7 @@ package org.brandao.brcache.tx;
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
-import org.brandao.brcache.BRCacheConfig;
-import org.brandao.brcache.BasicCache;
+import org.brandao.brcache.CacheHandler;
 
 /**
  * Gestor das transações de um cache.
@@ -32,7 +31,7 @@ public interface CacheTransactionManager {
 	
 	long getTimeout();
 	
-	CacheTransactionHandler begin(BasicCache cache);
+	CacheTransactionHandler begin(CacheHandler cache);
 	
 	CacheTransactionHandler getCurrrent();
 
