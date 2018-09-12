@@ -25,8 +25,8 @@ public class StressCacheTest extends TestCase{
 	}
 	
 	public void testPut() throws InterruptedException{
-		int totalClients  = 1000;
-		int maxOperations = 1000;
+		int totalClients  = 300;
+		int maxOperations = 10;
 		CountDownLatch countDown = new CountDownLatch(totalClients);
 		AtomicInteger keyCount   = new AtomicInteger();
 		Thread[] clients         = new Thread[totalClients];
@@ -48,8 +48,6 @@ public class StressCacheTest extends TestCase{
 		double opsSec = 1000000000 / timeOp;
 		
 		System.out.println("operations: " + op + ", time: " + time + " nano, ops: " + op + ", ops/Sec: " + + opsSec );
-		
-		Thread.sleep(6000);
 	}
 
 }
