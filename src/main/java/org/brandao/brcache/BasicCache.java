@@ -24,7 +24,7 @@ public class BasicCache extends AbstractCache {
     }
     
     /**
-     * Obtém o cache com suporte transacional com um gestor transacional específicos.
+     * Obtém o cache com suporte transacional com um gestor transacional específico.
      * @param txManager gestor transacional.
      * @return cache com suporte transacional.
      */
