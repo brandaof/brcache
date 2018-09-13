@@ -37,6 +37,16 @@ public class ConcurrentCache extends BasicCache {
     	this.locks = new NamedLock();
     }
     
+    /**
+     * Cria um novo cache.
+     * 
+     * @param cacheHandler Manpulador do cache.
+     */
+    public ConcurrentCache(CacheHandler cacheHandler){
+    	super(cacheHandler);
+    	this.locks = new NamedLock();
+    }
+    
 	/* métodos de armazenamento */
 	
     /**

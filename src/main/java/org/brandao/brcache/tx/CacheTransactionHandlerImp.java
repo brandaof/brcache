@@ -165,6 +165,8 @@ class CacheTransactionHandlerImp
 		
 	}
 
+	/* métodos do TXCacheHandler */
+	
 	public boolean replaceStream(CacheTransactionManager manager,
 			CacheHandler cache, String key, InputStream inputData,
 			long timeToLive, long timeToIdle)

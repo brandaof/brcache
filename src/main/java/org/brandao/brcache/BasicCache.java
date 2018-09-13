@@ -22,6 +22,15 @@ public class BasicCache extends AbstractCache {
     public BasicCache(BRCacheConfig config){
     	super("default", config);
     }
+
+    /**
+     * Cria um novo cache.
+     * 
+     * @param cacheHandler Manpulador do cache.
+     */
+    public BasicCache(CacheHandler cacheHandler){
+    	super(cacheHandler);
+    }
     
     /**
      * Obtém o cache com suporte transacional com um gestor transacional específico.
@@ -29,7 +38,7 @@ public class BasicCache extends AbstractCache {
      * @return cache com suporte transacional.
      */
     public TXCache getTXCache(CacheTransactionManager txManager){
-    	return new TXCache(this, txManager);
+    	return new TXCache(super.cacheHandler, txManager);
     }
     
 	/* métodos de armazenamento */
@@ -234,17 +243,6 @@ public class BasicCache extends AbstractCache {
     
     /* métodos de remoção */
     
-    /**
-     * Remove o valor associado à chave.
-     * @param key chave associada ao valor.
-     * @return <code>true</code> se o valor for removido. Caso contrário <code>false</code>.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
-     * item.
-     */
-    public boolean remove(String key) throws StorageException{
-    	return cacheHandler.removeStream(key);
-    }
-
 	/**
 	 * Obtém a configuração do cache.
 	 * @return configuração.

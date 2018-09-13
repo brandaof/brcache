@@ -143,7 +143,7 @@ class TransactionInfo implements Serializable {
 		}
     }
 	
-    /* métodos de manipulação*/
+    /*métodos de manipulação*/
     
 	public void rollback(CacheHandler cache) throws StorageException, RecoverException {
 		

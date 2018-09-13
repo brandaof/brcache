@@ -16,37 +16,146 @@ public class TXCacheHandler implements CacheHandler{
 
 	private static final long serialVersionUID = 3313232038342358036L;
 
-	private static final Method replaceStream;
+    private static final Method putStream;
+
+    private static final Method replaceStream;
+    
+    private static final Method putIfAbsentStream;
+    
+    private static final Method getStream;
+    
+    private static final Method removeStream;
+    
+    private static final Method containsKey;
+
+    private static final Method getPointer;
+
+    private static final Method setPointer;
+    
+    private static final Method replacePointer;
+    
+    private static final Method remove;
+    
+    private static final Method releaseSegments;
+    
+    private static final Method getStream_;
+    
+    private static final Method putData;
+
+    private static final Method getNextModCount;
+    
+    private static final Method getConfig;
+    
+    private static final Method getCountRead;
+
+    private static final Method getCountWrite;
+
+    private static final Method getCountRemoved;
+
+    private static final Method getCountReadData;
+    
+    private static final Method getCountWriteData;
+
+    private static final Method getCountRemovedData;
+    
+    private static final Method isDeleteOnExit;
+
+    private static final Method setDeleteOnExit;
+
+    private static final Method size;
 	
-	private static final Method putIfAbsentStream;
+    private static final Method isEmpty;
 	
-	private static final Method putStream;
+    private static final Method clear;
+	
+    private static final Method destroy;
 
-	private static final Method getStream;
-
-	private static final Method remove;
-
+	
 	static{
 		try{
-			replaceStream = CacheTransactionHandler.class.getDeclaredMethod(
-					"replaceStream", CacheTransactionManager.class, 
-					CacheHandler.class, String.class, InputStream.class, long.class, long.class);
-			
-			putIfAbsentStream = CacheTransactionHandler.class.getDeclaredMethod(
-					"putIfAbsentStream", CacheTransactionManager.class, CacheHandler.class,
-					String.class, InputStream.class, long.class, long.class);
-			
-			putStream = CacheTransactionHandler.class.getDeclaredMethod(
-					"putStream", CacheTransactionManager.class, CacheHandler.class, 
-		    		String.class, InputStream.class, long.class, long.class);
+		    putStream = CacheTransactionHandler.class.getDeclaredMethod("putStream", CacheTransactionManager.class,
+					CacheHandler.class, String.class, InputStream.class, 
+		    		long.class, long.class);
 
-			getStream = CacheTransactionHandler.class.getDeclaredMethod(
-					"getStream", CacheTransactionManager.class, CacheHandler.class, 
-		    		String.class, boolean.class);
+		    replaceStream = CacheTransactionHandler.class.getDeclaredMethod("replaceStream", CacheTransactionManager.class,
+					CacheHandler.class, String.class, InputStream.class, 
+		    		long.class, long.class);
+		    
+		    putIfAbsentStream = CacheTransactionHandler.class.getDeclaredMethod("putIfAbsentStream", CacheTransactionManager.class,
+					CacheHandler.class, String.class, InputStream.class, 
+		    		long.class, long.class);
+		    
+		    getStream = CacheTransactionHandler.class.getDeclaredMethod("getStream", CacheTransactionManager.class,
+					CacheHandler.class, String.class);
+		    
+		    removeStream = CacheTransactionHandler.class.getDeclaredMethod("removeStream", CacheTransactionManager.class,
+					CacheHandler.class, String.class);
+		    
+		    containsKey = CacheTransactionHandler.class.getDeclaredMethod("containsKey", CacheTransactionManager.class,
+					CacheHandler.class, String.class);
 
-			remove = CacheTransactionHandler.class.getDeclaredMethod(
-					"remove", CacheTransactionManager.class, CacheHandler.class,
-		    		String.class);
+		    getPointer = CacheTransactionHandler.class.getDeclaredMethod("getPointer", CacheTransactionManager.class,
+					CacheHandler.class, String.class);
+
+		    setPointer = CacheTransactionHandler.class.getDeclaredMethod("setPointer", CacheTransactionManager.class,
+					CacheHandler.class, String.class, DataMap.class);
+		    
+		    replacePointer = CacheTransactionHandler.class.getDeclaredMethod("replacePointer", CacheTransactionManager.class,
+					CacheHandler.class, String.class, DataMap.class, DataMap.class);
+		    
+		    remove = CacheTransactionHandler.class.getDeclaredMethod("remove", CacheTransactionManager.class,
+					CacheHandler.class, String.class, DataMap.class);
+		    
+		    releaseSegments = CacheTransactionHandler.class.getDeclaredMethod("releaseSegments", CacheTransactionManager.class,
+					CacheHandler.class, DataMap.class);
+		    
+		    getStream_ = CacheTransactionHandler.class.getDeclaredMethod("getStream", CacheTransactionManager.class,
+					CacheHandler.class, String.class, DataMap.class);
+		    
+		    putData = CacheTransactionHandler.class.getDeclaredMethod("putData", CacheTransactionManager.class,
+					CacheHandler.class, DataMap.class, InputStream.class);
+
+		    getNextModCount = CacheTransactionHandler.class.getDeclaredMethod("getNextModCount", CacheTransactionManager.class,
+					CacheHandler.class);
+		    
+			getConfig = CacheTransactionHandler.class.getDeclaredMethod("getConfig", CacheTransactionManager.class,
+					CacheHandler.class);
+		    
+		    getCountRead = CacheTransactionHandler.class.getDeclaredMethod("getCountRead", CacheTransactionManager.class,
+					CacheHandler.class);
+
+		    getCountWrite = CacheTransactionHandler.class.getDeclaredMethod("getCountWrite", CacheTransactionManager.class,
+					CacheHandler.class);
+
+		    getCountRemoved = CacheTransactionHandler.class.getDeclaredMethod("getCountRemoved", CacheTransactionManager.class,
+					CacheHandler.class);
+
+		    getCountReadData = CacheTransactionHandler.class.getDeclaredMethod("getCountReadData", CacheTransactionManager.class,
+					CacheHandler.class);
+		    
+		    getCountWriteData = CacheTransactionHandler.class.getDeclaredMethod("getCountWriteData", CacheTransactionManager.class,
+					CacheHandler.class);
+
+		    getCountRemovedData = CacheTransactionHandler.class.getDeclaredMethod("getCountRemovedData", CacheTransactionManager.class,
+					CacheHandler.class);
+		    
+		    isDeleteOnExit = CacheTransactionHandler.class.getDeclaredMethod("isDeleteOnExit", CacheTransactionManager.class,
+					CacheHandler.class);
+
+			setDeleteOnExit = CacheTransactionHandler.class.getDeclaredMethod("setDeleteOnExit", CacheTransactionManager.class,
+					CacheHandler.class, boolean.class);
+
+			size = CacheTransactionHandler.class.getDeclaredMethod("size", CacheTransactionManager.class,
+					CacheHandler.class);
+			
+			isEmpty = CacheTransactionHandler.class.getDeclaredMethod("isEmpty", CacheTransactionManager.class,
+					CacheHandler.class);
+			
+			clear = CacheTransactionHandler.class.getDeclaredMethod("clear", CacheTransactionManager.class,
+					CacheHandler.class);
+			
+			destroy = CacheTransactionHandler.class.getDeclaredMethod("destroy", CacheTransactionManager.class,
+					CacheHandler.class);
 
 		}
 		catch(Throwable e){
@@ -161,116 +270,89 @@ public class TXCacheHandler implements CacheHandler{
 	}
 
 	public boolean containsKey(String key) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	public DataMap getPointer(String key) throws RecoverException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public void setPointer(String key, DataMap newDta) throws RecoverException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public boolean replacePointer(String key, DataMap originalDta,
 			DataMap newDta) throws RecoverException {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	public void remove(String key, DataMap data) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void releaseSegments(DataMap map) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public InputStream getStream(String key, DataMap map)
 			throws RecoverException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public void putData(DataMap map, InputStream inputData)
 			throws StorageException, InterruptedException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public long getNextModCount() {
-		// TODO Auto-generated method stub
-		return 0;
+		return cacheHandler.getNextModCount();
 	}
 
 	public BRCacheConfig getConfig() {
-		// TODO Auto-generated method stub
-		return null;
+		return cacheHandler.getConfig();
 	}
 
 	public long getCountRead() {
-		// TODO Auto-generated method stub
-		return 0;
+		return cacheHandler.getCountRead();
 	}
 
 	public long getCountWrite() {
-		// TODO Auto-generated method stub
-		return 0;
+		return cacheHandler.getCountWrite();
 	}
 
 	public long getCountRemoved() {
-		// TODO Auto-generated method stub
-		return 0;
+		return cacheHandler.getCountRemoved();
 	}
 
 	public long getCountReadData() {
-		// TODO Auto-generated method stub
-		return 0;
+		return cacheHandler.getCountReadData();
 	}
 
 	public long getCountWriteData() {
-		// TODO Auto-generated method stub
-		return 0;
+		return cacheHandler.getCountWriteData();
 	}
 
 	public long getCountRemovedData() {
-		// TODO Auto-generated method stub
-		return 0;
+		return cacheHandler.getCountRemovedData();
 	}
 
 	public boolean isDeleteOnExit() {
-		// TODO Auto-generated method stub
-		return false;
+		return cacheHandler.isDeleteOnExit();
 	}
 
 	public void setDeleteOnExit(boolean deleteOnExit) {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException();
 	}
 
 	public long size() {
-		// TODO Auto-generated method stub
-		return 0;
+		return cacheHandler.size();
 	}
 
 	public boolean isEmpty() {
-		// TODO Auto-generated method stub
-		return false;
+		return cacheHandler.isEmpty();
 	}
 
 	public void clear() {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException();
 	}
 
 	public void destroy() {
-		// TODO Auto-generated method stub
-		
 	}
 
     private Object executeMethodInTX(Method method, 

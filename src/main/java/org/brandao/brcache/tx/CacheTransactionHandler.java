@@ -7,8 +7,7 @@ import org.brandao.brcache.CacheHandler;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 
-interface CacheTransactionHandler 
-	extends CacheTransaction{
+interface CacheTransactionHandler extends CacheTransaction{
 
 	Serializable getId();
 	

@@ -53,9 +53,23 @@ public abstract class AbstractCache implements Cache, Serializable{
      * @param config Configuração do cache.
      */
     public AbstractCache(String name, BRCacheConfig config){
-    	this.cacheHandler = new CacheHandler(name, config);
+    	this.cacheHandler = new BasicCacheHandler(name, config);
     }
 
+    /**
+     * Cria um novo cache.
+     * 
+     * @param cacheHandler Manpulador do cache.
+     */
+    public AbstractCache(CacheHandler cacheHandler){
+    	
+    	if(cacheHandler == null){
+    		throw new NullPointerException("cacheHandler");
+    	}
+    	
+    	this.cacheHandler = cacheHandler;
+    }
+    
     
     /**
 	 * Associa o fluxo de bytes do valor à chave.
@@ -110,6 +124,17 @@ public abstract class AbstractCache implements Cache, Serializable{
     
     public InputStream getStream(String key) throws RecoverException {
     	return cacheHandler.getStream(key);
+    }
+    
+    /**
+     * Remove o valor associado à chave.
+     * @param key chave associada ao valor.
+     * @return <code>true</code> se o valor for removido. Caso contrário <code>false</code>.
+     * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
+     * item.
+     */
+    public boolean remove(String key) throws StorageException{
+    	return cacheHandler.removeStream(key);
     }
     
     /**
@@ -189,6 +214,22 @@ public abstract class AbstractCache implements Cache, Serializable{
 		cacheHandler.setDeleteOnExit(deleteOnExit);
 	}
 
+	/**
+	 * Obtém a quantidade de itens no cache.
+	 * @return Quantidade.
+	 */
+	public long size() {
+		return cacheHandler.size();
+	}
+	
+	/**
+	 * Verifica se o cache está vazio.
+	 * @return <code>true</code> se o cache estiver vazio.
+	 */
+	public boolean isEmpty() {
+		return cacheHandler.isEmpty();
+	}
+	
 	/**
 	 * Remove todas as entradas contidas no cache.
 	 */
