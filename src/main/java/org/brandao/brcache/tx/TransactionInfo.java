@@ -17,11 +17,16 @@ import org.brandao.brcache.DataMap;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 
-class TransactionInfo implements Serializable {
+public class TransactionInfo 
+	implements Serializable, TransactionCacheHandler {
 
 	private static final long serialVersionUID = 3758041685386590737L;
 	
 	private Serializable id;
+	
+	private CacheTransactionManager manager;
+	
+	private CacheHandler cache;
 	
 	/**
 	 * Contém as chaves gerenciadas pela transação.
@@ -34,8 +39,10 @@ class TransactionInfo implements Serializable {
 	
 	private long timeout;
 	
-	public TransactionInfo(Serializable id, long timeout){
+	public TransactionInfo(Serializable id, CacheTransactionManager manager, CacheHandler cache, long timeout){
 		this.id                = id;
+		this.cache             = cache;
+		this.manager           = manager;
 		this.managed           = new HashSet<String>();
 		this.cacheItemMetadata = new HashMap<String, DataMap>();
 		this.originalMetadata  = new HashMap<String, DataMap>();
@@ -44,8 +51,7 @@ class TransactionInfo implements Serializable {
 	
 	/* métodos de armazenamento */
 	
-	public boolean replaceStream(CacheTransactionManager manager, CacheHandler cache,
-			String key, InputStream inputData, long timeToLive, long timeToIdle) throws StorageException{
+	public boolean replaceStream(String key, InputStream inputData, long timeToLive, long timeToIdle) throws StorageException{
 
 		try{
 			DataMap dta = getEntity(manager, cache, key, true);
@@ -66,8 +72,7 @@ class TransactionInfo implements Serializable {
 		
 	}
 	
-	public InputStream putIfAbsentStream(CacheTransactionManager manager, CacheHandler cache,
-			String key, InputStream inputData, long timeToLive, long timeToIdle) throws StorageException{
+	public InputStream putIfAbsentStream(String key, InputStream inputData, long timeToLive, long timeToIdle) throws StorageException{
 		
 		try{
 			DataMap dta = getEntity(manager, cache, key, true);
@@ -87,8 +92,7 @@ class TransactionInfo implements Serializable {
 		}		
 	}
 	
-    public boolean putStream(CacheTransactionManager manager, CacheHandler cache, 
-    		String key, InputStream inputData, long timeToLive, long timeToIdle) 
+    public boolean putStream(String key, InputStream inputData, long timeToLive, long timeToIdle) 
     		throws StorageException {
 
     	try{
@@ -107,8 +111,7 @@ class TransactionInfo implements Serializable {
 	/* métodos de coleta*/
 	
     
-    public InputStream getStream(CacheTransactionManager manager, CacheHandler cache, 
-    		String key, boolean forUpdate) throws RecoverException {
+    public InputStream getStream(String key, boolean forUpdate) throws RecoverException {
     	
     	try{
 			DataMap dta = getEntity(manager, cache, key, forUpdate);
@@ -127,8 +130,7 @@ class TransactionInfo implements Serializable {
 
     /* métodos de remoção */
     
-    public boolean remove(CacheTransactionManager manager, CacheHandler cache,
-    		String key) throws StorageException{
+    public boolean remove(String key) throws StorageException{
     	
     	try{
     		DataMap o = getEntity(manager, cache, key, true);

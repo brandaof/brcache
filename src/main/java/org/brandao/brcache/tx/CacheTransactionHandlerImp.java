@@ -9,8 +9,7 @@ import org.brandao.brcache.CacheHandler;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 
-class CacheTransactionHandlerImp
-	implements CacheTransactionHandler{
+public class CacheTransactionHandlerImp implements CacheTransactionHandler{
 
 	private TransactionInfo transactionInfo;
 	

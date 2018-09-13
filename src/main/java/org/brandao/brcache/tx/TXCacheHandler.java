@@ -23,6 +23,8 @@ public class TXCacheHandler implements CacheHandler{
     private static final Method putIfAbsentStream;
     
     private static final Method getStream;
+
+    private static final Method getStream_forUpdate;
     
     private static final Method removeStream;
     
@@ -87,6 +89,9 @@ public class TXCacheHandler implements CacheHandler{
 		    
 		    getStream = CacheTransactionHandler.class.getDeclaredMethod("getStream", CacheTransactionManager.class,
 					CacheHandler.class, String.class);
+
+		    getStream_forUpdate = CacheTransactionHandler.class.getDeclaredMethod("getStream", CacheTransactionManager.class,
+					CacheHandler.class, String.class, boolean.class);
 		    
 		    removeStream = CacheTransactionHandler.class.getDeclaredMethod("removeStream", CacheTransactionManager.class,
 					CacheHandler.class, String.class);
@@ -230,12 +235,26 @@ public class TXCacheHandler implements CacheHandler{
 	}
 
 	public InputStream getStream(String key) throws RecoverException {
-		return getStream(key, false);
+		try{
+			return (InputStream)this.executeMethodInTX(getStream, 
+					transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler, 
+		    		key);
+		}
+		catch(RecoverException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new RecoverException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new RecoverException(e, CacheErrors.ERROR_1021);
+		}
 	}
 
 	public InputStream getStream(String key, boolean forUpdate) throws RecoverException {
 		try{
-			return (InputStream)this.executeMethodInTX(getStream, 
+			return (InputStream)this.executeMethodInTX(getStream_forUpdate, 
 					transactionManager.getCurrrent(false), 
 					transactionManager, cacheHandler, 
 		    		key, forUpdate);
@@ -270,89 +289,353 @@ public class TXCacheHandler implements CacheHandler{
 	}
 
 	public boolean containsKey(String key) {
-		return false;
+		try{
+			return (Boolean)this.executeMethodInTX(containsKey, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler, key);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
 	}
 
 	public DataMap getPointer(String key) throws RecoverException {
-		return null;
+		try{
+			return (DataMap)this.executeMethodInTX(getPointer, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler, key);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
 	}
 
 	public void setPointer(String key, DataMap newDta) throws RecoverException {
+		try{
+			this.executeMethodInTX(setPointer, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler, key, newDta);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
 	}
 
 	public boolean replacePointer(String key, DataMap originalDta,
 			DataMap newDta) throws RecoverException {
-		return false;
+		try{
+			return (Boolean)this.executeMethodInTX(replacePointer, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler, key, originalDta, newDta);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
 	}
 
 	public void remove(String key, DataMap data) {
+		try{
+			executeMethodInTX(remove, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler, key, data);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
 	}
 
 	public void releaseSegments(DataMap map) {
+		try{
+			executeMethodInTX(releaseSegments, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler, map);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
 	}
 
 	public InputStream getStream(String key, DataMap map)
 			throws RecoverException {
-		return null;
+		try{
+			return (InputStream)executeMethodInTX(getStream_, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler, key, map);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
 	}
 
 	public void putData(DataMap map, InputStream inputData)
 			throws StorageException, InterruptedException {
+		try{
+			executeMethodInTX(putData, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler, map, inputData);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
 	}
 
 	public long getNextModCount() {
-		return cacheHandler.getNextModCount();
+		try{
+			return (Long)executeMethodInTX(getNextModCount, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
 	}
 
 	public BRCacheConfig getConfig() {
-		return cacheHandler.getConfig();
+		try{
+			return (BRCacheConfig)executeMethodInTX(getConfig, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
 	}
 
 	public long getCountRead() {
-		return cacheHandler.getCountRead();
-	}
+		try{
+			return (Long)executeMethodInTX(getCountRead, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}	}
 
 	public long getCountWrite() {
-		return cacheHandler.getCountWrite();
-	}
+		try{
+			return (Long)executeMethodInTX(getCountWrite, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}	}
 
 	public long getCountRemoved() {
-		return cacheHandler.getCountRemoved();
-	}
+		try{
+			return (Long)executeMethodInTX(getCountRemoved, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}	}
 
 	public long getCountReadData() {
-		return cacheHandler.getCountReadData();
-	}
+		try{
+			return (Long)executeMethodInTX(getCountReadData, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}	}
 
 	public long getCountWriteData() {
-		return cacheHandler.getCountWriteData();
+		try{
+			return (Long)executeMethodInTX(getCountWriteData, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
 	}
 
 	public long getCountRemovedData() {
-		return cacheHandler.getCountRemovedData();
+		try{
+			return (Long)executeMethodInTX(getCountRemovedData, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
 	}
 
 	public boolean isDeleteOnExit() {
-		return cacheHandler.isDeleteOnExit();
-	}
+		try{
+			return (Boolean)executeMethodInTX(isDeleteOnExit, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}	}
 
 	public void setDeleteOnExit(boolean deleteOnExit) {
-		throw new UnsupportedOperationException();
+		try{
+			executeMethodInTX(setDeleteOnExit, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler, deleteOnExit);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
 	}
 
 	public long size() {
-		return cacheHandler.size();
+		try{
+			return (Long)executeMethodInTX(size, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
 	}
 
 	public boolean isEmpty() {
-		return cacheHandler.isEmpty();
+		try{
+			return (Boolean)executeMethodInTX(isEmpty, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
 	}
 
 	public void clear() {
-		throw new UnsupportedOperationException();
+		try{
+			executeMethodInTX(clear, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
 	}
 
 	public void destroy() {
+		try{
+			executeMethodInTX(destroy, transactionManager.getCurrrent(false), 
+					transactionManager, cacheHandler);
+		}
+		catch(StorageException e){
+			throw e;
+		}
+		catch(CacheException e){
+			throw new StorageException(e, e.getError(), e.getParams());
+		}
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1020);
+		}
 	}
 
     private Object executeMethodInTX(Method method, 
@@ -392,7 +675,7 @@ public class TXCacheHandler implements CacheHandler{
 				
 			}
     		
-    		if(ex instanceof StorageException || ex instanceof RecoverException){
+    		if(ex instanceof CacheException){
         		throw ex;
     		}
     		else{
