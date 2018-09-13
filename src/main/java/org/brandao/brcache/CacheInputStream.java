@@ -114,7 +114,7 @@ public class CacheInputStream extends InputStream{
                 
                 //System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
                 
-                cache.countReadData 	+= lenRead;
+                //cache.countReadData 	+= lenRead;
                 length 					-= lenRead;
                 read 					+= lenRead;
                 destPos 				+= lenRead;
@@ -135,7 +135,7 @@ public class CacheInputStream extends InputStream{
                 
                 //System.arraycopy(origin, this.currentDataindex, dest, destPos, lenRead);
                 
-                cache.countReadData 	+= lenRead;
+                //cache.countReadData 	+= lenRead;
                 destPos 				+= lenRead;
                 read 					+= lenRead;
                 length 					-= lenRead;

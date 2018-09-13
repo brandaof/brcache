@@ -131,6 +131,11 @@ public class TransactionInfo implements TransactionCacheHandler {
 		}
     }
 
+	public InputStream getStream(String key, DataMap map)
+			throws RecoverException {
+    	throw new UnsupportedOperationException();
+	}
+    
     /* métodos de remoção */
     
     public boolean removeStream(String key) throws StorageException{
@@ -149,116 +154,92 @@ public class TransactionInfo implements TransactionCacheHandler {
     }
 	
 	public boolean containsKey(String key) {
-		// TODO Auto-generated method stub
-		return false;
+		if(cacheItemMetadata.containsKey(key)){
+			return cacheItemMetadata.get(key) != null;
+		}
+		else{
+			return cache.containsKey(key);
+		}
 	}
 
 	public DataMap getPointer(String key) throws RecoverException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public void setPointer(String key, DataMap newDta) throws RecoverException {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException();
 	}
 
 	public boolean replacePointer(String key, DataMap originalDta,
 			DataMap newDta) throws RecoverException {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	public void remove(String key, DataMap data) {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException();
 	}
 
 	public void releaseSegments(DataMap map) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public InputStream getStream(String key, DataMap map)
-			throws RecoverException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	public void putData(DataMap map, InputStream inputData)
 			throws StorageException, InterruptedException {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException();
 	}
 
 	public long getNextModCount() {
-		// TODO Auto-generated method stub
-		return 0;
+		return cache.getNextModCount();
 	}
 
 	public BRCacheConfig getConfig() {
-		// TODO Auto-generated method stub
-		return null;
+		return cache.getConfig();
 	}
 
 	public long getCountRead() {
-		// TODO Auto-generated method stub
-		return 0;
+		return cache.getCountRead();
 	}
 
 	public long getCountWrite() {
-		// TODO Auto-generated method stub
-		return 0;
+		return cache.getCountWrite();
 	}
 
 	public long getCountRemoved() {
-		// TODO Auto-generated method stub
-		return 0;
+		return cache.getCountRemoved();
 	}
 
 	public long getCountReadData() {
-		// TODO Auto-generated method stub
-		return 0;
+		return cache.getCountReadData();
 	}
 
 	public long getCountWriteData() {
-		// TODO Auto-generated method stub
-		return 0;
+		return cache.getCountWriteData();
 	}
 
 	public long getCountRemovedData() {
-		// TODO Auto-generated method stub
-		return 0;
+		return cache.getCountRemovedData();
 	}
 
 	public boolean isDeleteOnExit() {
-		// TODO Auto-generated method stub
-		return false;
+		return cache.isDeleteOnExit();
 	}
 
 	public void setDeleteOnExit(boolean deleteOnExit) {
-		// TODO Auto-generated method stub
-		
+		cache.setDeleteOnExit(deleteOnExit);
 	}
 
 	public long size() {
-		// TODO Auto-generated method stub
-		return 0;
+		return cache.size();
 	}
 
 	public boolean isEmpty() {
-		// TODO Auto-generated method stub
-		return false;
+		return cache.isEmpty();
 	}
 
 	public void clear() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void destroy() {
-		// TODO Auto-generated method stub
-		
 	}
     
     /*métodos de manipulação*/
@@ -312,7 +293,6 @@ public class TransactionInfo implements TransactionCacheHandler {
 	
 	public void close(CacheHandler cache) throws TransactionException{
 		managed.clear();
-		cacheItemMetadata.clear();
 		cacheItemMetadata.clear();
 		originalMetadata.clear();
 	}

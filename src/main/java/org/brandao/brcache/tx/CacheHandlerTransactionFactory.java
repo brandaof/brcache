@@ -11,11 +11,11 @@ import org.brandao.brcache.CacheHandler;
 
 public final class CacheHandlerTransactionFactory {
 
-	public static CacheHandler createCacheHandler(
+	public static TransactionCacheHandler createCacheHandler(
 			CacheHandler cache, CacheTransactionManager transactionManager){
-    	return (CacheHandler)Proxy.newProxyInstance(
+    	return (TransactionCacheHandler)Proxy.newProxyInstance(
     			cache.getClass().getClassLoader(), 
-					new Class[]{CacheHandler.class}, 
+					new Class[]{TransactionCacheHandler.class}, 
 					new CacheHandlerTransactionInvocationHandler(cache, transactionManager)
     			);
 	}
@@ -34,7 +34,7 @@ public final class CacheHandlerTransactionFactory {
 		
 		public Object invoke(Object proxy, Method method, Object[] args)
 				throws Throwable {
-			CacheTransactionHandler currentTx = transactionManager.getCurrrent();
+			CacheTransactionHandler currentTx = transactionManager.getCurrrent(false);
 	    	CacheTransactionHandler tx        = 
 	    			currentTx == null? 
 	    					transactionManager.begin(cache) : 

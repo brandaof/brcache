@@ -17,10 +17,15 @@
 
 package org.brandao.brcache.tx;
 
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 
+import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.CacheHandler;
 import org.brandao.brcache.ConcurrentCache;
+import org.brandao.brcache.RecoverException;
+import org.brandao.brcache.StorageException;
 
 /**
  * Provê suporte transacional a um cache.
@@ -51,6 +56,7 @@ public class TXCache extends ConcurrentCache implements Serializable{
 	
 	private CacheTransactionManager transactionManager;
 
+	private TransactionCacheHandler cacheHandler;
     /**
      * Cria um cache transacional especificando o gestor transacional.
      * @param cache cache não transacional.
@@ -58,9 +64,31 @@ public class TXCache extends ConcurrentCache implements Serializable{
      */
     public TXCache(CacheHandler cache, CacheTransactionManager transactionManager){
     	super(CacheHandlerTransactionFactory.createCacheHandler(cache, transactionManager));
+    	this.cacheHandler = (TransactionCacheHandler)super.cacheHandler;
     	this.transactionManager = transactionManager;
     }
     
+	public InputStream getStream(String key, boolean forUpdate) throws RecoverException{
+		return cacheHandler.getStream(key, forUpdate);
+	}
+    
+	public Object get(String key, boolean forUpdate) throws RecoverException{
+		try{
+			InputStream in = cacheHandler.getStream(key, forUpdate);
+			if(in != null){
+				ObjectInputStream oin = new ObjectInputStream(in);
+				return oin.readObject();
+			}
+			else
+				return null;
+		}
+		catch(RecoverException e){
+			throw e;
+		}	
+		catch(Throwable e){
+			throw new StorageException(e, CacheErrors.ERROR_1021);
+		}
+	}
     /**
      * Obtém o gestor transacional.
      * @return gestor transacional.

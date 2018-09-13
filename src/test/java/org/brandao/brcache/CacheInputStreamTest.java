@@ -31,7 +31,7 @@ public class CacheInputStreamTest extends TestCase{
 		r.write(0, dta, 0, dta.length);
 		Block b = new Block(0, 0, r, dta.length);
 		
-		CacheInputStream in = new CacheInputStream(c, null, new Block[]{b});
+		CacheInputStream in = new CacheInputStream(c.cacheHandler, null, new Block[]{b});
 		in.read(result, 0, result.length);
 		assertTrue(Arrays.equals(dta, result));
 	}
@@ -57,7 +57,7 @@ public class CacheInputStreamTest extends TestCase{
 			maxLen -= len;
 		}
 		
-		CacheInputStream in = new CacheInputStream(c, null, blocks.toArray(new Block[]{}));
+		CacheInputStream in = new CacheInputStream(c.cacheHandler, null, blocks.toArray(new Block[]{}));
 		in.read(result, 0, result.length);
 		assertTrue(Arrays.equals(dta, result));
 	}
@@ -83,7 +83,7 @@ public class CacheInputStreamTest extends TestCase{
 			maxLen -= len;
 		}
 		
-		CacheInputStream in = new CacheInputStream(c, null, blocks.toArray(new Block[]{}));
+		CacheInputStream in = new CacheInputStream(c.cacheHandler, null, blocks.toArray(new Block[]{}));
 		in.read(result, 0, result.length);
 		assertTrue(Arrays.equals(dta, result));
 	}
@@ -108,7 +108,7 @@ public class CacheInputStreamTest extends TestCase{
 			maxLen -= len;
 		}
 		
-		CacheInputStream in = new CacheInputStream(c, null, blocks.toArray(new Block[]{}));
+		CacheInputStream in = new CacheInputStream(c.cacheHandler, null, blocks.toArray(new Block[]{}));
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		byte[] b = new byte[4];
 		int l;

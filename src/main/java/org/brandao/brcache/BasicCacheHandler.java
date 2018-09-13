@@ -630,6 +630,7 @@ public class BasicCacheHandler implements CacheHandler{
         		return null;
         	}
         	
+        	
         	//Se timeToIdle foi definido, é atualizado o horário do último acesso.
         	if(map.getTimeToIdle() > 0){
             	map.setMostRecentTime(System.currentTimeMillis());
@@ -637,8 +638,9 @@ public class BasicCacheHandler implements CacheHandler{
             	dataMap.replace(key, map, map);
         	}
         	
+        	int readData     = 0;
             Block[] segments = new Block[map.getSegments()];
-            Block current    = this.dataList.get(map.getFirstSegment());
+            Block current    = dataList.get(map.getFirstSegment());
             int i            = 0;
             
             while(current != null){
@@ -651,10 +653,13 @@ public class BasicCacheHandler implements CacheHandler{
 				if(current.id != map.getId() || current.segment != i)
 				    throw new CorruptedDataException("invalid segment: " + current.id + ":" + map.getId() + " " + current.segment + ":" + i);
                 
-                segments[i] = current;
-            	current = current.nextBlock < 0? null : this.dataList.get(current.nextBlock);
+            	readData    += current.length;
+                segments[i]  = current;
+            	current      = current.nextBlock < 0? null : dataList.get(current.nextBlock);
             	i++;
             }
+            
+            countReadData += readData;
             
             return new CacheInputStream(this, map, segments);
         }
