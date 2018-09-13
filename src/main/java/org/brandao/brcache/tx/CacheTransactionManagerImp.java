@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
-import org.brandao.brcache.BasicCache;
 import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.CacheHandler;
 import org.brandao.brcache.collections.Collections;
@@ -169,15 +168,15 @@ public class CacheTransactionManagerImp
 	}
 	
 	public CacheTransactionHandler begin(CacheHandler cache) {
-		CacheTransactionHandler txh = this.transactions.get();
+		CacheTransactionHandler txh = transactions.get();
 		
 		if(txh != null){
 			throw new TransactionException(CacheErrors.ERROR_1016);
 		}
 		
-		Serializable txId = this.createTransactionID();
+		Serializable txId = createTransactionID();
 		
-		txh = new CacheTransactionHandlerImp(txId, this, cache, this.timeout);
+		txh = new CacheTransactionHandlerImp(txId, this, cache, timeout);
 		
 		transactionLocks.put(txId, new Transaction(txh, new HashMap<String, Serializable>()));
 		transactions.set(txh);

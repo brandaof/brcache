@@ -57,9 +57,8 @@ public class TXCache extends ConcurrentCache implements Serializable{
      * @param transactionManager gestor transacional.
      */
     public TXCache(CacheHandler cache, CacheTransactionManager transactionManager){
-    	super(new TXCacheHandler(cache, transactionManager));
+    	super(CacheHandlerTransactionFactory.createCacheHandler(cache, transactionManager));
     	this.transactionManager = transactionManager;
-    	super.setDeleteOnExit(false);
     }
     
     /**

@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.brandao.brcache.BRCacheConfig;
 import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.CacheException;
 import org.brandao.brcache.CacheHandler;
@@ -17,8 +18,7 @@ import org.brandao.brcache.DataMap;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 
-public class TransactionInfo 
-	implements Serializable, TransactionCacheHandler {
+public class TransactionInfo implements TransactionCacheHandler {
 
 	private static final long serialVersionUID = 3758041685386590737L;
 	
@@ -110,6 +110,9 @@ public class TransactionInfo
 	
 	/* métodos de coleta*/
 	
+	public InputStream getStream(String key) throws RecoverException {
+		return getStream(key, false);
+	}
     
     public InputStream getStream(String key, boolean forUpdate) throws RecoverException {
     	
@@ -130,7 +133,7 @@ public class TransactionInfo
 
     /* métodos de remoção */
     
-    public boolean remove(String key) throws StorageException{
+    public boolean removeStream(String key) throws StorageException{
     	
     	try{
     		DataMap o = getEntity(manager, cache, key, true);
@@ -145,6 +148,119 @@ public class TransactionInfo
 		}
     }
 	
+	public boolean containsKey(String key) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public DataMap getPointer(String key) throws RecoverException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void setPointer(String key, DataMap newDta) throws RecoverException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public boolean replacePointer(String key, DataMap originalDta,
+			DataMap newDta) throws RecoverException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public void remove(String key, DataMap data) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void releaseSegments(DataMap map) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public InputStream getStream(String key, DataMap map)
+			throws RecoverException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void putData(DataMap map, InputStream inputData)
+			throws StorageException, InterruptedException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public long getNextModCount() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public BRCacheConfig getConfig() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public long getCountRead() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public long getCountWrite() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public long getCountRemoved() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public long getCountReadData() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public long getCountWriteData() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public long getCountRemovedData() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public boolean isDeleteOnExit() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public void setDeleteOnExit(boolean deleteOnExit) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public long size() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public boolean isEmpty() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public void clear() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void destroy() {
+		// TODO Auto-generated method stub
+		
+	}
+    
     /*métodos de manipulação*/
     
 	public void rollback(CacheHandler cache) throws StorageException, RecoverException {

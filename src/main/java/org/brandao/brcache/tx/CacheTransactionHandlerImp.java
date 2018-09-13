@@ -3,13 +3,17 @@ package org.brandao.brcache.tx;
 import java.io.InputStream;
 import java.io.Serializable;
 
+import org.brandao.brcache.BRCacheConfig;
 import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.CacheException;
 import org.brandao.brcache.CacheHandler;
+import org.brandao.brcache.DataMap;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 
 public class CacheTransactionHandlerImp implements CacheTransactionHandler{
+
+	private static final long serialVersionUID = -7066992634138343620L;
 
 	private TransactionInfo transactionInfo;
 	
@@ -50,7 +54,7 @@ public class CacheTransactionHandlerImp implements CacheTransactionHandler{
 	
 	public synchronized void begin() {
 		
-		transactionInfo = new TransactionInfo(id, timeout);
+		transactionInfo = new TransactionInfo(id, transactionManager, cache, timeout);
 		
 		if(started){
 			throw new TransactionException(CacheErrors.ERROR_1016);
@@ -164,37 +168,123 @@ public class CacheTransactionHandlerImp implements CacheTransactionHandler{
 		
 	}
 
-	/* métodos do TXCacheHandler */
-	
-	public boolean replaceStream(CacheTransactionManager manager,
-			CacheHandler cache, String key, InputStream inputData,
-			long timeToLive, long timeToIdle)
-			throws StorageException {
-		return transactionInfo.replaceStream(manager, cache, key, inputData, 
-				timeToLive, timeToIdle);
-	}
-
-	public InputStream putIfAbsentStream(CacheTransactionManager manager,
-			CacheHandler cache, String key, InputStream inputData,
-			long timeToLive, long timeToIdle)
-			throws StorageException {
-		return transactionInfo.putIfAbsentStream(manager, cache, key, inputData, timeToLive, timeToIdle);
-	}
-
-	public boolean putStream(CacheTransactionManager manager, CacheHandler cache,
-			String key,InputStream inputData, long timeToLive, long timeToIdle) throws StorageException {
-		return transactionInfo.putStream(manager, cache, key, inputData, timeToLive, timeToIdle);
-	}
-
-	public InputStream getStream(CacheTransactionManager manager,
-			CacheHandler cache, String key, boolean forUpdate)
+	public InputStream getStream(String key, boolean forUpdate)
 			throws RecoverException {
-		return transactionInfo.getStream(manager, cache, key, forUpdate);
+		return transactionInfo.getStream(key, forUpdate);
 	}
 
-	public boolean remove(CacheTransactionManager manager, CacheHandler cache,
-			String key) throws StorageException {
-		return transactionInfo.remove(manager, cache, key);
+	public boolean putStream(String key, InputStream inputData,
+			long timeToLive, long timeToIdle) throws StorageException {
+		return transactionInfo.putStream(key, inputData, timeToLive, timeToIdle);
+	}
+
+	public boolean replaceStream(String key, InputStream inputData,
+			long timeToLive, long timeToIdle) throws StorageException {
+		return transactionInfo.replaceStream(key, inputData, timeToLive, timeToIdle);
+	}
+
+	public InputStream putIfAbsentStream(String key, InputStream inputData,
+			long timeToLive, long timeToIdle) throws StorageException {
+		return transactionInfo.putIfAbsentStream(key, inputData, timeToLive, timeToIdle);
+	}
+
+	public InputStream getStream(String key) throws RecoverException {
+		return transactionInfo.getStream(key);
+	}
+
+	public boolean removeStream(String key) throws StorageException {
+		return transactionInfo.removeStream(key);
+	}
+
+	public boolean containsKey(String key) {
+		return transactionInfo.containsKey(key);
+	}
+
+	public DataMap getPointer(String key) throws RecoverException {
+		return transactionInfo.getPointer(key);
+	}
+
+	public void setPointer(String key, DataMap newDta) throws RecoverException {
+		transactionInfo.setPointer(key, newDta);
+	}
+
+	public boolean replacePointer(String key, DataMap originalDta,
+			DataMap newDta) throws RecoverException {
+		return transactionInfo.replacePointer(key, originalDta, newDta);
+	}
+
+	public void remove(String key, DataMap data) {
+		transactionInfo.remove(key, data);
+	}
+
+	public void releaseSegments(DataMap map) {
+		transactionInfo.releaseSegments(map);
+	}
+
+	public InputStream getStream(String key, DataMap map)
+			throws RecoverException {
+		return transactionInfo.getStream(key, map);
+	}
+
+	public void putData(DataMap map, InputStream inputData)
+			throws StorageException, InterruptedException {
+		transactionInfo.putData(map, inputData);
+	}
+
+	public long getNextModCount() {
+		return transactionInfo.getNextModCount();
+	}
+
+	public BRCacheConfig getConfig() {
+		return transactionInfo.getConfig();
+	}
+
+	public long getCountRead() {
+		return transactionInfo.getCountRead();
+	}
+
+	public long getCountWrite() {
+		return transactionInfo.getCountWrite();
+	}
+
+	public long getCountRemoved() {
+		return transactionInfo.getCountRemoved();
+	}
+
+	public long getCountReadData() {
+		return transactionInfo.getCountReadData();
+	}
+
+	public long getCountWriteData() {
+		return transactionInfo.getCountWriteData();
+	}
+
+	public long getCountRemovedData() {
+		return transactionInfo.getCountRemovedData();
+	}
+
+	public boolean isDeleteOnExit() {
+		return transactionInfo.isDeleteOnExit();
+	}
+
+	public void setDeleteOnExit(boolean deleteOnExit) {
+		transactionInfo.setDeleteOnExit(deleteOnExit);
+	}
+
+	public long size() {
+		return transactionInfo.size();
+	}
+
+	public boolean isEmpty() {
+		return transactionInfo.isEmpty();
+	}
+
+	public void clear() {
+		transactionInfo.clear();
+	}
+
+	public void destroy() {
+		transactionInfo.destroy();
 	}
 
 }
