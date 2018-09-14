@@ -22,9 +22,8 @@ class HugeListCalculator {
     		throw new IllegalArgumentException("block size > slab size");
     	
     	double subLists       = (dataBufferSize / (blockSize*2048L));
-    	//subLists              = subLists > 12? 12 : subLists;
-    	//subLists              = subLists == 0? 1 : subLists;
-    	subLists = 1;
+    	subLists              = subLists > 12? 12 : subLists;
+    	subLists              = subLists == 0? 1 : subLists;
     	
     	dataBufferSize        = (long)(dataBufferSize / subLists);
     	
