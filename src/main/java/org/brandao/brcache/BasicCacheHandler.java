@@ -78,6 +78,7 @@ public class BasicCacheHandler implements CacheHandler{
     
     private boolean deleteOnExit;
     
+    private boolean enabled;
     /**
      * Cria um novo cache.
      * 
@@ -96,6 +97,7 @@ public class BasicCacheHandler implements CacheHandler{
     	this.entityFileManager      = this.createEntityFileManager(config);
         this.dataList               = this.createDataBuffer(name, this.entityFileManager, config);
         this.dataMap                = this.createDataMap(name, this.entityFileManager, config);
+        this.enabled                = true;
     }
     
     private EntityFileManagerConfigurer createEntityFileManager(BRCacheConfig config){
@@ -815,6 +817,10 @@ public class BasicCacheHandler implements CacheHandler{
 	public long size() {
 		return countRemoved - countWrite;
 	}
+
+	public int getMaxKeySize() {
+		return maxLengthKey;
+	}
 	
 	/**
 	 * Verifica se o cache está vazio.
@@ -843,15 +849,18 @@ public class BasicCacheHandler implements CacheHandler{
 	 * for <code>false</code>.
 	 */
 	public void destroy(){
-		this.dataList.destroy();
-		this.dataMap.destroy();
-		this.entityFileManager.destroy();
+		if(enabled){
+			dataList.destroy();
+			dataMap.destroy();
+			entityFileManager.destroy();
+			enabled = false;
+		}
 	}
 	
     protected void finalize() throws Throwable{
     	try{
-    		if(this.deleteOnExit){
-    			this.destroy();
+    		if(deleteOnExit){
+    			destroy();
     		}
     	}
     	finally{

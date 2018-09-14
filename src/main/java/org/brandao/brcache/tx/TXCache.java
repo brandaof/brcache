@@ -21,9 +21,9 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 
+import org.brandao.brcache.BasicCache;
 import org.brandao.brcache.CacheErrors;
 import org.brandao.brcache.CacheHandler;
-import org.brandao.brcache.ConcurrentCache;
 import org.brandao.brcache.RecoverException;
 import org.brandao.brcache.StorageException;
 
@@ -50,13 +50,16 @@ import org.brandao.brcache.StorageException;
  * 
  * @author Brandao
  */
-public class TXCache extends ConcurrentCache implements Serializable{
+public class TXCache extends BasicCache implements Serializable{
     
 	private static final long serialVersionUID = 4338728178626320357L;
 	
 	private CacheTransactionManager transactionManager;
 
 	private TransactionCacheHandler cacheHandler;
+	
+	private CacheHandler parentCacheHandler;
+	
     /**
      * Cria um cache transacional especificando o gestor transacional.
      * @param cache cache não transacional.
@@ -64,8 +67,9 @@ public class TXCache extends ConcurrentCache implements Serializable{
      */
     public TXCache(CacheHandler cache, CacheTransactionManager transactionManager){
     	super(CacheHandlerTransactionFactory.createCacheHandler(cache, transactionManager));
-    	this.cacheHandler = (TransactionCacheHandler)super.cacheHandler;
     	this.transactionManager = transactionManager;
+    	this.cacheHandler       = (TransactionCacheHandler) super.cacheHandler;
+    	this.parentCacheHandler = cache;
     }
     
 	public InputStream getStream(String key, boolean forUpdate) throws RecoverException{
@@ -89,6 +93,33 @@ public class TXCache extends ConcurrentCache implements Serializable{
 			throw new StorageException(e, CacheErrors.ERROR_1021);
 		}
 	}
+
+	public boolean replace(String key, Object oldValue, Object newValue,
+			long timeToLive, long timeToIdle) throws StorageException {
+		
+		Object o = get(key, true);
+		
+		if(oldValue.equals(o)){
+			put(key, newValue, timeToLive, timeToIdle);
+			return true;
+		}
+		
+		return false;
+	}
+
+	public boolean remove(String key, Object value) throws StorageException {
+		
+		Object o = get(key, true);
+		
+		if(value.equals(o)){
+			remove(key);
+			return true;
+		}
+		
+		return false;
+		
+	}
+	
     /**
      * Obtém o gestor transacional.
      * @return gestor transacional.
@@ -118,7 +149,7 @@ public class TXCache extends ConcurrentCache implements Serializable{
 	 * @return transação.
 	 */
 	public CacheTransaction beginTransaction(){
-    	return transactionManager.begin(cacheHandler);
+    	return transactionManager.begin(parentCacheHandler);
     }
     
 }

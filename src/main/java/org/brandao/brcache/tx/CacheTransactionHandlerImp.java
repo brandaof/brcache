@@ -271,6 +271,10 @@ public class CacheTransactionHandlerImp implements CacheTransactionHandler{
 		transactionInfo.setDeleteOnExit(deleteOnExit);
 	}
 
+	public int getMaxKeySize() {
+		return transactionInfo.getMaxKeySize();
+	}
+	
 	public long size() {
 		return transactionInfo.size();
 	}

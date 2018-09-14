@@ -20,19 +20,18 @@ public class TXCacheTest extends TestCase{
 
 	private static final String VALUE2 = "val";
 	
-	private BasicCache ntxCache;
-	
 	private TXCache cache;
 	
 	public void setUp(){
 		BRCacheConfig config        = new TestBRCacheConfig();
 		CacheTransactionManager txm = new CacheTransactionManagerImp("./tx", TimeUnit.SECONDS.toMillis(30));
-		ntxCache                    = new ConcurrentCache(config);
+		BasicCache ntxCache         = new ConcurrentCache(config);
 		cache                       = ntxCache.getTXCache(txm);
 	}
 	
 	public void tearDown(){
 		cache.destroy();
+		cache = null;
 		System.gc();
 	}
 	

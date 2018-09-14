@@ -228,6 +228,10 @@ public class TransactionInfo implements TransactionCacheHandler {
 		cache.setDeleteOnExit(deleteOnExit);
 	}
 
+	public int getMaxKeySize() {
+		return cache.getMaxKeySize();
+	}
+	
 	public long size() {
 		return cache.size();
 	}
@@ -237,9 +241,11 @@ public class TransactionInfo implements TransactionCacheHandler {
 	}
 
 	public void clear() {
+		cache.clear();
 	}
 
 	public void destroy() {
+		cache.destroy();
 	}
     
     /*métodos de manipulação*/
@@ -318,6 +324,15 @@ public class TransactionInfo implements TransactionCacheHandler {
     		InputStream inputData, long timeToLive, long timeToIdle
     		) throws StorageException, InterruptedException{
 
+    	if(timeToLive < 0)
+            throw new StorageException(CacheErrors.ERROR_1029);
+
+    	if(timeToIdle < 0)
+            throw new StorageException(CacheErrors.ERROR_1028);
+    	
+        if(key.length() > cache.getMaxKeySize())
+            throw new StorageException(CacheErrors.ERROR_1008);
+    	
 		manageItem(manager, cache, key, timeout);
     	
 		DataMap newDta = null;
@@ -360,5 +375,5 @@ public class TransactionInfo implements TransactionCacheHandler {
     	
     	managed.add(key);
     }
-    
+
 }

@@ -109,6 +109,8 @@ public interface CacheHandler extends Serializable{
 
     long getNextModCount();
     
+    int getMaxKeySize();
+    
 	/**
 	 * Obtém a configuração do cache.
 	 * @return configuração.
