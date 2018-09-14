@@ -16,10 +16,10 @@ class HugeListCalculator {
     		throw new IllegalArgumentException("block size <= 0");
 
     	if(dataPageSize > dataBufferSize)
-    		throw new IllegalArgumentException("slab size > buffer size");
+    		throw new IllegalArgumentException("page size > buffer size");
 
     	if(blockSize > dataPageSize)
-    		throw new IllegalArgumentException("block size > slab size");
+    		throw new IllegalArgumentException("block size > page size");
     	
     	double subLists       = (dataBufferSize / (blockSize*2048L));
     	subLists              = subLists > 12? 12 : subLists;
@@ -49,7 +49,7 @@ class HugeListCalculator {
         double swapFactor     = swapBlocks/blocksLength;
         
     	if(swapBlocks <= 0)
-    		throw new IllegalArgumentException("swap factor is very little");
+    		throw new IllegalArgumentException("swap factor is invalid: " + swapBlocks);
 
         return new HugeListInfo((int)blocksLength, swapFactor, pageFactor, (int)subLists);    			
 	}

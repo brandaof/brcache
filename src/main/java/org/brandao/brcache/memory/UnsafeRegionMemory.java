@@ -1,9 +1,9 @@
 package org.brandao.brcache.memory;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 
 public class UnsafeRegionMemory 
 	implements RegionMemory{
@@ -68,6 +68,18 @@ public class UnsafeRegionMemory
 		//}
 		
 		return max;
+	}
+	
+	public void read(OutputStream out, int off, int len) throws IOException {
+		byte[] tmp = new byte[2048];
+		int read;
+		int thisOff = off;
+		
+		while((read = read(thisOff, tmp, 0, tmp.length)) > 0){
+			out.write(tmp, 0, read);
+			thisOff += read;
+			len     -= read;
+		}
 	}
 	
 	public void write(long thisOff, byte[] buf, int off, int len){

@@ -1,6 +1,6 @@
 package org.brandao.brcache;
 
-import org.brandao.brcache.memory.HeapMemory;
+import org.brandao.brcache.memory.UnsafeMemory;
 
 public class TestBRCacheConfig 
 	extends BRCacheConfig{
@@ -23,7 +23,7 @@ public class TestBRCacheConfig
         this.maxSizeKey      = 100;
         this.swapperThread   = 4;
         this.dataPath        = "/mnt/brcache";
-        this.memory          = new HeapMemory();
+        this.memory          = new UnsafeMemory();//new HeapMemory();
 	}
 	
 }

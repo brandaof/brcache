@@ -3,6 +3,7 @@ package org.brandao.brcache.memory;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 
 public class HeapRegionMemory implements RegionMemory{
 
@@ -40,6 +41,32 @@ public class HeapRegionMemory implements RegionMemory{
 		return this.segments[seg][off];
 	}
 
+	public void read(OutputStream out, int off, int len) throws IOException{
+		
+		if(off >= length){
+			throw new IndexOutOfBoundsException("off");
+		}
+		
+		if(off + len > length){
+			throw new IndexOutOfBoundsException("len");
+		}
+		
+		int ioff = off % segmentSize;
+		int seg  = (off / segmentSize) + (ioff > 0? 1 : 0);
+		int maxWrite;
+		while(len > 0){
+			maxWrite = segmentSize - ioff;
+			maxWrite = maxWrite > len? len : maxWrite;
+			
+			out.write(segments[seg], ioff, maxWrite);
+			
+			len  -= maxWrite;
+			ioff  = ioff + maxWrite;
+			seg  += ioff / segmentSize;
+			ioff  = ioff % segmentSize;
+		}
+	}
+	
 	public int read(long thisOff, byte[] buf, int off, int len){
 
 		if(thisOff >= this.length)

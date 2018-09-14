@@ -522,8 +522,8 @@ public class BasicCacheHandler implements CacheHandler{
      */
     
     public InputStream getStream(String key) throws RecoverException {
-        DataMap map = this.dataMap.get(key);
-    	return map == null? null : this.getStream(key, map);
+        DataMap map = dataMap.get(key);
+    	return map == null? null : getStream(key, map);
     }
     
     /**
@@ -628,7 +628,7 @@ public class BasicCacheHandler implements CacheHandler{
         	//Verifica se o item já expirou
         	if(map.isDead()){
         		//Se expirou, remove do cache e retorna null.
-        		this.remove(key, map);
+        		remove(key, map);
         		return null;
         	}
         	
@@ -663,7 +663,7 @@ public class BasicCacheHandler implements CacheHandler{
             
             countReadData += readData;
             
-            return new CacheInputStream(this, map, segments);
+            return new CacheInputStream(this, map, segments, segmentSize);
         }
         catch(CorruptedDataException e){
             return null;

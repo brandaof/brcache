@@ -42,16 +42,19 @@ public class CacheInputStream extends InputStream{
     
     private byte[] bufByte = new byte[1];
 
+    private int segmentSize;
+    
     public CacheInputStream(){
-    	this(null, null, null);
+    	this(null, null, null, 1024);
     }
 
-    public CacheInputStream(CacheHandler cache, DataMap map, Block[] dataList){
+    public CacheInputStream(CacheHandler cache, DataMap map, Block[] dataList, int segmentSize){
         this.map                 = map;
         this.arrayDataList       = dataList;
         this.currentDataindex    = 0;
         this.currentSegmentIndex = 0;
         this.cache               = cache;
+        this.segmentSize         = segmentSize;
     }
     
     public DataMap getMap() {
@@ -147,15 +150,11 @@ public class CacheInputStream extends InputStream{
     }
     
     public void writeTo(OutputStream out) throws IOException{
-    	if(this.arrayDataList.length > 0){
-    		Block first = this.arrayDataList[0];
-    		byte[] tmp = new byte[first.length];
-    		
-    		for(Block block: this.arrayDataList){
-    			block.buffer.read(0, tmp, 0, block.length);
-    			out.write(tmp, 0, block.length);
+    	
+    	if(arrayDataList.length > 0){
+    		for(Block block: arrayDataList){
+    			block.buffer.read(out, 0, block.length);
     		}
-    		
     	}
     	
     }
