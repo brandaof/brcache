@@ -16,7 +16,7 @@ public class PropertiesBRCacheConfig extends BRCacheConfig{
 	}
 
 	public PropertiesBRCacheConfig(Configuration config) {
-		apply(this.configuration);
+		apply(config);
 	}
 	
     protected void apply(Configuration config){
