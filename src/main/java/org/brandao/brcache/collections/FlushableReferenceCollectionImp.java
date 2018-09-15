@@ -137,7 +137,7 @@ public class FlushableReferenceCollectionImp<T>
     
     public long length(){
     	long size = 0;
-    	for(SimpleReferenceCollection<T> l: this.lists){
+    	for(SimpleReferenceCollection<T> l: lists){
     		size += l.length();
     	}
     	return size;
@@ -147,37 +147,33 @@ public class FlushableReferenceCollectionImp<T>
     	return this.size() == 0;
     }
     
-    public boolean contains(Object value) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
     public void clear() {
-    	for(SimpleReferenceCollection<T> l: this.lists){
+    	for(SimpleReferenceCollection<T> l: lists){
     		l.clear();
     	}
     }
 
     public void destroy(){
-    	for(SimpleReferenceCollection<T> l: this.lists){
+    	for(SimpleReferenceCollection<T> l: lists){
     		l.destroy();
     	}
     }
     
     public void flush(){
-    	for(SimpleReferenceCollection<T> l: this.lists){
+    	for(SimpleReferenceCollection<T> l: lists){
     		l.flush();
     	}
     	
     }
 
 	public void setReadOnly(boolean value) {
-    	for(SimpleReferenceCollection<T> l: this.lists){
+    	for(SimpleReferenceCollection<T> l: lists){
     		l.setReadOnly(value);
     	}
 	}
 
 	public boolean isReadOnly() {
-    	return this.lists[0].isReadOnly();
+    	return lists[0].isReadOnly();
 	}
 
 }

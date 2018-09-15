@@ -79,12 +79,6 @@ public class BasicCacheHandler implements CacheHandler{
     private boolean deleteOnExit;
     
     private boolean enabled;
-    /**
-     * Cria um novo cache.
-     * 
-     * @param name Nome do cache.
-     * @param config Configuração do cache.
-     */
 
     public BasicCacheHandler(String name, BRCacheConfig config) throws CacheException{
     	this.config                 = config;
@@ -235,15 +229,6 @@ public class BasicCacheHandler implements CacheHandler{
     	
     }
     
-    /**
-	 * Associa o fluxo de bytes do valor à chave.
-	 * @param key chave associada ao fluxo.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @param inputData fluxo de bytes do valor.
-     * @return <code>true</code> se o item for substituido. Caso contrário, <code>false</code>
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-     */
     public boolean putStream(String key, InputStream inputData, 
     		long timeToLive, long timeToIdle) throws StorageException{
         
@@ -334,15 +319,6 @@ public class BasicCacheHandler implements CacheHandler{
         return oldMap != null;
     }
 
-    /**
-     * Substitui o fluxo de bytes associado à chave somente se ele existir.
-     * @param key chave associada ao valor.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @param inputData fluxo de bytes do valor.
-     * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-     */
     public boolean replaceStream(String key, InputStream inputData, 
     		long timeToLive, long timeToIdle) throws StorageException{
         
@@ -414,16 +390,6 @@ public class BasicCacheHandler implements CacheHandler{
         	return false;
     }
     
-    /**
-     * Associa o fluxo de bytes do valor à chave somente se a chave não estiver associada a um valor.
-     * @param key chave associada ao valor.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @param inputData fluxo de bytes do valor.
-     * @return fluxo associado à chave ou <code>null</code>.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item ou se o item atual 
-     * expirar no momento da execução do método.
-     */
     public InputStream putIfAbsentStream(String key, InputStream inputData, 
     		long timeToLive, long timeToIdle) throws StorageException{
         
@@ -513,26 +479,11 @@ public class BasicCacheHandler implements CacheHandler{
         
     }
     
-    /**
-     * Obtém o fluxo de bytes do valor associado à chave.
-     * @param key chave associada ao fluxo.
-     * @return fluxo de bytes do valor ou <code>null</code>.
-     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
-     * item.
-     */
-    
     public InputStream getStream(String key) throws RecoverException {
         DataMap map = dataMap.get(key);
     	return map == null? null : getStream(key, map);
     }
     
-    /**
-     * Remove o valor associado à chave.
-     * @param key chave associada ao valor.
-     * @return <code>true</code> se o valor for removido. Caso contrário <code>false</code>.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
-     * item.
-     */
     public boolean removeStream(String key) throws StorageException{
         
         try{
@@ -551,22 +502,10 @@ public class BasicCacheHandler implements CacheHandler{
         
     }
     
-    /**
-     * Verifica se uma chave está associada a um valor.
-     * @param key chave associada ao valor.
-     * @return <code>true</code> se a chave estiver associada a um valor. Caso contrário, <code>false</code>.
-     */
     public boolean containsKey(String key){
     	return dataMap.get(key) != null;
     }
 
-    /**
-     * Obtém o apontamento da chave.
-     * @param key chave.
-     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
-     * apontamento.
-     */
-    
     public DataMap getPointer(String key) throws RecoverException {
         return dataMap.get(key);
     }
@@ -579,11 +518,6 @@ public class BasicCacheHandler implements CacheHandler{
     	return dataMap.replace(key, originalDta, newDta);
     }
     
-    /**
-     * Remove os dados do item a partir de seu apontamento e chave.
-     * @param key Chave
-     * @param data Apontameto.
-     */
     public void remove(String key, DataMap data){
     	if(this.dataMap.remove(key, data)){
 	    	this.releaseSegments(data);
@@ -613,13 +547,6 @@ public class BasicCacheHandler implements CacheHandler{
     	map.setFirstSegment(-1);
     }
     
-    /**
-     * Obtém o fluxo de dados do item a partir de seu apontamento e chave.
-     * @param key Chave
-     * @param map Apontameto.
-     * @return Fluxo de dados.
-     * @throws RecoverException Lançada se ocorrer algum problema ao tentar obter os dados.
-     */
     public InputStream getStream(String key, DataMap map) throws RecoverException {
         
         try{
@@ -673,12 +600,6 @@ public class BasicCacheHandler implements CacheHandler{
         }
     }
     
-    /**
-     * Insere o fluxo de dados do item no cache usando um apontamento.
-     * @param map Apontameto.
-     * @param inputData Fluxo de dados.
-     * @throws StorageException Lançada se ocorrer algum problema ao tentar remover os dados.
-     */
     public void putData(DataMap map, InputStream inputData) throws StorageException, InterruptedException{
         
         int writeData    = 0;
@@ -734,86 +655,42 @@ public class BasicCacheHandler implements CacheHandler{
     	return modCount++;
     }
     
-	/**
-	 * Obtém a configuração do cache.
-	 * @return configuração.
-	 */
 	public BRCacheConfig getConfig() {
 		return config;
 	}
     
-    /**
-     * Obtém a quantidade de itens recuperados.
-     * @return Quantidade de itens recuperados.
-     */
     public long getCountRead(){
         return this.countRead;
     }
 
-    /**
-     * Obtém a quantidade de itens armazenados.
-     * @return Quantidade de itens armazenados.
-     */
     public long getCountWrite(){
         return this.countWrite;
     }
 
-    /**
-     * Obtém a quantidade de itens removidos.
-     * @return Quantidade de itens removidos.
-     */
     public long getCountRemoved() {
 		return countRemoved;
 	}
 
-    /**
-     * Obtém a quantidade de bytes recuperados.
-     * @return Quantidade de bytes recuperados.
-     */
     public long getCountReadData() {
         return countReadData;
     }
     
-    /**
-     * Obtém a quantidade de bytes armazenados.
-     * @return Quantidade de bytes armazenados.
-     */
     public long getCountWriteData() {
         return countWriteData;
     }
 
-    /**
-     * Obtém a quantidade de bytes removidos.
-     * @return Quantidade de bytes removidos.
-     */
     public long getCountRemovedData() {
         return countRemovedData;
     }
     
-    /**
-     * Verifica se os arquivos contidos na pasta de dados serão 
-     * destruidos junto com essa instância. 
-     * @return <code>true</code> para destruir todos os arquivos. 
-     * Caso contrário, <code>false</code>.
-     */
     public boolean isDeleteOnExit() {
 		return deleteOnExit;
 	}
 
-    /**
-     * Define que os arquivos contidos na pasta de dados sejam 
-     * destruidos junto com essa instância. 
-     * @param deleteOnExit <code>true</code> para destruir todos os arquivos. 
-     * Caso contrário, <code>false</code>.
-     */
 	public void setDeleteOnExit(boolean deleteOnExit) {
 		this.deleteOnExit = deleteOnExit;
 	}
 
-	/**
-	 * Obtém a quantidade de itens no cache.
-	 * @return Quantidade.
-	 */
 	public long size() {
 		return countRemoved - countWrite;
 	}
@@ -822,17 +699,10 @@ public class BasicCacheHandler implements CacheHandler{
 		return maxLengthKey;
 	}
 	
-	/**
-	 * Verifica se o cache está vazio.
-	 * @return <code>true</code> se o cache estiver vazio.
-	 */
 	public boolean isEmpty() {
 		return (countRemoved - countWrite) == 0;
 	}
 	
-	/**
-	 * Remove todas as entradas contidas no cache.
-	 */
 	public void clear(){
 		this.countRead 			= 0;
 		this.countReadData 		= 0;
@@ -844,10 +714,6 @@ public class BasicCacheHandler implements CacheHandler{
 		this.dataMap.clear();
 	}
 	
-	/**
-	 * Destrói os dados contidos nesta instância. Deve ser executado se {@link #isDeleteOnExit()} 
-	 * for <code>false</code>.
-	 */
 	public void destroy(){
 		if(enabled){
 			dataList.destroy();

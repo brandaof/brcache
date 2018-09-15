@@ -49,15 +49,6 @@ public class ConcurrentCache extends BasicCache {
     
 	/* métodos de armazenamento */
 	
-    /**
-     * Substitui o valor associado à chave somente se ele existir.
-     * @param key chave associada ao valor.
-     * @param value valor para ser associado à chave.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-     */
 	public boolean replace(String key, Object value, 
 			long timeToLive, long timeToIdle) throws StorageException {
 		
@@ -72,15 +63,6 @@ public class ConcurrentCache extends BasicCache {
 		}
 	}
 	
-    /**
-     * Substitui o fluxo de bytes associado à chave somente se ele existir.
-     * @param key chave associada ao valor.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @param inputData fluxo de bytes do valor.
-     * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-     */
     public boolean replaceStream(String key, InputStream inputData, long timeToLive, long timeToIdle) throws StorageException{
 		Serializable refLock = this.locks.lock(key);
 		try{
@@ -93,16 +75,6 @@ public class ConcurrentCache extends BasicCache {
 		}
     }
 	
-	/**
-	 * Substitui o valor associado à chave somente se ele for igual a um determinado valor.
-	 * @param key chave associada ao valor.
-	 * @param oldValue valor esperado associado à chave.
-	 * @param newValue valor para ser associado à chave.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-	 * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-	 */
 	public boolean replace(String key, Object oldValue, 
 			Object newValue, long timeToLive, long timeToIdle) throws StorageException {
 		
@@ -129,15 +101,6 @@ public class ConcurrentCache extends BasicCache {
 		}
 	}
 	
-	/**
-	 * Associa o valor à chave somente se a chave não estiver associada a um valor.
-	 * @param key chave associada ao valor.
-	 * @param value valor para ser associado à chave.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-	 * @return valor anterior associado à chave.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-	 */
 	public Object putIfAbsent(String key,
 			Object value, long timeToLive, long timeToIdle) throws StorageException {
 		
@@ -152,15 +115,6 @@ public class ConcurrentCache extends BasicCache {
 		}
 	}
 	
-    /**
-     * Associa o fluxo de bytes do valor à chave somente se a chave não estiver associada a um valor.
-     * @param key chave associada ao valor.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @param inputData fluxo de bytes do valor.
-     * @return fluxo associado à chave ou <code>null</code>.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-     */
     public InputStream putIfAbsentStream(String key, InputStream inputData, long timeToLive, long timeToIdle) throws StorageException{
     	
 		Serializable refLock = this.locks.lock(key);
@@ -180,15 +134,6 @@ public class ConcurrentCache extends BasicCache {
 		}
     }
 	
-	/**
-	 * Associa o valor à chave.
-	 * @param key chave associada ao valor.
-	 * @param value valor para ser associado à chave.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @return <code>true</code> se o item for substituido. Caso contrário, <code>false</code>
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-	 */
 	public boolean put(String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
 		
 		Serializable refLock = this.locks.lock(key);
@@ -202,15 +147,6 @@ public class ConcurrentCache extends BasicCache {
 		}
 	}
 	
-    /**
-	 * Associa o fluxo de bytes do valor à chave.
-	 * @param key chave associada ao fluxo.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @param inputData fluxo de bytes do valor.
-     * @return <code>true</code> se o item for substituido. Caso contrário, <code>false</code>
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-     */
     public boolean putStream(String key, InputStream inputData, 
     		long timeToLive, long timeToIdle) throws StorageException{
 		Serializable refLock = this.locks.lock(key);
@@ -226,58 +162,16 @@ public class ConcurrentCache extends BasicCache {
 	
     /* métodos de coleta */
 	
-	/**
-	 * Obtém o valor associado à chave.
-	 * @param key chave associada ao valor.
-     * @return valor associado à chave ou <code>null</code>.
-     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
-     * item.
-	 */
 	public Object get(String key) throws RecoverException {
-		/* Deixar sem bloqueio */
-		
-		//Serializable refLock = this.locks.lock(key);
-		//try{
-			return super.get(key);
-		//}
-		//finally{
-		//	if(refLock != null){
-		//		this.locks.unlock(refLock, key);
-		//	}
-		//}
+		return super.get(key);
 	}
 
-    /**
-     * Obtém o fluxo de bytes do valor associado à chave.
-     * @param key chave associada ao fluxo.
-     * @return fluxo de bytes do valor ou <code>null</code>.
-     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
-     * item.
-     */
     public InputStream getStream(String key) throws RecoverException {
-		/* Deixar sem bloqueio */
-    	
-		//Serializable refLock = this.locks.lock(key);
-		//try{
-			return super.getStream(key);
-		//}
-		//finally{
-		//	if(refLock != null){
-		//		this.locks.unlock(refLock, key);
-		//	}
-		//}
+		return super.getStream(key);
     }
 	
     /* métodos de remoção */
 
-	/**
-	 * Remove o valor associado à chave somente se ele for igual a um determinado valor.
-	 * @param key chave associada ao valor.
-	 * @param value valor esperado associado à chave.
-	 * @return <code>true</code> se o valor for removido. Caso contrário, <code>false</code>.
-	 * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
-     * item.
-	 */
 	public boolean remove(String key, Object value) throws StorageException {
 		
 		Serializable refLock = this.locks.lock(key);
@@ -305,13 +199,6 @@ public class ConcurrentCache extends BasicCache {
 		}
 	}
 	
-    /**
-     * Remove o valor associado à chave.
-     * @param key chave associada ao valor.
-     * @return <code>true</code> se o valor for removido. Caso contrário <code>false</code>.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar remover o
-     * item.
-     */
     public boolean remove(String key) throws StorageException{
 		Serializable refLock = this.locks.lock(key);
 		try{
@@ -323,32 +210,5 @@ public class ConcurrentCache extends BasicCache {
 			}
 		}
     }
-	
-	/**
-	 * Obtém a quantidade de itens contido no cache.
-	 * @return quantidade de itens.
-	 */
-	public long size() {
-		return super.getCountRemoved() - super.getCountWrite();
-	}
-
-	/**
-	 * Verifica se o cache está vazio.
-	 * @return <code>true</code> se o cache estiver vazio. Caso contrário, <code>false</code>.
-	 */
-	public boolean isEmpty() {
-		return this.size() == 0;
-	}
-
-	/**
-	 * Verifica se uma chave está associado a um valor.
-	 * @param key chave associada ao valor.
-	 * @return <code>true</code> se existir um valor associado à chave. Caso contrário, <code>false</code>.
-     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
-     * item.
-	 */
-	public boolean containsKey(String key) throws RecoverException {
-		return super.getStream(key) != null;
-	}
 	
 }

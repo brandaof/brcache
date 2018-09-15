@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 
 import org.brandao.brcache.tx.CacheTransactionManager;
 import org.brandao.brcache.tx.TXCache;
+import org.brandao.brcache.tx.TXCacheImp;
 
 /**
  * Provê as operações básicas de um cache.
@@ -38,20 +39,11 @@ public class BasicCache extends AbstractCache {
      * @return cache com suporte transacional.
      */
     public TXCache getTXCache(CacheTransactionManager txManager){
-    	return new TXCache(super.cacheHandler, txManager);
+    	return new TXCacheImp(super.cacheHandler, txManager);
     }
     
 	/* métodos de armazenamento */
     
-    /**
-     * Substitui o valor associado à chave somente se ele existir.
-     * @param key chave associada ao valor.
-     * @param value valor para ser associado à chave.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-     */
 	public boolean replace(String key, Object value, 
 			long timeToLive, long timeToIdle) throws StorageException {
 		
@@ -82,30 +74,11 @@ public class BasicCache extends AbstractCache {
 		}
 	}
 	
-    /**
-     * Substitui o fluxo de bytes associado à chave somente se ele existir.
-     * @param key chave associada ao valor.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @param inputData fluxo de bytes do valor.
-     * @return <code>true</code> se o valor for substituido. Caso contrário, <code>false</code>.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-     */
     public boolean replaceStream(String key, InputStream inputData, 
     		long timeToLive, long timeToIdle) throws StorageException{
     	return super.replaceStream(key, inputData, timeToLive, timeToIdle);
     }
 	
-	/**
-	 * Associa o valor à chave somente se a chave não estiver associada a um valor.
-	 * @param key chave associada ao valor.
-	 * @param value valor para ser associado à chave.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-	 * @return valor anterior associado à chave.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item ou se o item atual 
-     * expirar no momento da execução do método.
-	 */
     public Object putIfAbsent(String key, Object value, 
     		long timeToLive, long timeToIdle) throws StorageException{
 		ByteArrayOutputStream bout;
@@ -140,29 +113,11 @@ public class BasicCache extends AbstractCache {
 		}
     }
     
-    /**
-     * Associa o fluxo de bytes do valor à chave somente se a chave não estiver associada a um valor.
-     * @param key chave associada ao valor.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @param inputData fluxo de bytes do valor.
-     * @return fluxo associado à chave ou <code>null</code>.
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-     */
     public InputStream putIfAbsentStream(String key, InputStream inputData,
     		long timeToLive, long timeToIdle) throws StorageException{
     	return super.putIfAbsentStream(key, inputData, timeToLive, timeToIdle);
     }
     
-	/**
-	 * Associa o valor à chave.
-	 * @param key chave associada ao valor.
-	 * @param value valor para ser associado à chave.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @return <code>true</code> se o item for substituido. Caso contrário, <code>false</code>
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-	 */
 	public boolean put(String key, Object value, long timeToLive, long timeToIdle) throws StorageException {
 		
 		ByteArrayOutputStream bout;
@@ -189,15 +144,6 @@ public class BasicCache extends AbstractCache {
 		}
 	}
     
-    /**
-	 * Associa o fluxo de bytes do valor à chave.
-	 * @param key chave associada ao fluxo.
-	 * @param timeToLive é a quantidade máxima de tempo que um item expira após sua criação.
-	 * @param timeToIdle é a quantidade máxima de tempo que um item expira após o último acesso.
-     * @param inputData fluxo de bytes do valor.
-     * @return <code>true</code> se o item for substituido. Caso contrário, <code>false</code>
-     * @throws StorageException Lançada se ocorrer alguma falha ao tentar inserir o item.
-     */
     public boolean putStream(String key, InputStream inputData, 
     		long timeToLive, long timeToIdle) throws StorageException{
     	return super.putStream(key, inputData, timeToLive, timeToIdle);
@@ -205,13 +151,6 @@ public class BasicCache extends AbstractCache {
 	
     /* métodos de coleta */
     
-	/**
-	 * Obtém o valor associado à chave.
-	 * @param key chave associada ao valor.
-     * @return valor associado à chave ou <code>null</code>.
-     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
-     * item.
-	 */
 	public Object get(String key) throws RecoverException {
 		try{
 			InputStream in = super.getStream(key);
@@ -230,23 +169,12 @@ public class BasicCache extends AbstractCache {
 		}
 	}
 	
-    /**
-     * Obtém o fluxo de bytes do valor associado à chave.
-     * @param key chave associada ao fluxo.
-     * @return fluxo de bytes do valor ou <code>null</code>.
-     * @throws RecoverException Lançada se ocorrer alguma falha ao tentar obter o
-     * item.
-     */
     public InputStream getStream(String key) throws RecoverException {
     	return super.getStream(key);
     }
     
     /* métodos de remoção */
     
-	/**
-	 * Obtém a configuração do cache.
-	 * @return configuração.
-	 */
 	public BRCacheConfig getConfig() {
 		return cacheHandler.getConfig();
 	}
