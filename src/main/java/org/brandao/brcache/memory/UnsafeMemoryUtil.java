@@ -5,7 +5,7 @@ import java.lang.reflect.Field;
 import sun.misc.Unsafe;
 
 @SuppressWarnings("restriction")
-class UnsafeMemoryUtil {
+public class UnsafeMemoryUtil {
 
 	private static final Unsafe UNSAFE;
 	

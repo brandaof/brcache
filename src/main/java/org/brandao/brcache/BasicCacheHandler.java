@@ -100,7 +100,7 @@ public class BasicCacheHandler implements CacheHandler{
     			return (EntityFileManagerConfigurer)config.getEntityFileManager();
     		}
     		
-			File path   = new File(config.getDataPath());
+			File path   = new File(config.getDataPath(), "data");
 			File txPath = new File(path, "tx");
 			
 			EntityFileManagerConfigurer efm           = new EntityFileManagerImp();
