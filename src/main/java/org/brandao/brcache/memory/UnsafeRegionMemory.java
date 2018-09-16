@@ -74,11 +74,12 @@ public class UnsafeRegionMemory
 		byte[] tmp = new byte[2048];
 		int read;
 		int thisOff = off;
-		
-		while((read = read(thisOff, tmp, 0, tmp.length)) > 0){
+		int maxRead = len > tmp.length? tmp.length : len;
+		while((read = read(thisOff, tmp, 0, maxRead)) > 0){
 			out.write(tmp, 0, read);
 			thisOff += read;
 			len     -= read;
+			maxRead  = len > tmp.length? tmp.length : len;
 		}
 	}
 	
